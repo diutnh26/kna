@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"c:\\\\Users\\\\ADMIN\\\\Downloads\\\\kna-app\" && find . -maxdepth 2 -not -path '*/node_modules/*' -not -path '*/.git/*' | sort)",
+      "Read(//c/Users/ADMIN/Downloads/kna-app/**)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\ADMIN\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-ADMIN-Downloads-kna-app-src\\\\6559fec0-47f8-4b46-a537-42c54c9fc763\\\\scratchpad\")"
+    ]
+  }
+}
