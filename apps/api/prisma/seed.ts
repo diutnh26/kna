@@ -74,12 +74,14 @@ async function main() {
         "A working family home, not a guesthouse. You sleep in the long room, eat what the household eats, and help with the morning chores if you want to.",
       priceVnd: 500000,
       unit: "per night",
+      duration: "2 nights",
+      groupSize: "Up to 4 guests",
       carbonRating: "Low",
       customs: "Remove shoes at the ladder. Ask before photographing the ancestor shelf.",
       published: true,
     },
   });
-  const walk = await prisma.listing.create({
+  await prisma.listing.create({
     data: {
       providerId: yWik.id,
       category: "GUIDED_WALK",
@@ -88,12 +90,14 @@ async function main() {
         "Y Wik has foraged this stretch since he was seven. He names what is edible, what is medicine, and what the village leaves alone.",
       priceVnd: 700000,
       unit: "per person",
+      duration: "4 hours",
+      groupSize: "Up to 6 guests",
       carbonRating: "Low",
       customs: "Stay on the path near the spirit trees. Y Wik will point them out.",
       published: true,
     },
   });
-  const loom = await prisma.listing.create({
+  await prisma.listing.create({
     data: {
       providerId: amiLan.id,
       category: "CRAFT_SESSION",
@@ -101,6 +105,8 @@ async function main() {
       blurb: "A full day at the loom, from warping the threads to the finished panel.",
       priceVnd: 850000,
       unit: "per person",
+      duration: "6 hours",
+      groupSize: "Up to 3 guests",
       carbonRating: "Very low",
       published: true,
     },

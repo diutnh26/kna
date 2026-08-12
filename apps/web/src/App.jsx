@@ -6,6 +6,8 @@ import Marketplace from './components/Marketplace';
 import Assistant from './components/Assistant';
 import CarbonTracker from './components/CarbonTracker';
 import Community from './components/Community';
+import AuthModal from './components/AuthModal';
+import { AuthProvider } from './context/AuthProvider';
 
 /**
  * Lightweight hash router for the KNĂ prototype.
@@ -46,5 +48,10 @@ export default function App() {
   }, [hash]);
 
   const Screen = ROUTES[hash] ?? Landing;
-  return <Screen />;
+  return (
+    <AuthProvider>
+      <Screen />
+      <AuthModal />
+    </AuthProvider>
+  );
 }

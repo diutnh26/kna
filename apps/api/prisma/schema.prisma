@@ -74,6 +74,8 @@ model Listing {
   blurb        String
   priceVnd     Int
   unit         String // "per night" | "per person"
+  duration     String // "4 hours" | "2 nights" | "1 night minimum" — free text, host's own words
+  groupSize    String // "Up to 6 guests" — free text, host's own words
   carbonRating String // "Low" | "Very low" ...
   customs      String?
   published    Boolean           @default(false)

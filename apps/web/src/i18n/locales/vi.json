@@ -10,6 +10,19 @@
     "signIn": "Đăng nhập",
     "langToggle": "EN · VI"
   },
+  "auth": {
+    "signIn": "Đăng nhập",
+    "createAccount": "Tạo tài khoản",
+    "fullName": "Họ và tên",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "submitSignIn": "Đăng nhập",
+    "submitCreateAccount": "Tạo tài khoản",
+    "pleaseWait": "Đang xử lý…",
+    "signOut": "Đăng xuất",
+    "greeting": "Xin chào, {{name}}",
+    "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại."
+  },
   "landing": {
     "hero": {
       "eyebrow": "Knă · Nhà Dài",

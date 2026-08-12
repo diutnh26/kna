@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, X } from 'lucide-react';
+import { useAuth } from '../context/useAuth';
 
 /**
  * Shared navigation bar.
@@ -13,6 +14,7 @@ import { Menu, X } from 'lucide-react';
 export default function Navbar({ active = '', theme = 'dark' }) {
   const [open, setOpen] = useState(false);
   const { t, i18n } = useTranslation();
+  const { user, isAuthenticated, openAuthModal, logout } = useAuth();
   const isDark = theme === 'dark';
 
   const LINKS = [
@@ -81,11 +83,24 @@ export default function Navbar({ active = '', theme = 'dark' }) {
             >
               {t('nav.langToggle')}
             </button>
-            <button
-              className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
-            >
-              {t('nav.signIn')}
-            </button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <span className={`${muted} text-xs`}>{t('auth.greeting', { name: user.fullName.split(' ')[0] })}</span>
+                <button
+                  onClick={logout}
+                  className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
+                >
+                  {t('auth.signOut')}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openAuthModal}
+                className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
+              >
+                {t('nav.signIn')}
+              </button>
+            )}
           </div>
         </div>
 
@@ -119,11 +134,21 @@ export default function Navbar({ active = '', theme = 'dark' }) {
               <button onClick={toggleLanguage} className={`${faint} text-xs tracking-wider`}>
                 {t('nav.langToggle')}
               </button>
-              <button
-                className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
-              >
-                {t('nav.signIn')}
-              </button>
+              {isAuthenticated ? (
+                <button
+                  onClick={logout}
+                  className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
+                >
+                  {t('auth.signOut')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setOpen(false); openAuthModal(); }}
+                  className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
+                >
+                  {t('nav.signIn')}
+                </button>
+              )}
             </div>
           </div>
         </div>
