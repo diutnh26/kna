@@ -205,6 +205,9 @@ model CommitteeMember {
   role   String // "Chair · elder", "Guides and land use", ...
   buon   String
   since  String
+  // Display order is a curatorial decision by the community (the chair
+  // leads the list), not creation order — so it's stored, not inferred.
+  sortOrder Int @default(0)
 }
 
 model CommitteeDecision {

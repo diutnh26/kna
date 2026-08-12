@@ -54,4 +54,5 @@ export const api = {
   fund: () => request('/community/fund'),
   decisions: () => request('/community/decisions'),
   committee: () => request('/community/committee'),
+  communityStats: () => request('/community/stats'),
 };

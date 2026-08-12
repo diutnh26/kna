@@ -83,7 +83,8 @@
       "body": "Mọi giao dịch trên KNĂ đều được ghi lại trên một sổ cái công khai. Du khách thấy tiền của mình đi về đâu. Cộng đồng thấy mình đã kiếm được gì. Đối tác xác minh những gì họ công bố.",
       "quote": "“Minh bạch không còn là khẩu hiệu khi ai cũng có thể kiểm chứng.”",
       "ledgerLabel": "Sổ cái công khai · mẫu trực tiếp",
-      "ledgerMore": "+ còn {{count}} giao dịch khác hôm nay"
+      "ledgerMore": "+ còn {{count}} giao dịch khác hôm nay",
+      "ledgerEmpty": "Chưa có giao dịch nào được ghi nhận."
     },
     "community": {
       "eyebrow": "Bởi cộng đồng",

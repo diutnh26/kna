@@ -1,8 +1,11 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "rootDir": ".",
+    // seed.ts imports the fee split from ../src/lib/fees so the seeded
+    // ledger rows are computed the same way the API computes live ones —
+    // so rootDir has to span both directories.
+    "rootDir": "..",
     "noEmit": true
   },
-  "include": ["."]
+  "include": [".", "../src"]
 }

@@ -83,7 +83,8 @@
       "body": "Every transaction on KNĂ is recorded on a public ledger. Travelers see where their money goes. Communities see what they earned. Partners verify what they claim.",
       "quote": "“Transparency stops being a slogan when anyone can check.”",
       "ledgerLabel": "Public ledger · live sample",
-      "ledgerMore": "+ {{count}} more transactions today"
+      "ledgerMore": "+ {{count}} more transactions today",
+      "ledgerEmpty": "No transactions recorded yet."
     },
     "community": {
       "eyebrow": "By the community",

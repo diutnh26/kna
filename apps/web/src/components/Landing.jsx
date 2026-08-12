@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Coins, Eye, Mountain, Users } from 'lucide-react';
 import Navbar from './Navbar';
+import { api } from '../lib/api';
 import longhouseImg from '../assets/longhouse.png';
 import cultureImg from '../assets/ede-culture.jpg';
 
@@ -16,26 +18,51 @@ const PILLAR_ICONS = [
 
 const CULTURE_MARKS = ['①', '②', '③'];
 
-const LEDGER = [
-  { time: '14:22', from: 'Traveler #4821', to: "H'Bia Homestay", amount: '850,000 ₫' },
-  { time: '14:18', from: 'Traveler #4818', to: 'Y Wik Coffee Co-op', amount: '420,000 ₫' },
-  { time: '14:11', from: 'Traveler #4815', to: 'Buôn Đôn Gong Guides', amount: '1,200,000 ₫' },
-  { time: '14:05', from: 'Traveler #4812', to: 'Amí Lan Weaving', amount: '680,000 ₫' },
-];
-
-const STATS_FIGURES = ['100%', '3 to 8%', '12+'];
-
 const FOOTER_HREFS = [
   ['#explore', '#travel', '#marketplace', '#community'],
   ['#', '#', '#', '#'],
 ];
 
+const hhmm = (iso) =>
+  new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
+
 export default function Landing() {
   const { t } = useTranslation();
   const pillars = t('landing.pillars.items', { returnObjects: true });
   const culture = t('landing.culture.items', { returnObjects: true });
-  const stats = t('landing.community.stats', { returnObjects: true });
+  const statLabels = t('landing.community.stats', { returnObjects: true });
   const footerColumns = t('landing.footer.columns', { returnObjects: true });
+
+  const [ledger, setLedger] = useState([]);
+  const [communityStats, setCommunityStats] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([api.ledger(4), api.communityStats()])
+      .then(([ledgerData, statsData]) => {
+        if (cancelled) return;
+        setLedger(ledgerData);
+        setCommunityStats(statsData);
+      })
+      .catch(() => {
+        // The ledger panel is illustrative on the landing page; if the API
+        // is unreachable the section renders its empty state rather than
+        // blocking the whole marketing page behind an error.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // The first two figures are policy, not measurements: 100% is the review
+  // rule, 3–8% is the published commission band. Only the third is counted.
+  const statsFigures = [
+    '100%',
+    '3 to 8%',
+    communityStats ? `${communityStats.verifiedProviders}` : '—',
+  ];
 
   return (
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
@@ -192,24 +219,34 @@ export default function Landing() {
                 {t('landing.transparency.ledgerLabel')}
               </div>
               <div className="space-y-4">
-                {LEDGER.map((tx) => (
-                  <div
-                    key={tx.time}
-                    className="flex items-center justify-between gap-4 text-xs border-b border-[#F5EDDD]/10 pb-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-[#B87333] shrink-0">{tx.time}</span>
-                      <span className="text-[#F5EDDD]/50 shrink-0">{tx.from}</span>
-                      <span className="text-[#F5EDDD]/30 shrink-0">→</span>
-                      <span className="truncate">{tx.to}</span>
+                {ledger.length === 0 ? (
+                  <p className="text-[#F5EDDD]/40 text-xs">
+                    {t('landing.transparency.ledgerEmpty')}
+                  </p>
+                ) : (
+                  ledger.map((tx) => (
+                    <div
+                      key={tx.id}
+                      className="flex items-center justify-between gap-4 text-xs border-b border-[#F5EDDD]/10 pb-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-[#B87333] shrink-0">{hhmm(tx.createdAt)}</span>
+                        <span className="text-[#F5EDDD]/50 shrink-0">{tx.fromLabel}</span>
+                        <span className="text-[#F5EDDD]/30 shrink-0">→</span>
+                        <span className="truncate">{tx.toLabel}</span>
+                      </div>
+                      <span className="text-[#E8A33D] shrink-0">{vnd(tx.totalVnd)}</span>
                     </div>
-                    <span className="text-[#E8A33D] shrink-0">{tx.amount}</span>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
-              <div className="text-[#F5EDDD]/40 text-xs pt-4">
-                {t('landing.transparency.ledgerMore', { count: 1247 })}
-              </div>
+              {communityStats && communityStats.ledgerEntriesToday > ledger.length && (
+                <div className="text-[#F5EDDD]/40 text-xs pt-4">
+                  {t('landing.transparency.ledgerMore', {
+                    count: communityStats.ledgerEntriesToday - ledger.length,
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -236,12 +273,12 @@ export default function Landing() {
 
             <div className="md:col-span-5">
               <div className="border-l-4 border-[#C8302E] pl-8 py-4 space-y-8">
-                {STATS_FIGURES.map((figure, i) => (
-                  <div key={figure}>
+                {statsFigures.map((figure, i) => (
+                  <div key={statLabels[i]?.label ?? i}>
                     <div className="font-display text-5xl font-medium text-[#C8302E] mb-1">
                       {figure}
                     </div>
-                    <p className="text-sm text-[#1A1614]/70">{stats[i]?.label}</p>
+                    <p className="text-sm text-[#1A1614]/70">{statLabels[i]?.label}</p>
                   </div>
                 ))}
               </div>
