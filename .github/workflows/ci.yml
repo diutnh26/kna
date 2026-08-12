@@ -15,15 +15,17 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      # `npm install`, not `npm ci`: package-lock.json was generated on
-      # Windows, and npm has a long-standing bug (npm/cli#4828) where a
-      # lockfile only records the optionalDependency binding for the
-      # platform it was generated on — `npm ci` then can't find e.g.
-      # @rolldown/binding-linux-x64-gnu on this Ubuntu runner. `npm install`
-      # re-resolves instead of trusting the lockfile's platform-specific
-      # entries, which fixes it; it's slightly slower but reliable across
-      # platforms.
-      - run: npm install
+      # package-lock.json is generated on Windows, and npm has a
+      # long-standing bug (npm/cli#4828) where a lockfile only records the
+      # optionalDependency binding for the platform it was generated on —
+      # neither `npm ci` nor a plain `npm install` will then fetch e.g.
+      # @rolldown/binding-linux-x64-gnu on this Ubuntu runner, because npm
+      # still trusts the lockfile's (wrong-platform) optional-deps entries.
+      # Dropping the lockfile before installing forces npm to re-resolve
+      # optional deps for the runner it's actually on. Loses install caching
+      # and cross-platform reproducibility; worth revisiting once the
+      # lockfile is maintained from Linux (e.g. matching prod hosting).
+      - run: rm -f package-lock.json && npm install
       - run: npm run lint:web
       - run: npm run build:web
 
@@ -39,15 +41,17 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      # `npm install`, not `npm ci`: package-lock.json was generated on
-      # Windows, and npm has a long-standing bug (npm/cli#4828) where a
-      # lockfile only records the optionalDependency binding for the
-      # platform it was generated on — `npm ci` then can't find e.g.
-      # @rolldown/binding-linux-x64-gnu on this Ubuntu runner. `npm install`
-      # re-resolves instead of trusting the lockfile's platform-specific
-      # entries, which fixes it; it's slightly slower but reliable across
-      # platforms.
-      - run: npm install
+      # package-lock.json is generated on Windows, and npm has a
+      # long-standing bug (npm/cli#4828) where a lockfile only records the
+      # optionalDependency binding for the platform it was generated on —
+      # neither `npm ci` nor a plain `npm install` will then fetch e.g.
+      # @rolldown/binding-linux-x64-gnu on this Ubuntu runner, because npm
+      # still trusts the lockfile's (wrong-platform) optional-deps entries.
+      # Dropping the lockfile before installing forces npm to re-resolve
+      # optional deps for the runner it's actually on. Loses install caching
+      # and cross-platform reproducibility; worth revisiting once the
+      # lockfile is maintained from Linux (e.g. matching prod hosting).
+      - run: rm -f package-lock.json && npm install
       - run: npm run db:generate
       # Applies every migration against a throwaway SQLite file — catches a
       # schema that doesn't actually migrate cleanly, same as `db:migrate`
