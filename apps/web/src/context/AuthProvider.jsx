@@ -27,6 +27,27 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem(STORAGE_KEY);
   }, [session]);
 
+  // A session restored from localStorage carries whatever the user looked
+  // like when the token was issued. Re-read it once on mount so a seat
+  // granted or withdrawn since then is reflected, and so a revoked or
+  // expired token signs the person out instead of leaving a stale UI.
+  useEffect(() => {
+    const storedToken = readStoredSession()?.token;
+    if (!storedToken) return;
+    let cancelled = false;
+    api
+      .me(storedToken)
+      .then(({ user }) => {
+        if (!cancelled) setSession((s) => (s ? { ...s, user } : s));
+      })
+      .catch((err) => {
+        if (!cancelled && err?.status === 401) setSession(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const login = useCallback(async (email, password) => {
     const data = await api.login({ email, password });
     setSession(data);

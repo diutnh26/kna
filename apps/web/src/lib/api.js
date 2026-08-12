@@ -41,6 +41,7 @@ function query(params = {}) {
 export const api = {
   signup: (payload) => request('/auth/signup', { method: 'POST', body: payload }),
   login: (payload) => request('/auth/login', { method: 'POST', body: payload }),
+  me: (token) => request('/auth/me', { token }),
 
   listings: (params) => request(`/listings${query(params)}`),
   listing: (id) => request(`/listings/${id}`),
@@ -49,6 +50,18 @@ export const api = {
   createBooking: (payload, token) => request('/bookings', { method: 'POST', body: payload, token }),
   myBookings: (token) => request('/bookings/mine', { token }),
   createOrder: (payload, token) => request('/orders', { method: 'POST', body: payload, token }),
+
+  archive: (params) => request(`/archive${query(params)}`),
+  archiveTypes: () => request('/archive/types'),
+  archivePillars: () => request('/archive/pillars'),
+  archivePhrases: () => request('/archive/phrases'),
+  archiveStats: () => request('/archive/stats'),
+  submitArchiveEntry: (payload, token) => request('/archive', { method: 'POST', body: payload, token }),
+  myArchiveEntries: (token) => request('/archive/mine', { token }),
+  reviewQueue: (token) => request('/archive/queue', { token }),
+  reviewedEntries: (token) => request('/archive/reviewed', { token }),
+  reviewEntry: (id, payload, token) =>
+    request(`/archive/${id}/review`, { method: 'POST', body: payload, token }),
 
   ledger: (limit) => request(`/community/ledger${query({ limit })}`),
   fund: () => request('/community/fund'),

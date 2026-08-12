@@ -7,6 +7,7 @@
     "assistant": "Trợ lý",
     "impact": "Tác động",
     "community": "Cộng đồng",
+    "review": "Duyệt",
     "signIn": "Đăng nhập",
     "langToggle": "EN · VI"
   },
@@ -93,9 +94,15 @@
       "headingRest": "do chính người Ê Đê.",
       "body": "Nội dung văn hóa được các già làng thẩm định. Nhà cung cấp dịch vụ được đại diện cộng đồng xác minh. Quyết định phân phối doanh thu thuộc về hội đồng các bên liên quan người Ê Đê, không phải một hội đồng quản trị doanh nghiệp. KNĂ tồn tại để phục vụ chính ngôi nhà dài mang tên nó.",
       "stats": [
-        { "label": "nội dung văn hóa được các già làng cộng đồng thẩm định" },
-        { "label": "hoa hồng nền tảng, được giữ ở mức để giá trị luôn thuộc về nơi nó cần thuộc về: cộng đồng" },
-        { "label": "đối tác cộng đồng Ê Đê tham gia giai đoạn thí điểm" }
+        {
+          "label": "nội dung văn hóa được các già làng cộng đồng thẩm định"
+        },
+        {
+          "label": "hoa hồng nền tảng, được giữ ở mức để giá trị luôn thuộc về nơi nó cần thuộc về: cộng đồng"
+        },
+        {
+          "label": "đối tác cộng đồng Ê Đê tham gia giai đoạn thí điểm"
+        }
       ]
     },
     "invitation": {
@@ -108,8 +115,24 @@
     "footer": {
       "tagline": "Một nền tảng du lịch có trách nhiệm dành cho người Ê Đê tại Đắk Lắk. Được xây dựng cho cuộc thi BKI 2026 bởi sinh viên Trường Đại học Kinh tế Tài chính TP.HCM.",
       "columns": [
-        { "heading": "Khám phá", "items": ["Văn hóa", "Du lịch", "Chợ", "Cộng đồng"] },
-        { "heading": "Nền tảng", "items": ["Cách hoạt động", "Minh bạch", "Theo dõi carbon", "Đối tác"] }
+        {
+          "heading": "Khám phá",
+          "items": [
+            "Văn hóa",
+            "Du lịch",
+            "Chợ",
+            "Cộng đồng"
+          ]
+        },
+        {
+          "heading": "Nền tảng",
+          "items": [
+            "Cách hoạt động",
+            "Minh bạch",
+            "Theo dõi carbon",
+            "Đối tác"
+          ]
+        }
       ],
       "stayInTouch": "Giữ liên lạc",
       "newsletterBody": "Cập nhật từ ngôi nhà dài, gửi thỉnh thoảng.",

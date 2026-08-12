@@ -26,6 +26,12 @@ export default function Navbar({ active = '', theme = 'dark' }) {
     { key: 'community', label: t('nav.community'), href: '#community' },
   ];
 
+  // Only surfaced to people who can act on it. The route itself is still
+  // gated in Review.jsx and by the API — hiding a link is not access control.
+  if (user?.isCommitteeMember || user?.role === 'ADMIN') {
+    LINKS.push({ key: 'review', label: t('nav.review'), href: '#review' });
+  }
+
   function toggleLanguage() {
     i18n.changeLanguage(i18n.resolvedLanguage === 'vi' ? 'en' : 'vi');
   }

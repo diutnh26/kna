@@ -33,6 +33,9 @@ model User {
   bookings      Booking[]
   orders        Order[]
   committeeSeat CommitteeMember?
+
+  contributedEntries ArchiveEntry[] @relation("ArchiveContributor")
+  moderatedEntries   ArchiveEntry[] @relation("ArchiveModerator")
 }
 
 // ── Supply ────────────────────────────────────────────────
@@ -229,14 +232,41 @@ enum ModerationStatus {
   REJECTED
 }
 
+// Nothing here reaches the public archive without a Committee member
+// moving it to PUBLISHED. That review step is the point of the model —
+// see the moderation routes in src/routes/archive.ts.
 model ArchiveEntry {
-  id               String            @id @default(cuid())
+  id               String           @id @default(cuid())
   type             String // "Oral history" | "360° tour" | "Recording" | ...
   title            String
   meta             String
   keeperBuon       String
   body             String?
-  moderationStatus ModerationStatus  @default(DRAFT)
+  // Editorial grouping on the Explore page: "Cồng Chiêng" | "The Long
+  // House" | "Weaving". Null for entries that sit outside the three.
+  pillar           String?
+  moderationStatus ModerationStatus @default(IN_REVIEW)
+  createdAt        DateTime         @default(now())
+
+  contributedById  String?
+  contributedBy    User?     @relation("ArchiveContributor", fields: [contributedById], references: [id])
   moderatedById    String?
-  createdAt        DateTime          @default(now())
+  moderatedBy      User?     @relation("ArchiveModerator", fields: [moderatedById], references: [id])
+  moderatedAt      DateTime?
+  // The Committee's reason, kept for both outcomes. A refusal without a
+  // recorded reason isn't a governance record.
+  moderationNote   String?
+}
+
+// The phrasebook. Reviewed the same way as the archive: the Committee
+// decided in April 2026 that everyday speech is publishable and
+// ceremonial/clan-specific speech is not, so each phrase clears review.
+model Phrase {
+  id               String           @id @default(cuid())
+  ede              String
+  en               String
+  note             String
+  sortOrder        Int              @default(0)
+  moderationStatus ModerationStatus @default(IN_REVIEW)
+  createdAt        DateTime         @default(now())
 }

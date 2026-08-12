@@ -27,6 +27,7 @@ async function reset() {
   await prisma.committeeDecision.deleteMany();
   await prisma.communityFundEntry.deleteMany();
   await prisma.archiveEntry.deleteMany();
+  await prisma.phrase.deleteMany();
   await prisma.provider.deleteMany();
   await prisma.user.deleteMany();
 }
@@ -391,6 +392,115 @@ async function main() {
     ],
   });
 
+  // ── Cultural archive ─────────────────────────────────────────────────
+  // Published entries are the ones the Committee has already cleared.
+  const chair = await prisma.user.findUniqueOrThrow({ where: { email: "ami.hbia@example.kna" } });
+  await prisma.archiveEntry.createMany({
+    data: [
+      {
+        type: "Oral history",
+        title: "How the Ê Đê came to Đắk Lắk",
+        meta: "Narrated by Amí H'Bia · 14 min",
+        keeperBuon: "Buôn Akô Dhông",
+        pillar: "The Long House",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-03-02"),
+      },
+      {
+        type: "360° tour",
+        title: "Inside a working longhouse",
+        meta: "Six rooms · walkthrough",
+        keeperBuon: "Buôn Trấp",
+        pillar: "The Long House",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-03-11"),
+      },
+      {
+        type: "Recording",
+        title: "Gong set for the harvest ceremony",
+        meta: "Six players · 22 min",
+        keeperBuon: "Buôn Đôn",
+        pillar: "Cồng Chiêng",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-03-18"),
+      },
+      {
+        type: "Craft record",
+        title: "Backstrap loom, start to finish",
+        meta: "Photo essay · 40 frames",
+        keeperBuon: "Buôn Kli A",
+        pillar: "Weaving",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-04-04"),
+      },
+      {
+        type: "Oral history",
+        title: "Why the mother's line holds the house",
+        meta: "Narrated by Aduôn Sun · 19 min",
+        keeperBuon: "Buôn Akô Dhông",
+        pillar: "The Long House",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-04-15"),
+      },
+      {
+        type: "Language",
+        title: "Greetings and forms of address",
+        meta: "Audio · 12 phrases",
+        keeperBuon: "Community Council",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-04-19"),
+      },
+      // Waiting on the Committee — these are what the review queue shows.
+      {
+        type: "Craft record",
+        title: "Dyeing indigo, three vats",
+        meta: "Photo essay · 26 frames",
+        keeperBuon: "Buôn Kli A",
+        pillar: "Weaving",
+        moderationStatus: "IN_REVIEW",
+        contributedById: (await prisma.user.findUniqueOrThrow({ where: { email: "ami.lan@example.kna" } })).id,
+      },
+      {
+        type: "Recording",
+        title: "Teaching session, players under fifteen",
+        meta: "Four players · 31 min",
+        keeperBuon: "Buôn Kli A",
+        pillar: "Cồng Chiêng",
+        moderationStatus: "IN_REVIEW",
+        contributedById: (await prisma.user.findUniqueOrThrow({ where: { email: "y.wik@example.kna" } })).id,
+      },
+      // Already refused, with the reason on the record.
+      {
+        type: "Recording",
+        title: "Funeral gongs, slow cycle",
+        meta: "Six players · 17 min",
+        keeperBuon: "Buôn Trấp",
+        pillar: "Cồng Chiêng",
+        moderationStatus: "REJECTED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-05-14"),
+        moderationNote:
+          "Funeral practice is not published material. Recording stays with the household.",
+      },
+    ],
+  });
+
+  await prisma.phrase.createMany({
+    data: [
+      { ede: "Hê drei", en: "Hello", note: "Used at any hour", sortOrder: 0, moderationStatus: "PUBLISHED" },
+      { ede: "Bơni", en: "Thank you", note: "Said with a slight bow of the head", sortOrder: 1, moderationStatus: "PUBLISHED" },
+      { ede: "Kâo bi mơak", en: "I am glad to be here", note: "Offered when entering a house", sortOrder: 2, moderationStatus: "PUBLISHED" },
+      { ede: "Ơ ami", en: "Elder mother — a respectful address", note: "Used for the senior woman of a longhouse", sortOrder: 3, moderationStatus: "PUBLISHED" },
+      { ede: "Kâo lui", en: "I am leaving now", note: "Said at the ladder, not at the gate", sortOrder: 4, moderationStatus: "PUBLISHED" },
+    ],
+  });
+
   console.log("Seed complete:", {
     providers: 10,
     listings: listings.length,
@@ -398,6 +508,8 @@ async function main() {
     committee: seats.length,
     fundEntries: 9,
     decisions: 4,
+    archiveEntries: "6 published, 2 in review, 1 refused",
+    phrases: 5,
   });
   console.log(`Every demo account uses the password "${DEMO_PASSWORD}" — e.g. guest@example.kna`);
 }

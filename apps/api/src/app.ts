@@ -7,6 +7,7 @@ import { productsRouter } from "./routes/products";
 import { bookingsRouter } from "./routes/bookings";
 import { ordersRouter } from "./routes/orders";
 import { communityRouter } from "./routes/community";
+import { archiveRouter } from "./routes/archive";
 
 export function createApp() {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp() {
   app.use("/bookings", bookingsRouter);
   app.use("/orders", ordersRouter);
   app.use("/community", communityRouter);
+  app.use("/archive", archiveRouter);
 
   app.use((req, res) => {
     res.status(404).json({ error: `No route for ${req.method} ${req.path}` });

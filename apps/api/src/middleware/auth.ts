@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { prisma } from "../lib/prisma";
 
 export interface AuthedRequest extends Request {
   user?: { id: string; role: string };
@@ -34,4 +35,57 @@ export function requireRole(...roles: string[]) {
     }
     next();
   };
+}
+
+/**
+ * Committee authority comes from *holding a seat*, not from the Role enum.
+ * A person can be a host and a Committee member at once — Amí H'Bia is
+ * both — and a single-valued enum can't express that. So this checks for a
+ * CommitteeMember record, which is also what the governance model says
+ * confers the authority. ADMIN passes as a platform-operations escape
+ * hatch (someone has to be able to unstick the queue).
+ */
+export async function requireCommittee(req: AuthedRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Sign in required." });
+  }
+  if (req.user.role === "ADMIN") return next();
+
+  try {
+    const seat = await prisma.committeeMember.findUnique({ where: { userId: req.user.id } });
+    if (!seat) {
+      return res
+        .status(403)
+        .json({ error: "Only Community Governance Committee members can review submissions." });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Contributing to the archive requires being someone the community can
+ * identify: a verified provider, a Committee member, or platform staff.
+ */
+export async function requireContributor(req: AuthedRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Sign in required." });
+  }
+  if (req.user.role === "ADMIN") return next();
+
+  try {
+    const [provider, seat] = await Promise.all([
+      prisma.provider.findUnique({ where: { userId: req.user.id } }),
+      prisma.committeeMember.findUnique({ where: { userId: req.user.id } }),
+    ]);
+    if (!provider && !seat) {
+      return res
+        .status(403)
+        .json({ error: "Only verified providers and Committee members can contribute entries." });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
 }

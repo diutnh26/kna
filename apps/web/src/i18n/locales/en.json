@@ -7,6 +7,7 @@
     "assistant": "Assistant",
     "impact": "Impact",
     "community": "Community",
+    "review": "Review",
     "signIn": "Sign in",
     "langToggle": "EN · VI"
   },
@@ -93,9 +94,15 @@
       "headingRest": "the Ê Đê.",
       "body": "Cultural content is reviewed by community elders. Service providers are verified by community representatives. Revenue distribution decisions sit with a council of Ê Đê stakeholders, not a corporate board. KNĂ exists in service of the longhouse it is named after.",
       "stats": [
-        { "label": "of cultural content reviewed by community elders" },
-        { "label": "platform commission, set to keep the value where it belongs: with the community" },
-        { "label": "Ê Đê community partners onboarded for the pilot" }
+        {
+          "label": "of cultural content reviewed by community elders"
+        },
+        {
+          "label": "platform commission, set to keep the value where it belongs: with the community"
+        },
+        {
+          "label": "Ê Đê community partners onboarded for the pilot"
+        }
       ]
     },
     "invitation": {
@@ -108,8 +115,24 @@
     "footer": {
       "tagline": "A responsible tourism platform for the Ê Đê people of Đắk Lắk. Built for the BKI 2026 competition by students of Ho Chi Minh City University of Economics and Finance.",
       "columns": [
-        { "heading": "Explore", "items": ["Culture", "Travel", "Marketplace", "Community"] },
-        { "heading": "Platform", "items": ["How it works", "Transparency", "Carbon tracker", "Partners"] }
+        {
+          "heading": "Explore",
+          "items": [
+            "Culture",
+            "Travel",
+            "Marketplace",
+            "Community"
+          ]
+        },
+        {
+          "heading": "Platform",
+          "items": [
+            "How it works",
+            "Transparency",
+            "Carbon tracker",
+            "Partners"
+          ]
+        }
       ],
       "stayInTouch": "Stay in touch",
       "newsletterBody": "Updates from the longhouse, sent occasionally.",

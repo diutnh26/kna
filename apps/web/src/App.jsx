@@ -6,6 +6,7 @@ import Marketplace from './components/Marketplace';
 import Assistant from './components/Assistant';
 import CarbonTracker from './components/CarbonTracker';
 import Community from './components/Community';
+import Review from './components/Review';
 import AuthModal from './components/AuthModal';
 import { AuthProvider } from './context/AuthProvider';
 
@@ -19,6 +20,7 @@ import { AuthProvider } from './context/AuthProvider';
  *   /#assistant     → Travel assistant
  *   /#impact        → Carbon tracker
  *   /#community     → Community space
+ *   /#review        → Committee review queue (gated in the screen itself)
  *
  * Swap for react-router-dom when screens need nested
  * routes or URL parameters.
@@ -32,6 +34,7 @@ const ROUTES = {
   '#assistant': Assistant,
   '#impact': CarbonTracker,
   '#community': Community,
+  '#review': Review,
 };
 
 export default function App() {
