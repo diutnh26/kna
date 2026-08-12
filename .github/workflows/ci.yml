@@ -58,3 +58,4 @@ jobs:
       # would locally, without leaving dev data in the repo checkout.
       - run: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
       - run: npm run build:api
+      - run: npm run test:api

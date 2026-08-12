@@ -1,10 +1,25 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
+import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { requireAuth, signToken, type AuthedRequest } from "../middleware/auth";
 
 export const authRouter = Router();
+
+/**
+ * Credential endpoints are the ones worth guessing at, so they get a much
+ * tighter budget than the rest of the API. Disabled under test, where the
+ * suite logs in far more often than any person would.
+ */
+const credentialLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === "test",
+  message: { error: "Too many attempts. Wait a few minutes and try again." },
+});
 
 /**
  * What the client is told about the signed-in person.
@@ -42,7 +57,7 @@ const signupSchema = z.object({
   locale: z.enum(["en", "vi"]).default("en"),
 });
 
-authRouter.post("/signup", async (req, res) => {
+authRouter.post("/signup", credentialLimiter, async (req, res) => {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input." });
@@ -71,7 +86,7 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", credentialLimiter, async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Email and password are required." });
