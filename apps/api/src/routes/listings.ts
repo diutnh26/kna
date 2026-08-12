@@ -12,11 +12,23 @@ function isListingCategory(value: unknown): value is ListingCategory {
 // Public — this is what apps/web's Travel.jsx switches to once it stops
 // reading its local LISTINGS array.
 listingsRouter.get("/", async (req, res) => {
-  const { category, buon } = req.query;
+  const { category, buon, q } = req.query;
 
   const where: Prisma.ListingWhereInput = { published: true };
   if (isListingCategory(category)) where.category = category;
   if (typeof buon === "string") where.provider = { buon };
+
+  // Free-text search across the things a guest would actually type: a
+  // host's name, a buôn, or a word from the listing itself.
+  if (typeof q === "string" && q.trim()) {
+    const term = q.trim();
+    where.OR = [
+      { title: { contains: term } },
+      { blurb: { contains: term } },
+      { provider: { displayName: { contains: term } } },
+      { provider: { buon: { contains: term } } },
+    ];
+  }
 
   const listings = await prisma.listing.findMany({
     where,

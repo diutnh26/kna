@@ -20,7 +20,7 @@ const CULTURE_MARKS = ['①', '②', '③'];
 
 const FOOTER_HREFS = [
   ['#explore', '#travel', '#marketplace', '#community'],
-  ['#', '#', '#', '#'],
+  ['#community', '#community', '#impact', '#explore'],
 ];
 
 const hhmm = (iso) =>
@@ -85,13 +85,19 @@ export default function Landing() {
               {t('landing.hero.body')}
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="group bg-[#C8302E] hover:bg-[#A82826] text-[#F5EDDD] px-8 py-4 flex items-center gap-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1614]">
+              <a
+                href="#travel"
+                className="group bg-[#C8302E] hover:bg-[#A82826] text-[#F5EDDD] px-8 py-4 inline-flex items-center gap-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1614]"
+              >
                 {t('landing.hero.ctaPrimary')}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-              </button>
-              <button className="border border-[#1A1614]/30 hover:border-[#1A1614]/70 text-[#1A1614] px-8 py-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1614]">
+              </a>
+              <a
+                href="#community"
+                className="border border-[#1A1614]/30 hover:border-[#1A1614]/70 text-[#1A1614] px-8 py-4 inline-flex items-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1614]"
+              >
                 {t('landing.hero.ctaSecondary')}
-              </button>
+              </a>
             </div>
           </div>
 
@@ -303,10 +309,13 @@ export default function Landing() {
           <p className="text-lg text-[#F5EDDD]/70 max-w-3xl mb-12 mx-auto">
             {t('landing.invitation.body')}
           </p>
-          <button className="group bg-[#C8302E] hover:bg-[#A82826] text-[#F5EDDD] px-10 py-5 inline-flex items-center gap-3 transition text-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1614] focus-visible:ring-[#F5EDDD]">
+          <a
+            href="#travel"
+            className="group bg-[#C8302E] hover:bg-[#A82826] text-[#F5EDDD] px-10 py-5 inline-flex items-center gap-3 transition text-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1614] focus-visible:ring-[#F5EDDD]"
+          >
             {t('landing.invitation.cta')}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
-          </button>
+          </a>
         </div>
       </section>
 
@@ -342,35 +351,20 @@ export default function Landing() {
             <div className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD] mb-4">
               {t('landing.footer.stayInTouch')}
             </div>
-            <p className="text-sm mb-4">{t('landing.footer.newsletterBody')}</p>
-            <div className="flex">
-              <label htmlFor="newsletter" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="newsletter"
-                type="email"
-                placeholder={t('landing.footer.emailPlaceholder')}
-                className="bg-[#F5EDDD]/5 border border-[#F5EDDD]/20 px-4 py-3 text-sm flex-1 min-w-0 focus:outline-none focus:border-[#F5EDDD]/60"
-              />
-              <button
-                className="bg-[#C8302E] px-5 text-[#F5EDDD] text-sm hover:bg-[#A82826] transition"
-                aria-label={t('landing.footer.subscribe')}
-              >
-                →
-              </button>
-            </div>
+            <p className="text-sm mb-4 leading-relaxed">{t('landing.footer.newsletterBody')}</p>
+            <a
+              href="#community"
+              className="inline-flex items-center gap-2 text-sm text-[#E8A33D] underline underline-offset-4 hover:text-[#F5EDDD] transition"
+            >
+              {t('landing.footer.stayInTouchCta')}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
 
         <div className="border-t border-[#F5EDDD]/10">
           <div className="px-8 lg:px-12 xl:px-16 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-[#F5EDDD]/40">
             <div>{t('landing.footer.copyright')}</div>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-[#F5EDDD]/70 transition">{t('landing.footer.privacy')}</a>
-              <a href="#" className="hover:text-[#F5EDDD]/70 transition">{t('landing.footer.terms')}</a>
-              <a href="#" className="hover:text-[#F5EDDD]/70 transition">{t('landing.footer.contact')}</a>
-            </div>
           </div>
         </div>
       </footer>

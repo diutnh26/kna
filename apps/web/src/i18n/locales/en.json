@@ -131,18 +131,14 @@
             "How it works",
             "Transparency",
             "Carbon tracker",
-            "Partners"
+            "Archive"
           ]
         }
       ],
       "stayInTouch": "Stay in touch",
-      "newsletterBody": "Updates from the longhouse, sent occasionally.",
-      "emailPlaceholder": "your@email.com",
-      "subscribe": "Subscribe",
+      "newsletterBody": "Decisions and allocations are published on the community page as they happen.",
       "copyright": "© 2026 KNĂ · Bach Khoa Innovation 2026",
-      "privacy": "Privacy",
-      "terms": "Terms",
-      "contact": "Contact"
+      "stayInTouchCta": "Read the minutes"
     }
   }
 }

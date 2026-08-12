@@ -13,6 +13,7 @@ import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
+import { useDebounced } from '../lib/useDebounced';
 
 const CATEGORIES = ['All', 'Stay', 'Guided walk', 'Craft session', 'Ceremony'];
 const BUON = ['All buôn', 'Buôn Akô Dhông', 'Buôn Đôn', 'Buôn Trấp', 'Buôn Kli A'];
@@ -43,6 +44,8 @@ const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 export default function Travel() {
   const [category, setCategory] = useState('All');
   const [buon, setBuon] = useState('All buôn');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounced(search);
   const [listings, setListings] = useState([]);
   const [loadState, setLoadState] = useState('loading'); // 'loading' | 'ready' | 'error'
 
@@ -59,6 +62,7 @@ export default function Travel() {
       .listings({
         category: category === 'All' ? undefined : CATEGORY_TO_API[category],
         buon: buon === 'All buôn' ? undefined : buon,
+        q: debouncedSearch || undefined,
       })
       .then((data) => {
         if (!cancelled) {
@@ -72,7 +76,7 @@ export default function Travel() {
     return () => {
       cancelled = true;
     };
-  }, [category, buon]);
+  }, [category, buon, debouncedSearch]);
 
   function qtyFor(listing) {
     return bookings[listing.id]?.qty ?? 1;
@@ -152,6 +156,8 @@ export default function Travel() {
             <input
               id="q"
               type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search a host, a buôn, or a craft"
               className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-[#F5EDDD]/35 border-b border-transparent focus:border-[#F5EDDD]/30 transition"
             />
@@ -219,7 +225,7 @@ export default function Travel() {
                   Only four buôn have onboarded so far. Try a wider filter.
                 </p>
                 <button
-                  onClick={() => { setCategory('All'); setBuon('All buôn'); }}
+                  onClick={() => { setCategory('All'); setBuon('All buôn'); setSearch(''); }}
                   className="text-sm text-[#E8A33D] underline underline-offset-4"
                 >
                   Clear filters

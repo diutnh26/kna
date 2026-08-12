@@ -12,6 +12,7 @@ import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
+import { useDebounced } from '../lib/useDebounced';
 
 const CATEGORIES = ['All', 'Textile', 'Woodwork', 'Basketry', 'Jewellery', 'Coffee'];
 
@@ -19,7 +20,10 @@ const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 
 export default function Marketplace() {
   const [category, setCategory] = useState('All');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounced(search);
   const [products, setProducts] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loadState, setLoadState] = useState('loading'); // 'loading' | 'ready' | 'error'
 
   // orders[productId] = { qty, status: 'idle'|'submitting'|'done'|'error', error }
@@ -32,7 +36,10 @@ export default function Marketplace() {
   useEffect(() => {
     let cancelled = false;
     api
-      .products({ category: category === 'All' ? undefined : category })
+      .products({
+        category: category === 'All' ? undefined : category,
+        q: debouncedSearch || undefined,
+      })
       .then((data) => {
         if (!cancelled) {
           setProducts(data);
@@ -45,7 +52,21 @@ export default function Marketplace() {
     return () => {
       cancelled = true;
     };
-  }, [category]);
+  }, [category, debouncedSearch]);
+
+  // Headline counts — measured, not asserted.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .communityStats()
+      .then((data) => {
+        if (!cancelled) setStats(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function qtyFor(product) {
     return orders[product.id]?.qty ?? 1;
@@ -101,11 +122,15 @@ export default function Marketplace() {
               <p className="text-sm text-[#F5EDDD]/60">stays with the artisan</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">30</div>
+              <div className="font-display text-4xl font-medium text-[#B87333]">
+                {stats ? stats.verifiedArtisans : '—'}
+              </div>
               <p className="text-sm text-[#F5EDDD]/60">makers listing in the pilot</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">4</div>
+              <div className="font-display text-4xl font-medium text-[#B87333]">
+                {stats ? stats.buonOnboarded : '—'}
+              </div>
               <p className="text-sm text-[#F5EDDD]/60">buôn represented</p>
             </div>
           </div>
@@ -177,7 +202,9 @@ export default function Marketplace() {
             <input
               id="mq"
               type="search"
-              placeholder="Search a maker, a material, or a reference"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search a maker, a material, or a piece"
               className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-[#F5EDDD]/35 border-b border-transparent focus:border-[#F5EDDD]/30 transition"
             />
           </div>
@@ -229,7 +256,7 @@ export default function Marketplace() {
                   Makers list when a piece is finished, so stock moves slowly by design.
                 </p>
                 <button
-                  onClick={() => setCategory('All')}
+                  onClick={() => { setCategory('All'); setSearch(''); }}
                   className="text-sm text-[#E8A33D] underline underline-offset-4"
                 >
                   See everything

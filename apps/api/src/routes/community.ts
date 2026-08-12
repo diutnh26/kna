@@ -74,17 +74,20 @@ communityRouter.get("/stats", async (_req, res) => {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const [committeeCount, providerCount, ledgerToday, fundTotal, buonGroups] = await Promise.all([
-    prisma.committeeMember.count(),
-    prisma.provider.count({ where: { verified: true } }),
-    prisma.ledgerEntry.count({ where: { createdAt: { gte: startOfToday } } }),
-    prisma.communityFundEntry.aggregate({ _sum: { amountVnd: true } }),
-    prisma.provider.groupBy({ by: ["buon"] }),
-  ]);
+  const [committeeCount, providerCount, artisanCount, ledgerToday, fundTotal, buonGroups] =
+    await Promise.all([
+      prisma.committeeMember.count(),
+      prisma.provider.count({ where: { verified: true } }),
+      prisma.provider.count({ where: { verified: true, type: "ARTISAN" } }),
+      prisma.ledgerEntry.count({ where: { createdAt: { gte: startOfToday } } }),
+      prisma.communityFundEntry.aggregate({ _sum: { amountVnd: true } }),
+      prisma.provider.groupBy({ by: ["buon"] }),
+    ]);
 
   res.json({
     committeeMembers: committeeCount,
     verifiedProviders: providerCount,
+    verifiedArtisans: artisanCount,
     buonOnboarded: buonGroups.length,
     ledgerEntriesToday: ledgerToday,
     communityFundTotalVnd: fundTotal._sum.amountVnd ?? 0,

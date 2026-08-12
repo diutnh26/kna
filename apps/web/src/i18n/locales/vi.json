@@ -131,18 +131,14 @@
             "Cách hoạt động",
             "Minh bạch",
             "Theo dõi carbon",
-            "Đối tác"
+            "Kho lưu trữ"
           ]
         }
       ],
       "stayInTouch": "Giữ liên lạc",
-      "newsletterBody": "Cập nhật từ ngôi nhà dài, gửi thỉnh thoảng.",
-      "emailPlaceholder": "email@cuaban.com",
-      "subscribe": "Đăng ký",
+      "newsletterBody": "Các quyết định và phân bổ được công bố trên trang cộng đồng ngay khi phát sinh.",
       "copyright": "© 2026 KNĂ · Bach Khoa Innovation 2026",
-      "privacy": "Quyền riêng tư",
-      "terms": "Điều khoản",
-      "contact": "Liên hệ"
+      "stayInTouchCta": "Đọc biên bản"
     }
   }
 }
