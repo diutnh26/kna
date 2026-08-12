@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ArrowRight,
   Gavel,
@@ -124,7 +124,7 @@ export default function Community() {
 
   return (
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
-      <Navbar active="Community" theme="dark" />
+      <Navbar active="community" theme="dark" />
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">

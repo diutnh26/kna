@@ -1,0 +1,237 @@
+// KNĂ — Phase 1 data model.
+// Local dev runs on SQLite (zero-setup). Staging/production point this
+// datasource at Azure SQL — only `provider` + `url` change, the schema
+// and every query below carry over as-is.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ── Identity ──────────────────────────────────────────────
+
+enum Role {
+  GUEST
+  PROVIDER
+  COMMITTEE
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  fullName      String
+  role          Role      @default(GUEST)
+  locale        String    @default("en") // "en" | "vi"
+  createdAt     DateTime  @default(now())
+
+  provider      Provider?
+  bookings      Booking[]
+  orders        Order[]
+  committeeSeat CommitteeMember?
+}
+
+// ── Supply ────────────────────────────────────────────────
+
+enum ProviderType {
+  HOMESTAY
+  GUIDE
+  ARTISAN
+}
+
+model Provider {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  user        User         @relation(fields: [userId], references: [id])
+  type        ProviderType
+  displayName String
+  buon        String // village, e.g. "Buôn Akô Dhông"
+  bio         String?
+  verified    Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+
+  listings    Listing[]
+  products    Product[]
+}
+
+enum ListingCategory {
+  STAY
+  GUIDED_WALK
+  CRAFT_SESSION
+  CEREMONY
+}
+
+model Listing {
+  id           String            @id @default(cuid())
+  providerId   String
+  provider     Provider          @relation(fields: [providerId], references: [id])
+  category     ListingCategory
+  title        String
+  blurb        String
+  priceVnd     Int
+  unit         String // "per night" | "per person"
+  carbonRating String // "Low" | "Very low" ...
+  customs      String?
+  published    Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+
+  slots        AvailabilitySlot[]
+  bookings     Booking[]
+}
+
+model AvailabilitySlot {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  date      DateTime
+  capacity  Int
+  booked    Int      @default(0)
+
+  @@unique([listingId, date])
+}
+
+// ── Commerce ──────────────────────────────────────────────
+
+enum BookingStatus {
+  PENDING // awaiting concierge confirmation — Phase 1 MVP is concierge-assisted
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+// A Booking's totalVnd always splits as:
+//   platformFeeVnd (7%) + communityFundVnd (3%) + providerPayoutVnd (90%)
+// See LedgerEntry — this split is what the public transparency table renders.
+model Booking {
+  id                String        @id @default(cuid())
+  listingId         String
+  listing           Listing       @relation(fields: [listingId], references: [id])
+  guestId           String
+  guest             User          @relation(fields: [guestId], references: [id])
+  status            BookingStatus @default(PENDING)
+  guests            Int
+  totalVnd          Int
+  platformFeeVnd    Int
+  communityFundVnd  Int
+  providerPayoutVnd Int
+  createdAt         DateTime      @default(now())
+
+  ledgerEntry       LedgerEntry?
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  providerId  String
+  provider    Provider    @relation(fields: [providerId], references: [id])
+  category    String // "Textile" | "Woodwork" | "Basketry" | ...
+  title       String
+  note        String
+  priceVnd    Int
+  stock       Int
+  published   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  orderItems  OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+}
+
+// An Order's totalVnd splits as marketplaceFeeVnd (5%) + artisan payout (95%).
+model Order {
+  id                String      @id @default(cuid())
+  buyerId           String
+  buyer             User        @relation(fields: [buyerId], references: [id])
+  status            OrderStatus @default(PENDING)
+  totalVnd          Int
+  marketplaceFeeVnd Int
+  createdAt         DateTime    @default(now())
+
+  items             OrderItem[]
+  ledgerEntry       LedgerEntry?
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id])
+  productId    String
+  product      Product @relation(fields: [productId], references: [id])
+  quantity     Int
+  unitPriceVnd Int
+}
+
+// ── Trust & governance ───────────────────────────────────
+// The Phase 1 "Proof of Impact" — a plain, publicly-readable ledger.
+// Becomes the reconciliation target for the Phase 2 smart contract.
+
+model LedgerEntry {
+  id               String   @id @default(cuid())
+  bookingId        String?  @unique
+  booking          Booking? @relation(fields: [bookingId], references: [id])
+  orderId          String?  @unique
+  order            Order?   @relation(fields: [orderId], references: [id])
+  fromLabel        String // "Traveler #4821"
+  toLabel          String // "H'Bia Homestay"
+  totalVnd         Int
+  platformFeeVnd   Int
+  communityFundVnd Int
+  createdAt        DateTime @default(now())
+}
+
+model CommunityFundEntry {
+  id        String   @id @default(cuid())
+  quarter   String // "Q2 2026"
+  what      String
+  toBuon    String
+  amountVnd Int
+  createdAt DateTime @default(now())
+}
+
+model CommitteeMember {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+  role   String // "Chair · elder", "Guides and land use", ...
+  buon   String
+  since  String
+}
+
+model CommitteeDecision {
+  id        String   @id @default(cuid())
+  status    String // "passed" | "declined"
+  title     String
+  fromLabel String
+  date      DateTime
+  note      String
+  createdAt DateTime @default(now())
+}
+
+// ── Content ───────────────────────────────────────────────
+
+enum ModerationStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  REJECTED
+}
+
+model ArchiveEntry {
+  id               String            @id @default(cuid())
+  type             String // "Oral history" | "360° tour" | "Recording" | ...
+  title            String
+  meta             String
+  keeperBuon       String
+  body             String?
+  moderationStatus ModerationStatus  @default(DRAFT)
+  moderatedById    String?
+  createdAt        DateTime          @default(now())
+}

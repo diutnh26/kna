@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  web:
+    name: web — lint & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:web
+      - run: npm run build:web
+
+  api:
+    name: api — typecheck & migrate
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:./ci.db"
+      JWT_SECRET: "ci-only"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      # Applies every migration against a throwaway SQLite file — catches a
+      # schema that doesn't actually migrate cleanly, same as `db:migrate`
+      # would locally, without leaving dev data in the repo checkout.
+      - run: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+      - run: npm run build:api

@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# apps/api
+apps/api/dist
+apps/api/.env
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+apps/api/generated
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

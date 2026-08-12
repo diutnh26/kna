@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "wordmarkSub": "Nhà Dài",
+    "explore": "Khám phá",
+    "travel": "Du lịch",
+    "marketplace": "Chợ",
+    "assistant": "Trợ lý",
+    "impact": "Tác động",
+    "community": "Cộng đồng",
+    "signIn": "Đăng nhập",
+    "langToggle": "EN · VI"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Knă · Nhà Dài",
+      "titleLine1": "Hành trình chạm đến",
+      "titleEm": "những con người",
+      "titleRest": "bạn đã đến để gặp.",
+      "body": "Một hệ sinh thái du lịch do cộng đồng sở hữu, được xây dựng cùng người Ê Đê tại Đắk Lắk, nơi mọi trải nghiệm đều chân thực, mọi lợi ích đều ở lại địa phương, và mọi hành trình đều để lại điều gì đó đáng giữ.",
+      "ctaPrimary": "Bắt đầu hành trình",
+      "ctaSecondary": "Cách thức hoạt động"
+    },
+    "pillars": {
+      "eyebrow": "Nền tảng của KNĂ",
+      "headingLine1": "Bốn nền tảng.",
+      "headingEm": "Một ngôi nhà dài.",
+      "items": [
+        {
+          "title": "Trao Quyền Kinh Tế Trực Tiếp",
+          "body": "Một chợ giao dịch ngang hàng cho phép du khách đặt chỗ và mua trực tiếp từ nhà cung cấp Ê Đê, để giá trị của trải nghiệm ở lại với chính hộ gia đình đã tạo ra nó."
+        },
+        {
+          "title": "Bảo Tồn Văn Hóa",
+          "body": "Một kho lưu trữ số tương tác về lịch sử, truyền thống và ngôn ngữ Ê Đê, được phát triển cùng các thành viên cộng đồng và được các già làng thẩm định."
+        },
+        {
+          "title": "Gìn Giữ Môi Trường",
+          "body": "Một công cụ theo dõi dấu chân carbon, chuyển các khoản đóng góp bù đắp vào các dự án bảo tồn do chính cộng đồng Tây Nguyên vận hành và đo lường."
+        },
+        {
+          "title": "Gắn Kết Cộng Đồng",
+          "body": "Cơ chế quản trị trao cho cộng đồng Ê Đê tiếng nói trực tiếp trong cách nền tảng phát triển và cách doanh thu được phân phối."
+        }
+      ]
+    },
+    "culture": {
+      "eyebrow": "Người Ê Đê",
+      "headingLine1": "Một nền văn hóa sống,",
+      "headingEm": "vẫn đang thở.",
+      "body": "Người Ê Đê là một trong những dân tộc thiểu số lớn nhất ở Tây Nguyên Việt Nam, với cấu trúc xã hội mẫu hệ đã điều hành đời sống cộng đồng qua nhiều thế hệ. Văn hóa của họ được gìn giữ trong nhịp điệu của Cồng Chiêng, trong nghề dệt của những người thợ, và trong kiến trúc trường tồn của ngôi nhà dài.",
+      "items": [
+        {
+          "title": "Cồng Chiêng — Di sản Văn hóa Phi vật thể UNESCO",
+          "body": "Được UNESCO công nhận năm 2005, truyền thống Cồng Chiêng không chỉ là âm nhạc. Đó là một ngôn ngữ kết nối người sống với tổ tiên, được cử hành quanh bếp lửa trong mọi dịp trọng đại."
+        },
+        {
+          "title": "Nhà Dài — Kiến Trúc Của Cộng Đồng",
+          "body": "Knă là trái tim kiến trúc của đời sống Ê Đê. Các đại gia đình sống chung dưới một mái nhà, do người mẹ lớn tuổi nhất đứng đầu. Đó là nơi hội họp, nơi lưu giữ ký ức, và là nguồn gốc của tên gọi nền tảng này."
+        },
+        {
+          "title": "Dệt Thổ Cẩm — Câu Chuyện Trong Từng Sợi Chỉ",
+          "body": "Truyền thống dệt thổ cẩm Ê Đê mã hóa bản sắc và câu chuyện trong từng hoa văn. Mỗi tấm vải được dệt tay theo kỹ thuật truyền qua nhiều thế hệ, mang một ý nghĩa mà không bản sao nào có thể tái hiện."
+        }
+      ],
+      "cta": "Khám phá văn hóa Ê Đê"
+    },
+    "transparency": {
+      "eyebrow": "Minh bạch tài chính",
+      "heading": "Được theo dõi, không chỉ hứa hẹn.",
+      "body": "Mọi giao dịch trên KNĂ đều được ghi lại trên một sổ cái công khai. Du khách thấy tiền của mình đi về đâu. Cộng đồng thấy mình đã kiếm được gì. Đối tác xác minh những gì họ công bố.",
+      "quote": "“Minh bạch không còn là khẩu hiệu khi ai cũng có thể kiểm chứng.”",
+      "ledgerLabel": "Sổ cái công khai · mẫu trực tiếp",
+      "ledgerMore": "+ còn {{count}} giao dịch khác hôm nay"
+    },
+    "community": {
+      "eyebrow": "Bởi cộng đồng",
+      "headingLine1": "Không chỉ là vì người Ê Đê.",
+      "headingEm": "Mà là",
+      "headingRest": "do chính người Ê Đê.",
+      "body": "Nội dung văn hóa được các già làng thẩm định. Nhà cung cấp dịch vụ được đại diện cộng đồng xác minh. Quyết định phân phối doanh thu thuộc về hội đồng các bên liên quan người Ê Đê, không phải một hội đồng quản trị doanh nghiệp. KNĂ tồn tại để phục vụ chính ngôi nhà dài mang tên nó.",
+      "stats": [
+        { "label": "nội dung văn hóa được các già làng cộng đồng thẩm định" },
+        { "label": "hoa hồng nền tảng, được giữ ở mức để giá trị luôn thuộc về nơi nó cần thuộc về: cộng đồng" },
+        { "label": "đối tác cộng đồng Ê Đê tham gia giai đoạn thí điểm" }
+      ]
+    },
+    "invitation": {
+      "eyebrow": "Lời mời",
+      "headingLine1": "Tối nay bạn sẽ",
+      "headingEm": "nghỉ lại nơi đâu?",
+      "body": "Ngôi nhà dài rất rộng. Luôn có chỗ cho những du khách đến với thiện chí.",
+      "cta": "Bắt đầu hành trình"
+    },
+    "footer": {
+      "tagline": "Một nền tảng du lịch có trách nhiệm dành cho người Ê Đê tại Đắk Lắk. Được xây dựng cho cuộc thi BKI 2026 bởi sinh viên Trường Đại học Kinh tế Tài chính TP.HCM.",
+      "columns": [
+        { "heading": "Khám phá", "items": ["Văn hóa", "Du lịch", "Chợ", "Cộng đồng"] },
+        { "heading": "Nền tảng", "items": ["Cách hoạt động", "Minh bạch", "Theo dõi carbon", "Đối tác"] }
+      ],
+      "stayInTouch": "Giữ liên lạc",
+      "newsletterBody": "Cập nhật từ ngôi nhà dài, gửi thỉnh thoảng.",
+      "emailPlaceholder": "email@cuaban.com",
+      "subscribe": "Đăng ký",
+      "copyright": "© 2026 KNĂ · Bach Khoa Innovation 2026",
+      "privacy": "Quyền riêng tư",
+      "terms": "Điều khoản",
+      "contact": "Liên hệ"
+    }
+  }
+}

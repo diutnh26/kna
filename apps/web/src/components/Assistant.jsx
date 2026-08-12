@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   ArrowRight,
   Send,
@@ -101,7 +101,7 @@ export default function Assistant() {
 
   return (
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
-      <Navbar active="Assistant" theme="dark" />
+      <Navbar active="assistant" theme="dark" />
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">

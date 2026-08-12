@@ -1,26 +1,32 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Menu, X } from 'lucide-react';
-
-const LINKS = [
-  { label: 'Explore', href: '#explore' },
-  { label: 'Travel', href: '#travel' },
-  { label: 'Marketplace', href: '#marketplace' },
-  { label: 'Assistant', href: '#assistant' },
-  { label: 'Impact', href: '#impact' },
-  { label: 'Community', href: '#community' },
-];
 
 /**
  * Shared navigation bar.
  *
  * Props:
- *   active  — label of the current page, e.g. "Explore". Highlights that link.
+ *   active  — route key of the current page, e.g. "explore". Highlights that link.
  *   theme   — "dark" (default) or "light". Use "light" when the section
  *             directly beneath the navbar has the Bone cream background.
  */
 export default function Navbar({ active = '', theme = 'dark' }) {
   const [open, setOpen] = useState(false);
+  const { t, i18n } = useTranslation();
   const isDark = theme === 'dark';
+
+  const LINKS = [
+    { key: 'explore', label: t('nav.explore'), href: '#explore' },
+    { key: 'travel', label: t('nav.travel'), href: '#travel' },
+    { key: 'marketplace', label: t('nav.marketplace'), href: '#marketplace' },
+    { key: 'assistant', label: t('nav.assistant'), href: '#assistant' },
+    { key: 'impact', label: t('nav.impact'), href: '#impact' },
+    { key: 'community', label: t('nav.community'), href: '#community' },
+  ];
+
+  function toggleLanguage() {
+    i18n.changeLanguage(i18n.resolvedLanguage === 'vi' ? 'en' : 'vi');
+  }
 
   const bg = isDark ? 'bg-[#1A1614]' : 'bg-[#F5EDDD]';
   const text = isDark ? 'text-[#F5EDDD]' : 'text-[#1A1614]';
@@ -41,7 +47,7 @@ export default function Navbar({ active = '', theme = 'dark' }) {
           <span className="font-display text-2xl font-semibold tracking-tight">KNĂ</span>
           <span className={`hidden md:block h-4 w-px ${divider}`} />
           <span className={`hidden md:block text-[10px] ${faint} tracking-[0.2em] uppercase`}>
-            The Long House
+            {t('nav.wordmarkSub')}
           </span>
         </a>
 
@@ -49,10 +55,10 @@ export default function Navbar({ active = '', theme = 'dark' }) {
         <div className="ml-auto hidden lg:flex items-center gap-8">
           <div className={`flex items-center gap-8 text-sm ${muted}`}>
             {LINKS.map((link) => {
-              const isActive = link.label === active;
+              const isActive = link.key === active;
               return (
                 <a
-                  key={link.label}
+                  key={link.key}
                   href={link.href}
                   className={`relative transition ${
                     isActive ? (isDark ? 'text-[#F5EDDD]' : 'text-[#1A1614]') : ''
@@ -68,13 +74,17 @@ export default function Navbar({ active = '', theme = 'dark' }) {
           </div>
 
           <div className="flex items-center gap-5 text-sm">
-            <button className={`${faint} text-xs tracking-wider hover:${text}`}>
-              EN · VI
+            <button
+              onClick={toggleLanguage}
+              className={`${faint} text-xs tracking-wider hover:${text}`}
+              aria-label="Switch language"
+            >
+              {t('nav.langToggle')}
             </button>
             <button
               className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
             >
-              Sign in
+              {t('nav.signIn')}
             </button>
           </div>
         </div>
@@ -95,22 +105,24 @@ export default function Navbar({ active = '', theme = 'dark' }) {
           <div className="flex flex-col gap-5">
             {LINKS.map((link) => (
               <a
-                key={link.label}
+                key={link.key}
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className={`text-base ${
-                  link.label === active ? text : muted
+                  link.key === active ? text : muted
                 }`}
               >
                 {link.label}
               </a>
             ))}
             <div className={`flex items-center gap-5 pt-4 border-t ${rule}`}>
-              <button className={`${faint} text-xs tracking-wider`}>EN · VI</button>
+              <button onClick={toggleLanguage} className={`${faint} text-xs tracking-wider`}>
+                {t('nav.langToggle')}
+              </button>
               <button
                 className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
               >
-                Sign in
+                {t('nav.signIn')}
               </button>
             </div>
           </div>

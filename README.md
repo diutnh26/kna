@@ -1,16 +1,36 @@
-# React + Vite
+# KNĂ
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Community-owned circular tourism ecosystem for the Ê Đê people of Đắk Lắk, Vietnam.
+BKI 2026 · Team NEXUS · UEF.
 
-Currently, two official plugins are available:
+This is a monorepo (npm workspaces):
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```
+apps/
+  web/   React + Vite frontend (the original prototype, unchanged in spirit)
+  api/   Express + TypeScript + Prisma backend
+```
 
-## React Compiler
+See [`docs/development-plan.md`](docs/development-plan.md) for the phased build
+plan this repo follows (Phase 0 → Phase 3).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting started
 
-## Expanding the ESLint configuration
+```bash
+npm install          # installs both workspaces
+npm run db:generate   # generate the Prisma client
+npm run db:migrate    # create the local SQLite dev database
+npm run dev:api        # http://localhost:4000
+npm run dev:web        # http://localhost:5173, in a second terminal
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Why this structure
+
+The frontend (`apps/web`) is the existing prototype, moved as-is — same
+components, same design system, no rewrite. `apps/api` is new: a small
+Express + Prisma service that Phase 1 wires the frontend's mock arrays up to.
+
+Local development uses SQLite so no cloud account is required to start
+building. The Prisma schema is written to move to Azure SQL / T-SQL for
+staging and production without application-code changes — see
+`apps/api/prisma/schema.prisma`.

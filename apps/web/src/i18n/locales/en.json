@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "wordmarkSub": "The Long House",
+    "explore": "Explore",
+    "travel": "Travel",
+    "marketplace": "Marketplace",
+    "assistant": "Assistant",
+    "impact": "Impact",
+    "community": "Community",
+    "signIn": "Sign in",
+    "langToggle": "EN · VI"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Knă · The Long House",
+      "titleLine1": "Travel that reaches",
+      "titleEm": "the people",
+      "titleRest": "you came to meet.",
+      "body": "A community-owned tourism ecosystem built with the Ê Đê people of Đắk Lắk, where every experience is authentic, every benefit is local, and every journey leaves something behind worth keeping.",
+      "ctaPrimary": "Begin the journey",
+      "ctaSecondary": "How it works"
+    },
+    "pillars": {
+      "eyebrow": "What KNĂ stands on",
+      "headingLine1": "Four foundations.",
+      "headingEm": "One long house.",
+      "items": [
+        {
+          "title": "Direct Economic Empowerment",
+          "body": "A peer-to-peer marketplace that lets travelers book and buy directly from Ê Đê providers, so the value of an experience stays with the household that created it."
+        },
+        {
+          "title": "Cultural Preservation",
+          "body": "An interactive digital archive of Ê Đê history, traditions, and language, developed in collaboration with community members and reviewed by elders."
+        },
+        {
+          "title": "Environmental Stewardship",
+          "body": "A carbon footprint tracker that channels offset contributions into conservation projects run and measured by communities in the Central Highlands."
+        },
+        {
+          "title": "Community Engagement",
+          "body": "Governance structures that give the Ê Đê community a direct voice in how the platform evolves and how revenue is distributed."
+        }
+      ]
+    },
+    "culture": {
+      "eyebrow": "The Ê Đê people",
+      "headingLine1": "A living culture,",
+      "headingEm": "still breathing.",
+      "body": "The Ê Đê are one of the largest ethnic minority groups in the Central Highlands of Vietnam, with a matrilineal social structure that has governed community life for generations. Their culture is preserved in the rhythm of the Cồng Chiêng, the craft of their weavers, and the enduring architecture of the longhouse.",
+      "items": [
+        {
+          "title": "Cồng Chiêng — UNESCO Intangible Heritage",
+          "body": "Recognised by UNESCO in 2005, the Cồng Chiêng tradition is not merely music. It is a language that connects the living with their ancestors, performed around the fire at every gathering of significance."
+        },
+        {
+          "title": "The Longhouse — Architecture of Community",
+          "body": "The Knă is the architectural heart of Ê Đê life. Extended families live together under one roof, governed by a matriarch. It is the gathering place, the memory keeper, and the source of this platform's name."
+        },
+        {
+          "title": "Weaving and Craft — Stories in Thread",
+          "body": "Ê Đê textile traditions encode identity and story in every pattern. Each piece is woven by hand using techniques passed down through generations, carrying a meaning that no reproduction can replicate."
+        }
+      ],
+      "cta": "Explore Ê Đê culture"
+    },
+    "transparency": {
+      "eyebrow": "Financial transparency",
+      "heading": "Tracked, not promised.",
+      "body": "Every transaction on KNĂ is recorded on a public ledger. Travelers see where their money goes. Communities see what they earned. Partners verify what they claim.",
+      "quote": "“Transparency stops being a slogan when anyone can check.”",
+      "ledgerLabel": "Public ledger · live sample",
+      "ledgerMore": "+ {{count}} more transactions today"
+    },
+    "community": {
+      "eyebrow": "By the community",
+      "headingLine1": "Not about the Ê Đê.",
+      "headingEm": "By",
+      "headingRest": "the Ê Đê.",
+      "body": "Cultural content is reviewed by community elders. Service providers are verified by community representatives. Revenue distribution decisions sit with a council of Ê Đê stakeholders, not a corporate board. KNĂ exists in service of the longhouse it is named after.",
+      "stats": [
+        { "label": "of cultural content reviewed by community elders" },
+        { "label": "platform commission, set to keep the value where it belongs: with the community" },
+        { "label": "Ê Đê community partners onboarded for the pilot" }
+      ]
+    },
+    "invitation": {
+      "eyebrow": "The invitation",
+      "headingLine1": "Where will you",
+      "headingEm": "stay tonight?",
+      "body": "The longhouse is wide. There is room for travelers who arrive in good faith.",
+      "cta": "Begin the journey"
+    },
+    "footer": {
+      "tagline": "A responsible tourism platform for the Ê Đê people of Đắk Lắk. Built for the BKI 2026 competition by students of Ho Chi Minh City University of Economics and Finance.",
+      "columns": [
+        { "heading": "Explore", "items": ["Culture", "Travel", "Marketplace", "Community"] },
+        { "heading": "Platform", "items": ["How it works", "Transparency", "Carbon tracker", "Partners"] }
+      ],
+      "stayInTouch": "Stay in touch",
+      "newsletterBody": "Updates from the longhouse, sent occasionally.",
+      "emailPlaceholder": "your@email.com",
+      "subscribe": "Subscribe",
+      "copyright": "© 2026 KNĂ · Bach Khoa Innovation 2026",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "contact": "Contact"
+    }
+  }
+}
