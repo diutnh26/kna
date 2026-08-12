@@ -65,6 +65,29 @@ export async function requireCommittee(req: AuthedRequest, res: Response, next: 
 }
 
 /**
+ * Booking coordination — confirming that a household actually has the
+ * dates — is platform operations, not governance. Committee members can
+ * do it too, since in the pilot the same people often are the community
+ * coordinators, but it does not require a seat the way reviewing does.
+ */
+export async function requireCoordinator(req: AuthedRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Sign in required." });
+  }
+  if (req.user.role === "ADMIN" || req.user.role === "COORDINATOR") return next();
+
+  try {
+    const seat = await prisma.committeeMember.findUnique({ where: { userId: req.user.id } });
+    if (!seat) {
+      return res.status(403).json({ error: "Only KNĂ coordinators can confirm bookings." });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * Contributing to the archive requires being someone the community can
  * identify: a verified provider, a Committee member, or platform staff.
  */

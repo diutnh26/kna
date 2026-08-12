@@ -282,6 +282,17 @@ async function main() {
     },
   });
 
+  // The community coordinator who confirms bookings with households by
+  // hand — the human step the Phase 1 concierge MVP is built around.
+  await prisma.user.create({
+    data: {
+      email: "coordinator@example.kna",
+      passwordHash: await bcrypt.hash(DEMO_PASSWORD, 10),
+      fullName: "H'Linh Niê",
+      role: "COORDINATOR",
+    },
+  });
+
   // ── Settled transactions, so the public ledger isn't empty ───────────
   const bookingTotal = longhouseStay.priceVnd * 2;
   const bookingSplit = splitBooking(bookingTotal);

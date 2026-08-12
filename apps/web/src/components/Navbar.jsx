@@ -28,6 +28,9 @@ export default function Navbar({ active = '', theme = 'dark' }) {
 
   // Only surfaced to people who can act on it. The route itself is still
   // gated in Review.jsx and by the API — hiding a link is not access control.
+  if (user?.provider || user?.role === 'COORDINATOR' || user?.role === 'ADMIN' || user?.isCommitteeMember) {
+    LINKS.push({ key: 'dashboard', label: t('nav.dashboard'), href: '#dashboard' });
+  }
   if (user?.isCommitteeMember || user?.role === 'ADMIN') {
     LINKS.push({ key: 'review', label: t('nav.review'), href: '#review' });
   }

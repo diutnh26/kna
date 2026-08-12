@@ -13,9 +13,14 @@ generator client {
 
 // ── Identity ──────────────────────────────────────────────
 
+// Note: this is a coarse account type, not the source of truth for what
+// someone may do. Committee authority comes from a CommitteeMember row and
+// provider status from a Provider row, because one person can hold both —
+// see src/middleware/auth.ts.
 enum Role {
   GUEST
   PROVIDER
+  COORDINATOR // KNĂ staff who confirm bookings with households
   COMMITTEE
   ADMIN
 }

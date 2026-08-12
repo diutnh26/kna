@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { splitBooking } from "../lib/fees";
-import { requireAuth, type AuthedRequest } from "../middleware/auth";
+import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
 
 export const bookingsRouter = Router();
 
@@ -69,3 +69,64 @@ bookingsRouter.get("/mine", requireAuth, async (req: AuthedRequest, res) => {
   });
   res.json(bookings);
 });
+
+// ── Coordination ─────────────────────────────────────────────────────
+// Phase 1 is concierge-assisted by design: a community coordinator checks
+// availability with the household and confirms by hand. Without these
+// routes a PENDING booking has nobody who can act on it, which is the
+// gap that made the guest-facing "we'll be in touch" copy a promise the
+// system couldn't keep.
+
+/** The coordination queue — every booking still awaiting a decision. */
+bookingsRouter.get(
+  "/pending",
+  requireAuth,
+  requireCoordinator,
+  async (_req: AuthedRequest, res) => {
+    const bookings = await prisma.booking.findMany({
+      where: { status: "PENDING" },
+      include: {
+        listing: { include: { provider: { select: { displayName: true, buon: true } } } },
+        guest: { select: { fullName: true, email: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    res.json(bookings);
+  }
+);
+
+const decisionSchema = z.object({ decision: z.enum(["confirm", "decline"]) });
+
+bookingsRouter.post(
+  "/:id/decision",
+  requireAuth,
+  requireCoordinator,
+  async (req: AuthedRequest, res) => {
+    const parsed = decisionSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "A decision of 'confirm' or 'decline' is required." });
+    }
+
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
+    if (!booking) {
+      return res.status(404).json({ error: "That booking no longer exists." });
+    }
+    if (booking.status !== "PENDING") {
+      return res.status(409).json({ error: "That booking has already been decided." });
+    }
+
+    // A declined booking's ledger row goes with it: the public ledger
+    // records money that moved, and no money moves on a decline.
+    const updated = await prisma.$transaction(async (tx) => {
+      if (parsed.data.decision === "decline") {
+        await tx.ledgerEntry.deleteMany({ where: { bookingId: booking.id } });
+      }
+      return tx.booking.update({
+        where: { id: booking.id },
+        data: { status: parsed.data.decision === "confirm" ? "CONFIRMED" : "CANCELLED" },
+      });
+    });
+
+    res.json(updated);
+  }
+);

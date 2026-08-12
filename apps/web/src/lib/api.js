@@ -49,6 +49,10 @@ export const api = {
 
   createBooking: (payload, token) => request('/bookings', { method: 'POST', body: payload, token }),
   myBookings: (token) => request('/bookings/mine', { token }),
+  pendingBookings: (token) => request('/bookings/pending', { token }),
+  decideBooking: (id, payload, token) =>
+    request(`/bookings/${id}/decision`, { method: 'POST', body: payload, token }),
+  providerDashboard: (token) => request('/providers/me', { token }),
   createOrder: (payload, token) => request('/orders', { method: 'POST', body: payload, token }),
 
   archive: (params) => request(`/archive${query(params)}`),
