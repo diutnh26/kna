@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { splitBooking } from "../lib/fees";
 import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
+import { getPaymentGateway } from "../payments/gateway";
 
 export const bookingsRouter = Router();
 
@@ -58,7 +59,16 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     include: { ledgerEntry: true },
   });
 
-  res.status(201).json(booking);
+  // What the guest is told about paying comes from the configured gateway,
+  // not from hardcoded copy — so switching to VNPay/MoMo changes the
+  // instruction everywhere at once instead of leaving stale promises.
+  const payment = await getPaymentGateway().createIntent({
+    reference: booking.id,
+    amountVnd: booking.totalVnd,
+    description: `KNĂ booking · ${listing.title}`,
+  });
+
+  res.status(201).json({ ...booking, payment });
 });
 
 bookingsRouter.get("/mine", requireAuth, async (req: AuthedRequest, res) => {

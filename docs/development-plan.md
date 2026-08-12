@@ -15,31 +15,65 @@ This file is the working, plain-text copy the team edits as the plan changes.
    ledger for a month with zero discrepancies.
 3. **Quantified exit gates, not vibes.** See below.
 
-## Phase 0 — Foundation (in progress)
+## Phase 0 — Foundation (done)
 
 - [x] Git repo initialized, baseline mockup snapshot committed
 - [x] Repo split into `apps/web` (existing prototype) + `apps/api` (new)
-- [ ] Auth service + real "Sign in" in `Navbar.jsx`
-- [ ] `react-i18next` wired; EN·VI toggle in `Navbar.jsx` actually switches locale
-- [ ] CI: lint + build on every PR
-- [ ] Security review of the auth flow before payment work begins
+- [x] Auth service + real "Sign in" in `Navbar.jsx`
+- [x] `react-i18next` wired; EN·VI toggle in `Navbar.jsx` actually switches locale
+- [x] CI: lint + build + typecheck + migrate + test on every PR
+- [x] Security review of the auth flow before payment work begins
 
-## Phase 1 — MVP core (3 mo. build + 3 mo. pilot, one buôn)
+## Phase 1 — MVP core (build done; pilot not started)
 
-| Area | Ships | Deferred |
-|---|---|---|
-| Booking (`Travel.jsx`) | Real listings, availability, VNPay/MoMo checkout, concierge-assisted confirmation queue | Dynamic pricing, calendars, third-party sync |
-| Marketplace (`Marketplace.jsx`) | Real inventory, cart, checkout, 5% fee at settlement | Digital certificates of authenticity |
-| Transparency ledger (`Community.jsx`, `Landing.jsx`) | Public revenue-split table (10% booking: 7%/3%, 5% marketplace), DB-backed | Blockchain settlement (Phase 2) |
-| Cultural archive (`Explore.jsx`) | Admin console, elder/committee moderation before publish | 360° tours, gamified phrases |
-| Governance & provider ops | Committee roster + decisions log as real records, provider dashboard | On-platform voting |
+| Area | Status |
+|---|---|
+| Booking (`Travel.jsx`) | **Done.** Real listings, search + filters, server-side pricing, concierge confirmation queue |
+| Marketplace (`Marketplace.jsx`) | **Done.** Real inventory, checkout, 5% fee, stock enforcement |
+| Transparency ledger (`Community.jsx`, `Landing.jsx`) | **Done.** Public revenue-split table, DB-backed, computed server-side |
+| Cultural archive (`Explore.jsx`) | **Done.** Contribution + Committee moderation before publish (`#review`) |
+| Governance & provider ops | **Done.** Committee roster and minutes as real records; provider dashboard and coordinator queue (`#dashboard`) |
+| Payments | **Seam built, integration blocked.** See below. |
 
-### Exit gate (all four required)
+### Deferred out of Phase 1 (unchanged)
 
-- 100+ completed bookings in the 3-month pilot window
-- ≥80% of onboarded providers still active at pilot end
-- Post-trip survey confirms the transparency panel affected the booking decision
-- 1 B2B partner (Intermèdes or Lua Viet Tours) completes a pilot group through the platform
+Dynamic pricing · 360° tours and media hosting · gamified phrasebook ·
+digital certificates of authenticity · on-platform committee voting ·
+provider discussion board · blockchain settlement.
+
+### Payments — the one open item
+
+`apps/api/src/payments/gateway.ts` defines the interface the rest of the
+system codes against, and ships `ManualSettlementGateway`: the guest
+arranges payment with the household directly and a coordinator records
+it. That is not a stub — it is how the pilot actually runs, and it is why
+bookings sit `PENDING` until confirmed.
+
+Choosing VNPay vs MoMo is **not an engineering decision**. It depends on
+which the pilot buôn's households can settle into, and needs a merchant
+account. When that exists: add one file next to `gateway.ts` and set
+`PAYMENT_PROVIDER`. Nothing outside `src/payments/` should need changing.
+
+### Not production-ready yet
+
+- No email delivery — booking confirmations reach nobody
+- No password reset or email verification
+- Media (audio, 360° tours, photo essays) has no storage or pipeline
+- Privacy policy, terms, and a contact route need writing (their footer
+  links were removed rather than left pointing at nothing)
+- Frontend has no automated tests; the API has 40
+
+### Exit gate (all four required — none met, none can be met by code)
+
+- [ ] 100+ completed bookings in the 3-month pilot window
+- [ ] ≥80% of onboarded providers still active at pilot end
+- [ ] Post-trip survey confirms the transparency panel affected the booking decision
+- [ ] 1 B2B partner (Intermèdes or Lua Viet Tours) completes a pilot group through the platform
+
+These are field results, not build tasks. **Phase 2 does not begin when the
+software is finished — it begins when these four clear.** The remaining work
+before the pilot can start is a payment decision, a pilot buôn selected via
+the Beachhead matrix (§5.7), and real providers onboarded.
 
 ## Phase 2 — Transparency & intelligence (gated by Phase 1)
 

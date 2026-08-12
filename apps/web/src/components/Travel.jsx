@@ -95,7 +95,7 @@ export default function Travel() {
     const perNight = listing.unit === 'per night';
     setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'submitting', error: null } }));
     try {
-      await api.createBooking(
+      const created = await api.createBooking(
         {
           listingId: listing.id,
           guests: perNight ? 1 : qty,
@@ -103,7 +103,16 @@ export default function Travel() {
         },
         token
       );
-      setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'done', error: null } }));
+      setBookings((b) => ({
+        ...b,
+        [listing.id]: {
+          ...b[listing.id],
+          qty,
+          status: 'done',
+          error: null,
+          payment: created.payment,
+        },
+      }));
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Could not send that booking. Try again.';
       setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'error', error: message } }));
@@ -332,9 +341,9 @@ export default function Travel() {
                             )}
                           </div>
 
-                          {booking?.status === 'done' && (
+                          {booking?.status === 'done' && booking.payment && (
                             <p className="text-xs text-[#F5EDDD]/50 leading-relaxed">
-                              A KNĂ coordinator confirms availability with {l.provider.displayName.split(' ')[0]} directly — you&rsquo;ll hear back shortly.
+                              {booking.payment.instructions}
                             </p>
                           )}
                           {booking?.status === 'error' && (
