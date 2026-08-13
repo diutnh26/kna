@@ -1,33 +1,38 @@
 import { execFileSync } from "node:child_process";
-import { rmSync } from "node:fs";
 import { join } from "node:path";
 
-const TEST_DB_URL = "file:./test.db";
+const TEST_DATABASE_URL =
+  process.env.TEST_DATABASE_URL ??
+  "sqlserver://localhost:1433;database=kna_test;integratedSecurity=true;trustServerCertificate=true";
 
 /**
- * Builds the test database once per run, from the migrations — so the
- * suite fails if a migration is broken, not just if the code is. Done
- * here rather than in an npm script because setting an env var inline
+ * Brings the test database up to the current migrations before the suite
+ * runs, so a broken migration fails the build rather than only broken
+ * code. That matters more since the move to SQL Server, where the
+ * migrations carry the CHECK constraints standing in for the enums Prisma
+ * can't express.
+ *
+ * `migrate deploy`, not `migrate reset`: deploy only applies pending
+ * migrations and destroys nothing. Row-level cleanup between suites is
+ * already handled by resetDb() in each test file, so there is no reason to
+ * drop the schema — and no reason for the test command to be capable of
+ * destroying a database it was pointed at by mistake.
+ *
+ * Done here rather than in an npm script because setting an env var inline
  * isn't portable to Windows' cmd.exe.
  */
 export async function setup() {
   const apiRoot = join(__dirname, "..");
-  const dbFile = join(apiRoot, "prisma", "test.db");
-
-  // Start from nothing, so a stale schema can't mask a missing migration.
-  rmSync(dbFile, { force: true });
-  rmSync(`${dbFile}-journal`, { force: true });
 
   execFileSync("npx", ["prisma", "migrate", "deploy"], {
     cwd: apiRoot,
-    env: { ...process.env, DATABASE_URL: TEST_DB_URL },
+    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL },
     stdio: "inherit",
     shell: process.platform === "win32",
   });
 }
 
 export async function teardown() {
-  const dbFile = join(__dirname, "..", "prisma", "test.db");
-  rmSync(dbFile, { force: true });
-  rmSync(`${dbFile}-journal`, { force: true });
+  // Nothing to tear down: the database is left in place deliberately, since
+  // inspecting it after a failure is often how you work out what went wrong.
 }

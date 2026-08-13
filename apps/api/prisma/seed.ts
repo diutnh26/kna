@@ -304,7 +304,7 @@ async function main() {
       guests: 2,
       totalVnd: bookingTotal,
       ...bookingSplit,
-      ledgerEntry: {
+      ledgerEntries: {
         create: {
           fromLabel: "Traveler #4821",
           toLabel: amiHBia.displayName,
@@ -325,7 +325,7 @@ async function main() {
       totalVnd: orderTotal,
       marketplaceFeeVnd: orderSplit.marketplaceFeeVnd,
       items: { create: [{ productId: basket.id, quantity: 1, unitPriceVnd: basket.priceVnd }] },
-      ledgerEntry: {
+      ledgerEntries: {
         create: {
           fromLabel: "Traveler #4818",
           toLabel: yBla.displayName,

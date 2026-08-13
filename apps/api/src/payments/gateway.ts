@@ -65,7 +65,7 @@ export class ManualSettlementGateway implements PaymentGateway {
     };
   }
 
-  async verifyCallback(): Promise<{ reference: string; status: PaymentStatus }> {
+  async verifyCallback(_payload: unknown): Promise<{ reference: string; status: PaymentStatus }> {
     throw new Error(
       "Manual settlement has no gateway callback. A coordinator records payment by hand."
     );
