@@ -46,7 +46,7 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
       platformFeeVnd,
       communityFundVnd,
       providerPayoutVnd,
-      ledgerEntry: {
+      ledgerEntries: {
         create: {
           fromLabel: `Traveler #${req.user!.id.slice(-4).toUpperCase()}`,
           toLabel: listing.provider.displayName,
@@ -56,7 +56,7 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
         },
       },
     },
-    include: { ledgerEntry: true },
+    include: { ledgerEntries: true },
   });
 
   // What the guest is told about paying comes from the configured gateway,
@@ -68,7 +68,11 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     description: `KNĂ booking · ${listing.title}`,
   });
 
-  res.status(201).json({ ...booking, payment });
+  // The relation is one-to-many in Prisma (see the note on LedgerEntry in
+  // schema.prisma) but the rule is one entry per booking, enforced by a
+  // filtered unique index. Respond with the single entry, not an array.
+  const { ledgerEntries, ...rest } = booking;
+  res.status(201).json({ ...rest, ledgerEntry: ledgerEntries[0] ?? null, payment });
 });
 
 bookingsRouter.get("/mine", requireAuth, async (req: AuthedRequest, res) => {

@@ -1,9 +1,22 @@
 // KNĂ — Phase 1 data model.
-// Local dev runs on SQLite (zero-setup). Staging/production point this
-// datasource at Azure SQL — only `provider` + `url` change, the schema
-// and every query below carry over as-is.
+//
+// No `enum` blocks: Prisma's SQL Server connector does not support them.
+// The columns below that would be enums are plain strings, with their
+// permitted values declared once in src/lib/enums.ts (used for both
+// validation and TypeScript types) and enforced at the database by CHECK
+// constraints — see the migration named `enum_check_constraints`.
+//
+// Runs on SQL Server everywhere: a local instance for development and
+// tests, Azure SQL for staging and production. Only the connection string
+// differs between them.
+//
+// Development used to run on SQLite. It was dropped because the migration
+// history and several column types are provider-specific, so SQLite could
+// not catch the problems Azure SQL would hit — most concretely, Prisma
+// maps a bare `String` to NVARCHAR(1000) here, which SQLite has no
+// equivalent of and would silently accept past.
 datasource db {
-  provider = "sqlite"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
@@ -17,22 +30,15 @@ generator client {
 // someone may do. Committee authority comes from a CommitteeMember row and
 // provider status from a Provider row, because one person can hold both —
 // see src/middleware/auth.ts.
-enum Role {
-  GUEST
-  PROVIDER
-  COORDINATOR // KNĂ staff who confirm bookings with households
-  COMMITTEE
-  ADMIN
-}
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  fullName      String
-  role          Role      @default(GUEST)
-  locale        String    @default("en") // "en" | "vi"
-  createdAt     DateTime  @default(now())
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         String   @default("GUEST")
+  locale       String   @default("en") // "en" | "vi"
+  createdAt    DateTime @default(now())
 
   provider      Provider?
   bookings      Booking[]
@@ -45,52 +51,39 @@ model User {
 
 // ── Supply ────────────────────────────────────────────────
 
-enum ProviderType {
-  HOMESTAY
-  GUIDE
-  ARTISAN
-}
-
 model Provider {
-  id          String       @id @default(cuid())
-  userId      String       @unique
-  user        User         @relation(fields: [userId], references: [id])
-  type        ProviderType
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  type        String
   displayName String
   buon        String // village, e.g. "Buôn Akô Dhông"
-  bio         String?
-  verified    Boolean      @default(false)
-  createdAt   DateTime     @default(now())
+  bio         String?  @db.NVarChar(Max)
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
 
-  listings    Listing[]
-  products    Product[]
-}
-
-enum ListingCategory {
-  STAY
-  GUIDED_WALK
-  CRAFT_SESSION
-  CEREMONY
+  listings Listing[]
+  products Product[]
 }
 
 model Listing {
-  id           String            @id @default(cuid())
+  id           String   @id @default(cuid())
   providerId   String
-  provider     Provider          @relation(fields: [providerId], references: [id])
-  category     ListingCategory
+  provider     Provider @relation(fields: [providerId], references: [id])
+  category     String
   title        String
-  blurb        String
+  blurb        String   @db.NVarChar(Max)
   priceVnd     Int
   unit         String // "per night" | "per person"
   duration     String // "4 hours" | "2 nights" | "1 night minimum" — free text, host's own words
   groupSize    String // "Up to 6 guests" — free text, host's own words
   carbonRating String // "Low" | "Very low" ...
-  customs      String?
-  published    Boolean           @default(false)
-  createdAt    DateTime          @default(now())
+  customs      String?  @db.NVarChar(Max)
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now())
 
-  slots        AvailabilitySlot[]
-  bookings     Booking[]
+  slots    AvailabilitySlot[]
+  bookings Booking[]
 }
 
 model AvailabilitySlot {
@@ -106,75 +99,69 @@ model AvailabilitySlot {
 
 // ── Commerce ──────────────────────────────────────────────
 
-enum BookingStatus {
-  PENDING // awaiting concierge confirmation — Phase 1 MVP is concierge-assisted
-  CONFIRMED
-  CANCELLED
-  COMPLETED
-}
-
+// NoAction on the relations below is required by SQL Server, which refuses
+// multiple cascade paths to the same table — Booking reaches User both
+// directly (guest) and via Listing -> Provider. It is also the behaviour
+// this system wants: bookings, orders and ledger rows are financial
+// record. Deleting a User must fail rather than silently erase a
+// household's earnings history. SQLite accepted the cascades and would
+// never have surfaced this.
+//
 // A Booking's totalVnd always splits as:
 //   platformFeeVnd (7%) + communityFundVnd (3%) + providerPayoutVnd (90%)
 // See LedgerEntry — this split is what the public transparency table renders.
 model Booking {
-  id                String        @id @default(cuid())
+  id                String   @id @default(cuid())
   listingId         String
-  listing           Listing       @relation(fields: [listingId], references: [id])
+  listing           Listing  @relation(fields: [listingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   guestId           String
-  guest             User          @relation(fields: [guestId], references: [id])
-  status            BookingStatus @default(PENDING)
+  guest             User     @relation(fields: [guestId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status            String   @default("PENDING")
   guests            Int
   totalVnd          Int
   platformFeeVnd    Int
   communityFundVnd  Int
   providerPayoutVnd Int
-  createdAt         DateTime      @default(now())
+  createdAt         DateTime @default(now())
 
-  ledgerEntry       LedgerEntry?
+  ledgerEntries LedgerEntry[]
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  providerId  String
-  provider    Provider    @relation(fields: [providerId], references: [id])
-  category    String // "Textile" | "Woodwork" | "Basketry" | ...
-  title       String
-  note        String
-  priceVnd    Int
-  stock       Int
-  published   Boolean     @default(false)
-  createdAt   DateTime    @default(now())
+  id         String   @id @default(cuid())
+  providerId String
+  provider   Provider @relation(fields: [providerId], references: [id])
+  category   String // "Textile" | "Woodwork" | "Basketry" | ...
+  title      String
+  note       String   @db.NVarChar(Max)
+  priceVnd   Int
+  stock      Int
+  published  Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  orderItems  OrderItem[]
-}
-
-enum OrderStatus {
-  PENDING
-  PAID
-  FULFILLED
-  CANCELLED
+  orderItems OrderItem[]
 }
 
 // An Order's totalVnd splits as marketplaceFeeVnd (5%) + artisan payout (95%).
 model Order {
-  id                String      @id @default(cuid())
+  id                String   @id @default(cuid())
   buyerId           String
-  buyer             User        @relation(fields: [buyerId], references: [id])
-  status            OrderStatus @default(PENDING)
+  buyer             User     @relation(fields: [buyerId], references: [id])
+  status            String   @default("PENDING")
   totalVnd          Int
   marketplaceFeeVnd Int
-  createdAt         DateTime    @default(now())
+  createdAt         DateTime @default(now())
 
-  items             OrderItem[]
-  ledgerEntry       LedgerEntry?
+  items         OrderItem[]
+  ledgerEntries LedgerEntry[]
 }
 
 model OrderItem {
   id           String  @id @default(cuid())
   orderId      String
-  order        Order   @relation(fields: [orderId], references: [id])
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   productId    String
-  product      Product @relation(fields: [productId], references: [id])
+  product      Product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   quantity     Int
   unitPriceVnd Int
 }
@@ -183,12 +170,20 @@ model OrderItem {
 // The Phase 1 "Proof of Impact" — a plain, publicly-readable ledger.
 // Becomes the reconciliation target for the Phase 2 smart contract.
 
+// bookingId/orderId are NOT marked @unique, deliberately. SQL Server
+// treats NULLs as equal in a UNIQUE constraint, so a plain unique index on
+// a nullable column permits exactly one NULL — which would mean only one
+// order-derived ledger row could ever exist. The real rule (at most one
+// entry per booking, and per order) is enforced by filtered unique indexes
+// added in the `ledger_filtered_unique` migration. Prisma cannot express a
+// filtered index, so it models these as one-to-many; the routes still
+// return a single `ledgerEntry`.
 model LedgerEntry {
   id               String   @id @default(cuid())
-  bookingId        String?  @unique
-  booking          Booking? @relation(fields: [bookingId], references: [id])
-  orderId          String?  @unique
-  order            Order?   @relation(fields: [orderId], references: [id])
+  bookingId        String?
+  booking          Booking? @relation(fields: [bookingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderId          String?
+  order            Order?   @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   fromLabel        String // "Traveler #4821"
   toLabel          String // "H'Bia Homestay"
   totalVnd         Int
@@ -207,15 +202,15 @@ model CommunityFundEntry {
 }
 
 model CommitteeMember {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-  role   String // "Chair · elder", "Guides and land use", ...
-  buon   String
-  since  String
+  id        String @id @default(cuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id])
+  role      String // "Chair · elder", "Guides and land use", ...
+  buon      String
+  since     String
   // Display order is a curatorial decision by the community (the chair
   // leads the list), not creation order — so it's stored, not inferred.
-  sortOrder Int @default(0)
+  sortOrder Int    @default(0)
 }
 
 model CommitteeDecision {
@@ -224,54 +219,47 @@ model CommitteeDecision {
   title     String
   fromLabel String
   date      DateTime
-  note      String
+  note      String   @db.NVarChar(Max)
   createdAt DateTime @default(now())
 }
 
 // ── Content ───────────────────────────────────────────────
 
-enum ModerationStatus {
-  DRAFT
-  IN_REVIEW
-  PUBLISHED
-  REJECTED
-}
-
 // Nothing here reaches the public archive without a Committee member
 // moving it to PUBLISHED. That review step is the point of the model —
 // see the moderation routes in src/routes/archive.ts.
 model ArchiveEntry {
-  id               String           @id @default(cuid())
+  id               String   @id @default(cuid())
   type             String // "Oral history" | "360° tour" | "Recording" | ...
   title            String
   meta             String
   keeperBuon       String
-  body             String?
+  body             String?  @db.NVarChar(Max)
   // Editorial grouping on the Explore page: "Cồng Chiêng" | "The Long
   // House" | "Weaving". Null for entries that sit outside the three.
   pillar           String?
-  moderationStatus ModerationStatus @default(IN_REVIEW)
-  createdAt        DateTime         @default(now())
+  moderationStatus String   @default("IN_REVIEW")
+  createdAt        DateTime @default(now())
 
-  contributedById  String?
-  contributedBy    User?     @relation("ArchiveContributor", fields: [contributedById], references: [id])
-  moderatedById    String?
-  moderatedBy      User?     @relation("ArchiveModerator", fields: [moderatedById], references: [id])
-  moderatedAt      DateTime?
+  contributedById String?
+  contributedBy   User?     @relation("ArchiveContributor", fields: [contributedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  moderatedById   String?
+  moderatedBy     User?     @relation("ArchiveModerator", fields: [moderatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  moderatedAt     DateTime?
   // The Committee's reason, kept for both outcomes. A refusal without a
   // recorded reason isn't a governance record.
-  moderationNote   String?
+  moderationNote  String?   @db.NVarChar(Max)
 }
 
 // The phrasebook. Reviewed the same way as the archive: the Committee
 // decided in April 2026 that everyday speech is publishable and
 // ceremonial/clan-specific speech is not, so each phrase clears review.
 model Phrase {
-  id               String           @id @default(cuid())
+  id               String   @id @default(cuid())
   ede              String
   en               String
-  note             String
-  sortOrder        Int              @default(0)
-  moderationStatus ModerationStatus @default(IN_REVIEW)
-  createdAt        DateTime         @default(now())
+  note             String   @db.NVarChar(Max)
+  sortOrder        Int      @default(0)
+  moderationStatus String   @default("IN_REVIEW")
+  createdAt        DateTime @default(now())
 }

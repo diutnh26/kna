@@ -53,7 +53,7 @@ ordersRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
             unitPriceVnd: products.find((p) => p.id === item.productId)!.priceVnd,
           })),
         },
-        ledgerEntry: {
+        ledgerEntries: {
           create: {
             fromLabel: `Traveler #${req.user!.id.slice(-4).toUpperCase()}`,
             toLabel: primaryMaker,
@@ -63,7 +63,7 @@ ordersRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
           },
         },
       },
-      include: { items: true, ledgerEntry: true },
+      include: { items: true, ledgerEntries: true },
     });
 
     for (const item of parsed.data.items) {
@@ -76,5 +76,6 @@ ordersRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     return created;
   });
 
-  res.status(201).json(order);
+  const { ledgerEntries, ...rest } = order;
+  res.status(201).json({ ...rest, ledgerEntry: ledgerEntries[0] ?? null });
 });
