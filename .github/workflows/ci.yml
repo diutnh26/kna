@@ -81,15 +81,24 @@ jobs:
       - run: npm run build:api
       - run: npm run test:api
 
-  # Mirrors the Render build as closely as CI can, because every deploy
-  # failure so far has been an environment difference rather than a code
-  # bug: Node 20 vs 24, a Windows-generated lockfile missing the linux
-  # rolldown binding, and NODE_ENV=production making npm skip the
-  # devDependencies that tsc and vite need.
+  # Mirrors the Render builds, one job per service.
   #
-  # The commands below must stay in step with buildCommand in render.yaml.
-  production-build:
-    name: production build (mirrors Render)
+  # Two jobs, not one, because Render gives each service its own checkout
+  # and its own node_modules. A single job sharing a workspace is not a
+  # mirror: the web build's `rm -rf node_modules` deleted the Prisma client
+  # the API build had generated, failing for a reason the real deploy could
+  # never hit.
+  #
+  # These exist because every deploy failure so far has been an environment
+  # difference rather than a defect: Node 20 vs 24, a Windows-generated
+  # lockfile missing the linux rolldown binding, NODE_ENV=production
+  # pruning the build's own toolchain, and Render's automatic pre-install
+  # leaving a populated node_modules that made a later install a no-op.
+  #
+  # Keep the run: lines in step with buildCommand in render.yaml.
+
+  production-build-api:
+    name: production build — api (mirrors Render)
     runs-on: ubuntu-latest
 
     services:
@@ -107,7 +116,7 @@ jobs:
           --health-retries 12
 
     env:
-      # The setting that caused the failure this job exists to catch.
+      # The setting that caused one of the failures this job exists to catch.
       NODE_ENV: production
       JWT_SECRET: "ci-only-not-a-real-secret-at-least-32-chars"
       DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
@@ -118,34 +127,48 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      # Render runs its own `npm install` before the build command, using
-      # the committed lockfile. Reproducing that matters: it leaves a
-      # populated node_modules, which made a later `npm install` report
-      # "up to date" and skip the missing linux binding entirely. Without
-      # this step the job passes while the real deploy fails.
+
+      # Render installs before running buildCommand. Reproducing that
+      # matters: it leaves a populated node_modules, which is what made
+      # deleting only the lockfile a no-op.
       - name: Pre-install, as Render does automatically
         run: npm install
 
-      - name: API — exactly what Render runs
+      - name: Build exactly as render.yaml does
         run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
 
-      # Re-create Render's starting state for the second service, which
-      # gets its own checkout and its own pre-install.
-      - name: Restore the lockfile and pre-install again, for the web build
-        run: git checkout -- package-lock.json && npm install
-
-      - name: Web — exactly what Render runs
-        run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
-      - name: Start the API the way Render does, and check it answers
+      - name: Start the compiled server and wait for /health
+        env:
+          PORT: "4000"
+          CORS_ORIGIN: "https://example.invalid"
         run: |
           node apps/api/dist/index.js &
           for i in $(seq 1 30); do
             if curl -sf http://localhost:4000/health > /dev/null; then
-              echo "health ok after ${i}s"; curl -s http://localhost:4000/health; exit 0
+              echo "healthy after ${i}s"; curl -s http://localhost:4000/health; exit 0
             fi
             sleep 1
           done
           echo "API did not become healthy in 30s"; exit 1
-        env:
-          PORT: "4000"
-          CORS_ORIGIN: "https://example.invalid"
+
+  production-build-web:
+    name: production build — web (mirrors Render)
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Pre-install, as Render does automatically
+        run: npm install
+
+      - name: Build exactly as render.yaml does
+        run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
+
+      - name: Confirm the bundle was actually produced
+        run: |
+          test -f apps/web/dist/index.html || { echo "no index.html in apps/web/dist"; exit 1; }
+          echo "built:"; ls apps/web/dist
