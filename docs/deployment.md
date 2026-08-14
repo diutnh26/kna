@@ -87,9 +87,15 @@ guard exists precisely for this moment.
    | `DIRECT_DATABASE_URL` | Neon **direct** string (no `-pooler`), same options |
    | `JWT_SECRET` | 32+ chars — `openssl rand -base64 48` |
 
-   The API **refuses to start** without both, and rejects a short or
-   default secret (`apps/api/src/lib/config.ts`). A failed first boot is
-   almost always one of these.
+   Paste the **bare URL only**. Neon's dashboard can hand you a `psql '…'`
+   command; copying that whole line is the most common way this fails, and
+   Prisma reports it only as `P1013: the scheme is not recognized`. The
+   build runs `apps/api/scripts/check-db-env.mjs` first, which names the
+   offending variable, spots a pasted psql command, and refuses if the
+   pooled and direct URLs are the wrong way round.
+
+   The API also **refuses to start** without both, and rejects a short or
+   default `JWT_SECRET` (`apps/api/src/lib/config.ts`).
 3. Deploy. `CORS_ORIGIN` and `VITE_API_URL` are wired between the two
    services automatically.
 
