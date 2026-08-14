@@ -96,8 +96,31 @@ guard exists precisely for this moment.
 
    The API also **refuses to start** without both, and rejects a short or
    default `JWT_SECRET` (`apps/api/src/lib/config.ts`).
-3. Deploy. `CORS_ORIGIN` and `VITE_API_URL` are wired between the two
-   services automatically.
+3. Deploy.
+
+### The two services' URLs are written out, not wired
+
+`render.yaml` sets `CORS_ORIGIN` and `VITE_API_URL` to literal origins.
+Render's `fromService … property: host` looks like the better answer and was
+tried first; it failed in both directions, and both failures were silent:
+
+- On the API it resolved to the **bare service name**, so the response
+  header was `access-control-allow-origin: https://kna-web` and a browser
+  would have blocked every call from the real origin.
+- On the static site it did not reach the Vite build **at all**, so
+  `VITE_API_URL` was unset and the first deployed bundle called
+  `http://localhost:4000`. The build succeeded and the site served; it was
+  broken only in a visitor's browser.
+
+So `apps/web/vite.config.js` now **fails the build** if `VITE_API_URL` is
+missing or points at localhost, and CI asserts the built bundle names the
+deployed API. If you rename a service, edit both values in `render.yaml`.
+
+To build the frontend locally you must therefore pass one:
+
+```bash
+VITE_API_URL=https://kna-api.onrender.com npm run build:web
+```
 
 ## What "free" actually costs here
 
@@ -131,14 +154,46 @@ guard exists precisely for this moment.
 
 ## Checks after deploying
 
+Both services are live and were verified with these:
+
 ```bash
 curl https://kna-api.onrender.com/health
 # {"status":"ok","db":"connected", ...}
 
 curl https://kna-api.onrender.com/listings
 # [] until providers are onboarded — an empty array is correct, not a fault
+
+# CORS must name the full origin, not the bare service name
+curl -i -X OPTIONS https://kna-api.onrender.com/listings \
+  -H "Origin: https://kna-web.onrender.com" \
+  -H "Access-Control-Request-Method: GET" | grep -i access-control-allow-origin
+# access-control-allow-origin: https://kna-web.onrender.com
+
+# The deployed bundle must not have baked in the dev API URL
+curl -s https://kna-web.onrender.com/ | grep -oE '/assets/index-[^"]+\.js'
+curl -s https://kna-web.onrender.com/assets/<that file> | grep -c localhost:4000
+# 0
 ```
 
-Then open the frontend, sign in, and place a booking; it should appear on
-the landing page's public ledger. That single loop exercises auth, the fee
-split, and the ledger together.
+`/listings`, `/products`, `/community/ledger`, `/community/committee` and
+`/archive` all answer `200 []`.
+
+### The database is empty, on purpose
+
+Nothing is seeded. `npm run db:seed` deletes every row before inserting, and
+refuses to run against anything that is not a local dev database — that
+guard is why it cannot be pointed at Neon by accident.
+
+So the deployed site currently renders empty states everywhere. Before
+showing it to Intermèdes or Lua Viet Tours, decide deliberately between:
+
+- **Onboard real providers** through the app — the honest option, and the
+  one the pilot needs anyway.
+- **Load demo content** written for the demo, inserted by a separate
+  additive script. Do not reach for the seed: repointing it at Neon means
+  disabling a guard that exists for exactly this moment, and one stray run
+  later would wipe real pilot data.
+
+Then sign in, place a booking, and confirm it appears on the landing page's
+public ledger. That single loop exercises auth, the fee split, and the
+ledger together, and nobody has driven it against the deployed stack yet.
