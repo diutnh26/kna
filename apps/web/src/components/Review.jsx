@@ -3,6 +3,7 @@ import { Check, X, Clock, MapPin, ShieldCheck } from 'lucide-react';
 import Navbar from './Navbar';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
+import ApiErrorNotice from './ApiErrorNotice';
 
 const dmy = (iso) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -133,13 +134,7 @@ export default function Review() {
             )}
 
             {loadState === 'error' && (
-              <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
-                <p className="font-display text-2xl mb-3">Couldn&rsquo;t reach the KNĂ API.</p>
-                <p className="text-sm text-[#F5EDDD]/60">
-                  Is <code className="text-[#E8A33D]">apps/api</code> running on{' '}
-                  <code className="text-[#E8A33D]">localhost:4000</code>?
-                </p>
-              </div>
+              <ApiErrorNotice className="py-16" />
             )}
 
             {loadState === 'ready' && queue.length === 0 && (

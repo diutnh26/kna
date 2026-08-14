@@ -5,9 +5,20 @@
  * Accepts a base URL with or without a scheme. Render's blueprint wiring
  * supplies a bare hostname, and fetch() would treat that as a relative path
  * — every call would quietly hit the frontend's own origin and 404.
+ *
+ * The localhost default sits behind `import.meta.env.DEV` so it is compiled
+ * out of production bundles entirely, rather than lingering as an unused
+ * string. That keeps CI's "does the bundle mention localhost" check honest —
+ * a literal that is present but unreachable makes the check cry wolf, and a
+ * check that cries wolf gets deleted.
  */
 function normalizeApiUrl(value) {
-  if (!value) return 'http://localhost:4000';
+  if (!value) {
+    if (import.meta.env.DEV) return 'http://localhost:4000';
+    // Unreachable: the production build fails without VITE_API_URL, in
+    // apps/web/vite.config.js. Here in case that guard is ever removed.
+    throw new Error('VITE_API_URL was not set when this bundle was built.');
+  }
   if (/^https?:\/\//i.test(value)) return value.replace(/\/$/, '');
   const isLocal = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(value);
   return `${isLocal ? 'http' : 'https'}://${value}`.replace(/\/$/, '');

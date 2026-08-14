@@ -14,6 +14,7 @@ import ImageSlot from './ImageSlot';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import { useDebounced } from '../lib/useDebounced';
+import ApiErrorNotice from './ApiErrorNotice';
 
 const CATEGORIES = ['All', 'Stay', 'Guided walk', 'Craft session', 'Ceremony'];
 const BUON = ['All buôn', 'Buôn Akô Dhông', 'Buôn Đôn', 'Buôn Trấp', 'Buôn Kli A'];
@@ -212,13 +213,7 @@ export default function Travel() {
         )}
 
         {loadState === 'error' && (
-          <div className="border border-dashed border-[#F5EDDD]/20 py-20 text-center">
-            <p className="font-display text-2xl mb-3">Couldn&rsquo;t reach the KNĂ API.</p>
-            <p className="text-sm text-[#F5EDDD]/60">
-              Is <code className="text-[#E8A33D]">apps/api</code> running on{' '}
-              <code className="text-[#E8A33D]">localhost:4000</code>?
-            </p>
-          </div>
+          <ApiErrorNotice />
         )}
 
         {loadState === 'ready' && (

@@ -18,4 +18,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Build config runs in Node, not the browser, so it may read process.env
+    // — which the app itself must never do.
+    files: ['*.config.js'],
+    languageOptions: { globals: globals.node },
+  },
 ])

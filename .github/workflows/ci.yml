@@ -156,6 +156,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: production
+      # Must match the kna-web service in render.yaml. The build now refuses
+      # to run without it — the first deploy shipped a bundle calling
+      # http://localhost:4000 because nothing checked.
+      VITE_API_URL: https://kna-api.onrender.com
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -168,7 +172,12 @@ jobs:
       - name: Build exactly as render.yaml does
         run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
 
-      - name: Confirm the bundle was actually produced
+      - name: Confirm the bundle is real and points at the deployed API
         run: |
           test -f apps/web/dist/index.html || { echo "no index.html in apps/web/dist"; exit 1; }
-          echo "built:"; ls apps/web/dist
+          if grep -rq "localhost:4000" apps/web/dist/assets; then
+            echo "the bundle calls localhost:4000 — VITE_API_URL did not reach the build"; exit 1
+          fi
+          grep -rq "kna-api.onrender.com" apps/web/dist/assets \
+            || { echo "the bundle does not reference the API host at all"; exit 1; }
+          echo "built, and pointed at the deployed API:"; ls apps/web/dist

@@ -14,6 +14,7 @@ import {
 import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
 import { api } from '../lib/api';
+import ApiErrorNotice from './ApiErrorNotice';
 
 // Illustrative only — the provider board is not built. See the note
 // rendered above these cards; they are examples of what hosts would use
@@ -125,13 +126,7 @@ export default function Community() {
 
       {loadState === 'error' && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
-          <div className="border border-dashed border-[#F5EDDD]/20 py-20 text-center">
-            <p className="font-display text-2xl mb-3">Couldn&rsquo;t reach the KNĂ API.</p>
-            <p className="text-sm text-[#F5EDDD]/60">
-              Is <code className="text-[#E8A33D]">apps/api</code> running on{' '}
-              <code className="text-[#E8A33D]">localhost:4000</code>?
-            </p>
-          </div>
+          <ApiErrorNotice />
         </section>
       )}
 

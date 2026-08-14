@@ -77,12 +77,16 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
-      # Points at the static site below, so the two cannot drift apart.
+      # Full origin, written out rather than wired with fromService.
+      #
+      # `fromService … property: host` looked tidier but resolved to the bare
+      # service name, so the API answered
+      # `access-control-allow-origin: https://kna-web` and every browser call
+      # from the real origin was blocked. Renaming a service now means editing
+      # two lines here; that beats a header that is wrong in a way only a
+      # browser console shows.
       - key: CORS_ORIGIN
-        fromService:
-          type: web
-          name: kna-web
-          property: host
+        value: https://kna-web.onrender.com
 
   # ── Frontend ───────────────────────────────────────────────────────
   # No `plan` or `region` here: static sites take neither. They are always
@@ -102,11 +106,14 @@ services:
         value: "24"
       # Baked in at build time by Vite, so a change here needs a rebuild,
       # not just a restart.
+      #
+      # Written out for the same reason as CORS_ORIGIN above. Here the
+      # fromService wiring did not merely resolve to a bare name — it did not
+      # reach the build at all, and the first deployed bundle shipped calling
+      # http://localhost:4000. apps/web/vite.config.js now fails the build
+      # rather than let that happen again.
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: kna-api
-          property: host
+        value: https://kna-api.onrender.com
     routes:
       # The app uses a hash router today, so every path serves index.html.
       # Harmless now, and correct already if it moves to real URLs.
