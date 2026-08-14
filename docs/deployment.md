@@ -28,33 +28,46 @@ have failed the second marketplace order in production.
 > unaffected — but the business plan's wording should be updated before the
 > next submission so it matches what is deployed.
 
-## 1. Database
+## 1. Database — already provisioned
 
-1. Sign up at <https://neon.com> with GitHub. No card.
-2. Create a project named `kna`. Pick the region closest to Đắk Lắk —
-   Singapore (`ap-southeast-1`) is the nearest.
-3. Copy the connection string from the dashboard. It looks like:
+The Neon project **KNA** (`tiny-rice-73142638`) exists in the
+`ap-southeast-1` (Singapore) region, running **PostgreSQL 18**, and all
+three migrations have been applied to it. Local development runs Postgres
+17; the schema uses nothing version-specific, and CI runs 17 as a check.
 
-   ```
-   postgresql://<user>:<password>@ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-   ```
+The repo has a committed [`.neon`](../.neon) file holding the org and
+project IDs — no secrets. `npx neon env pull` writes the real connection
+strings to `.env.local`, which is gitignored.
 
-   Keep `?sslmode=require`. Neon refuses unencrypted connections.
+### Two connection strings, and why
 
-### First migration
+Neon gives you both:
 
-Run once from your machine:
+| | Host | Use for |
+|---|---|---|
+| **Pooled** | `…-pooler.…neon.tech` | the running app (`DATABASE_URL`) |
+| **Direct** | `…neon.tech` (no `-pooler`) | migrations (`DIRECT_DATABASE_URL`) |
+
+The pooled endpoint is PgBouncer in transaction mode, which cannot run
+Prisma migrations — they need session-level advisory locks. The schema
+declares `directUrl` so Prisma picks the right one automatically. Locally
+both point at the same server, so it makes no difference there.
+
+### Running migrations by hand
 
 ```bash
+npx neon env pull        # writes .env.local at the repo root
+
 cd apps/api
-DATABASE_URL="<neon connection string>" npx prisma migrate deploy
+DIRECT="<neon direct url>"
+DATABASE_URL="$DIRECT" DIRECT_DATABASE_URL="$DIRECT" npx prisma migrate deploy
 ```
 
 After this, Render's `preDeployCommand` applies migrations on every deploy.
 
 **Do not run `npm run db:seed` against it.** The seed deletes every row. It
-refuses to run against a non-local or non-dev-named database, and that guard
-exists precisely for this moment.
+refuses to run against a non-local or non-dev-named database, and that
+guard exists precisely for this moment.
 
 ## 2. Render
 
@@ -65,7 +78,8 @@ exists precisely for this moment.
 
    | Variable | Value |
    |---|---|
-   | `DATABASE_URL` | the Neon string, including `?sslmode=require` |
+   | `DATABASE_URL` | Neon **pooled** string (`…-pooler.…`), with `?sslmode=require` |
+   | `DIRECT_DATABASE_URL` | Neon **direct** string (no `-pooler`), same options |
    | `JWT_SECRET` | 32+ chars — `openssl rand -base64 48` |
 
    The API **refuses to start** without both, and rejects a short or

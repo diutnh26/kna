@@ -15,6 +15,11 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Migrations run over a direct connection, never a pooler. Neon's pooled
+  // endpoint is PgBouncer in transaction mode, which does not support the
+  // session-level advisory locks Prisma Migrate relies on. Locally both
+  // point at the same server, so this changes nothing there.
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 generator client {

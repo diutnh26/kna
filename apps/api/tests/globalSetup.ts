@@ -26,7 +26,7 @@ export async function setup() {
 
   execFileSync("npx", ["prisma", "migrate", "deploy"], {
     cwd: apiRoot,
-    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL },
+    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL, DIRECT_DATABASE_URL: TEST_DATABASE_URL },
     stdio: "inherit",
     shell: process.platform === "win32",
   });

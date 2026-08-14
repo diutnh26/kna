@@ -27,11 +27,15 @@ services:
       - key: PAYMENT_PROVIDER
         value: manual
       # Set in the dashboard — never committed.
-      #   DATABASE_URL: the Neon connection string (include ?sslmode=require)
-      #   JWT_SECRET:   32+ chars; `openssl rand -base64 48`
+      #   DATABASE_URL:        Neon POOLED string (…-pooler.…), ?sslmode=require
+      #   DIRECT_DATABASE_URL: Neon DIRECT string (no -pooler), for migrations —
+      #                        the pooler is PgBouncer and cannot run them
+      #   JWT_SECRET:          32+ chars; `openssl rand -base64 48`
       # The API refuses to start if either is missing or weak
       # (apps/api/src/lib/config.ts).
       - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_DATABASE_URL
         sync: false
       - key: JWT_SECRET
         sync: false
