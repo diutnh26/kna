@@ -54,10 +54,11 @@ services:
           property: host
 
   # ── Frontend ───────────────────────────────────────────────────────
+  # No `plan` or `region` here: static sites take neither. They are always
+  # free and served from Render's CDN rather than a single region.
   - type: web
     name: kna-web
     runtime: static
-    plan: free
     rootDir: .
     buildCommand: npm install && npm run build:web
     staticPublishPath: apps/web/dist
