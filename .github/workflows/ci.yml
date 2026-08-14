@@ -38,26 +38,30 @@ jobs:
     name: api — typecheck, migrate & test
     runs-on: ubuntu-latest
 
-    # Real SQL Server, matching development and Azure SQL. Running the
-    # suite on SQLite used to hide provider-specific failures — most
-    # seriously, SQL Server treats NULLs as equal in a UNIQUE constraint,
-    # which silently broke the second marketplace order.
+    # Real Postgres, matching development and Neon. The suite ran on
+    # SQLite once; that hid provider-specific failures, and running it on
+    # the engine actually deployed is what caught them.
     services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2022-latest
+      postgres:
+        image: postgres:17
         env:
-          ACCEPT_EULA: "Y"
           # Literal, not ${{ env.* }}: the env context is not available
           # inside a services block. CI-only throwaway credential.
-          MSSQL_SA_PASSWORD: "Kna-CI-only-2026!"
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: kna_test
         ports:
-          - 1433:1433
+          - 5432:5432
+        # Postgres accepts TCP before it is ready; pg_isready is the check.
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
 
     env:
       JWT_SECRET: "ci-only"
-      DATABASE_URL: "sqlserver://localhost:1433;database=kna_test;user=sa;password=Kna-CI-only-2026!;encrypt=true;trustServerCertificate=true"
-      TEST_DATABASE_URL: "sqlserver://localhost:1433;database=kna_test;user=sa;password=Kna-CI-only-2026!;encrypt=true;trustServerCertificate=true"
-      MASTER_URL: "sqlserver://localhost:1433;database=master;user=sa;password=Kna-CI-only-2026!;encrypt=true;trustServerCertificate=true"
+      DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+      TEST_DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
 
     steps:
       - uses: actions/checkout@v4
@@ -72,28 +76,6 @@ jobs:
       - run: rm -f package-lock.json && npm install
       - run: npm run db:generate
 
-      # The container accepts TCP before SQL Server finishes starting, so
-      # poll with a real query rather than trusting the port.
-      - name: Wait for SQL Server
-        run: |
-          for i in $(seq 1 60); do
-            if echo "SELECT 1" | npx prisma db execute --url "$MASTER_URL" --stdin >/dev/null 2>&1; then
-              echo "SQL Server ready after ${i}s"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "SQL Server did not become ready in 60s"
-          exit 1
-
-      # Prisma does not create the database for SQL Server the way it does
-      # for SQLite, so it has to exist before migrate runs.
-      - name: Create test database
-        run: echo "IF DB_ID('kna_test') IS NULL CREATE DATABASE kna_test;" | npx prisma db execute --url "$MASTER_URL" --stdin
-
-      # Applies every migration to a real SQL Server — catches a schema that
-      # doesn't migrate cleanly, including the hand-written CHECK
-      # constraints and filtered unique indexes.
       - run: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
       - run: npm run build:api
       - run: npm run test:api

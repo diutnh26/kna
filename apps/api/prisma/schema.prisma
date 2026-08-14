@@ -1,22 +1,19 @@
 // KNĂ — Phase 1 data model.
 //
-// No `enum` blocks: Prisma's SQL Server connector does not support them.
-// The columns below that would be enums are plain strings, with their
-// permitted values declared once in src/lib/enums.ts (used for both
-// validation and TypeScript types) and enforced at the database by CHECK
-// constraints — see the migration named `enum_check_constraints`.
-//
-// Runs on SQL Server everywhere: a local instance for development and
-// tests, Azure SQL for staging and production. Only the connection string
+// Runs on PostgreSQL everywhere: a local instance for development and
+// tests, Neon for staging and production. Only the connection string
 // differs between them.
 //
-// Development used to run on SQLite. It was dropped because the migration
-// history and several column types are provider-specific, so SQLite could
-// not catch the problems Azure SQL would hit — most concretely, Prisma
-// maps a bare `String` to NVARCHAR(1000) here, which SQLite has no
-// equivalent of and would silently accept past.
+// No `enum` blocks, and no `@unique` on LedgerEntry's nullable foreign
+// keys. Both are legacies of a period on SQL Server, and both are kept
+// deliberately: the permitted values live in src/lib/enums.ts enforced by
+// CHECK constraints, and the "at most one ledger entry per booking" rule
+// is a partial unique index. Postgres supports enums and treats NULLs as
+// distinct, so it would tolerate the simpler forms — but this shape works
+// on both engines, and the plan still contemplates Azure SQL later.
+//
 datasource db {
-  provider = "sqlserver"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -58,7 +55,7 @@ model Provider {
   type        String
   displayName String
   buon        String // village, e.g. "Buôn Akô Dhông"
-  bio         String?  @db.NVarChar(Max)
+  bio         String?
   verified    Boolean  @default(false)
   createdAt   DateTime @default(now())
 
@@ -72,13 +69,13 @@ model Listing {
   provider     Provider @relation(fields: [providerId], references: [id])
   category     String
   title        String
-  blurb        String   @db.NVarChar(Max)
+  blurb        String
   priceVnd     Int
   unit         String // "per night" | "per person"
   duration     String // "4 hours" | "2 nights" | "1 night minimum" — free text, host's own words
   groupSize    String // "Up to 6 guests" — free text, host's own words
   carbonRating String // "Low" | "Very low" ...
-  customs      String?  @db.NVarChar(Max)
+  customs      String?
   published    Boolean  @default(false)
   createdAt    DateTime @default(now())
 
@@ -133,7 +130,7 @@ model Product {
   provider   Provider @relation(fields: [providerId], references: [id])
   category   String // "Textile" | "Woodwork" | "Basketry" | ...
   title      String
-  note       String   @db.NVarChar(Max)
+  note       String
   priceVnd   Int
   stock      Int
   published  Boolean  @default(false)
@@ -219,7 +216,7 @@ model CommitteeDecision {
   title     String
   fromLabel String
   date      DateTime
-  note      String   @db.NVarChar(Max)
+  note      String
   createdAt DateTime @default(now())
 }
 
@@ -234,7 +231,7 @@ model ArchiveEntry {
   title            String
   meta             String
   keeperBuon       String
-  body             String?  @db.NVarChar(Max)
+  body             String?
   // Editorial grouping on the Explore page: "Cồng Chiêng" | "The Long
   // House" | "Weaving". Null for entries that sit outside the three.
   pillar           String?
@@ -248,7 +245,7 @@ model ArchiveEntry {
   moderatedAt     DateTime?
   // The Committee's reason, kept for both outcomes. A refusal without a
   // recorded reason isn't a governance record.
-  moderationNote  String?   @db.NVarChar(Max)
+  moderationNote  String?
 }
 
 // The phrasebook. Reviewed the same way as the archive: the Committee
@@ -258,7 +255,7 @@ model Phrase {
   id               String   @id @default(cuid())
   ede              String
   en               String
-  note             String   @db.NVarChar(Max)
+  note             String
   sortOrder        Int      @default(0)
   moderationStatus String   @default("IN_REVIEW")
   createdAt        DateTime @default(now())

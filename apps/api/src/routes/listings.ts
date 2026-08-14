@@ -18,11 +18,14 @@ listingsRouter.get("/", async (req, res) => {
   // host's name, a buôn, or a word from the listing itself.
   if (typeof q === "string" && q.trim()) {
     const term = q.trim();
+    // mode:'insensitive' is required, not cosmetic: Postgres `contains`
+    // is case-sensitive, so without it searching "wik" would not find
+    // "Y Wik Niê" — which is exactly how a guest would type it.
     where.OR = [
-      { title: { contains: term } },
-      { blurb: { contains: term } },
-      { provider: { displayName: { contains: term } } },
-      { provider: { buon: { contains: term } } },
+      { title: { contains: term, mode: 'insensitive' } },
+      { blurb: { contains: term, mode: 'insensitive' } },
+      { provider: { displayName: { contains: term, mode: 'insensitive' } } },
+      { provider: { buon: { contains: term, mode: 'insensitive' } } },
     ];
   }
 

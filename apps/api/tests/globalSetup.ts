@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 const TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ??
-  "sqlserver://localhost:1433;database=kna_test;integratedSecurity=true;trustServerCertificate=true";
+  "postgresql://postgres@localhost:5432/kna_test";
 
 /**
  * Brings the test database up to the current migrations before the suite

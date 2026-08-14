@@ -1,10 +1,9 @@
 # Render Blueprint — staging for KNĂ.
 #
 # Deploys the frontend and the API. It does NOT define a database, on
-# purpose: Render offers only Postgres and Redis, and this project runs on
-# SQL Server (see apps/api/README.md for why that is not a preference).
-# Provision the database separately — Azure SQL's free offer is the
-# recommended pairing — and set DATABASE_URL in the Render dashboard.
+# purpose: Render's own free Postgres expires 30 days after creation, which
+# is shorter than a pilot. Provision Neon instead (free permanently, no
+# card) and set DATABASE_URL in the Render dashboard.
 #
 # Full walkthrough: docs/deployment.md
 
@@ -28,7 +27,7 @@ services:
       - key: PAYMENT_PROVIDER
         value: manual
       # Set in the dashboard — never committed.
-      #   DATABASE_URL: the Azure SQL connection string
+      #   DATABASE_URL: the Neon connection string (include ?sslmode=require)
       #   JWT_SECRET:   32+ chars; `openssl rand -base64 48`
       # The API refuses to start if either is missing or weak
       # (apps/api/src/lib/config.ts).
