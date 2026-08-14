@@ -63,7 +63,12 @@ DIRECT="<neon direct url>"
 DATABASE_URL="$DIRECT" DIRECT_DATABASE_URL="$DIRECT" npx prisma migrate deploy
 ```
 
-After this, Render's `preDeployCommand` applies migrations on every deploy.
+After this, Render's **build command** applies pending migrations on every
+deploy. (Render does not support `preDeployCommand` on the free plan, so
+migration runs as a build step. `migrate deploy` is a no-op once migrations
+are applied, so this is safe to repeat — but if a build fails after it, the
+database is briefly ahead of the running code. Harmless for additive
+migrations; apply a destructive one by hand first.)
 
 **Do not run `npm run db:seed` against it.** The seed deletes every row. It
 refuses to run against a non-local or non-dev-named database, and that

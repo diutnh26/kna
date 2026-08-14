@@ -15,10 +15,17 @@ services:
     plan: free
     region: singapore # closest Render region to Đắk Lắk
     rootDir: .
-    buildCommand: npm install && npm run db:generate && npm run build:api
-    # Applies pending migrations before the new version takes traffic, and
-    # aborts the deploy if one fails.
-    preDeployCommand: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+    # Migrations run here rather than in preDeployCommand, which Render does
+    # not support on the free plan. `migrate deploy` only applies pending
+    # migrations and is a no-op once they are in, so re-running it on every
+    # deploy is safe. It resolves DIRECT_DATABASE_URL via the schema's
+    # directUrl, because Neon's pooled endpoint cannot run migrations.
+    #
+    # The trade-off versus pre-deploy: if the build fails *after* this step,
+    # the database is briefly ahead of the running code. Harmless for
+    # additive migrations; for a destructive one, apply it by hand first and
+    # deploy afterwards.
+    buildCommand: npm install && npm run db:generate && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
     startCommand: node apps/api/dist/index.js
     healthCheckPath: /health
     envVars:
