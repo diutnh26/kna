@@ -34,8 +34,13 @@ services:
     # @rolldown/binding-win32-x64-msvc — npm writes just the optional
     # dependency it actually installed (npm/cli#4828). On a Linux builder
     # npm then honours the lockfile, skips the linux binding, and `vite
-    # build` fails with "Cannot find native binding". Removing the lockfile
-    # forces a real resolve for the platform being built on.
+    # build` fails with "Cannot find native binding".
+    #
+    # node_modules must go too, not just the lockfile. Render runs its own
+    # `npm install` before this command, so node_modules already exists;
+    # npm would then report "up to date" and install nothing, leaving the
+    # missing binding missing. This is exactly what rolldown's own error
+    # message tells you to do.
     #
     # This costs install reproducibility. The proper fix is to maintain the
     # lockfile from Linux (matching this host) or move to a package manager
@@ -46,7 +51,7 @@ services:
     # devDependencies — and typescript plus every @types/* package lives
     # there, so `tsc` fails with a hundred "Cannot find name 'process'"
     # errors. The runtime image does not need them; the build does.
-    buildCommand: rm -f package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+    buildCommand: rm -rf node_modules package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
     startCommand: node apps/api/dist/index.js
     healthCheckPath: /health
     envVars:
@@ -90,7 +95,7 @@ services:
     # actually needs the linux rolldown binding.
     # --include=dev for the same reason as the API: vite, tailwindcss,
     # postcss and autoprefixer are devDependencies and the build needs them.
-    buildCommand: rm -f package-lock.json && npm install --include=dev && npm run build:web
+    buildCommand: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
     staticPublishPath: apps/web/dist
     envVars:
       - key: NODE_VERSION

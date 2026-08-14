@@ -118,10 +118,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      # Render runs its own `npm install` before the build command, using
+      # the committed lockfile. Reproducing that matters: it leaves a
+      # populated node_modules, which made a later `npm install` report
+      # "up to date" and skip the missing linux binding entirely. Without
+      # this step the job passes while the real deploy fails.
+      - name: Pre-install, as Render does automatically
+        run: npm install
+
       - name: API — exactly what Render runs
-        run: rm -f package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+        run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+
+      # Re-create Render's starting state for the second service, which
+      # gets its own checkout and its own pre-install.
+      - name: Restore the lockfile and pre-install again, for the web build
+        run: git checkout -- package-lock.json && npm install
+
       - name: Web — exactly what Render runs
-        run: rm -f package-lock.json && npm install --include=dev && npm run build:web
+        run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
       - name: Start the API the way Render does, and check it answers
         run: |
           node apps/api/dist/index.js &
