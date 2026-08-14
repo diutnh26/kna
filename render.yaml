@@ -41,7 +41,12 @@ services:
     # lockfile from Linux (matching this host) or move to a package manager
     # that records every platform. CI does the same thing for the same
     # reason — see .github/workflows/ci.yml.
-    buildCommand: rm -f package-lock.json && npm install && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+    # --include=dev is required, not optional. NODE_ENV=production (set
+    # below, correctly, for the running service) also makes npm omit
+    # devDependencies — and typescript plus every @types/* package lives
+    # there, so `tsc` fails with a hundred "Cannot find name 'process'"
+    # errors. The runtime image does not need them; the build does.
+    buildCommand: rm -f package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
     startCommand: node apps/api/dist/index.js
     healthCheckPath: /health
     envVars:
@@ -83,7 +88,9 @@ services:
     rootDir: .
     # Same lockfile workaround as the API above — this is the build that
     # actually needs the linux rolldown binding.
-    buildCommand: rm -f package-lock.json && npm install && npm run build:web
+    # --include=dev for the same reason as the API: vite, tailwindcss,
+    # postcss and autoprefixer are devDependencies and the build needs them.
+    buildCommand: rm -f package-lock.json && npm install --include=dev && npm run build:web
     staticPublishPath: apps/web/dist
     envVars:
       - key: NODE_VERSION

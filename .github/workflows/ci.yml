@@ -80,3 +80,58 @@ jobs:
       - run: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
       - run: npm run build:api
       - run: npm run test:api
+
+  # Mirrors the Render build as closely as CI can, because every deploy
+  # failure so far has been an environment difference rather than a code
+  # bug: Node 20 vs 24, a Windows-generated lockfile missing the linux
+  # rolldown binding, and NODE_ENV=production making npm skip the
+  # devDependencies that tsc and vite need.
+  #
+  # The commands below must stay in step with buildCommand in render.yaml.
+  production-build:
+    name: production build (mirrors Render)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: kna_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      # The setting that caused the failure this job exists to catch.
+      NODE_ENV: production
+      JWT_SECRET: "ci-only-not-a-real-secret-at-least-32-chars"
+      DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+      DIRECT_DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: API — exactly what Render runs
+        run: rm -f package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+      - name: Web — exactly what Render runs
+        run: rm -f package-lock.json && npm install --include=dev && npm run build:web
+      - name: Start the API the way Render does, and check it answers
+        run: |
+          node apps/api/dist/index.js &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4000/health > /dev/null; then
+              echo "health ok after ${i}s"; curl -s http://localhost:4000/health; exit 0
+            fi
+            sleep 1
+          done
+          echo "API did not become healthy in 30s"; exit 1
+        env:
+          PORT: "4000"
+          CORS_ORIGIN: "https://example.invalid"
