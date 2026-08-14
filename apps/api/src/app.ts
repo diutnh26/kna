@@ -10,10 +10,25 @@ import { communityRouter } from "./routes/community";
 import { archiveRouter } from "./routes/archive";
 import { providersRouter } from "./routes/providers";
 
+/**
+ * Accepts an origin with or without a scheme.
+ *
+ * Render's blueprint wiring (`fromService … property: host`) supplies a
+ * bare hostname, but the browser sends a full origin, so a bare value would
+ * silently never match and every request would fail CORS. Assume https for
+ * anything that isn't obviously local.
+ */
+function normalizeOrigin(value: string) {
+  if (/^https?:\/\//i.test(value)) return value;
+  const isLocal = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(value);
+  return `${isLocal ? "http" : "https"}://${value}`;
+}
+
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: process.env.CORS_ORIGIN ?? "http://localhost:5173" }));
+  const corsOrigin = normalizeOrigin(process.env.CORS_ORIGIN ?? "http://localhost:5173");
+  app.use(cors({ origin: corsOrigin }));
   app.use(express.json());
 
   app.use("/health", healthRouter);

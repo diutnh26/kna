@@ -1,6 +1,19 @@
 // Thin fetch wrapper around @kna/api. Every screen that used to read a
 // hard-coded mock array calls one of these instead.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+/**
+ * Accepts a base URL with or without a scheme. Render's blueprint wiring
+ * supplies a bare hostname, and fetch() would treat that as a relative path
+ * — every call would quietly hit the frontend's own origin and 404.
+ */
+function normalizeApiUrl(value) {
+  if (!value) return 'http://localhost:4000';
+  if (/^https?:\/\//i.test(value)) return value.replace(/\/$/, '');
+  const isLocal = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(value);
+  return `${isLocal ? 'http' : 'https'}://${value}`.replace(/\/$/, '');
+}
+
+const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL);
 
 export class ApiError extends Error {
   constructor(message, status) {

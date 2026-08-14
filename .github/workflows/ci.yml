@@ -27,6 +27,7 @@ jobs:
       # lockfile is maintained from Linux (e.g. matching prod hosting).
       - run: rm -f package-lock.json && npm install
       - run: npm run lint:web
+      - run: npm run test:web
       - run: npm run build:web
 
   api:

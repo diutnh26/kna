@@ -1,10 +1,10 @@
-// Seeds the local dev DB with the same households, listings, products, and
+// Seeds the dev database with the same households, listings, products, and
 // governance records the frontend's mock arrays used to hard-code — so a
 // screen switching from its mock array to a fetch() doesn't change what's
 // on screen.
 //
-// This resets the demo tables first, so `npm run db:seed` is reproducible.
-// Fine for local development; it is not something to point at a real database.
+// THIS DELETES EVERY ROW IN EVERY TABLE before inserting. See assertSafe()
+// below for the conditions under which it will agree to run.
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -13,6 +13,59 @@ import { splitBooking, splitOrder } from "../src/lib/fees";
 const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = "changeme123";
+
+/**
+ * Refuses to wipe anything that doesn't look like a development database.
+ *
+ * A comment saying "don't point this at production" is worth nothing at
+ * 2am with the wrong terminal focused. This platform's whole argument is a
+ * ledger the community can audit; one careless `npm run db:seed` against
+ * the deployed database would erase every booking and every Community Fund
+ * record, and there is no undo.
+ *
+ * Escape hatch for the rare legitimate case (reseeding a shared staging
+ * database): SEED_ALLOW_DESTRUCTIVE=yes.
+ */
+function assertSafe() {
+  if (process.env.SEED_ALLOW_DESTRUCTIVE === "yes") {
+    console.warn("SEED_ALLOW_DESTRUCTIVE=yes — proceeding against a non-development database.");
+    return;
+  }
+
+  const url = process.env.DATABASE_URL ?? "";
+  const problems: string[] = [];
+
+  if (process.env.NODE_ENV === "production") {
+    problems.push("NODE_ENV is production.");
+  }
+
+  // Name-based check, deliberately conservative: the database must say it
+  // is for development or testing.
+  const dbName = /(?:^|;)\s*database=([^;]+)/i.exec(url)?.[1]?.trim() ?? "";
+  if (!/(dev|test|local)/i.test(dbName)) {
+    problems.push(
+      `the database is named "${dbName || "(not found in DATABASE_URL)"}", ` +
+        'which does not contain "dev", "test" or "local".'
+    );
+  }
+
+  // A remote host is not somewhere to run a destructive script by accident.
+  const host = /^sqlserver:\/\/([^;:]+)/i.exec(url)?.[1]?.trim().toLowerCase() ?? "";
+  const isLocal = host === "localhost" || host === "127.0.0.1" || host === "." || host === "(local)";
+  if (!isLocal) {
+    problems.push(`the host is "${host || "(not found)"}", which is not local.`);
+  }
+
+  if (problems.length > 0) {
+    console.error(
+      "\nRefusing to seed — this would DELETE EVERY ROW, and:\n" +
+        problems.map((p) => `  - ${p}`).join("\n") +
+        "\n\nIf you are certain (e.g. reseeding a staging database), re-run with\n" +
+        "SEED_ALLOW_DESTRUCTIVE=yes\n"
+    );
+    process.exit(1);
+  }
+}
 
 async function reset() {
   // Delete in foreign-key-safe order (children before parents).
@@ -54,6 +107,7 @@ async function createProvider(opts: {
 }
 
 async function main() {
+  assertSafe();
   console.log("Seeding KNĂ dev database…");
   await reset();
 

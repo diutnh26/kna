@@ -1,0 +1,77 @@
+# Render Blueprint — staging for KNĂ.
+#
+# Deploys the frontend and the API. It does NOT define a database, on
+# purpose: Render offers only Postgres and Redis, and this project runs on
+# SQL Server (see apps/api/README.md for why that is not a preference).
+# Provision the database separately — Azure SQL's free offer is the
+# recommended pairing — and set DATABASE_URL in the Render dashboard.
+#
+# Full walkthrough: docs/deployment.md
+
+services:
+  # ── API ────────────────────────────────────────────────────────────
+  - type: web
+    name: kna-api
+    runtime: node
+    plan: free
+    region: singapore # closest Render region to Đắk Lắk
+    rootDir: .
+    buildCommand: npm install && npm run db:generate && npm run build:api
+    # Applies pending migrations before the new version takes traffic, and
+    # aborts the deploy if one fails.
+    preDeployCommand: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+    startCommand: node apps/api/dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PAYMENT_PROVIDER
+        value: manual
+      # Set in the dashboard — never committed.
+      #   DATABASE_URL: the Azure SQL connection string
+      #   JWT_SECRET:   32+ chars; `openssl rand -base64 48`
+      # The API refuses to start if either is missing or weak
+      # (apps/api/src/lib/config.ts).
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      # Points at the static site below, so the two cannot drift apart.
+      - key: CORS_ORIGIN
+        fromService:
+          type: web
+          name: kna-web
+          property: host
+
+  # ── Frontend ───────────────────────────────────────────────────────
+  - type: web
+    name: kna-web
+    runtime: static
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm run build:web
+    staticPublishPath: apps/web/dist
+    envVars:
+      # Baked in at build time by Vite, so a change here needs a rebuild,
+      # not just a restart.
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: kna-api
+          property: host
+    routes:
+      # The app uses a hash router today, so every path serves index.html.
+      # Harmless now, and correct already if it moves to real URLs.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
