@@ -47,6 +47,11 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        # Pinned, not a range. `engines: ">=22"` let Render resolve to Node
+        # 26, which broke the build — local and CI both run 24. A runtime
+        # nobody develops or tests against is not a runtime to deploy on.
+        value: "24"
       - key: PAYMENT_PROVIDER
         value: manual
       # Set in the dashboard — never committed.
@@ -81,6 +86,8 @@ services:
     buildCommand: rm -f package-lock.json && npm install && npm run build:web
     staticPublishPath: apps/web/dist
     envVars:
+      - key: NODE_VERSION
+        value: "24"
       # Baked in at build time by Vite, so a change here needs a rebuild,
       # not just a restart.
       - key: VITE_API_URL
