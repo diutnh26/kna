@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "description": "KNĂ — community-owned circular tourism ecosystem. Monorepo: apps/web (React/Vite) + apps/api (Express/Prisma).",
+  "engines": {
+    "node": ">=22"
+  },
   "workspaces": [
     "apps/*"
   ],
