@@ -32,7 +32,14 @@ jobs:
       - run: rm -f package-lock.json && npm install
       - run: npm run lint:web
       - run: npm run test:web
+      # `vite build` implies production mode, so the VITE_API_URL guard in
+      # apps/web/vite.config.js applies here as much as on Render. This job
+      # only asks "does it compile", but there is no build that legitimately
+      # has no API to point at — so give it the real one rather than
+      # weakening the guard.
       - run: npm run build:web
+        env:
+          VITE_API_URL: https://kna-api.onrender.com
 
   api:
     name: api — typecheck, migrate & test
