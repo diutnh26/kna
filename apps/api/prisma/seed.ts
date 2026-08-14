@@ -26,6 +26,26 @@ const DEMO_PASSWORD = "changeme123";
  * Escape hatch for the rare legitimate case (reseeding a shared staging
  * database): SEED_ALLOW_DESTRUCTIVE=yes.
  */
+/** Host and database name from either URL style, '' for anything unreadable. */
+function parseDatabaseUrl(url: string): { host: string; dbName: string } {
+  if (/^postgres(ql)?:\/\//i.test(url)) {
+    try {
+      const parsed = new URL(url);
+      return {
+        host: parsed.hostname.toLowerCase(),
+        dbName: decodeURIComponent(parsed.pathname.replace(/^\//, "")),
+      };
+    } catch {
+      return { host: "", dbName: "" };
+    }
+  }
+  // sqlserver://host:port;database=name;...
+  return {
+    host: (/^sqlserver:\/\/([^;:]+)/i.exec(url)?.[1] ?? "").trim().toLowerCase(),
+    dbName: (/(?:^|;)\s*database=([^;]+)/i.exec(url)?.[1] ?? "").trim(),
+  };
+}
+
 function assertSafe() {
   if (process.env.SEED_ALLOW_DESTRUCTIVE === "yes") {
     console.warn("SEED_ALLOW_DESTRUCTIVE=yes — proceeding against a non-development database.");
@@ -39,21 +59,25 @@ function assertSafe() {
     problems.push("NODE_ENV is production.");
   }
 
+  // Parses postgresql:// URLs, and still understands the sqlserver://
+  // key=value form in case a branch or an old .env is still on it. A URL
+  // this cannot parse yields empty values, which fail both checks below —
+  // failing closed is the whole point of this function.
+  const { host, dbName } = parseDatabaseUrl(url);
+
   // Name-based check, deliberately conservative: the database must say it
   // is for development or testing.
-  const dbName = /(?:^|;)\s*database=([^;]+)/i.exec(url)?.[1]?.trim() ?? "";
   if (!/(dev|test|local)/i.test(dbName)) {
     problems.push(
-      `the database is named "${dbName || "(not found in DATABASE_URL)"}", ` +
+      `the database is named "${dbName || "(could not be read from DATABASE_URL)"}", ` +
         'which does not contain "dev", "test" or "local".'
     );
   }
 
   // A remote host is not somewhere to run a destructive script by accident.
-  const host = /^sqlserver:\/\/([^;:]+)/i.exec(url)?.[1]?.trim().toLowerCase() ?? "";
-  const isLocal = host === "localhost" || host === "127.0.0.1" || host === "." || host === "(local)";
+  const isLocal = ["localhost", "127.0.0.1", "::1", ".", "(local)"].includes(host);
   if (!isLocal) {
-    problems.push(`the host is "${host || "(not found)"}", which is not local.`);
+    problems.push(`the host is "${host || "(could not be read)"}", which is not local.`);
   }
 
   if (problems.length > 0) {

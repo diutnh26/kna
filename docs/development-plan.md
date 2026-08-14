@@ -61,7 +61,8 @@ account. When that exists: add one file next to `gateway.ts` and set
 - Media (audio, 360° tours, photo essays) has no storage or pipeline
 - Privacy policy, terms, and a contact route need writing (their footer
   links were removed rather than left pointing at nothing)
-- Frontend has no automated tests; the API has 40
+- No automated end-to-end tests; 40 API tests and 25 frontend tests exist,
+  but nobody has driven the deployed app in a browser end to end
 
 ### Exit gate (all four required — none met, none can be met by code)
 
@@ -84,7 +85,7 @@ the Beachhead matrix (§5.7), and real providers onboarded.
 ## Phase 3 — Controlled scale (gated by Phase 2)
 
 - Replication tooling for new buôn (same schema, new tenant, not a new codebase)
-- ESG reporting product (Power BI over Azure SQL)
+- ESG reporting product (Power BI over Postgres — see the note below)
 - White-label / other-province expansion — scoped, not built, until Phase 3 revenue funds it
 
 ## Explicitly not in Phase 1
@@ -92,3 +93,25 @@ the Beachhead matrix (§5.7), and real providers onboarded.
 Blockchain settlement · AI assistant (any form) · carbon tracker (any form) ·
 dynamic pricing · white-label · on-platform committee voting · digital
 certificates of authenticity.
+
+## Database engine — decision changed
+
+The dossier specifies Azure SQL, chosen partly for the team's T-SQL and
+Power BI skills. **The implementation runs on PostgreSQL instead**, because
+no SQL Server host is free without credit-card verification, and the pilot
+needs a deployed environment more than it needs a specific engine.
+
+What this does and doesn't affect:
+
+- **Power BI is unaffected** — it has a native PostgreSQL connector, so the
+  Phase 3 ESG reporting product still works as described.
+- **T-SQL skills are less directly used.** Almost all database access goes
+  through Prisma in TypeScript; the only hand-written SQL in the repo is the
+  CHECK-constraint and partial-index migrations.
+- **The business plan wording should be updated** before the next
+  submission so it matches what is deployed.
+
+The project briefly ran on SQL Server, and that was not wasted: it exposed
+three real defects SQLite had hidden, the most serious being a nullable
+`UNIQUE` that would have failed the second marketplace order in production.
+Those fixes are engine-independent and remain in place.

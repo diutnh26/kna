@@ -16,18 +16,17 @@ plan this repo follows (Phase 0 → Phase 3).
 
 ## Getting started
 
-Requires a **SQL Server** instance on `localhost:1433` — see
-[`apps/api/README.md`](apps/api/README.md) for setup, including a Docker
-one-liner if you don't have one.
+Requires **PostgreSQL** on `localhost:5432` — see
+[`apps/api/README.md`](apps/api/README.md) for setup.
 
 ```bash
-CREATE DATABASE kna_dev; CREATE DATABASE kna_test;   -- once, in SQL Server
+createdb kna_dev && createdb kna_test        # once
 
 cp apps/api/.env.example apps/api/.env
 npm install           # installs both workspaces
 npm run db:generate   # generate the Prisma client
 npm run db:migrate    # apply migrations
-npm run db:seed       # load demo data (wipes kna_dev)
+npm run db:seed       # load demo data (wipes kna_dev; refuses non-local targets)
 npm run dev:api       # http://localhost:4000
 npm run dev:web       # http://localhost:5173, in a second terminal
 ```
@@ -42,7 +41,7 @@ The frontend (`apps/web`) is the existing prototype, moved as-is — same
 components, same design system, no rewrite. `apps/api` is a small
 Express + Prisma service that Phase 1 wired the frontend's mock arrays up to.
 
-Both development and production run on SQL Server (Azure SQL in staging and
-production), so the two agree on constraint behaviour. Development briefly
-ran on SQLite; that was dropped after it hid three provider-specific
-defects — see the "Why not SQLite" section in `apps/api/README.md`.
+Development, CI and production all run on PostgreSQL (Neon in staging and
+production), so they agree on constraint behaviour. Development previously
+ran on SQLite and then SQL Server; the history and why it matters are in
+the "One engine everywhere" section of `apps/api/README.md`.
