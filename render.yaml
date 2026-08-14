@@ -25,7 +25,23 @@ services:
     # the database is briefly ahead of the running code. Harmless for
     # additive migrations; for a destructive one, apply it by hand first and
     # deploy afterwards.
-    buildCommand: npm install && npm run db:generate && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+    #
+    # ── and ──
+    #
+    # `rm -f package-lock.json` before installing, deliberately.
+    #
+    # The committed lockfile is generated on Windows and records only
+    # @rolldown/binding-win32-x64-msvc — npm writes just the optional
+    # dependency it actually installed (npm/cli#4828). On a Linux builder
+    # npm then honours the lockfile, skips the linux binding, and `vite
+    # build` fails with "Cannot find native binding". Removing the lockfile
+    # forces a real resolve for the platform being built on.
+    #
+    # This costs install reproducibility. The proper fix is to maintain the
+    # lockfile from Linux (matching this host) or move to a package manager
+    # that records every platform. CI does the same thing for the same
+    # reason — see .github/workflows/ci.yml.
+    buildCommand: rm -f package-lock.json && npm install && npm run db:generate && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
     startCommand: node apps/api/dist/index.js
     healthCheckPath: /health
     envVars:
@@ -60,7 +76,9 @@ services:
     name: kna-web
     runtime: static
     rootDir: .
-    buildCommand: npm install && npm run build:web
+    # Same lockfile workaround as the API above — this is the build that
+    # actually needs the linux rolldown binding.
+    buildCommand: rm -f package-lock.json && npm install && npm run build:web
     staticPublishPath: apps/web/dist
     envVars:
       # Baked in at build time by Vite, so a change here needs a rebuild,
