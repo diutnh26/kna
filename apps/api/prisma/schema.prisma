@@ -40,6 +40,11 @@ model User {
   fullName     String
   role         String   @default("GUEST")
   locale       String   @default("en") // "en" | "vi"
+  // Bumped whenever authority changes or the account signs out everywhere.
+  // A token carrying a stale version is rejected, which is what makes
+  // withdrawing a seat or a coordinator role take effect now rather than
+  // whenever the seven-day token happens to expire.
+  tokenVersion Int      @default(0)
   createdAt    DateTime @default(now())
 
   provider      Provider?

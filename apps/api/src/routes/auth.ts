@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
-import { requireAuth, signToken, type AuthedRequest } from "../middleware/auth";
+import { requireAuth, revokeSessions, signToken, type AuthedRequest } from "../middleware/auth";
 
 export const authRouter = Router();
 
@@ -77,7 +77,7 @@ authRouter.post("/signup", credentialLimiter, async (req, res) => {
     data: { email, passwordHash, fullName, role: "GUEST", locale },
   });
 
-  const token = signToken({ id: user.id, role: user.role });
+  const token = signToken({ id: user.id, role: user.role, tokenVersion: user.tokenVersion });
   res.status(201).json({ token, user: await describeUser(user.id) });
 });
 
@@ -99,7 +99,7 @@ authRouter.post("/login", credentialLimiter, async (req, res) => {
     return res.status(401).json({ error: "Incorrect email or password." });
   }
 
-  const token = signToken({ id: user.id, role: user.role });
+  const token = signToken({ id: user.id, role: user.role, tokenVersion: user.tokenVersion });
   res.json({ token, user: await describeUser(user.id) });
 });
 
@@ -114,4 +114,20 @@ authRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
   } catch {
     res.status(401).json({ error: "That account no longer exists." });
   }
+});
+
+/**
+ * Ends every session for this account, including the one making the call.
+ *
+ * There was previously no way to invalidate a token at all: a leaked one
+ * stayed valid for its full seven days with nothing anyone could do. This
+ * is the answer to "a token got out" — and to a shared screenshot.
+ *
+ * Any future route that grants or withdraws a Committee seat, changes a
+ * role, or resets a password should call revokeSessions() for the same
+ * reason: the change should bind now, not whenever the old token expires.
+ */
+authRouter.post("/sign-out-everywhere", requireAuth, async (req: AuthedRequest, res) => {
+  await revokeSessions(req.user!.id);
+  res.json({ ok: true });
 });

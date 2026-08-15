@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
+import { splitOrder } from "../lib/fees";
 
 export const providersRouter = Router();
 
@@ -55,7 +56,11 @@ providersRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
     (i) => i.order.status === "PAID" || i.order.status === "FULFILLED"
   );
   const marketplaceGrossVnd = paidItems.reduce((sum, i) => sum + i.unitPriceVnd * i.quantity, 0);
-  const marketplaceEarnedVnd = Math.round(marketplaceGrossVnd * 0.95);
+  // Via splitOrder, not a second copy of 0.95. The rate agreed at realistic
+  // amounts, so this was never a live discrepancy — but a rate written down
+  // twice is one edit away from the household's dashboard disagreeing with
+  // the public ledger, which is the one thing fees.ts exists to prevent.
+  const marketplaceEarnedVnd = splitOrder(marketplaceGrossVnd).artisanPayoutVnd;
 
   res.json({
     provider: {
@@ -86,7 +91,7 @@ providersRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
       productTitle: i.product.title,
       quantity: i.quantity,
       grossVnd: i.unitPriceVnd * i.quantity,
-      earnedVnd: Math.round(i.unitPriceVnd * i.quantity * 0.95),
+      earnedVnd: splitOrder(i.unitPriceVnd * i.quantity).artisanPayoutVnd,
       status: i.order.status,
       createdAt: i.order.createdAt,
     })),

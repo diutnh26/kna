@@ -201,4 +201,71 @@ describe("archive moderation gate", () => {
       "Someone else's listing"
     );
   });
+
+  // ── Revocation ─────────────────────────────────────────────────────
+  // The JWT used to carry `role` and be trusted for it, for seven days.
+  // Demoting someone left their token working; a leaked token could not be
+  // invalidated at all.
+
+  describe("withdrawing authority", () => {
+    it("stops honouring a role the account no longer has", async () => {
+      const email = "demote@authz.kna";
+      await makeUser(email, "COORDINATOR");
+      const token = (
+        await request(app).post("/auth/login").send({ email, password: PASSWORD })
+      ).body.token;
+
+      // The token works while the role holds.
+      expect(
+        (await request(app).get("/bookings/pending").set("Authorization", `Bearer ${token}`)).status
+      ).toBe(200);
+
+      await prisma.user.update({ where: { email }, data: { role: "GUEST" } });
+
+      // Same token, same seven-day expiry — but the role is re-read.
+      expect(
+        (await request(app).get("/bookings/pending").set("Authorization", `Bearer ${token}`)).status
+      ).toBe(403);
+    });
+
+    it("invalidates every existing token on sign-out-everywhere", async () => {
+      const email = "revoke@authz.kna";
+      await makeUser(email, "GUEST");
+      const login = async () =>
+        (await request(app).post("/auth/login").send({ email, password: PASSWORD })).body.token;
+
+      const phone = await login();
+      const laptop = await login();
+
+      expect((await request(app).get("/auth/me").set("Authorization", `Bearer ${phone}`)).status).toBe(200);
+
+      await request(app)
+        .post("/auth/sign-out-everywhere")
+        .set("Authorization", `Bearer ${laptop}`)
+        .expect(200);
+
+      // Both devices, not just the one that asked.
+      for (const token of [phone, laptop]) {
+        const res = await request(app).get("/auth/me").set("Authorization", `Bearer ${token}`);
+        expect(res.status).toBe(401);
+      }
+
+      // And a fresh sign-in still works.
+      expect((await request(app).get("/auth/me").set("Authorization", `Bearer ${await login()}`)).status).toBe(200);
+    });
+
+    it("rejects a token for an account that has been deleted", async () => {
+      const email = "ghost@authz.kna";
+      await makeUser(email, "GUEST");
+      const token = (
+        await request(app).post("/auth/login").send({ email, password: PASSWORD })
+      ).body.token;
+
+      await prisma.user.delete({ where: { email } });
+
+      const res = await request(app).get("/auth/me").set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(401);
+    });
+  });
+
 });
