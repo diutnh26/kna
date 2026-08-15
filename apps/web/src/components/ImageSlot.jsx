@@ -1,4 +1,5 @@
 import { Image } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Placeholder for a photograph that has not been sourced yet.
@@ -11,11 +12,12 @@ import { Image } from 'lucide-react';
  *   className — extra classes passed through to the wrapper.
  */
 export default function ImageSlot({
-  label = 'Image',
+  label,
   ratio = 'aspect-[4/3]',
   theme = 'dark',
   className = '',
 }) {
+  const { t } = useTranslation();
   const isDark = theme === 'dark';
 
   const border = isDark ? 'border-[#F5EDDD]/20' : 'border-[#1A1614]/20';
@@ -29,7 +31,7 @@ export default function ImageSlot({
     >
       <Image className={`w-5 h-5 ${icon}`} strokeWidth={1.5} />
       <p className={`text-xs ${text} text-center leading-relaxed max-w-[22ch]`}>
-        {label}
+        {label ?? t('imageSlot.fallback')}
       </p>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Gavel,
@@ -17,44 +18,23 @@ import { api } from '../lib/api';
 import ApiErrorNotice from './ApiErrorNotice';
 
 // Illustrative only — the provider board is not built. See the note
-// rendered above these cards; they are examples of what hosts would use
-// it for, not posts anyone has made.
-const EXAMPLE_THREADS = [
-  {
-    author: 'A guide',
-    role: 'Buôn Đôn',
-    title: 'Forest walk moving to earlier starts from June',
-    body:
-      'The heat after ten is too much for guests and for me. Walks will start at six thirty from 1 June until the rains. Please update your listings if you run the same route.',
-  },
-  {
-    author: 'A weaver',
-    role: 'Buôn Kli A',
-    title: 'Indigo supply is short this season',
-    body:
-      'The dye plot flooded in April. I have enough for maybe four more pieces. If anyone in Trấp has surplus leaf I will trade rattan for it.',
-  },
-  {
-    author: 'A host',
-    role: 'Buôn Trấp',
-    title: 'Guests keep asking to help with cooking',
-    body:
-      'Is anyone else finding this? I do not mind but the kitchen is small. Wondering whether we should add it as a listed activity rather than let it happen by accident.',
-  },
-];
-
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 
 const dmy = (iso) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-const STATUS = {
-  passed: { icon: Check, label: 'Passed', cls: 'text-[#E8A33D] border-[#E8A33D]/40' },
-  declined: { icon: X, label: 'Declined', cls: 'text-[#C8302E] border-[#C8302E]/50' },
-  open: { icon: Clock, label: 'Open', cls: 'text-[#B87333] border-[#B87333]/40' },
-};
 
 export default function Community() {
+  const { t } = useTranslation();
+  // Built from t() rather than a module constant, so these follow the
+  // language toggle instead of freezing at import time.
+  const STATUS = {
+    passed: { icon: Check, label: t('community.statusPassed'), cls: 'text-[#E8A33D] border-[#E8A33D]/40' },
+    declined: { icon: X, label: t('community.statusDeclined'), cls: 'text-[#C8302E] border-[#C8302E]/50' },
+    open: { icon: Clock, label: t('community.statusOpen'), cls: 'text-[#B87333] border-[#B87333]/40' },
+  };
+  const exampleThreads = t('community.threads', { returnObjects: true });
+  const feedbackNotes = t('community.feedbackNotes', { returnObjects: true });
   const [committee, setCommittee] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [decisions, setDecisions] = useState([]);
@@ -92,15 +72,13 @@ export default function Community() {
         <div className="md:col-span-7">
           <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
             <span className="h-px w-12 bg-[#B87333]" />
-            <span>Community space</span>
+            <span>{t('community.eyebrow')}</span>
           </div>
           <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
-            The decisions are made here, in the open.
+            {t('community.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
-            Representatives from the onboarded buôn govern what is published, what the Community
-            Fund pays for, and who may list on the platform. Minutes and allocations are public,
-            including the decisions that went against the platform.
+            {t('community.intro')}
           </p>
         </div>
 
@@ -110,15 +88,15 @@ export default function Community() {
               <div className="font-display text-4xl font-medium text-[#B87333]">
                 {stats ? stats.committeeMembers : '—'}
               </div>
-              <p className="text-sm text-[#F5EDDD]/60">committee members, all Ê Đê</p>
+              <p className="text-sm text-[#F5EDDD]/60">{t('community.statMembers')}</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">Monthly</div>
-              <p className="text-sm text-[#F5EDDD]/60">meetings, minutes published within a week</p>
+              <div className="font-display text-4xl font-medium text-[#B87333]">{t('community.statMonthly')}</div>
+              <p className="text-sm text-[#F5EDDD]/60">{t('community.statMeetings')}</p>
             </div>
             <div>
               <div className="font-display text-4xl font-medium text-[#B87333]">0</div>
-              <p className="text-sm text-[#F5EDDD]/60">KNĂ staff with a vote</p>
+              <p className="text-sm text-[#F5EDDD]/60">{t('community.statNoVote')}</p>
             </div>
           </div>
         </div>
@@ -139,15 +117,14 @@ export default function Community() {
                 <div className="max-w-xl">
                   <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
                     <Gavel className="w-4 h-4" />
-                    Community Governance Committee
+                    {t('community.committeeEyebrow')}
                   </div>
                   <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
-                    Named people, not a board of advisors.
+                    {t('community.committeeHeading')}
                   </h2>
                 </div>
                 <p className="text-sm text-[#1A1614]/60 max-w-sm leading-relaxed">
-                  Members are nominated by their own buôn and serve one-year terms. KNĂ attends
-                  meetings to answer questions and has no vote.
+                  {t('community.committeeBody')}
                 </p>
               </div>
 
@@ -157,7 +134,7 @@ export default function Community() {
                     <ImageSlot
                       theme="light"
                       ratio="aspect-square"
-                      label="Portrait"
+                      label={t('community.portrait')}
                       className="w-24 shrink-0"
                     />
                     <div className="pt-1">
@@ -167,7 +144,7 @@ export default function Community() {
                         <MapPin className="w-3 h-3" />
                         {m.buon}
                       </p>
-                      <p className="text-xs text-[#1A1614]/40 mt-1">Serving since {m.since}</p>
+                      <p className="text-xs text-[#1A1614]/40 mt-1">{t('community.servingSince', { date: m.since })}</p>
                     </div>
                   </article>
                 ))}
@@ -181,14 +158,13 @@ export default function Community() {
               <div className="max-w-xl">
                 <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
                   <Wallet className="w-4 h-4" />
-                  Community Fund
+                  {t('community.fundEyebrow')}
                 </div>
                 <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight mb-6">
-                  Three percent of every booking, spent line by line.
+                  {t('community.fundHeading')}
                 </h2>
                 <p className="text-lg text-[#F5EDDD]/70 leading-relaxed">
-                  The Fund is a pass-through, not platform revenue. The Committee decides what it
-                  pays for and publishes the allocation each quarter.
+                  {t('community.fundBody')}
                 </p>
               </div>
 
@@ -213,7 +189,7 @@ export default function Community() {
               <div className="border border-[#F5EDDD]/15">
                 <div className="px-8 py-6 border-b border-[#F5EDDD]/10 flex flex-wrap items-baseline justify-between gap-4">
                   <span className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD]/40">
-                    Allocated in {fund.quarter}
+                    {t('community.fundAllocated', { quarter: fund.quarter })}
                   </span>
                   <span className="font-display text-3xl text-[#E8A33D]">{vnd(fund.totalVnd)}</span>
                 </div>
@@ -253,14 +229,13 @@ export default function Community() {
               <div className="max-w-2xl mb-14">
                 <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
                   <FileText className="w-4 h-4" />
-                  Minutes
+                  {t('community.minutesEyebrow')}
                 </div>
                 <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-6">
-                  Including the ones that said no.
+                  {t('community.minutesHeading')}
                 </h2>
                 <p className="text-lg text-[#1A1614]/70 leading-relaxed">
-                  A governance record that only contains approvals is not a governance record.
-                  Refusals are published with the same detail as decisions that passed.
+                  {t('community.minutesBody')}
                 </p>
               </div>
 
@@ -301,39 +276,37 @@ export default function Community() {
           <div className="max-w-xl">
             <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
               <MessageSquare className="w-4 h-4" />
-              Provider board
+              {t('community.boardEyebrow')}
             </div>
             <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight">
-              Hosts talking to hosts.
+              {t('community.boardHeading')}
             </h2>
           </div>
           <p className="text-sm text-[#F5EDDD]/50 max-w-sm leading-relaxed">
-            Planned to be readable by anyone, with posting limited to verified providers and
-            Committee members.
+            {t('community.boardBody')}
           </p>
         </div>
 
         <div className="border border-[#B87333]/40 bg-[#B87333]/5 px-6 py-4 mb-10">
           <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
-            <span className="text-[#B87333] uppercase tracking-wider text-xs">Not yet built · </span>
-            The board is on the roadmap and nobody has posted to it. The cards below are examples of
-            what hosts told us they would use it for.
+            <span className="text-[#B87333] uppercase tracking-wider text-xs">{t('community.boardNotBuiltLabel')}</span>
+            {t('community.boardNotBuiltBody')}
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 opacity-60">
-          {EXAMPLE_THREADS.map((t) => (
-            <article key={t.title} className="border border-dashed border-[#F5EDDD]/15 p-6 flex flex-col">
+          {exampleThreads.map((thread) => (
+            <article key={thread.title} className="border border-dashed border-[#F5EDDD]/15 p-6 flex flex-col">
               <div className="flex items-center gap-3 mb-5">
                 <ImageSlot ratio="aspect-square" label="" className="w-9 shrink-0 p-0" />
                 <div className="min-w-0">
-                  <div className="text-sm truncate">{t.author}</div>
-                  <div className="text-[11px] text-[#F5EDDD]/45 truncate">{t.role}</div>
+                  <div className="text-sm truncate">{thread.author}</div>
+                  <div className="text-[11px] text-[#F5EDDD]/45 truncate">{thread.role}</div>
                 </div>
               </div>
 
-              <h3 className="font-display text-lg font-medium leading-tight mb-3">{t.title}</h3>
-              <p className="text-sm text-[#F5EDDD]/60 leading-relaxed flex-1">{t.body}</p>
+              <h3 className="font-display text-lg font-medium leading-tight mb-3">{thread.title}</h3>
+              <p className="text-sm text-[#F5EDDD]/60 leading-relaxed flex-1">{thread.body}</p>
             </article>
           ))}
         </div>
@@ -345,28 +318,18 @@ export default function Community() {
           <div className="md:col-span-6">
             <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
               <Megaphone className="w-4 h-4" />
-              After your stay
+              {t('community.feedbackEyebrow')}
             </div>
             <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-6">
-              Your feedback goes to the Committee, not to a ratings algorithm.
+              {t('community.feedbackHeading')}
             </h2>
             <p className="text-lg text-[#1A1614]/70 leading-relaxed">
-              There are no star ratings on KNĂ. Comments are read at the monthly meeting and, where
-              they concern a host, shared with that household first.
+              {t('community.feedbackBody')}
             </p>
           </div>
 
           <div className="md:col-span-6 grid sm:grid-cols-2 gap-8">
-            {[
-              {
-                h: 'Why no stars',
-                b: 'A four out of five on a family home is a judgement on a household, published permanently. Written comments carry the same information without that cost.',
-              },
-              {
-                h: 'What happens to a complaint',
-                b: 'It goes to the host and to the Committee together. Serious or repeated issues can suspend a listing, and that decision appears in the minutes.',
-              },
-            ].map((n) => (
+            {feedbackNotes.map((n) => (
               <div key={n.h}>
                 <h3 className="font-display text-lg font-medium mb-2 text-[#B87333]">{n.h}</h3>
                 <p className="text-sm text-[#1A1614]/65 leading-relaxed">{n.b}</p>
@@ -382,17 +345,17 @@ export default function Community() {
       <section className="px-8 lg:px-12 xl:px-16 py-20 flex flex-wrap items-center justify-between gap-8">
         <div className="max-w-xl">
           <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
-            That is the whole of it.
+            {t('community.closingHeading')}
           </h2>
           <p className="text-[#F5EDDD]/70">
-            The archive, the experiences, the marketplace, the ledger, and the people who decide.
+            {t('community.closingBody')}
           </p>
         </div>
         <a
           href="#home"
           className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
         >
-          Back to the beginning
+          {t('community.closingCta')}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
         </a>
       </section>

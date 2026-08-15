@@ -30,13 +30,39 @@ describe('locales', () => {
     expect(viKeys.filter((k) => !enKeys.includes(k))).toEqual([]);
   });
 
-  it('covers the screens the community operates, not only the visitor-facing ones', () => {
-    // Dashboard is where a household reads its own earnings; Review is the
-    // Committee's console. Both were English-only while the landing page
-    // and navbar were translated.
-    for (const section of ['dashboard', 'review', 'nav', 'auth', 'landing']) {
-      expect(Object.keys(vi[section] ?? {}).length).toBeGreaterThan(0);
+  it('covers every screen, not just the visitor-facing ones', () => {
+    // The landing page and navbar were translated long before anything
+    // else, which made the app look bilingual while every actual feature
+    // stayed in English. This is the list that stops that recurring: one
+    // section per screen, all of them.
+    const sections = [
+      'nav', 'auth', 'landing',
+      'explore', 'travel', 'marketplace', 'community', 'assistant', 'carbon',
+      'dashboard', 'review',
+      'demo', 'apiError', 'imageSlot',
+    ];
+    for (const section of sections) {
+      expect(Object.keys(vi[section] ?? {}).length, `vi.${section} is missing`).toBeGreaterThan(0);
+      expect(Object.keys(en[section] ?? {}).length, `en.${section} is missing`).toBeGreaterThan(0);
     }
+  });
+
+  it('keeps array-shaped content the same length in both languages', () => {
+    // Several screens render arrays straight out of the locale files
+    // (pillars, prompts, guardrails, offset projects). A short array in one
+    // language silently drops cards from the page rather than erroring.
+    const walk = (a, b, path = '') => {
+      for (const [k, v] of Object.entries(a)) {
+        const other = b?.[k];
+        if (Array.isArray(v)) {
+          expect(Array.isArray(other), `${path}${k} is not an array in vi`).toBe(true);
+          expect(other.length, `${path}${k} length differs`).toBe(v.length);
+        } else if (v && typeof v === 'object') {
+          walk(v, other ?? {}, `${path}${k}.`);
+        }
+      }
+    };
+    walk(en, vi);
   });
 
   it('has no Vietnamese value left as its English original', () => {

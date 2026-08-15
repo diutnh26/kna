@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Plane,
@@ -19,59 +20,40 @@ import ImageSlot from './ImageSlot';
    before publication.
    ─────────────────────────────────────────────── */
 
+// The factors are data and stay here; only the label a visitor reads is
+// translated, keyed by id so the two cannot drift apart.
 const ORIGINS = [
-  { id: 'hcmc', label: 'Ho Chi Minh City', flight: 150, coach: 45, car: 95 },
-  { id: 'hanoi', label: 'Hanoi', flight: 290, coach: 130, car: 210 },
-  { id: 'danang', label: 'Đà Nẵng', flight: 130, coach: 60, car: 90 },
-  { id: 'asia', label: 'Elsewhere in Asia', flight: 620, coach: null, car: null },
-  { id: 'europe', label: 'Europe', flight: 2400, coach: null, car: null },
+  { id: 'hcmc', labelKey: 'carbon.originHcmc', flight: 150, coach: 45, car: 95 },
+  { id: 'hanoi', labelKey: 'carbon.originHanoi', flight: 290, coach: 130, car: 210 },
+  { id: 'danang', labelKey: 'carbon.originDanang', flight: 130, coach: 60, car: 90 },
+  { id: 'asia', labelKey: 'carbon.originAsia', flight: 620, coach: null, car: null },
+  { id: 'europe', labelKey: 'carbon.originEurope', flight: 2400, coach: null, car: null },
 ];
 
 const MODES = [
-  { id: 'flight', label: 'Flight', icon: Plane },
-  { id: 'coach', label: 'Coach', icon: Bus },
-  { id: 'car', label: 'Car', icon: Car },
+  { id: 'flight', labelKey: 'carbon.modeFlight', icon: Plane },
+  { id: 'coach', labelKey: 'carbon.modeCoach', icon: Bus },
+  { id: 'car', labelKey: 'carbon.modeCar', icon: Car },
 ];
 
 const PER_NIGHT = 4; // homestay, no air conditioning
 const PER_DAY_LOCAL = 3; // ground travel between buôn
 
-const PROJECTS = [
-  {
-    id: 'yokdon',
-    name: 'Yok Đôn buffer replanting',
-    led: 'Buôn Đôn households',
-    rate: 1100,
-    unit: 'native saplings, tended for three years',
-    body:
-      'Degraded buffer land on the park edge, replanted with dipterocarp and tended by the households that farm beside it. Survival is counted annually, not at planting.',
-    joinable: true,
-  },
-  {
-    id: 'lak',
-    name: 'Lắk Lake watershed planting',
-    led: 'Buôn Trấp households',
-    rate: 950,
-    unit: 'bamboo and hardwood along the shoreline',
-    body:
-      'Shoreline planting to slow erosion into the lake. Run in the wet season, when saplings take without irrigation.',
-    joinable: true,
-  },
-  {
-    id: 'corridor',
-    name: 'Elephant corridor upkeep',
-    led: 'Buôn Đôn conservation group',
-    rate: 1350,
-    unit: 'habitat clearing and fodder planting',
-    body:
-      'Supports the shift away from elephant riding by funding habitat and fodder for observation-based tourism instead.',
-    joinable: false,
-  },
-];
+const PROJECT_FACTS = {
+  yokdon: { rate: 1100, joinable: true },
+  lak: { rate: 950, joinable: true },
+  corridor: { rate: 1350, joinable: false },
+};
 
 const vnd = (n) => Math.round(n).toLocaleString('vi-VN') + ' ₫';
 
 export default function CarbonTracker() {
+  const { t } = useTranslation();
+  // Copy from the locale files, rates and joinability from PROJECT_FACTS.
+  const PROJECTS = t('carbon.projects', { returnObjects: true }).map((p) => ({
+    ...p,
+    ...PROJECT_FACTS[p.id],
+  }));
   const [origin, setOrigin] = useState('hcmc');
   const [mode, setMode] = useState('flight');
   const [nights, setNights] = useState(3);
@@ -104,14 +86,13 @@ export default function CarbonTracker() {
         <div className="md:col-span-7">
           <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
             <span className="h-px w-12 bg-[#B87333]" />
-            <span>Carbon tracker</span>
+            <span>{t('carbon.eyebrow')}</span>
           </div>
           <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
-            Getting here has a cost. Here is the number.
+            {t('carbon.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
-            Most of a trip&rsquo;s footprint is the journey, not the stay. The tracker shows the
-            split, and offset contributions fund conservation work that Ê Đê communities choose,
+            {t('carbon.intro')}
             run, and measure themselves.
           </p>
         </div>
@@ -120,11 +101,10 @@ export default function CarbonTracker() {
           <div className="border border-[#F5EDDD]/15 p-6 space-y-4">
             <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[#B87333]">
               <Users className="w-4 h-4" />
-              Community-led, not algorithm-led
+              {t('carbon.communityLedTitle')}
             </div>
             <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
-              Projects are identified by the buôn, approved by the Community Governance Committee,
-              and counted on the ground each year. KNĂ does not generate offset schemes or buy
+              {t('carbon.communityLedBody')}
               credits on your behalf.
             </p>
           </div>
@@ -139,7 +119,7 @@ export default function CarbonTracker() {
           <div className="lg:col-span-5 border border-[#F5EDDD]/15 p-8 space-y-10">
             <div>
               <label htmlFor="origin" className="block text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
-                Travelling from
+                {t('carbon.travellingFrom')}
               </label>
               <select
                 id="origin"
@@ -148,14 +128,14 @@ export default function CarbonTracker() {
                 className="w-full bg-[#1A1614] border border-[#F5EDDD]/25 px-4 py-3 text-sm focus:outline-none focus:border-[#F5EDDD]/60"
               >
                 {ORIGINS.map((o) => (
-                  <option key={o.id} value={o.id}>{o.label}</option>
+                  <option key={o.id} value={o.id}>{t(o.labelKey)}</option>
                 ))}
               </select>
             </div>
 
             <div>
               <span className="block text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
-                How you arrive
+                {t('carbon.howYouArrive')}
               </span>
               <div className="grid grid-cols-3 gap-2">
                 {MODES.map((m) => {
@@ -175,21 +155,21 @@ export default function CarbonTracker() {
                       }`}
                     >
                       <m.icon className="w-4 h-4" />
-                      {m.label}
+                      {t(m.labelKey)}
                     </button>
                   );
                 })}
               </div>
               {availableModes.length < MODES.length && (
                 <p className="text-[11px] text-[#F5EDDD]/40 mt-3">
-                  Overland options are not offered for this origin.
+                  {t('carbon.noOverland')}
                 </p>
               )}
             </div>
 
             <div>
               <label htmlFor="nights" className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
-                <span>Nights in the buôn</span>
+                <span>{t('carbon.nightsLabel')}</span>
                 <span className="font-display text-2xl text-[#E8A33D] normal-case tracking-normal">
                   {nights}
                 </span>
@@ -218,7 +198,7 @@ export default function CarbonTracker() {
           {/* Result */}
           <div className="lg:col-span-7 border border-[#F5EDDD]/15 p-8 flex flex-col">
             <div className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD]/40 mb-6">
-              Estimated footprint
+              {t('carbon.estimatedFootprint')}
             </div>
 
             <div className="flex items-baseline gap-4 mb-2">
@@ -238,9 +218,9 @@ export default function CarbonTracker() {
 
             <dl className="space-y-5 mb-10">
               {[
-                { c: 'bg-[#C8302E]', k: 'Getting to Đắk Lắk', v: breakdown.travel, i: MODES.find((m) => m.id === activeMode).icon },
-                { c: 'bg-[#B87333]', k: `Staying ${nights} ${nights === 1 ? 'night' : 'nights'}`, v: breakdown.stay, i: Moon },
-                { c: 'bg-[#E8A33D]', k: 'Moving between buôn', v: breakdown.local, i: Car },
+                { c: 'bg-[#C8302E]', k: t('carbon.rowTravel'), v: breakdown.travel, i: MODES.find((m) => m.id === activeMode).icon },
+                { c: 'bg-[#B87333]', k: t('carbon.rowStay', { count: nights }), v: breakdown.stay, i: Moon },
+                { c: 'bg-[#E8A33D]', k: t('carbon.rowLocal'), v: breakdown.local, i: Car },
               ].map((row) => (
                 <div key={row.k} className="flex items-center gap-4 border-b border-[#F5EDDD]/10 pb-4">
                   <span className={`w-2 h-2 ${row.c} shrink-0`} />
@@ -259,8 +239,7 @@ export default function CarbonTracker() {
             <div className="mt-auto flex items-start gap-3 text-xs text-[#F5EDDD]/45 leading-relaxed">
               <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#B87333]" />
               <p>
-                An estimate, not a measurement. Figures are indicative and will be replaced with a
-                verified dataset before the platform goes live.
+                {t('carbon.estimateNote')}
               </p>
             </div>
           </div>
@@ -272,15 +251,13 @@ export default function CarbonTracker() {
         <div className="px-8 lg:px-12 xl:px-16 py-24">
           <div className="max-w-2xl mb-14">
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
-              Where an offset goes
+              {t('carbon.projectsEyebrow')}
             </div>
             <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-6">
-              Three projects, all within an hour of where you will be staying.
+              {t('carbon.projectsHeading')}
             </h2>
             <p className="text-lg text-[#1A1614]/70 leading-relaxed">
-              Choose one and the contribution is routed to that project&rsquo;s account, not to a
-              general fund. On two of the three you can join the work yourself at the end of your
-              stay.
+              {t('carbon.projectsBody')}
             </p>
           </div>
 
@@ -311,7 +288,7 @@ export default function CarbonTracker() {
                       {p.joinable && (
                         <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#E8A33D]">
                           <Sprout className="w-3 h-3" />
-                          Join in
+                          {t('carbon.joinIn')}
                         </span>
                       )}
                     </div>
@@ -334,14 +311,13 @@ export default function CarbonTracker() {
           <div className="bg-[#1A1614] text-[#F5EDDD] p-8 md:p-10 grid md:grid-cols-12 gap-8 items-center">
             <div className="md:col-span-7">
               <div className="text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
-                Your contribution
+                {t('carbon.yourContribution')}
               </div>
               <p className="text-lg leading-relaxed text-[#F5EDDD]/80">
-                Offsetting {breakdown.total.toLocaleString('vi-VN')} kg through{' '}
-                <span className="text-[#E8A33D]">{selected.name}</span>, led by {selected.led}.
-                {selected.joinable
-                  ? ' You are invited to plant on the final day of your stay.'
-                  : ' This project is maintained year-round by the conservation group.'}
+                {t('carbon.offsetting', { kg: breakdown.total.toLocaleString('vi-VN') })}{' '}
+                <span className="text-[#E8A33D]">{selected.name}</span>
+                {t('carbon.ledBy', { led: selected.led })}
+                {selected.joinable ? t('carbon.joinableYes') : t('carbon.joinableNo')}
               </p>
             </div>
 
@@ -351,11 +327,11 @@ export default function CarbonTracker() {
                   {vnd(cost)}
                 </div>
                 <div className="text-xs text-[#F5EDDD]/40 mt-2">
-                  one contribution, per person
+                  {t('carbon.perPerson')}
                 </div>
               </div>
               <button className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition">
-                Add to my booking
+                {t('carbon.addToBooking')}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
               </button>
             </div>
@@ -367,18 +343,16 @@ export default function CarbonTracker() {
       <section className="px-8 lg:px-12 xl:px-16 py-24 grid md:grid-cols-12 gap-12 items-center">
         <div className="md:col-span-6">
           <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
-            Afterwards
+            {t('carbon.afterwardsEyebrow')}
           </div>
           <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight mb-8">
-            An offset you can follow, the same as any other payment.
+            {t('carbon.afterwardsHeading')}
           </h2>
           <p className="text-lg text-[#F5EDDD]/70 leading-relaxed mb-6">
-            Offset contributions sit on the same public ledger as bookings and purchases. You can
-            open the entry for yours and see when the project account received it.
+            {t('carbon.afterwardsBody')}
           </p>
           <p className="text-sm text-[#F5EDDD]/55 leading-relaxed">
-            Survival counts are published each year by the households running the site. A planting
-            that fails is recorded as a failure.
+            {t('carbon.afterwardsNote')}
           </p>
         </div>
 
@@ -386,18 +360,18 @@ export default function CarbonTracker() {
           <div className="bg-[#F5EDDD]/[0.04] border border-[#F5EDDD]/10 p-8 font-mono text-sm">
             <div className="flex items-center justify-between gap-4 mb-8">
               <span className="text-[#F5EDDD]/40 text-xs uppercase tracking-wider">
-                Ledger entry · sample
+                {t('carbon.ledgerSample')}
               </span>
               <ScanLine className="w-4 h-4 text-[#B87333]" />
             </div>
             <dl className="space-y-4 text-xs">
               {[
-                ['Reference', 'KNA-OF-1182'],
-                ['Contribution', '612 kg CO₂e'],
-                ['Project', 'Yok Đôn buffer replanting'],
-                ['Received by', 'Buôn Đôn households'],
-                ['Planted', '18 Mar 2026 · 41 saplings'],
-                ['Year 1 survival', '38 of 41'],
+                [t('carbon.ledgerReference'), 'KNA-OF-1182'],
+                [t('carbon.ledgerContribution'), '612 kg CO₂e'],
+                [t('carbon.ledgerProject'), PROJECTS[0].name],
+                [t('carbon.ledgerReceivedBy'), PROJECTS[0].led],
+                [t('carbon.ledgerPlanted'), t('carbon.ledgerPlantedValue')],
+                [t('carbon.ledgerSurvival'), t('carbon.ledgerSurvivalValue')],
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-6 border-b border-[#F5EDDD]/10 pb-3">
                   <dt className="text-[#F5EDDD]/45 shrink-0">{k}</dt>
@@ -419,18 +393,17 @@ export default function CarbonTracker() {
       <section className="px-8 lg:px-12 xl:px-16 py-20 flex flex-wrap items-center justify-between gap-8">
         <div className="max-w-xl">
           <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
-            Who decides which projects get funded?
+            {t('carbon.handoffHeading')}
           </h2>
           <p className="text-[#F5EDDD]/70">
-            The Community Governance Committee. Their minutes, decisions, and fund allocations are
-            published in the community space.
+            {t('carbon.handoffBody')}
           </p>
         </div>
         <a
           href="#community"
           className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
         >
-          See the community space
+          {t('carbon.handoffCta')}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
         </a>
       </section>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   ShieldCheck,
@@ -17,9 +18,23 @@ import ApiErrorNotice from './ApiErrorNotice';
 
 const CATEGORIES = ['All', 'Textile', 'Woodwork', 'Basketry', 'Jewellery', 'Coffee'];
 
+// The values above are state and are sent to the API as-is; only the label
+// a shopper reads is translated. Translating the values would break both
+// the query and the Product.category CHECK constraint behind it.
+const CATEGORY_KEYS = {
+  All: 'marketplace.filterAll',
+  Textile: 'marketplace.categoryTextile',
+  Woodwork: 'marketplace.categoryWoodwork',
+  Basketry: 'marketplace.categoryBasketry',
+  Jewellery: 'marketplace.categoryJewellery',
+  Coffee: 'marketplace.categoryCoffee',
+};
+
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 
 export default function Marketplace() {
+  const { t } = useTranslation();
+  const notes = t('marketplace.notes', { returnObjects: true });
   const [category, setCategory] = useState('All');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounced(search);
@@ -89,7 +104,7 @@ export default function Marketplace() {
       setOrders((o) => ({ ...o, [product.id]: { ...o[product.id], qty, status: 'done', error: null } }));
       setProducts((ps) => ps.map((p) => (p.id === product.id ? { ...p, stock: p.stock - qty } : p)));
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Could not place that order. Try again.';
+      const message = err instanceof ApiError ? err.message : t('marketplace.orderError');
       setOrders((o) => ({ ...o, [product.id]: { ...o[product.id], qty, status: 'error', error: message } }));
     }
   }
@@ -105,14 +120,13 @@ export default function Marketplace() {
         <div className="md:col-span-7">
           <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
             <span className="h-px w-12 bg-[#B87333]" />
-            <span>Community Marketplace</span>
+            <span>{t('marketplace.eyebrow')}</span>
           </div>
           <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
-            Made by a person you can name.
+            {t('marketplace.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
-            Artisans set their own prices and keep 95% of what you pay — verified by the same
-            community representatives who verify hosts and guides.
+            {t('marketplace.intro')}
           </p>
         </div>
 
@@ -120,19 +134,19 @@ export default function Marketplace() {
           <div className="border-l-2 border-[#B87333] pl-8 space-y-6">
             <div>
               <div className="font-display text-4xl font-medium text-[#B87333]">95%</div>
-              <p className="text-sm text-[#F5EDDD]/60">stays with the artisan</p>
+              <p className="text-sm text-[#F5EDDD]/60">{t('marketplace.statArtisanShare')}</p>
             </div>
             <div>
               <div className="font-display text-4xl font-medium text-[#B87333]">
                 {stats ? stats.verifiedArtisans : '—'}
               </div>
-              <p className="text-sm text-[#F5EDDD]/60">makers listing in the pilot</p>
+              <p className="text-sm text-[#F5EDDD]/60">{t('marketplace.statMakers')}</p>
             </div>
             <div>
               <div className="font-display text-4xl font-medium text-[#B87333]">
                 {stats ? stats.buonOnboarded : '—'}
               </div>
-              <p className="text-sm text-[#F5EDDD]/60">buôn represented</p>
+              <p className="text-sm text-[#F5EDDD]/60">{t('marketplace.statBuon')}</p>
             </div>
           </div>
         </div>
@@ -143,20 +157,16 @@ export default function Marketplace() {
         <div className="px-8 lg:px-12 xl:px-16 py-20 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-6">
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
-              Coming to the marketplace
+              {t('marketplace.certEyebrow')}
             </div>
             <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
-              Authenticity you&rsquo;ll be able to check, not a label you have to trust.
+              {t('marketplace.certHeading')}
             </h2>
             <p className="text-lg text-[#1A1614]/70 leading-relaxed mb-6">
-              The plan: register each piece when the maker finishes it, so scanning a tag opens the
-              same record — who made it, where, how long it took — alongside the payment that
-              reached the household. Every order today is still verified by the Community
-              Governance Committee; the scannable certificate itself is on the roadmap.
+              {t('marketplace.certBody')}
             </p>
             <p className="text-sm text-[#1A1614]/55 leading-relaxed">
-              Certificates will be issued by the Community Governance Committee, not by KNĂ. Only
-              work made by a registered Ê Đê household will be able to carry one.
+              {t('marketplace.certNote')}
             </p>
           </div>
 
@@ -165,19 +175,19 @@ export default function Marketplace() {
             <div className="bg-[#1A1614] text-[#F5EDDD] p-8 font-mono text-sm">
               <div className="flex items-center justify-between gap-4 mb-8">
                 <span className="text-[#F5EDDD]/40 text-xs uppercase tracking-wider">
-                  Certificate of origin · mock-up
+                  {t('marketplace.certLabel')}
                 </span>
                 <ScanLine className="w-4 h-4 text-[#B87333]" />
               </div>
 
               <dl className="space-y-4 text-xs">
                 {[
-                  ['Reference', 'KNA-TX-0114'],
-                  ['Maker', 'Amí Lan · registered 2026'],
-                  ['Buôn', 'Buôn Kli A, Đắk Lắk'],
-                  ['Technique', 'Backstrap loom, natural dye'],
-                  ['Time to make', '11 weeks'],
-                  ['Reviewed by', 'Community Governance Committee'],
+                  [t('marketplace.certReference'), 'KNA-TX-0114'],
+                  [t('marketplace.certMaker'), t('marketplace.certMakerValue')],
+                  [t('marketplace.certBuon'), 'Buôn Kli A, Đắk Lắk'],
+                  [t('marketplace.certTechnique'), t('marketplace.certTechniqueValue')],
+                  [t('marketplace.certTime'), t('marketplace.certTimeValue')],
+                  [t('marketplace.certReviewedBy'), t('marketplace.certReviewedByValue')],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-6 border-b border-[#F5EDDD]/10 pb-3">
                     <dt className="text-[#F5EDDD]/45 shrink-0">{k}</dt>
@@ -185,7 +195,7 @@ export default function Marketplace() {
                   </div>
                 ))}
                 <div className="flex justify-between gap-6 pt-1">
-                  <dt className="text-[#F5EDDD]/45 shrink-0">To the maker</dt>
+                  <dt className="text-[#F5EDDD]/45 shrink-0">{t('marketplace.certToMaker')}</dt>
                   <dd className="text-[#E8A33D]">3,990,000 ₫ of 4,200,000 ₫</dd>
                 </div>
               </dl>
@@ -199,13 +209,13 @@ export default function Marketplace() {
         <div className="border-y border-[#F5EDDD]/10 py-6 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-3 flex-1 min-w-[240px]">
             <Search className="w-4 h-4 text-[#F5EDDD]/40 shrink-0" />
-            <label htmlFor="mq" className="sr-only">Search the marketplace</label>
+            <label htmlFor="mq" className="sr-only">{t('marketplace.searchLabel')}</label>
             <input
               id="mq"
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search a maker, a material, or a piece"
+              placeholder={t('marketplace.searchPlaceholder')}
               className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-[#F5EDDD]/35 border-b border-transparent focus:border-[#F5EDDD]/30 transition"
             />
           </div>
@@ -221,7 +231,7 @@ export default function Marketplace() {
                     : 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
                 }`}
               >
-                {c}
+                {CATEGORY_KEYS[c] ? t(CATEGORY_KEYS[c]) : c}
               </button>
             ))}
           </div>
@@ -231,7 +241,7 @@ export default function Marketplace() {
       {/* ── PRODUCTS ──────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-12 pb-24">
         {loadState === 'loading' && (
-          <div className="text-sm text-[#F5EDDD]/50 py-20 text-center">Loading pieces…</div>
+          <div className="text-sm text-[#F5EDDD]/50 py-20 text-center">{t('marketplace.loading')}</div>
         )}
 
         {loadState === 'error' && (
@@ -241,20 +251,20 @@ export default function Marketplace() {
         {loadState === 'ready' && (
           <>
             <div className="text-sm text-[#F5EDDD]/50 mb-8">
-              {shown.length} {shown.length === 1 ? 'piece' : 'pieces'} listed
+              {t('marketplace.listed', { count: shown.length })}
             </div>
 
             {shown.length === 0 ? (
               <div className="border border-dashed border-[#F5EDDD]/20 py-20 text-center">
-                <p className="font-display text-2xl mb-3">No pieces in that category yet.</p>
+                <p className="font-display text-2xl mb-3">{t('marketplace.emptyTitle')}</p>
                 <p className="text-sm text-[#F5EDDD]/60 mb-6">
-                  Makers list when a piece is finished, so stock moves slowly by design.
+                  {t('marketplace.emptyBody')}
                 </p>
                 <button
                   onClick={() => { setCategory('All'); setSearch(''); }}
                   className="text-sm text-[#E8A33D] underline underline-offset-4"
                 >
-                  See everything
+                  {t('marketplace.seeEverything')}
                 </button>
               </div>
             ) : (
@@ -270,12 +280,12 @@ export default function Marketplace() {
                       <div className="relative">
                         <ImageSlot
                           ratio="aspect-square"
-                          label={`${p.title} — ${p.provider.displayName}`}
+                          label={t('marketplace.photoLabel', { title: p.title, maker: p.provider.displayName })}
                           className="border-0 border-b border-dashed"
                         />
                         {p.stock === 1 && (
                           <span className="absolute top-4 left-4 bg-[#C8302E] text-[#F5EDDD] text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
-                            One of a kind
+                            {t('marketplace.oneOfAKind')}
                           </span>
                         )}
                       </div>
@@ -287,7 +297,7 @@ export default function Marketplace() {
                           </span>
                           <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#E8A33D]">
                             <ShieldCheck className="w-3 h-3" />
-                            Verified maker
+                            {t('marketplace.verifiedMaker')}
                           </span>
                         </div>
 
@@ -320,19 +330,23 @@ export default function Marketplace() {
                                 {vnd(p.priceVnd)}
                               </div>
                               <div className="text-[11px] text-[#F5EDDD]/40 mt-1">
-                                {soldOut ? 'Sold out' : p.stock === 1 ? 'Last one' : `${p.stock} available`}
+                                {soldOut
+                                  ? t('marketplace.soldOut')
+                                  : p.stock === 1
+                                    ? t('marketplace.lastOne')
+                                    : t('marketplace.available', { count: p.stock })}
                               </div>
                             </div>
 
                             {order?.status === 'done' ? (
                               <span className="text-xs text-[#E8A33D] uppercase tracking-wider">
-                                Ordered ✓
+                                {t('marketplace.ordered')}
                               </span>
                             ) : soldOut ? (
                               <span className="text-xs text-[#F5EDDD]/40 uppercase tracking-wider">Sold out</span>
                             ) : (
                               <div className="flex items-center gap-3">
-                                <label className="sr-only" htmlFor={`qty-${p.id}`}>Quantity</label>
+                                <label className="sr-only" htmlFor={`qty-${p.id}`}>{t('marketplace.quantity')}</label>
                                 <input
                                   id={`qty-${p.id}`}
                                   type="number"
@@ -348,7 +362,7 @@ export default function Marketplace() {
                                   className="group/btn inline-flex items-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-5 py-3 text-sm transition"
                                 >
                                   <ShoppingBag className="w-3.5 h-3.5" />
-                                  {order?.status === 'submitting' ? 'Placing…' : 'Buy'}
+                                  {order?.status === 'submitting' ? t('marketplace.placing') : t('marketplace.buy')}
                                 </button>
                               </div>
                             )}
@@ -375,32 +389,15 @@ export default function Marketplace() {
             <div className="md:col-span-4">
               <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
                 <Info className="w-4 h-4" />
-                Before you order
+                {t('marketplace.notesEyebrow')}
               </div>
               <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
-                Handmade means slow, and sometimes means no.
+                {t('marketplace.notesHeading')}
               </h2>
             </div>
 
             <div className="md:col-span-8 grid sm:grid-cols-2 gap-10 pt-2">
-              {[
-                {
-                  h: 'Stock is literal',
-                  b: 'If a listing says one, there is one. Nothing here is reproduced to meet demand, and a maker may decline a repeat commission.',
-                },
-                {
-                  h: 'Dispatch takes time',
-                  b: 'Pieces ship from Đắk Lắk once a week. Allow two to three weeks within Vietnam, longer internationally.',
-                },
-                {
-                  h: 'Some work is not for sale',
-                  b: 'Certain ceremonial pieces are recorded in the cultural archive but never listed. The Committee decides what stays in the buôn.',
-                },
-                {
-                  h: 'Prices are the maker’s',
-                  b: 'KNĂ does not discount, run sales, or negotiate on a maker’s behalf. What you see is what they asked for.',
-                },
-              ].map((n) => (
+              {notes.map((n) => (
                 <div key={n.h}>
                   <h3 className="font-display text-lg font-medium mb-2 text-[#B87333]">{n.h}</h3>
                   <p className="text-sm text-[#1A1614]/65 leading-relaxed">{n.b}</p>
@@ -417,17 +414,17 @@ export default function Marketplace() {
       <section className="px-8 lg:px-12 xl:px-16 py-20 flex flex-wrap items-center justify-between gap-8">
         <div className="max-w-xl">
           <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
-            Not sure what you are looking at?
+            {t('marketplace.handoffHeading')}
           </h2>
           <p className="text-[#F5EDDD]/70">
-            The assistant can explain a motif, a technique, or what a piece is traditionally for.
+            {t('marketplace.handoffBody')}
           </p>
         </div>
         <a
           href="#assistant"
           className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
         >
-          Ask the assistant
+          {t('marketplace.handoffCta')}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
         </a>
       </section>

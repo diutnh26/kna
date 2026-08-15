@@ -78,7 +78,7 @@ export default function Landing() {
             </div>
             <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-10 text-[#1A1614]">
               {t('landing.hero.titleLine1')}{' '}
-              <span className="italic text-[#C8302E]">{t('landing.hero.titleEm')}</span>{' '}
+              <span className="text-[#C8302E]">{t('landing.hero.titleEm')}</span>{' '}
               {t('landing.hero.titleRest')}
             </h1>
             <p className="text-lg text-[#1A1614]/70 max-w-2xl mb-10 leading-relaxed">
@@ -123,7 +123,7 @@ export default function Landing() {
             </div>
             <h2 className="font-display text-5xl md:text-6xl font-medium leading-[1.05] tracking-tight text-white">
               {t('landing.pillars.headingLine1')}
-              <span className="italic"> {t('landing.pillars.headingEm')}</span>
+              <span> {t('landing.pillars.headingEm')}</span>
             </h2>
           </div>
 
@@ -134,7 +134,7 @@ export default function Landing() {
                 className="bg-[#1A1614] p-8 flex flex-col min-h-[320px] items-start text-left"
               >
                 <p.icon className="w-5 h-5 text-[#B87333] mb-10" />
-                <div className="font-display italic text-lg text-[#B87333] mb-2">{p.vn}</div>
+                <div className="font-display text-lg text-[#B87333] mb-2">{p.vn}</div>
                 <h3 className="font-display text-xl font-medium mb-4 leading-tight">
                   {pillars[i]?.title}
                 </h3>
@@ -163,7 +163,7 @@ export default function Landing() {
             </div>
             <h2 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8 text-[#1A1614]">
               {t('landing.culture.headingLine1')}{' '}
-              <span className="italic text-[#C8302E]">{t('landing.culture.headingEm')}</span>
+              <span className="text-[#C8302E]">{t('landing.culture.headingEm')}</span>
             </h2>
             <p className="text-lg leading-relaxed text-[#1A1614]/80 mb-10">
               {t('landing.culture.body')}
@@ -214,7 +214,7 @@ export default function Landing() {
             <p className="text-lg leading-relaxed text-[#F5EDDD]/90 mb-8">
               {t('landing.transparency.body')}
             </p>
-            <p className="font-display italic text-2xl leading-snug">
+            <p className="font-display text-2xl leading-snug">
               {t('landing.transparency.quote')}
             </p>
           </div>
@@ -269,7 +269,7 @@ export default function Landing() {
               <h2 className="font-display text-5xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8 text-[#6B1A1A]">
                 {t('landing.community.headingLine1')}
                 <br />
-                <span className="italic">{t('landing.community.headingEm')}</span>{' '}
+                <span>{t('landing.community.headingEm')}</span>{' '}
                 {t('landing.community.headingRest')}
               </h2>
               <p className="text-lg leading-relaxed text-[#1A1614]/70">

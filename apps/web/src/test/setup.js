@@ -8,8 +8,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// jsdom implements neither of these, and components use both.
+// jsdom implements none of these, and components use all of them.
 window.scrollTo = vi.fn();
+Element.prototype.scrollIntoView = vi.fn();
 
 if (!window.matchMedia) {
   window.matchMedia = (query) => ({

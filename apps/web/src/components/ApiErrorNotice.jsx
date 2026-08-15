@@ -11,10 +11,13 @@
  *
  * Previously duplicated verbatim across six screens.
  */
+import { useTranslation } from 'react-i18next';
+
 export default function ApiErrorNotice({ className = 'py-20' }) {
+  const { t } = useTranslation();
   return (
     <div className={`border border-dashed border-[#F5EDDD]/20 text-center ${className}`}>
-      <p className="font-display text-2xl mb-3">Couldn&rsquo;t reach the KNĂ API.</p>
+      <p className="font-display text-2xl mb-3">{t('apiError.unreachable')}</p>
       <p className="text-sm text-[#F5EDDD]/60">
         {import.meta.env.DEV ? (
           <>
@@ -22,7 +25,7 @@ export default function ApiErrorNotice({ className = 'py-20' }) {
             <code className="text-[#E8A33D]">localhost:4000</code>?
           </>
         ) : (
-          <>The service may be waking up — that can take a minute. Please try again shortly.</>
+          <>{t('apiError.waking')}</>
         )}
       </p>
     </div>
