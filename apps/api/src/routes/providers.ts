@@ -71,6 +71,8 @@ providersRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
       id: b.id,
       status: b.status,
       guests: b.guests,
+      checkIn: b.checkIn,
+      nights: b.nights,
       createdAt: b.createdAt,
       listingTitle: b.listing.title,
       guestName: b.guest.fullName,

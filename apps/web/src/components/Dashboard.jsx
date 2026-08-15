@@ -171,6 +171,12 @@ export default function Dashboard() {
                     <p className="text-sm text-[#F5EDDD]/60 mb-1">
                       {b.listing.provider.displayName} · {b.listing.provider.buon}
                     </p>
+                    {/* The dates lead: this is the question the coordinator
+                        has to put to the household, and it is the reason the
+                        queue is ordered by arrival rather than by request. */}
+                    <p className="text-sm text-[#E8A33D] mb-1">
+                      Arriving {dmy(b.checkIn)} · {b.nights} {b.nights === 1 ? 'night' : 'nights'}
+                    </p>
                     <p className="text-xs text-[#F5EDDD]/45">
                       {b.guest.fullName} ({b.guest.email}) · {b.guests}{' '}
                       {b.guests === 1 ? 'guest' : 'guests'} · requested {dmy(b.createdAt)}
@@ -284,7 +290,8 @@ export default function Dashboard() {
                         <div className="text-sm mb-1">{b.listingTitle}</div>
                         <div className="text-xs text-[#F5EDDD]/45">
                           {b.guestName} · {b.guests} {b.guests === 1 ? 'guest' : 'guests'} ·{' '}
-                          {dmy(b.createdAt)}
+                          arriving {dmy(b.checkIn)}, {b.nights}{' '}
+                          {b.nights === 1 ? 'night' : 'nights'}
                         </div>
                       </div>
                       <div className="text-right shrink-0">

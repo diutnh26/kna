@@ -120,6 +120,13 @@ model Booking {
   guest             User     @relation(fields: [guestId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   status            String   @default("PENDING")
   guests            Int
+  // `nights` was accepted by the API and multiplied into the price, then
+  // dropped — it was never a column. So the total could not be audited
+  // back to the inputs that produced it, and a coordinator confirming a
+  // booking had no idea which dates to check with the household. Both are
+  // stored now.
+  checkIn           DateTime @db.Date
+  nights            Int      @default(1)
   totalVnd          Int
   platformFeeVnd    Int
   communityFundVnd  Int

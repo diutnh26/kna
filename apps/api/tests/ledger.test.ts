@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import { prisma } from "../src/lib/prisma";
-import { app, PASSWORD, makeListing, makeProvider, makeUser, resetDb } from "./helpers";
+import { PASSWORD, app, makeListing, makeProvider, makeUser, resetDb, soon } from "./helpers";
 
 /**
  * The public ledger, which is the artifact this platform's whole argument
@@ -62,7 +62,7 @@ describe("public ledger", () => {
     const booking = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ listingId, guests: 2, nights: 1 });
+      .send({ listingId, guests: 2, nights: 1, checkIn: soon() });
     expect(booking.status).toBe(201);
 
     // The row exists — it is the record of what the guest was shown.
@@ -103,7 +103,7 @@ describe("public ledger", () => {
     const booking = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ listingId, guests: 1, nights: 1 });
+      .send({ listingId, guests: 1, nights: 1, checkIn: soon() });
 
     await request(app)
       .post(`/bookings/${booking.body.id}/decision`)

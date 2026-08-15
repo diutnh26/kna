@@ -9,9 +9,24 @@ export const bookingsRouter = Router();
 
 const createBookingSchema = z.object({
   listingId: z.string(),
-  guests: z.number().int().min(1),
-  nights: z.number().int().min(1).default(1),
+  // Bounded, because both multiply straight into a money figure and a
+  // public ledger row. The ceilings match the CHECK constraints.
+  guests: z.number().int().min(1).max(20),
+  nights: z.number().int().min(1).max(30).default(1),
+  // A calendar date, not a timestamp: a stay begins on a day, and pinning
+  // it to an instant would shift it across a timezone boundary. The Ê Đê
+  // households and the guest are rarely in the same one.
+  checkIn: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "A check-in date is required (YYYY-MM-DD).")
+    .refine((v) => !Number.isNaN(Date.parse(`${v}T00:00:00Z`)), "That is not a real date."),
 });
+
+/** Today in UTC, as a date-only value, for comparing against check-in. */
+function todayUtc() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
 
 // Phase 1 is concierge-assisted: a booking is created PENDING and a
 // community coordinator confirms it from the admin console (not built yet
@@ -24,7 +39,12 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input." });
   }
-  const { listingId, guests, nights } = parsed.data;
+  const { listingId, guests, nights, checkIn } = parsed.data;
+
+  const checkInDate = new Date(`${checkIn}T00:00:00Z`);
+  if (checkInDate < todayUtc()) {
+    return res.status(400).json({ error: "Check-in cannot be in the past." });
+  }
 
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
@@ -42,6 +62,8 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
       listingId,
       guestId: req.user!.id,
       guests,
+      checkIn: checkInDate,
+      nights,
       totalVnd,
       platformFeeVnd,
       communityFundVnd,
@@ -103,7 +125,9 @@ bookingsRouter.get(
         listing: { include: { provider: { select: { displayName: true, buon: true } } } },
         guest: { select: { fullName: true, email: true } },
       },
-      orderBy: { createdAt: "asc" },
+      // Soonest arrival first, not oldest request. A coordinator's queue is
+      // ordered by what needs deciding before the guest turns up.
+      orderBy: [{ checkIn: "asc" }, { createdAt: "asc" }],
     });
     res.json(bookings);
   }

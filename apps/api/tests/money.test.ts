@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import { prisma } from "../src/lib/prisma";
-import { app, PASSWORD, makeListing, makeProvider, makeUser, resetDb } from "./helpers";
+import { PASSWORD, app, makeListing, makeProvider, makeUser, resetDb, soon } from "./helpers";
 
 /**
  * The booking money path, end to end. What is asserted here is the thing
@@ -35,7 +35,7 @@ describe("booking money path", () => {
   });
 
   it("refuses an unauthenticated booking", async () => {
-    const res = await request(app).post("/bookings").send({ listingId, guests: 1, nights: 1 });
+    const res = await request(app).post("/bookings").send({ listingId, guests: 1, nights: 1, checkIn: soon() });
     expect(res.status).toBe(401);
   });
 
@@ -43,7 +43,7 @@ describe("booking money path", () => {
     const res = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ listingId, guests: 1, nights: 2 });
+      .send({ listingId, guests: 1, nights: 2, checkIn: soon() });
 
     expect(res.status).toBe(201);
     const b = res.body;
@@ -64,7 +64,7 @@ describe("booking money path", () => {
     const res = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ listingId, guests: 1, nights: 1, totalVnd: 1, providerPayoutVnd: 999_999_999 });
+      .send({ listingId, guests: 1, nights: 1, checkIn: soon(), totalVnd: 1, providerPayoutVnd: 999_999_999 });
 
     expect(res.status).toBe(201);
     expect(res.body.totalVnd).toBe(500_000);
@@ -75,7 +75,7 @@ describe("booking money path", () => {
     const created = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ listingId, guests: 1, nights: 1 });
+      .send({ listingId, guests: 1, nights: 1, checkIn: soon() });
     expect(created.body.status).toBe("PENDING");
 
     const before = await request(app)
@@ -98,7 +98,7 @@ describe("booking money path", () => {
     const created = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ listingId, guests: 1, nights: 1 });
+      .send({ listingId, guests: 1, nights: 1, checkIn: soon() });
 
     const before = await prisma.ledgerEntry.count();
 
@@ -127,6 +127,75 @@ describe("booking money path", () => {
       expect(e.totalVnd).toBeGreaterThan(0);
     }
   });
+  // ── Dates ──────────────────────────────────────────────────────────
+  // `nights` used to be priced and then discarded, and there was no date
+  // field at all: a coordinator could not tell the household which nights
+  // to hold, and the total could not be reconciled against its inputs.
+
+  it("stores the arrival date and the number of nights", async () => {
+    const checkIn = soon(45);
+    const res = await request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ listingId, guests: 1, nights: 3, checkIn });
+
+    expect(res.status).toBe(201);
+    const stored = await prisma.booking.findUniqueOrThrow({ where: { id: res.body.id } });
+    expect(stored.nights).toBe(3);
+    expect(stored.checkIn.toISOString().slice(0, 10)).toBe(checkIn);
+    // …and the total is reconstructable from what was stored.
+    expect(stored.totalVnd).toBe(500_000 * stored.nights);
+  });
+
+  it("refuses a booking with no date", async () => {
+    const res = await request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ listingId, guests: 1, nights: 1 });
+    expect(res.status).toBe(400);
+  });
+
+  it("refuses a date in the past", async () => {
+    const res = await request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ listingId, guests: 1, nights: 1, checkIn: soon(-1) });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/past/i);
+  });
+
+  it("refuses quantities that would inflate the ledger", async () => {
+    for (const payload of [
+      { guests: 1, nights: 9_999 },
+      { guests: 10_000, nights: 1 },
+    ]) {
+      const res = await request(app)
+        .post("/bookings")
+        .set("Authorization", `Bearer ${guestToken}`)
+        .send({ listingId, checkIn: soon(), ...payload });
+      expect(res.status).toBe(400);
+    }
+  });
+
+  it("puts the soonest arrival at the top of the coordinator queue", async () => {
+    const far = soon(90);
+    const near = soon(2);
+    for (const checkIn of [far, near]) {
+      await request(app)
+        .post("/bookings")
+        .set("Authorization", `Bearer ${guestToken}`)
+        .send({ listingId, guests: 1, nights: 1, checkIn });
+    }
+
+    const queue = await request(app)
+      .get("/bookings/pending")
+      .set("Authorization", `Bearer ${coordinatorToken}`);
+
+    const dates = queue.body.map((b: { checkIn: string }) => b.checkIn.slice(0, 10));
+    expect(dates).toEqual([...dates].sort());
+    expect(dates[0]).toBe(near);
+  });
+
 });
 
 describe("marketplace money path", () => {
@@ -189,4 +258,5 @@ describe("marketplace money path", () => {
     const res = await request(app).get("/products");
     expect(res.body.map((p: { id: string }) => p.id)).not.toContain(productId);
   });
+
 });

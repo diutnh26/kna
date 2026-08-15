@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   MapPin,
@@ -50,9 +50,18 @@ export default function Travel() {
   const [listings, setListings] = useState([]);
   const [loadState, setLoadState] = useState('loading'); // 'loading' | 'ready' | 'error'
 
-  // bookings[listingId] = { qty, status: 'idle'|'submitting'|'done'|'error', error }
+  // bookings[listingId] = { qty, checkIn, status: 'idle'|'submitting'|'done'|'error', error }
   const [bookings, setBookings] = useState({});
   const { isAuthenticated, token, openAuthModal } = useAuth();
+
+  // Floor for the date picker. Local date, not toISOString() — that converts
+  // to UTC first, so anywhere east of Greenwich (Vietnam is UTC+7) would
+  // offer yesterday as a valid arrival for the first seven hours of the day.
+  const today = useMemo(() => {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }, []);
 
   // Deliberately doesn't flip back to 'loading' on every filter change —
   // the previous results stay on screen (stale-while-revalidate) until the
@@ -87,13 +96,33 @@ export default function Travel() {
     setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty: Math.max(1, qty) } }));
   }
 
+  function checkInFor(listing) {
+    return bookings[listing.id]?.checkIn ?? '';
+  }
+
+  function setCheckIn(listing, checkIn) {
+    setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], checkIn } }));
+  }
+
   async function handleBook(listing) {
     if (!isAuthenticated) {
       openAuthModal();
       return;
     }
     const qty = qtyFor(listing);
+    const checkIn = checkInFor(listing);
     const perNight = listing.unit === 'per night';
+
+    // The household has to hold a specific day. Asking here beats a
+    // coordinator chasing the guest by phone afterwards.
+    if (!checkIn) {
+      setBookings((b) => ({
+        ...b,
+        [listing.id]: { ...b[listing.id], qty, status: 'error', error: 'Choose an arrival date first.' },
+      }));
+      return;
+    }
+
     setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'submitting', error: null } }));
     try {
       const created = await api.createBooking(
@@ -101,6 +130,7 @@ export default function Travel() {
           listingId: listing.id,
           guests: perNight ? 1 : qty,
           nights: perNight ? qty : 1,
+          checkIn,
         },
         token
       );
@@ -312,7 +342,18 @@ export default function Travel() {
                                 Requested ✓
                               </span>
                             ) : (
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-3 flex-wrap justify-end">
+                                <label className="sr-only" htmlFor={`checkin-${l.id}`}>
+                                  Arrival date
+                                </label>
+                                <input
+                                  id={`checkin-${l.id}`}
+                                  type="date"
+                                  min={today}
+                                  value={checkInFor(l)}
+                                  onChange={(e) => setCheckIn(l, e.target.value)}
+                                  className="bg-transparent border border-[#F5EDDD]/25 text-sm py-2 px-2 focus:outline-none focus:border-[#F5EDDD]/60 [color-scheme:dark]"
+                                />
                                 <label className="sr-only" htmlFor={`qty-${l.id}`}>
                                   {perNight ? 'Nights' : 'Guests'}
                                 </label>
@@ -320,6 +361,7 @@ export default function Travel() {
                                   id={`qty-${l.id}`}
                                   type="number"
                                   min={1}
+                                  max={perNight ? 30 : 20}
                                   value={qtyFor(l)}
                                   onChange={(e) => setQty(l, Number(e.target.value))}
                                   className="w-14 bg-transparent border border-[#F5EDDD]/25 text-sm text-center py-2 focus:outline-none focus:border-[#F5EDDD]/60"

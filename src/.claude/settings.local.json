@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"c:\\\\Users\\\\ADMIN\\\\Downloads\\\\kna-app\" && echo \"=== CHECK constraints in migrations ===\" && grep -rhoE \"CHECK \\\\\\([^\\)]*\\\\\\)\" apps/api/prisma/migrations/ | head -20; echo; echo \"=== any constraint on stock? ===\"; grep -rn \"stock\" apps/api/prisma/migrations/ | head)",
+      "Read(//c/Users/ADMIN/Downloads/kna-app/**)"
+    ]
+  }
+}

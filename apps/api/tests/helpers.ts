@@ -79,3 +79,10 @@ export async function tokenFor(request: typeof import("supertest"), email: strin
   const res = await request(app).post("/auth/login").send({ email, password: PASSWORD });
   return res.body.token as string;
 }
+
+/** A check-in far enough ahead that it never trips the past-date rule. */
+export function soon(daysAhead = 30) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + daysAhead);
+  return d.toISOString().slice(0, 10);
+}

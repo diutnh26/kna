@@ -10,6 +10,18 @@ import { renderScreen, signIn, aListing } from '../test/helpers';
  * booking path behaves, and — most importantly — that what a guest is shown
  * about money comes from the server rather than being invented in the UI.
  */
+/**
+ * Bookings now require an arrival date, because a household has to hold a
+ * specific day. Every path that expects a request to go out has to pick one.
+ */
+function pickArrivalDate() {
+  const d = new Date();
+  d.setDate(d.getDate() + 30);
+  const iso = d.toISOString().slice(0, 10);
+  fireEvent.change(screen.getByLabelText(/Arrival date/i), { target: { value: iso } });
+  return iso;
+}
+
 describe('Travel', () => {
   beforeEach(() => {
     vi.spyOn(api, 'listings').mockResolvedValue([aListing()]);
@@ -62,12 +74,13 @@ describe('Travel', () => {
 
     const qty = screen.getByLabelText(/Nights/i);
     fireEvent.change(qty, { target: { value: '3' } });
+    const checkIn = pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
     await waitFor(() => expect(api.createBooking).toHaveBeenCalled());
     const [payload] = api.createBooking.mock.calls[0];
     // "per night" listing: the number chosen is nights, and guests is 1.
-    expect(payload).toMatchObject({ listingId: 'l1', nights: 3, guests: 1 });
+    expect(payload).toMatchObject({ listingId: 'l1', nights: 3, guests: 1, checkIn });
   });
 
   it("shows the server's payment instruction verbatim, not UI-invented reassurance", async () => {
@@ -82,6 +95,7 @@ describe('Travel', () => {
 
     renderScreen(<Travel />);
     await screen.findByRole('heading', { name: /Two nights/ });
+    pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
     expect(await screen.findByText(instructions)).toBeInTheDocument();
@@ -94,6 +108,7 @@ describe('Travel', () => {
 
     renderScreen(<Travel />);
     await screen.findByRole('heading', { name: /Two nights/ });
+    pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
     expect(await screen.findByText('Those dates are taken.')).toBeInTheDocument();
@@ -117,4 +132,18 @@ describe('Travel', () => {
     expect(screen.getByText('3%')).toBeInTheDocument();
     expect(screen.getByText('7%')).toBeInTheDocument();
   });
+
+  it('will not send a booking without an arrival date', async () => {
+    signIn();
+    const createBooking = vi.spyOn(api, 'createBooking');
+
+    renderScreen(<Travel />);
+    await screen.findByRole('heading', { name: /Two nights/ });
+    await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
+
+    // Caught in the form, not by a round trip that comes back 400.
+    expect(createBooking).not.toHaveBeenCalled();
+    expect(await screen.findByText(/Choose an arrival date first/i)).toBeInTheDocument();
+  });
+
 });
