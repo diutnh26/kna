@@ -54,6 +54,29 @@ which the pilot buôn's households can settle into, and needs a merchant
 account. When that exists: add one file next to `gateway.ts` and set
 `PAYMENT_PROVIDER`. Nothing outside `src/payments/` should need changing.
 
+### Fixed after the August 2026 review
+
+An engineering review of the whole codebase found ten issues, all
+concentrated in the money path. The five ranked highest are fixed:
+
+1. **The marketplace oversold one-of-a-kind pieces.** Stock was checked
+   before the transaction and decremented unconditionally inside it; eight
+   simultaneous buyers for one basket produced five orders and stock -4.
+   Now a conditional UPDATE, with a CHECK constraint behind it.
+2. **The public ledger showed money that had not moved.** Rows were
+   published while the booking was still PENDING. Now filtered to settled
+   parents, with pending surfaced as a count.
+3. **Bookings recorded no dates.** `nights` was priced then discarded, and
+   there was no arrival date at all — a coordinator could not tell a
+   household which nights to hold.
+4. **The screens the community operates were English-only.** Dashboard and
+   Review are translated; 143 keys, both locales, guarded by a test.
+5. **Withdrawing authority took up to seven days.** The role came from a
+   7-day JWT claim. Now re-read from the database, with token revocation.
+
+Also: marketplace orders had no settlement path at all, so artisans saw
+zero marketplace earnings no matter how much they sold.
+
 ### Not production-ready yet
 
 - No email delivery — booking confirmations reach nobody
@@ -61,8 +84,10 @@ account. When that exists: add one file next to `gateway.ts` and set
 - Media (audio, 360° tours, photo essays) has no storage or pipeline
 - Privacy policy, terms, and a contact route need writing (their footer
   links were removed rather than left pointing at nothing)
-- No automated end-to-end tests; 40 API tests and 25 frontend tests exist,
-  but nobody has driven the deployed app in a browser end to end
+- No automated end-to-end tests; 58 API tests and 30 frontend tests exist.
+  The booking and settlement loop has now been driven against the deployed
+  stack by hand (sign in, coordinator queue, provider earnings, public
+  ledger), but not in a browser and not automatically.
 
 ### Exit gate (all four required — none met, none can be met by code)
 

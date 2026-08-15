@@ -178,21 +178,19 @@ curl -s https://kna-web.onrender.com/assets/<that file> | grep -c localhost:4000
 `/listings`, `/products`, `/community/ledger`, `/community/committee` and
 `/archive` all answer `200 []`.
 
-### The database is empty, on purpose
+### The database holds demonstration data
 
-Nothing is seeded. `npm run db:seed` deletes every row before inserting, and
-refuses to run against anything that is not a local dev database — that
-guard is why it cannot be pointed at Neon by accident.
+The deployed environment is loaded with the demonstration dataset — the
+households, listings and governance records the original mockup carried —
+so the screens show how KNĂ presents information rather than empty states.
 
-So the deployed site currently renders empty states everywhere. Before
-showing it to Intermèdes or Lua Viet Tours, decide deliberately between:
+**It is not field data**, and the app says so on every screen for as long as
+those records exist. See [demo-data.md](demo-data.md) for what is in it, how
+to sign in, and how to remove it when real providers are onboarded.
 
-- **Onboard real providers** through the app — the honest option, and the
-  one the pilot needs anyway.
-- **Load demo content** written for the demo, inserted by a separate
-  additive script. Do not reach for the seed: repointing it at Neon means
-  disabling a guard that exists for exactly this moment, and one stray run
-  later would wipe real pilot data.
+`npm run db:seed` is still the wrong tool for a deployed database: it
+deletes every row first and refuses to run against anything non-local.
+`npm run db:demo` is the additive one.
 
 Then sign in, place a booking, and confirm it appears on the landing page's
 public ledger. That single loop exercises auth, the fee split, and the
