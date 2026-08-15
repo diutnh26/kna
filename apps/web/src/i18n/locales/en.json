@@ -201,5 +201,9 @@
     "statusCompleted": "Completed",
     "statusCancelled": "Declined",
     "decisionError": "Could not record that. Try again."
+  },
+  "demo": {
+    "label": "Demonstration data.",
+    "body": "These households, bookings and ledger figures are examples showing how the platform presents information. They are not real records — actual data arrives with the field pilot."
   }
 }

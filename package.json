@@ -19,6 +19,7 @@
     "test:api": "npm run test --workspace apps/api",
     "db:generate": "npm run db:generate --workspace apps/api",
     "db:migrate": "npm run db:migrate --workspace apps/api",
-    "db:seed": "npm run db:seed --workspace apps/api"
+    "db:seed": "npm run db:seed --workspace apps/api",
+    "db:demo": "npm run db:demo --workspace apps/api"
   }
 }

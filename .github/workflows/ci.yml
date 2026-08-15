@@ -88,6 +88,14 @@ jobs:
       - run: npm run build:api
       - run: npm run test:api
 
+      # The demonstration dataset is the only code path no test covers, and
+      # it broke the moment `checkIn` became a required column — silently,
+      # because nothing loads it. It runs last, against the database the
+      # suite has just emptied, so a schema change that the dataset has not
+      # kept up with fails here rather than in front of a BKI panel.
+      - name: Demonstration dataset still loads against the current schema
+        run: npm run db:demo
+
   # Mirrors the Render builds, one job per service.
   #
   # Two jobs, not one, because Render gives each service its own checkout

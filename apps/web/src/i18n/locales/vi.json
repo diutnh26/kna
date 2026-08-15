@@ -201,5 +201,9 @@
     "statusCompleted": "Đã hoàn thành",
     "statusCancelled": "Đã từ chối",
     "decisionError": "Không ghi nhận được. Vui lòng thử lại."
+  },
+  "demo": {
+    "label": "Dữ liệu minh hoạ.",
+    "body": "Các hộ gia đình, đơn đặt và số liệu sổ cái ở đây là ví dụ minh hoạ cách nền tảng trình bày thông tin. Đây không phải dữ liệu thật — dữ liệu thực tế sẽ có khi triển khai thí điểm tại thực địa."
   }
 }

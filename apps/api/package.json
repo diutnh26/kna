@@ -11,7 +11,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:demo": "tsx prisma/demo.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

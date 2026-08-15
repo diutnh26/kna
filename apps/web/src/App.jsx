@@ -9,6 +9,7 @@ import Community from './components/Community';
 import Review from './components/Review';
 import Dashboard from './components/Dashboard';
 import AuthModal from './components/AuthModal';
+import DemoDataBanner from './components/DemoDataBanner';
 import { AuthProvider } from './context/AuthProvider';
 
 /**
@@ -56,6 +57,9 @@ export default function App() {
   const Screen = ROUTES[hash] ?? Landing;
   return (
     <AuthProvider>
+      {/* Above everything: a demonstration ledger that does not say it is
+          one undermines the exact claim this platform is making. */}
+      <DemoDataBanner />
       <Screen />
       <AuthModal />
     </AuthProvider>

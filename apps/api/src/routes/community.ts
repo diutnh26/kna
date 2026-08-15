@@ -79,7 +79,16 @@ communityRouter.get("/stats", async (_req, res) => {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const [committeeCount, providerCount, artisanCount, ledgerToday, awaiting, fundTotal, buonGroups] =
+  const [
+    committeeCount,
+    providerCount,
+    artisanCount,
+    ledgerToday,
+    awaiting,
+    fundTotal,
+    buonGroups,
+    demoAccounts,
+  ] =
     await Promise.all([
       prisma.committeeMember.count(),
       prisma.provider.count({ where: { verified: true } }),
@@ -92,6 +101,12 @@ communityRouter.get("/stats", async (_req, res) => {
       prisma.ledgerEntry.count({ where: PENDING_LEDGER_WHERE }),
       prisma.communityFundEntry.aggregate({ _sum: { amountVnd: true } }),
       prisma.provider.groupBy({ by: ["buon"] }),
+      // Drives the "demonstration data" banner. Derived from the data
+      // rather than an environment flag on purpose: a flag someone forgets
+      // to unset would label real pilot records as a demo, and a flag
+      // someone forgets to set would present demo figures as real. This
+      // clears itself the moment the demo accounts are removed.
+      prisma.user.count({ where: { email: { endsWith: "@example.kna" } } }),
     ]);
 
   res.json({
@@ -105,5 +120,6 @@ communityRouter.get("/stats", async (_req, res) => {
     // as settled revenue is not.
     ledgerEntriesAwaiting: awaiting,
     communityFundTotalVnd: fundTotal._sum.amountVnd ?? 0,
+    isDemoData: demoAccounts > 0,
   });
 });
