@@ -36,3 +36,7 @@ apps/api/generated
 *.sln
 *.sw?
 apps/api/prisma/test.db
+
+# Local Claude Code settings — per-machine, not project config
+.claude/settings.local.json
+src/
