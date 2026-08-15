@@ -39,4 +39,8 @@ apps/api/prisma/test.db
 
 # Local Claude Code settings — per-machine, not project config
 .claude/settings.local.json
-src/
+
+# An empty stray directory at the repo root. Anchored with a leading slash:
+# a bare `src/` matches a directory of that name at ANY depth, which
+# silently excluded apps/web/src files from two commits.
+/src/
