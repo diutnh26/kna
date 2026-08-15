@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
+import { PENDING_LEDGER_WHERE, SETTLED_LEDGER_WHERE } from "../lib/ledger";
 
 export const communityRouter = Router();
 
@@ -7,9 +8,13 @@ export const communityRouter = Router();
 // transparency feature. It is the Phase 1 "Proof of Impact" — a plain
 // database ledger, and the reconciliation target for the Phase 2 contract.
 
+// Only settled rows. A pending booking is a promise, not a distribution,
+// and publishing it as one is the single thing that would most undermine
+// the claim this ledger exists to make. See lib/ledger.ts.
 communityRouter.get("/ledger", async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const entries = await prisma.ledgerEntry.findMany({
+    where: SETTLED_LEDGER_WHERE,
     orderBy: { createdAt: "desc" },
     take: limit,
   });
@@ -74,12 +79,17 @@ communityRouter.get("/stats", async (_req, res) => {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const [committeeCount, providerCount, artisanCount, ledgerToday, fundTotal, buonGroups] =
+  const [committeeCount, providerCount, artisanCount, ledgerToday, awaiting, fundTotal, buonGroups] =
     await Promise.all([
       prisma.committeeMember.count(),
       prisma.provider.count({ where: { verified: true } }),
       prisma.provider.count({ where: { verified: true, type: "ARTISAN" } }),
-      prisma.ledgerEntry.count({ where: { createdAt: { gte: startOfToday } } }),
+      // Settled only, matching /ledger — otherwise the landing page's
+      // "N more today" counted rows the table itself will not show.
+      prisma.ledgerEntry.count({
+        where: { AND: [SETTLED_LEDGER_WHERE, { createdAt: { gte: startOfToday } }] },
+      }),
+      prisma.ledgerEntry.count({ where: PENDING_LEDGER_WHERE }),
       prisma.communityFundEntry.aggregate({ _sum: { amountVnd: true } }),
       prisma.provider.groupBy({ by: ["buon"] }),
     ]);
@@ -90,6 +100,10 @@ communityRouter.get("/stats", async (_req, res) => {
     verifiedArtisans: artisanCount,
     buonOnboarded: buonGroups.length,
     ledgerEntriesToday: ledgerToday,
+    // Surfaced rather than hidden. "3 bookings awaiting confirmation" is a
+    // true and useful thing for a visitor to read; a pending booking shown
+    // as settled revenue is not.
+    ledgerEntriesAwaiting: awaiting,
     communityFundTotalVnd: fundTotal._sum.amountVnd ?? 0,
   });
 });

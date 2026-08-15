@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { splitOrder } from "../lib/fees";
-import { requireAuth, type AuthedRequest } from "../middleware/auth";
+import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
 
 export const ordersRouter = Router();
 
@@ -72,8 +72,8 @@ ordersRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     return sum + product.priceVnd * item.quantity;
   }, 0);
   const { marketplaceFeeVnd } = splitOrder(totalVnd);
-  // Every order in this MVP is single-maker, so the ledger's "to" is that
-  // maker; a mixed-cart order would need one ledger row per provider instead.
+  // Safe because multi-maker carts are rejected above, so every product
+  // here shares one provider.
   const primaryMaker = products[0].provider.displayName;
 
   let order;
@@ -142,3 +142,73 @@ ordersRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
   const { ledgerEntries, ...rest } = order;
   res.status(201).json({ ...rest, ledgerEntry: ledgerEntries[0] ?? null });
 });
+
+// ── Settlement ───────────────────────────────────────────────────────
+// Orders were created PENDING and nothing ever moved them. Two things
+// followed from that, both invisible: the provider dashboard filters
+// marketplace income on PAID/FULFILLED, so artisans saw zero marketplace
+// earnings no matter how much they sold; and once the public ledger began
+// showing only settled rows, no marketplace sale could ever appear on it.
+//
+// Under manual settlement the buyer pays the maker directly and a
+// coordinator records it, exactly as with a booking.
+
+/** Orders awaiting a payment record. */
+ordersRouter.get("/pending", requireAuth, requireCoordinator, async (_req: AuthedRequest, res) => {
+  const orders = await prisma.order.findMany({
+    where: { status: "PENDING" },
+    include: {
+      buyer: { select: { fullName: true, email: true } },
+      items: { include: { product: { select: { title: true, providerId: true } } } },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+  res.json(orders);
+});
+
+const orderDecisionSchema = z.object({ decision: z.enum(["settle", "cancel"]) });
+
+ordersRouter.post(
+  "/:id/decision",
+  requireAuth,
+  requireCoordinator,
+  async (req: AuthedRequest, res) => {
+    const parsed = orderDecisionSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "A decision of 'settle' or 'cancel' is required." });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: req.params.id },
+      include: { items: true },
+    });
+    if (!order) {
+      return res.status(404).json({ error: "That order no longer exists." });
+    }
+    if (order.status !== "PENDING") {
+      return res.status(409).json({ error: "That order has already been decided." });
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (parsed.data.decision === "cancel") {
+        // Put the pieces back. Without this a cancelled order removes stock
+        // permanently — the maker's only copy of something becomes
+        // unsellable because a buyer changed their mind.
+        for (const item of order.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
+        // No money moved, so the promise leaves no trace on the ledger.
+        await tx.ledgerEntry.deleteMany({ where: { orderId: order.id } });
+      }
+      return tx.order.update({
+        where: { id: order.id },
+        data: { status: parsed.data.decision === "settle" ? "PAID" : "CANCELLED" },
+      });
+    });
+
+    res.json(updated);
+  }
+);
