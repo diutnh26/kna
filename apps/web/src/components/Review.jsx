@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import ApiErrorNotice from './ApiErrorNotice';
+import { useTranslation } from 'react-i18next';
 
 const dmy = (iso) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -17,6 +18,7 @@ const dmy = (iso) =>
  * a reason.
  */
 export default function Review() {
+  const { t } = useTranslation();
   const { user, token, isAuthenticated, openAuthModal } = useAuth();
   const [queue, setQueue] = useState([]);
   const [reviewed, setReviewed] = useState([]);
@@ -62,7 +64,7 @@ export default function Review() {
       apply(await fetchAll());
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : 'Could not record that decision. Try again.';
+        err instanceof ApiError ? err.message : t('review.decisionError');
       setErrors((e) => ({ ...e, [entry.id]: message }));
     } finally {
       setBusyId(null);
@@ -76,27 +78,25 @@ export default function Review() {
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 max-w-5xl">
         <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
           <span className="h-px w-12 bg-[#B87333]" />
-          <span>Committee review</span>
+          <span>{t('review.eyebrow')}</span>
         </div>
         <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
-          Nothing is published until someone here says so.
+          {t('review.title')}
         </h1>
         <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
-          Submissions from households wait in this queue. Publishing puts an entry into the public
-          archive; refusing keeps it with the household. Either way the reason is recorded, and a
-          refusal cannot be filed without one.
+          {t('review.intro')}
         </p>
       </section>
 
       {!isAuthenticated && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
           <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
-            <p className="font-display text-2xl mb-4">Sign in to continue.</p>
+            <p className="font-display text-2xl mb-4">{t('review.signInPrompt')}</p>
             <button
               onClick={openAuthModal}
               className="bg-[#C8302E] hover:bg-[#A82826] px-6 py-3 text-sm uppercase tracking-wider transition"
             >
-              Sign in
+              {t('review.signIn')}
             </button>
           </div>
         </section>
@@ -105,10 +105,9 @@ export default function Review() {
       {isAuthenticated && !mayReview && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
           <div className="border border-dashed border-[#F5EDDD]/20 py-16 px-8 text-center">
-            <p className="font-display text-2xl mb-3">This queue belongs to the Committee.</p>
+            <p className="font-display text-2xl mb-3">{t('review.notCommitteeTitle')}</p>
             <p className="text-sm text-[#F5EDDD]/60 max-w-lg mx-auto leading-relaxed">
-              Only members of the Community Governance Committee can review submissions. Seats are
-              nominated by each buôn — they are not something the platform grants.
+              {t('review.notCommitteeBody')}
             </p>
           </div>
         </section>
@@ -119,18 +118,18 @@ export default function Review() {
           <section className="px-8 lg:px-12 xl:px-16 pb-16 max-w-5xl">
             <div className="flex items-center gap-3 text-sm text-[#E8A33D] border border-[#E8A33D]/30 bg-[#E8A33D]/5 px-5 py-3 mb-12">
               <ShieldCheck className="w-4 h-4 shrink-0" />
-              Signed in as {user.fullName}
-              {user.committeeRole ? ` · ${user.committeeRole}` : ' · platform staff'}
+              {t('review.signedInAs', { name: user.fullName })}
+              {user.committeeRole ? ` · ${user.committeeRole}` : ` · ${t('review.platformStaff')}`}
             </div>
 
             <h2 className="font-display text-3xl font-medium mb-2">
-              Waiting for review
+              {t('review.waiting')}
               <span className="text-[#B87333] ml-3 text-2xl">{queue.length}</span>
             </h2>
-            <p className="text-sm text-[#F5EDDD]/50 mb-8">Oldest first, so nothing waits forever.</p>
+            <p className="text-sm text-[#F5EDDD]/50 mb-8">{t('review.oldestFirst')}</p>
 
             {loadState === 'loading' && (
-              <p className="text-sm text-[#F5EDDD]/50 py-12">Loading the queue…</p>
+              <p className="text-sm text-[#F5EDDD]/50 py-12">{t('review.loading')}</p>
             )}
 
             {loadState === 'error' && (
@@ -139,8 +138,8 @@ export default function Review() {
 
             {loadState === 'ready' && queue.length === 0 && (
               <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
-                <p className="font-display text-2xl mb-2">The queue is empty.</p>
-                <p className="text-sm text-[#F5EDDD]/60">Every submission has been decided.</p>
+                <p className="font-display text-2xl mb-2">{t('review.emptyTitle')}</p>
+                <p className="text-sm text-[#F5EDDD]/60">{t('review.emptyBody')}</p>
               </div>
             )}
 
@@ -160,7 +159,7 @@ export default function Review() {
                     </div>
                     <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] border border-[#B87333]/40 text-[#B87333] px-3 py-1.5 shrink-0">
                       <Clock className="w-3 h-3" />
-                      Submitted {dmy(entry.createdAt)}
+                      {t('review.submitted', { date: dmy(entry.createdAt) })}
                     </span>
                   </div>
 
@@ -169,7 +168,7 @@ export default function Review() {
                       <MapPin className="w-3 h-3" />
                       {entry.keeperBuon}
                     </span>
-                    {entry.contributedBy && <span>Submitted by {entry.contributedBy.fullName}</span>}
+                    {entry.contributedBy && <span>{t('review.submittedBy', { name: entry.contributedBy.fullName })}</span>}
                   </div>
 
                   {entry.body && (
@@ -182,7 +181,7 @@ export default function Review() {
                     htmlFor={`note-${entry.id}`}
                     className="block text-xs uppercase tracking-wider text-[#F5EDDD]/50 mb-2"
                   >
-                    Reason — required to refuse, optional to publish
+                    {t('review.reasonLabel')}
                   </label>
                   <textarea
                     id={`note-${entry.id}`}
@@ -203,7 +202,7 @@ export default function Review() {
                       className="inline-flex items-center gap-2 bg-[#3F6146] hover:bg-[#35543B] disabled:opacity-50 px-5 py-3 text-sm transition"
                     >
                       <Check className="w-4 h-4" />
-                      Publish to the archive
+                      {t('review.publish')}
                     </button>
                     <button
                       onClick={() => decide(entry, 'reject')}
@@ -211,7 +210,7 @@ export default function Review() {
                       className="inline-flex items-center gap-2 border border-[#C8302E] text-[#C8302E] hover:bg-[#C8302E] hover:text-[#F5EDDD] disabled:opacity-50 px-5 py-3 text-sm transition"
                     >
                       <X className="w-4 h-4" />
-                      Refuse
+                      {t('review.refuse')}
                     </button>
                   </div>
                 </article>
@@ -223,11 +222,10 @@ export default function Review() {
           <section className="bg-[#F5EDDD] text-[#1A1614]">
             <div className="px-8 lg:px-12 xl:px-16 py-20">
               <h2 className="font-display text-3xl font-medium mb-2 text-[#6B1A1A]">
-                Already decided
+                {t('review.decidedTitle')}
               </h2>
               <p className="text-sm text-[#1A1614]/60 mb-8 max-w-xl leading-relaxed">
-                The full record, refusals included. This is what makes the archive auditable after
-                the fact rather than only at the moment of publishing.
+                {t('review.decidedBody')}
               </p>
 
               <div className="space-y-px bg-[#1A1614]/10">
@@ -244,7 +242,7 @@ export default function Review() {
                           }`}
                         >
                           {published ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                          {published ? 'Published' : 'Refused'}
+                          {published ? t('review.published') : t('review.refused')}
                         </span>
                         {entry.moderatedAt && (
                           <div className="text-xs text-[#1A1614]/45 mt-3">

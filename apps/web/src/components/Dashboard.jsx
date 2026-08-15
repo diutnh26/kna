@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BadgeCheck, Check, Clock, MapPin, Wallet, X } from 'lucide-react';
 import Navbar from './Navbar';
 import { api, ApiError } from '../lib/api';
@@ -9,12 +10,6 @@ const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 const dmy = (iso) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-const BOOKING_STATUS = {
-  PENDING: { label: 'Awaiting confirmation', cls: 'text-[#B87333] border-[#B87333]/40' },
-  CONFIRMED: { label: 'Confirmed', cls: 'text-[#E8A33D] border-[#E8A33D]/40' },
-  COMPLETED: { label: 'Completed', cls: 'text-[#8FBE95] border-[#8FBE95]/40' },
-  CANCELLED: { label: 'Cancelled', cls: 'text-[#C8302E] border-[#C8302E]/50' },
-};
 
 /**
  * Two audiences, one screen:
@@ -27,6 +22,15 @@ const BOOKING_STATUS = {
  * Someone can be both, and then they see both.
  */
 export default function Dashboard() {
+  const { t } = useTranslation();
+  // Status labels are built from t() rather than a module constant, so
+  // they follow the language toggle instead of freezing at import time.
+  const BOOKING_STATUS = {
+    PENDING: { label: t('dashboard.statusPending'), cls: 'text-[#B87333] border-[#B87333]/40' },
+    CONFIRMED: { label: t('dashboard.statusConfirmed'), cls: 'text-[#E8A33D] border-[#E8A33D]/40' },
+    COMPLETED: { label: t('dashboard.statusCompleted'), cls: 'text-[#8FA37B] border-[#8FA37B]/40' },
+    CANCELLED: { label: t('dashboard.statusCancelled'), cls: 'text-[#F5EDDD]/40 border-[#F5EDDD]/20' },
+  };
   const { user, token, isAuthenticated, openAuthModal } = useAuth();
   const [data, setData] = useState(null);
   const [pending, setPending] = useState(null);
@@ -73,7 +77,7 @@ export default function Dashboard() {
       setData(dashboard);
       setPending(queue);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not record that. Try again.');
+      setError(err instanceof ApiError ? err.message : t('dashboard.decisionError'));
     } finally {
       setBusyId(null);
     }
@@ -88,10 +92,10 @@ export default function Dashboard() {
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 max-w-6xl">
         <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
           <span className="h-px w-12 bg-[#B87333]" />
-          <span>Your account</span>
+          <span>{t('dashboard.eyebrow')}</span>
         </div>
         <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-6">
-          {data ? data.provider.displayName : 'Dashboard'}
+          {data ? data.provider.displayName : t('dashboard.fallbackTitle')}
         </h1>
         {data && (
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed flex items-center gap-3">
@@ -100,7 +104,7 @@ export default function Dashboard() {
             {data.provider.verified && (
               <span className="inline-flex items-center gap-1.5 text-sm text-[#E8A33D]">
                 <BadgeCheck className="w-4 h-4" />
-                Verified
+                {t('dashboard.verified')}
               </span>
             )}
           </p>
@@ -110,12 +114,12 @@ export default function Dashboard() {
       {!isAuthenticated && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
           <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
-            <p className="font-display text-2xl mb-4">Sign in to see your account.</p>
+            <p className="font-display text-2xl mb-4">{t('dashboard.signInPrompt')}</p>
             <button
               onClick={openAuthModal}
               className="bg-[#C8302E] hover:bg-[#A82826] px-6 py-3 text-sm uppercase tracking-wider transition"
             >
-              Sign in
+              {t('dashboard.signIn')}
             </button>
           </div>
         </section>
@@ -130,10 +134,9 @@ export default function Dashboard() {
       {isAuthenticated && loadState === 'ready' && !data && !mayCoordinate && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
           <div className="border border-dashed border-[#F5EDDD]/20 py-16 px-8 text-center">
-            <p className="font-display text-2xl mb-3">Nothing to manage here yet.</p>
+            <p className="font-display text-2xl mb-3">{t('dashboard.noProviderTitle')}</p>
             <p className="text-sm text-[#F5EDDD]/60 max-w-lg mx-auto leading-relaxed">
-              This page is for hosts, guides, and makers listing on KNĂ. Becoming a provider means
-              being verified by a community representative in your buôn.
+              {t('dashboard.noProviderBody')}
             </p>
           </div>
         </section>
@@ -143,19 +146,18 @@ export default function Dashboard() {
       {isAuthenticated && loadState === 'ready' && mayCoordinate && (
         <section className="px-8 lg:px-12 xl:px-16 pb-20 max-w-6xl">
           <h2 className="font-display text-3xl font-medium mb-2">
-            Bookings to confirm
+            {t('dashboard.queueTitle')}
             <span className="text-[#B87333] ml-3 text-2xl">{pending?.length ?? 0}</span>
           </h2>
           <p className="text-sm text-[#F5EDDD]/50 mb-8 max-w-2xl leading-relaxed">
-            Check the dates with the household, then confirm here. Declining releases the booking
-            and removes its entry from the public ledger, because no money moved.
+            {t('dashboard.queueIntro')}
           </p>
 
           {error && <p className="text-sm text-[#E8A33D] mb-6">{error}</p>}
 
           {pending?.length === 0 ? (
             <div className="border border-dashed border-[#F5EDDD]/20 py-12 text-center text-sm text-[#F5EDDD]/60">
-              Nothing waiting. Every booking has been decided.
+              {t('dashboard.queueEmpty')}
             </div>
           ) : (
             <div className="space-y-4">
@@ -175,11 +177,12 @@ export default function Dashboard() {
                         has to put to the household, and it is the reason the
                         queue is ordered by arrival rather than by request. */}
                     <p className="text-sm text-[#E8A33D] mb-1">
-                      Arriving {dmy(b.checkIn)} · {b.nights} {b.nights === 1 ? 'night' : 'nights'}
+                      {t('dashboard.arriving', { date: dmy(b.checkIn), count: b.nights })}
                     </p>
                     <p className="text-xs text-[#F5EDDD]/45">
-                      {b.guest.fullName} ({b.guest.email}) · {b.guests}{' '}
-                      {b.guests === 1 ? 'guest' : 'guests'} · requested {dmy(b.createdAt)}
+                      {b.guest.fullName} ({b.guest.email}) ·{' '}
+                      {t('dashboard.guest', { count: b.guests })} ·{' '}
+                      {t('dashboard.requested', { date: dmy(b.createdAt) })}
                     </p>
                   </div>
 
@@ -199,7 +202,7 @@ export default function Dashboard() {
                       className="inline-flex items-center gap-2 bg-[#3F6146] hover:bg-[#35543B] disabled:opacity-50 px-5 py-3 text-sm transition"
                     >
                       <Check className="w-4 h-4" />
-                      Confirm
+                            {t('dashboard.confirm')}
                     </button>
                     <button
                       onClick={() => decide(b, 'decline')}
@@ -207,7 +210,7 @@ export default function Dashboard() {
                       className="inline-flex items-center gap-2 border border-[#C8302E] text-[#C8302E] hover:bg-[#C8302E] hover:text-[#F5EDDD] disabled:opacity-50 px-5 py-3 text-sm transition"
                     >
                       <X className="w-4 h-4" />
-                      Decline
+                      {t('dashboard.decline')}
                     </button>
                   </div>
                 </article>
@@ -224,7 +227,7 @@ export default function Dashboard() {
             <div className="px-8 lg:px-12 xl:px-16 py-20">
               <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-8">
                 <Wallet className="w-4 h-4" />
-                What has reached you
+                {t('dashboard.earningsEyebrow')}
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
@@ -232,44 +235,43 @@ export default function Dashboard() {
                   <div className="font-display text-4xl font-medium text-[#6B1A1A] mb-1">
                     {vnd(totals.bookingEarnedVnd + totals.marketplaceEarnedVnd)}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">yours, from confirmed business</p>
+                  <p className="text-sm text-[#1A1614]/60">{t('dashboard.yours')}</p>
                 </div>
                 <div>
                   <div className="font-display text-4xl font-medium text-[#B87333] mb-1">
                     {vnd(totals.bookingFundVnd)}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">to the Community Fund from your bookings</p>
+                  <p className="text-sm text-[#1A1614]/60">{t('dashboard.toFund')}</p>
                 </div>
                 <div>
                   <div className="font-display text-4xl font-medium text-[#1A1614]/70 mb-1">
                     {vnd(totals.bookingPlatformVnd)}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">platform commission on your bookings</p>
+                  <p className="text-sm text-[#1A1614]/60">{t('dashboard.platformCut')}</p>
                 </div>
                 <div>
                   <div className="font-display text-4xl font-medium text-[#1A1614]/70 mb-1">
                     {totals.pendingBookings}
                   </div>
                   <p className="text-sm text-[#1A1614]/60">
-                    {totals.pendingBookings === 1 ? 'booking' : 'bookings'} awaiting confirmation
+                    {t('dashboard.awaiting', { count: totals.pendingBookings })}
                   </p>
                 </div>
               </div>
 
               <p className="text-xs text-[#1A1614]/50 leading-relaxed max-w-2xl">
-                Bookings still awaiting confirmation are not counted as earnings — nobody has agreed
-                the dates yet. Every figure here also appears on the public ledger.
+                {t('dashboard.earningsNote')}
               </p>
             </div>
           </section>
 
           {/* ── BOOKINGS ─────────────────────────────── */}
           <section className="px-8 lg:px-12 xl:px-16 py-20 max-w-6xl">
-            <h2 className="font-display text-3xl font-medium mb-8">Your bookings</h2>
+            <h2 className="font-display text-3xl font-medium mb-8">{t('dashboard.yourBookings')}</h2>
 
             {data.bookings.length === 0 ? (
               <p className="text-sm text-[#F5EDDD]/60 border border-dashed border-[#F5EDDD]/20 py-12 text-center">
-                No bookings yet.
+                {t('dashboard.noBookings')}
               </p>
             ) : (
               <div className="space-y-3">
@@ -289,9 +291,8 @@ export default function Dashboard() {
                       <div className="flex-1 min-w-[220px]">
                         <div className="text-sm mb-1">{b.listingTitle}</div>
                         <div className="text-xs text-[#F5EDDD]/45">
-                          {b.guestName} · {b.guests} {b.guests === 1 ? 'guest' : 'guests'} ·{' '}
-                          arriving {dmy(b.checkIn)}, {b.nights}{' '}
-                          {b.nights === 1 ? 'night' : 'nights'}
+                          {b.guestName} · {t('dashboard.guest', { count: b.guests })} ·{' '}
+                          {t('dashboard.arriving', { date: dmy(b.checkIn), count: b.nights })}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
