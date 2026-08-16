@@ -259,4 +259,26 @@ describe("account", () => {
       .send({ email: "guest@account.kna", password: "a-much-better-password" });
     expect(relogin.status).toBe(200);
   });
+
+  it("returns the archive photograph on the public list", async () => {
+    // Regression: imageUrl was added to the schema, written to every row
+    // and rendered by the client, but this endpoint uses an explicit
+    // select and silently omitted it. Nothing failed — the field was just
+    // undefined, and every card fell back to its placeholder.
+    const entry = await prisma.archiveEntry.create({
+      data: {
+        type: "Recording",
+        title: "Gong set, harvest",
+        meta: "m",
+        keeperBuon: "Buôn Đôn",
+        moderationStatus: "PUBLISHED",
+        imageUrl: "/images/archive/harvest-gong-set.jpg",
+      },
+    });
+
+    const res = await request(app).get("/archive");
+    const found = res.body.find((e: { id: string }) => e.id === entry.id);
+    expect(found?.imageUrl).toBe("/images/archive/harvest-gong-set.jpg");
+  });
+
 });

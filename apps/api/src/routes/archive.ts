@@ -30,6 +30,11 @@ archiveRouter.get("/", async (req, res) => {
       keeperBuon: true,
       body: true,
       pillar: true,
+      // Explicit select, so a new column is invisible until named here.
+      // imageUrl was added to the schema, written to every row and
+      // rendered by the client, and still came back undefined from this
+      // one endpoint — the other three use `include` and had it already.
+      imageUrl: true,
       createdAt: true,
     },
   });
