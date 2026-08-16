@@ -460,7 +460,8 @@
     ],
     "closingHeading": "That is the whole of it.",
     "closingBody": "The archive, the experiences, the marketplace, the ledger, and the people who decide.",
-    "closingCta": "Back to the beginning"
+    "closingCta": "Back to the beginning",
+    "portraitOf": "Portrait of {{name}}"
   },
   "assistant": {
     "eyebrow": "Travel assistant",

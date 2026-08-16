@@ -16,6 +16,7 @@ import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
 import { api } from '../lib/api';
 import ApiErrorNotice from './ApiErrorNotice';
+import InitialAvatar from './InitialAvatar';
 
 // Illustrative only — the provider board is not built. See the note
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
@@ -131,13 +132,24 @@ export default function Community() {
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {committee.map((m) => (
                   <article key={m.id} className="flex gap-5">
-                    <ImageSlot
-                      src={m.imageUrl}
-                      theme="light"
-                      ratio="aspect-square"
-                      label={t('community.portrait')}
-                      className="w-24 shrink-0"
-                    />
+                    {/* A real photograph the moment one exists and its
+                        subject has agreed; a woven monogram until then.
+                        Not a generated face: these are named people, and a
+                        synthetic portrait of an Ê Đê elder is
+                        indistinguishable from a real one once screenshotted
+                        away from the demonstration banner. */}
+                    {m.imageUrl ? (
+                      <ImageSlot
+                        src={m.imageUrl}
+                        theme="light"
+                        ratio="aspect-square"
+                        label={t('community.portrait')}
+                        alt={t('community.portraitOf', { name: m.name })}
+                        className="w-24 shrink-0"
+                      />
+                    ) : (
+                      <InitialAvatar name={m.name} className="w-24 shrink-0" />
+                    )}
                     <div className="pt-1">
                       <h3 className="font-display text-xl font-medium leading-tight mb-1">{m.name}</h3>
                       <p className="text-sm text-[#B87333] mb-2">{m.role}</p>

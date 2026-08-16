@@ -460,7 +460,8 @@
     ],
     "closingHeading": "Toàn bộ là như vậy.",
     "closingBody": "Kho lưu trữ, các trải nghiệm, chợ, sổ cái, và những con người đưa ra quyết định.",
-    "closingCta": "Trở về từ đầu"
+    "closingCta": "Trở về từ đầu",
+    "portraitOf": "Chân dung {{name}}"
   },
   "assistant": {
     "eyebrow": "Trợ lý du lịch",
