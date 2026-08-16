@@ -91,5 +91,20 @@ try {
 } finally { $img.Dispose() }
 
 $after = (Get-Item $Destination).Length
+
+# Re-encoding an already-compressed JPEG at a fixed quality can produce a
+# LARGER file than it started with, while also costing a second generation
+# of JPEG loss. When nothing was resized and nothing was saved, the honest
+# result is the original: copy it across instead and say so.
+if ($tw -eq $w -and $th -eq $h -and $after -ge $before) {
+  $sameFormat = [IO.Path]::GetExtension($src).ToLower() -in '.jpg', '.jpeg'
+  if ($sameFormat) {
+    Copy-Item -LiteralPath $src -Destination $Destination -Force
+    "{0}x{1}   {2:N0} KB kept as-is (re-encoding would have added {3:N0} KB and a second generation of loss)" -f `
+      $w, $h, ($before / 1KB), (($after - $before) / 1KB)
+    return
+  }
+}
+
 "{0}x{1} -> {2}x{3}   {4:N0} KB -> {5:N0} KB   ({6:N0}% smaller)" -f `
   $w, $h, $tw, $th, ($before / 1KB), ($after / 1KB), ((1 - $after / $before) * 100)
