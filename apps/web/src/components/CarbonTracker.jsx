@@ -323,7 +323,7 @@ export default function CarbonTracker() {
 
             <div className="md:col-span-5 flex flex-col items-start md:items-end gap-4">
               <div>
-                <div className="font-display text-4xl md:text-5xl font-medium text-[#E8A33D] leading-none">
+                <div className="font-display price-hero font-medium text-[#E8A33D] leading-none">
                   {vnd(cost)}
                 </div>
                 <div className="text-xs text-[#F5EDDD]/40 mt-2">

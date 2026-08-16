@@ -187,7 +187,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <div className="font-display text-2xl text-[#E8A33D] leading-none mb-1">
+                    <div className="font-display price-sm text-[#E8A33D] leading-none mb-1">
                       {vnd(b.totalVnd)}
                     </div>
                     <div className="text-[11px] text-[#F5EDDD]/40">
@@ -232,19 +232,19 @@ export default function Dashboard() {
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
                 <div>
-                  <div className="font-display text-4xl font-medium text-[#6B1A1A] mb-1">
+                  <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
                     {vnd(totals.bookingEarnedVnd + totals.marketplaceEarnedVnd)}
                   </div>
                   <p className="text-sm text-[#1A1614]/60">{t('dashboard.yours')}</p>
                 </div>
                 <div>
-                  <div className="font-display text-4xl font-medium text-[#B87333] mb-1">
+                  <div className="font-display price-lg font-medium text-[#B87333] mb-1">
                     {vnd(totals.bookingFundVnd)}
                   </div>
                   <p className="text-sm text-[#1A1614]/60">{t('dashboard.toFund')}</p>
                 </div>
                 <div>
-                  <div className="font-display text-4xl font-medium text-[#1A1614]/70 mb-1">
+                  <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
                     {vnd(totals.bookingPlatformVnd)}
                   </div>
                   <p className="text-sm text-[#1A1614]/60">{t('dashboard.platformCut')}</p>
@@ -296,7 +296,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="font-mono text-sm text-[#E8A33D]">
+                        <div className="font-mono price-xs text-[#E8A33D]">
                           {vnd(b.providerPayoutVnd)}
                         </div>
                         <div className="text-[11px] text-[#F5EDDD]/40">
@@ -327,7 +327,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-mono text-sm text-[#E8A33D]">{vnd(o.earnedVnd)}</div>
+                      <div className="font-mono price-xs text-[#E8A33D]">{vnd(o.earnedVnd)}</div>
                       <div className="text-[11px] text-[#F5EDDD]/40">of {vnd(o.grossVnd)} · 95%</div>
                     </div>
                   </article>

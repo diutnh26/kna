@@ -191,7 +191,7 @@ export default function Community() {
                   <span className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD]/40">
                     {t('community.fundAllocated', { quarter: fund.quarter })}
                   </span>
-                  <span className="font-display text-3xl text-[#E8A33D]">{vnd(fund.totalVnd)}</span>
+                  <span className="font-display price-md text-[#E8A33D]">{vnd(fund.totalVnd)}</span>
                 </div>
 
                 <ul>
@@ -213,7 +213,7 @@ export default function Community() {
                           style={{ width: `${(l.amountVnd / fund.totalVnd) * 100}%` }}
                         />
                       </div>
-                      <span className="font-mono text-sm text-[#F5EDDD]/70 w-32 text-right shrink-0">
+                      <span className="font-mono price-xs text-[#F5EDDD]/70 w-32 text-right shrink-0">
                         {vnd(l.amountVnd)}
                       </span>
                     </li>

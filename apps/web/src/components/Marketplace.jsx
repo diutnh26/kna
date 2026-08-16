@@ -326,7 +326,7 @@ export default function Marketplace() {
                         <div className="mt-auto space-y-4">
                           <div className="flex items-end justify-between gap-4">
                             <div>
-                              <div className="font-display text-2xl text-[#E8A33D] leading-none">
+                              <div className="font-display price-sm text-[#E8A33D] leading-none">
                                 {vnd(p.priceVnd)}
                               </div>
                               <div className="text-[11px] text-[#F5EDDD]/40 mt-1">

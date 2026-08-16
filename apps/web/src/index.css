@@ -30,6 +30,41 @@
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
   }
 
+  /* Price figures.
+
+     Each step is exactly 80% of the Tailwind size it replaces, so a price
+     never shouts louder than the thing it is the price of. Named steps
+     rather than arbitrary values at each call site, so the ratio can be
+     re-tuned in one place instead of hunted across six screens.
+
+     Pair with font-display as before — these set size only. */
+  /* The one price that scales with the viewport (the offset total). The
+     breakpoint lives here rather than as `md:price-xl` in the markup:
+     Tailwind does not emit a responsive variant for a components-layer
+     class that never appears bare, so that silently rendered at the small
+     size on every screen. */
+  .price-hero {
+    font-size: 1.8rem;
+  } /* was text-4xl, 2.25rem */
+  @media (min-width: 768px) {
+    .price-hero {
+      font-size: 2.4rem;
+    } /* was md:text-5xl, 3rem */
+  }
+
+  .price-lg {
+    font-size: 1.8rem;
+  } /* was text-4xl, 2.25rem */
+  .price-md {
+    font-size: 1.5rem;
+  } /* was text-3xl, 1.875rem */
+  .price-sm {
+    font-size: 1.2rem;
+  } /* was text-2xl, 1.5rem */
+  .price-xs {
+    font-size: 0.7rem;
+  } /* was text-sm, 0.875rem */
+
   /* Signature woven band, used as a section divider.
      Diagonals in Kteh red and Gong copper. */
   .textile {
