@@ -242,7 +242,7 @@
         "en": "Weaving",
         "line": "Pattern as written record",
         "body": "Motifs are not ornament. They mark clan, region, and the occasion a cloth was made for. A weaver reading another weaver’s work can name the village it came from.",
-        "image": "/images/pillars/mnga-weaving.png",
+        "image": "/images/pillars/mnga-weaving.jpg",
         "alt": "An Ê Đê woman weaving at a backstrap loom in an indigo tunic with red and white motifs at the collar and sleeves, a second weaver working behind her."
       }
     ],
@@ -563,7 +563,8 @@
         "led": "Buôn Trấp households",
         "unit": "bamboo and hardwood along the shoreline",
         "body": "Shoreline planting to slow erosion into the lake. Run in the wet season, when saplings take without irrigation.",
-        "image": "/images/projects/lak.jpg"
+        "image": "/images/projects/lak.jpg",
+        "alt": "A person in a conical palm-leaf hat and a woven jacket with red and blue motifs, seen from behind, looking out over Lắk Lake towards low hills, reeds standing in the shallows."
       },
       {
         "id": "corridor",

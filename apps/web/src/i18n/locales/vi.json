@@ -242,7 +242,7 @@
         "en": "Dệt thổ cẩm",
         "line": "Hoa văn như một dạng chữ viết",
         "body": "Hoa văn không phải để trang trí. Chúng ghi dấu dòng họ, vùng đất và dịp mà tấm vải được dệt. Một người thợ dệt nhìn tác phẩm của người khác có thể gọi tên ngôi làng nó đến từ đó.",
-        "image": "/images/pillars/mnga-weaving.png",
+        "image": "/images/pillars/mnga-weaving.jpg",
         "alt": "Một phụ nữ Ê Đê đang dệt trên khung dệt lưng, mặc áo chàm với hoa văn đỏ trắng ở cổ và tay áo, phía sau là một người thợ dệt khác đang làm việc."
       }
     ],
@@ -563,7 +563,8 @@
         "led": "Các hộ gia đình Buôn Trấp",
         "unit": "tre và cây gỗ dọc bờ hồ",
         "body": "Trồng cây ven bờ để làm chậm xói mòn xuống lòng hồ. Thực hiện vào mùa mưa, khi cây con bén rễ mà không cần tưới.",
-        "image": "/images/projects/lak.jpg"
+        "image": "/images/projects/lak.jpg",
+        "alt": "Một người đội nón lá và mặc áo dệt hoa văn đỏ xanh, nhìn từ phía sau, đang ngắm hồ Lắk về phía dãy đồi thấp, lau sậy mọc lên từ vùng nước nông."
       },
       {
         "id": "corridor",
