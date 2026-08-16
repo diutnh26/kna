@@ -554,7 +554,8 @@
         "led": "Các hộ gia đình Buôn Đôn",
         "unit": "cây bản địa, được chăm sóc trong ba năm",
         "body": "Vùng đệm bị suy thoái ở rìa vườn quốc gia, được trồng lại bằng cây họ dầu và do chính các hộ canh tác bên cạnh chăm sóc. Tỷ lệ sống được đếm hằng năm, không phải tại thời điểm trồng.",
-        "image": "/images/projects/yokdon.jpg"
+        "image": "/images/projects/yokdon.jpg",
+        "alt": "Ba người mặc đồng phục kiểm lâm ngồi giữa những bầu cây con dưới giàn che vườn ươm, một người cầm cây giống trong bầu đất, một người khác ghi chép trên bảng kẹp hồ sơ."
       },
       {
         "id": "lak",

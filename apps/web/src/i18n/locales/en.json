@@ -554,7 +554,8 @@
         "led": "Buôn Đôn households",
         "unit": "native saplings, tended for three years",
         "body": "Degraded buffer land on the park edge, replanted with dipterocarp and tended by the households that farm beside it. Survival is counted annually, not at planting.",
-        "image": "/images/projects/yokdon.jpg"
+        "image": "/images/projects/yokdon.jpg",
+        "alt": "Three men in forestry uniforms crouched among potted saplings under a nursery shade frame, one holding a seedling in a planting bag while another writes on a clipboard."
       },
       {
         "id": "lak",

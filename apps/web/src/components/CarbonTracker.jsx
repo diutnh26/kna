@@ -276,6 +276,8 @@ export default function CarbonTracker() {
                 >
                   <ImageSlot
                     src={p.image}
+                    alt={p.alt}
+                    position={p.position}
                     theme={active ? 'dark' : 'light'}
                     ratio="aspect-[3/2]"
                     label={`${p.name} — site photograph`}
