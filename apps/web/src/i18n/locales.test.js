@@ -98,4 +98,24 @@ describe('locales', () => {
     walk(en, vi);
     expect(suspicious).toEqual([]);
   });
+
+  it('gives every editorial photograph alt text in both languages', () => {
+    // `label` describes what a slot should eventually hold; `alt` describes
+    // the photograph now in it. Once a real image lands, shipping without
+    // alt leaves a screen-reader user with the caption for a picture that
+    // is no longer missing — which describes the crop and nothing else.
+    const missing = [];
+    for (const [section, key] of [
+      ['explore', 'pillars'],
+      ['carbon', 'projects'],
+    ]) {
+      (en[section][key] ?? []).forEach((item, i) => {
+        if (!item.image) return;
+        if (!item.alt) missing.push(`en.${section}.${key}[${i}]`);
+        if (!vi[section][key]?.[i]?.alt) missing.push(`vi.${section}.${key}[${i}]`);
+      });
+    }
+    expect(missing).toEqual([]);
+  });
+
 });

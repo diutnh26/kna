@@ -572,7 +572,8 @@
         "led": "Buôn Đôn conservation group",
         "unit": "habitat clearing and fodder planting",
         "body": "Supports the shift away from elephant riding by funding habitat and fodder for observation-based tourism instead.",
-        "image": "/images/projects/corridor.jpg"
+        "image": "/images/projects/corridor.jpg",
+        "alt": "An elder in Ê Đê ceremonial dress with a red headwrap holds a bowl to a domesticated elephant, reaching up to touch its head; the elephant carries no saddle."
       }
     ],
     "joinIn": "Join in",

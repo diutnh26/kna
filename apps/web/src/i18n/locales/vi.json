@@ -572,7 +572,8 @@
         "led": "Nhóm bảo tồn Buôn Đôn",
         "unit": "phát quang sinh cảnh và trồng cây thức ăn",
         "body": "Hỗ trợ việc chuyển đổi khỏi hình thức cưỡi voi, bằng cách tài trợ sinh cảnh và nguồn thức ăn cho mô hình du lịch quan sát voi.",
-        "image": "/images/projects/corridor.jpg"
+        "image": "/images/projects/corridor.jpg",
+        "alt": "Một già làng trong trang phục nghi lễ Ê Đê, đầu quấn khăn đỏ, đưa bát thức ăn cho một con voi nhà và với tay chạm lên đầu voi; con voi không mang bành."
       }
     ],
     "joinIn": "Cùng tham gia",
