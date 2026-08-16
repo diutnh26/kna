@@ -66,6 +66,11 @@ model Provider {
   displayName String
   buon        String // village, e.g. "Buôn Akô Dhông"
   bio         String?
+  // Path or URL to a photograph. Nullable on purpose: a provider without a
+  // photograph is a normal state, not a broken one, and the UI falls back
+  // to a labelled placeholder. Holding a URL rather than bytes means the
+  // move to object storage later is a data change, not a schema change.
+  imageUrl    String?
   verified    Boolean  @default(false)
   createdAt   DateTime @default(now())
 
@@ -86,6 +91,7 @@ model Listing {
   groupSize    String // "Up to 6 guests" — free text, host's own words
   carbonRating String // "Low" | "Very low" ...
   customs      String?
+  imageUrl     String?
   published    Boolean  @default(false)
   createdAt    DateTime @default(now())
 
@@ -150,6 +156,7 @@ model Product {
   note       String
   priceVnd   Int
   stock      Int
+  imageUrl   String?
   published  Boolean  @default(false)
   createdAt  DateTime @default(now())
 
@@ -252,6 +259,7 @@ model ArchiveEntry {
   // Editorial grouping on the Explore page: "Cồng Chiêng" | "The Long
   // House" | "Weaving". Null for entries that sit outside the three.
   pillar           String?
+  imageUrl         String?
   moderationStatus String   @default("IN_REVIEW")
   createdAt        DateTime @default(now())
 

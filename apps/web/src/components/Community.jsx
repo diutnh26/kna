@@ -132,6 +132,7 @@ export default function Community() {
                 {committee.map((m) => (
                   <article key={m.id} className="flex gap-5">
                     <ImageSlot
+                      src={m.imageUrl}
                       theme="light"
                       ratio="aspect-square"
                       label={t('community.portrait')}

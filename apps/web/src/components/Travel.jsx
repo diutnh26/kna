@@ -282,6 +282,7 @@ export default function Travel() {
                       className="group border border-[#F5EDDD]/10 hover:border-[#F5EDDD]/30 transition flex flex-col"
                     >
                       <ImageSlot
+                        src={l.imageUrl}
                         ratio="aspect-[4/3]"
                         label={t('travel.photoLabel', { title: l.title, buon: l.provider.buon })}
                         className="border-0 border-b border-dashed"

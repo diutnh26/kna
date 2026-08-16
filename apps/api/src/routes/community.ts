@@ -57,7 +57,12 @@ communityRouter.get("/decisions", async (_req, res) => {
 
 communityRouter.get("/committee", async (_req, res) => {
   const members = await prisma.committeeMember.findMany({
-    include: { user: { select: { fullName: true } } },
+    // The portrait hangs off Provider, not CommitteeMember: a seat-holder
+    // who is also a host already has one, and asking for a second copy of
+    // the same photograph would be asking the same person twice.
+    include: {
+      user: { select: { fullName: true, provider: { select: { imageUrl: true } } } },
+    },
     orderBy: { sortOrder: "asc" },
   });
   // Flatten so the client isn't reaching through a relation for a name.
@@ -68,6 +73,7 @@ communityRouter.get("/committee", async (_req, res) => {
       role: m.role,
       buon: m.buon,
       since: m.since,
+      imageUrl: m.user.provider?.imageUrl ?? null,
     }))
   );
 });

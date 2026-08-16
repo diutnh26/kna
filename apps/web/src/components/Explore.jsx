@@ -117,6 +117,7 @@ export default function Explore() {
               return (
                 <article key={p.en} className="flex flex-col">
                   <ImageSlot
+                    src={p.image}
                     theme="light"
                     ratio="aspect-[4/5]"
                     label={t('explore.photoLabel', { name: p.en })}
@@ -190,6 +191,7 @@ export default function Explore() {
               {entries.map((item) => (
                 <article key={item.id} className="group">
                   <ImageSlot
+                    src={item.imageUrl}
                     ratio="aspect-[3/2]"
                     label={`${item.type} — ${item.title}`}
                     className="mb-5"

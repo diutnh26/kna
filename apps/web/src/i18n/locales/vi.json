@@ -224,19 +224,22 @@
         "ede": "Ching Kram",
         "en": "Cồng Chiêng",
         "line": "Được UNESCO công nhận năm 2005",
-        "body": "Ở đây, cồng chiêng không phải một nhạc cụ. Đó là một tiếng nói. Mỗi bộ được chỉnh riêng cho một gia đình, được tấu lên trong lễ sinh, mùa gặt và tang lễ, và người nghe đọc nó như đọc một lá thư."
+        "body": "Ở đây, cồng chiêng không phải một nhạc cụ. Đó là một tiếng nói. Mỗi bộ được chỉnh riêng cho một gia đình, được tấu lên trong lễ sinh, mùa gặt và tang lễ, và người nghe đọc nó như đọc một lá thư.",
+        "image": "/images/pillars/ching-kram.jpg"
       },
       {
         "ede": "Knă",
         "en": "Nhà Dài",
         "line": "Kiến trúc của gia đình mẫu hệ",
-        "body": "Ngôi nhà lớn lên cùng gia đình. Mỗi khi một người con gái lấy chồng, nhà lại được nối thêm một gian — nên chiều dài của ngôi nhà dài ghi lại bao nhiêu thế hệ đã sống dưới mái ấy."
+        "body": "Ngôi nhà lớn lên cùng gia đình. Mỗi khi một người con gái lấy chồng, nhà lại được nối thêm một gian — nên chiều dài của ngôi nhà dài ghi lại bao nhiêu thế hệ đã sống dưới mái ấy.",
+        "image": "/images/pillars/kna-longhouse.jpg"
       },
       {
         "ede": "Mnga",
         "en": "Dệt thổ cẩm",
         "line": "Hoa văn như một dạng chữ viết",
-        "body": "Hoa văn không phải để trang trí. Chúng ghi dấu dòng họ, vùng đất và dịp mà tấm vải được dệt. Một người thợ dệt nhìn tác phẩm của người khác có thể gọi tên ngôi làng nó đến từ đó."
+        "body": "Hoa văn không phải để trang trí. Chúng ghi dấu dòng họ, vùng đất và dịp mà tấm vải được dệt. Một người thợ dệt nhìn tác phẩm của người khác có thể gọi tên ngôi làng nó đến từ đó.",
+        "image": "/images/pillars/mnga-weaving.jpg"
       }
     ],
     "entriesPublished_one": "{{count}} mục đã công bố",
@@ -546,21 +549,24 @@
         "name": "Trồng lại vùng đệm Yok Đôn",
         "led": "Các hộ gia đình Buôn Đôn",
         "unit": "cây bản địa, được chăm sóc trong ba năm",
-        "body": "Vùng đệm bị suy thoái ở rìa vườn quốc gia, được trồng lại bằng cây họ dầu và do chính các hộ canh tác bên cạnh chăm sóc. Tỷ lệ sống được đếm hằng năm, không phải tại thời điểm trồng."
+        "body": "Vùng đệm bị suy thoái ở rìa vườn quốc gia, được trồng lại bằng cây họ dầu và do chính các hộ canh tác bên cạnh chăm sóc. Tỷ lệ sống được đếm hằng năm, không phải tại thời điểm trồng.",
+        "image": "/images/projects/yokdon.jpg"
       },
       {
         "id": "lak",
         "name": "Trồng rừng đầu nguồn hồ Lắk",
         "led": "Các hộ gia đình Buôn Trấp",
         "unit": "tre và cây gỗ dọc bờ hồ",
-        "body": "Trồng cây ven bờ để làm chậm xói mòn xuống lòng hồ. Thực hiện vào mùa mưa, khi cây con bén rễ mà không cần tưới."
+        "body": "Trồng cây ven bờ để làm chậm xói mòn xuống lòng hồ. Thực hiện vào mùa mưa, khi cây con bén rễ mà không cần tưới.",
+        "image": "/images/projects/lak.jpg"
       },
       {
         "id": "corridor",
         "name": "Duy trì hành lang voi",
         "led": "Nhóm bảo tồn Buôn Đôn",
         "unit": "phát quang sinh cảnh và trồng cây thức ăn",
-        "body": "Hỗ trợ việc chuyển đổi khỏi hình thức cưỡi voi, bằng cách tài trợ sinh cảnh và nguồn thức ăn cho mô hình du lịch quan sát voi."
+        "body": "Hỗ trợ việc chuyển đổi khỏi hình thức cưỡi voi, bằng cách tài trợ sinh cảnh và nguồn thức ăn cho mô hình du lịch quan sát voi.",
+        "image": "/images/projects/corridor.jpg"
       }
     ],
     "joinIn": "Cùng tham gia",

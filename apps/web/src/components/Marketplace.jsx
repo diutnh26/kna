@@ -279,6 +279,7 @@ export default function Marketplace() {
                     >
                       <div className="relative">
                         <ImageSlot
+                          src={p.imageUrl}
                           ratio="aspect-square"
                           label={t('marketplace.photoLabel', { title: p.title, maker: p.provider.displayName })}
                           className="border-0 border-b border-dashed"

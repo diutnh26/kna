@@ -224,19 +224,22 @@
         "ede": "Ching Kram",
         "en": "Cồng Chiêng",
         "line": "Recognised by UNESCO in 2005",
-        "body": "A gong is not an instrument here. It is a voice. Each set is tuned to a family, played at births, harvests, and funerals, and read by listeners the way a letter is read."
+        "body": "A gong is not an instrument here. It is a voice. Each set is tuned to a family, played at births, harvests, and funerals, and read by listeners the way a letter is read.",
+        "image": "/images/pillars/ching-kram.jpg"
       },
       {
         "ede": "Knă",
         "en": "The Long House",
         "line": "Architecture of the matrilineal family",
-        "body": "A house grows with its family. New sections are added as daughters marry, so the length of a longhouse records how many generations have lived under it."
+        "body": "A house grows with its family. New sections are added as daughters marry, so the length of a longhouse records how many generations have lived under it.",
+        "image": "/images/pillars/kna-longhouse.jpg"
       },
       {
         "ede": "Mnga",
         "en": "Weaving",
         "line": "Pattern as written record",
-        "body": "Motifs are not ornament. They mark clan, region, and the occasion a cloth was made for. A weaver reading another weaver’s work can name the village it came from."
+        "body": "Motifs are not ornament. They mark clan, region, and the occasion a cloth was made for. A weaver reading another weaver’s work can name the village it came from.",
+        "image": "/images/pillars/mnga-weaving.jpg"
       }
     ],
     "entriesPublished_one": "{{count}} entry published",
@@ -546,21 +549,24 @@
         "name": "Yok Đôn buffer replanting",
         "led": "Buôn Đôn households",
         "unit": "native saplings, tended for three years",
-        "body": "Degraded buffer land on the park edge, replanted with dipterocarp and tended by the households that farm beside it. Survival is counted annually, not at planting."
+        "body": "Degraded buffer land on the park edge, replanted with dipterocarp and tended by the households that farm beside it. Survival is counted annually, not at planting.",
+        "image": "/images/projects/yokdon.jpg"
       },
       {
         "id": "lak",
         "name": "Lắk Lake watershed planting",
         "led": "Buôn Trấp households",
         "unit": "bamboo and hardwood along the shoreline",
-        "body": "Shoreline planting to slow erosion into the lake. Run in the wet season, when saplings take without irrigation."
+        "body": "Shoreline planting to slow erosion into the lake. Run in the wet season, when saplings take without irrigation.",
+        "image": "/images/projects/lak.jpg"
       },
       {
         "id": "corridor",
         "name": "Elephant corridor upkeep",
         "led": "Buôn Đôn conservation group",
         "unit": "habitat clearing and fodder planting",
-        "body": "Supports the shift away from elephant riding by funding habitat and fodder for observation-based tourism instead."
+        "body": "Supports the shift away from elephant riding by funding habitat and fodder for observation-based tourism instead.",
+        "image": "/images/projects/corridor.jpg"
       }
     ],
     "joinIn": "Join in",

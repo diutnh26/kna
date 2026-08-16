@@ -75,6 +75,11 @@ describe('locales', () => {
       // Proper nouns and a competition name; translating these would be wrong.
       'landing.footer.copyright',
     ];
+    // Image paths sit beside the prose they belong to, so a translator
+    // never has to hunt for a filename — but a filename is not prose and
+    // is identical in every language by definition.
+    const isAssetPath = (key, value) =>
+      key.endsWith('.image') || (typeof value === 'string' && value.startsWith('/images/'));
     const suspicious = [];
     const walk = (a, b, path = '') => {
       for (const [k, v] of Object.entries(a)) {
@@ -83,7 +88,8 @@ describe('locales', () => {
           typeof v === 'string' &&
           v.length > 24 &&
           b?.[k] === v &&
-          !identicalOnPurpose.includes(`${path}${k}`)
+          !identicalOnPurpose.includes(`${path}${k}`) &&
+          !isAssetPath(`${path}${k}`, v)
         ) {
           suspicious.push(`${path}${k}`);
         }
