@@ -243,7 +243,8 @@
         "en": "Dệt thổ cẩm",
         "line": "Hoa văn như một dạng chữ viết",
         "body": "Hoa văn không phải để trang trí. Chúng ghi dấu dòng họ, vùng đất và dịp mà tấm vải được dệt. Một người thợ dệt nhìn tác phẩm của người khác có thể gọi tên ngôi làng nó đến từ đó.",
-        "image": "/images/pillars/mnga-weaving.jpg"
+        "image": "/images/pillars/mnga-weaving.png",
+        "alt": "Một phụ nữ Ê Đê đang dệt trên khung dệt lưng, mặc áo chàm với hoa văn đỏ trắng ở cổ và tay áo, phía sau là một người thợ dệt khác đang làm việc."
       }
     ],
     "entriesPublished_one": "{{count}} mục đã công bố",

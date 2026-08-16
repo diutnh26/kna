@@ -243,7 +243,8 @@
         "en": "Weaving",
         "line": "Pattern as written record",
         "body": "Motifs are not ornament. They mark clan, region, and the occasion a cloth was made for. A weaver reading another weaver’s work can name the village it came from.",
-        "image": "/images/pillars/mnga-weaving.jpg"
+        "image": "/images/pillars/mnga-weaving.png",
+        "alt": "An Ê Đê woman weaving at a backstrap loom in an indigo tunic with red and white motifs at the collar and sleeves, a second weaver working behind her."
       }
     ],
     "entriesPublished_one": "{{count}} entry published",
