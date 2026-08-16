@@ -62,6 +62,33 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(() => setSession(null), []);
 
+  /**
+   * Re-reads the signed-in person from the API.
+   *
+   * The session in localStorage is a snapshot from when the token was
+   * issued. After the account screen changes a name or a language, the
+   * navbar greeting and the language toggle are both reading that stale
+   * snapshot until this runs.
+   */
+  const refreshUser = useCallback(async () => {
+    const current = readStoredSession()?.token;
+    if (!current) return;
+    const { user } = await api.me(current);
+    setSession((s) => (s ? { ...s, user } : s));
+  }, []);
+
+  /**
+   * Replaces the token without touching the user.
+   *
+   * Changing a password revokes every token including this tab's, and the
+   * API hands back a replacement. Without this the person would be signed
+   * out of the page they just changed their password on, which reads as
+   * the change having failed.
+   */
+  const setToken = useCallback((token) => {
+    setSession((s) => (s ? { ...s, token } : s));
+  }, []);
+
   const value = useMemo(
     () => ({
       user: session?.user ?? null,
@@ -70,11 +97,13 @@ export function AuthProvider({ children }) {
       login,
       signup,
       logout,
+      refreshUser,
+      setToken,
       modalOpen,
       openAuthModal: () => setModalOpen(true),
       closeAuthModal: () => setModalOpen(false),
     }),
-    [session, login, signup, logout, modalOpen]
+    [session, login, signup, logout, refreshUser, setToken, modalOpen]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

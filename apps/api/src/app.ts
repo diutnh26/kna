@@ -9,6 +9,7 @@ import { ordersRouter } from "./routes/orders";
 import { communityRouter } from "./routes/community";
 import { archiveRouter } from "./routes/archive";
 import { providersRouter } from "./routes/providers";
+import { accountRouter } from "./routes/account";
 
 /**
  * Accepts an origin with or without a scheme.
@@ -40,6 +41,7 @@ export function createApp() {
   app.use("/community", communityRouter);
   app.use("/archive", archiveRouter);
   app.use("/providers", providersRouter);
+  app.use("/account", accountRouter);
 
   app.use((req, res) => {
     res.status(404).json({ error: `No route for ${req.method} ${req.path}` });

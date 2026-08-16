@@ -8,6 +8,7 @@ import CarbonTracker from './components/CarbonTracker';
 import Community from './components/Community';
 import Review from './components/Review';
 import Dashboard from './components/Dashboard';
+import Account from './components/Account';
 import AuthModal from './components/AuthModal';
 import DemoDataBanner from './components/DemoDataBanner';
 import { AuthProvider } from './context/AuthProvider';
@@ -24,6 +25,7 @@ import { AuthProvider } from './context/AuthProvider';
  *   /#community     → Community space
  *   /#review        → Committee review queue (gated in the screen itself)
  *   /#dashboard     → Provider earnings + coordinator booking queue
+ *   /#account       → The signed-in person's details and activity
  *
  * Swap for react-router-dom when screens need nested
  * routes or URL parameters.
@@ -39,6 +41,7 @@ const ROUTES = {
   '#community': Community,
   '#review': Review,
   '#dashboard': Dashboard,
+  '#account': Account,
 };
 
 export default function App() {

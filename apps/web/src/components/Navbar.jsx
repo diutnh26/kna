@@ -94,7 +94,15 @@ export default function Navbar({ active = '', theme = 'dark' }) {
             </button>
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
-                <span className={`${muted} text-xs`}>{t('auth.greeting', { name: user.fullName.split(' ')[0] })}</span>
+                {/* The greeting is the way in, rather than another nav
+                    item: an account link is only meaningful once you are
+                    signed in, and the name is already where people look. */}
+                <a
+                  href="#account"
+                  className={`${muted} text-xs hover:text-current underline-offset-4 hover:underline`}
+                >
+                  {t('auth.greeting', { name: user.fullName.split(' ')[0] })}
+                </a>
                 <button
                   onClick={logout}
                   className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
@@ -144,12 +152,21 @@ export default function Navbar({ active = '', theme = 'dark' }) {
                 {t('nav.langToggle')}
               </button>
               {isAuthenticated ? (
+                <>
+                  <a
+                    href="#account"
+                    onClick={() => setOpen(false)}
+                    className={`${faint} text-xs uppercase tracking-wider`}
+                  >
+                    {t('nav.account')}
+                  </a>
                 <button
                   onClick={logout}
                   className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
                 >
                   {t('auth.signOut')}
                 </button>
+                </>
               ) : (
                 <button
                   onClick={() => { setOpen(false); openAuthModal(); }}

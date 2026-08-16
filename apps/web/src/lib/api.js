@@ -77,6 +77,14 @@ export const api = {
   decideBooking: (id, payload, token) =>
     request(`/bookings/${id}/decision`, { method: 'POST', body: payload, token }),
   providerDashboard: (token) => request('/providers/me', { token }),
+
+  // A person's own account: who they are, and everything they have done
+  // here as one timeline rather than three lists.
+  account: (token) => request('/account', { token }),
+  updateAccount: (payload, token) => request('/account', { method: 'PATCH', body: payload, token }),
+  changePassword: (payload, token) =>
+    request('/account/password', { method: 'POST', body: payload, token }),
+  accountActivity: (token) => request('/account/activity', { token }),
   createOrder: (payload, token) => request('/orders', { method: 'POST', body: payload, token }),
 
   archive: (params) => request(`/archive${query(params)}`),

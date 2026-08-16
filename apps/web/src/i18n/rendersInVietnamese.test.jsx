@@ -10,6 +10,7 @@ import Explore from '../components/Explore';
 import Community from '../components/Community';
 import Assistant from '../components/Assistant';
 import CarbonTracker from '../components/CarbonTracker';
+import Account from '../components/Account';
 
 /**
  * Proves the screens actually render Vietnamese, rather than merely having
@@ -73,6 +74,13 @@ describe('screens render in Vietnamese', () => {
     expect(await screen.findByText(/Trợ lý du lịch/)).toBeInTheDocument();
     // The canned prompts are content, not chrome — they must translate too.
     expect(screen.getByText(/Tôi nên chào người lớn tuổi thế nào/)).toBeInTheDocument();
+  });
+
+  it('Account', async () => {
+    // Signed out is enough: the sign-in prompt is the screen's own copy.
+    await withVietnamese(<Account />);
+    expect(await screen.findByText(/Tài khoản của bạn/)).toBeInTheDocument();
+    expect(screen.getByText(/Đăng nhập để xem tài khoản của bạn/)).toBeInTheDocument();
   });
 
   it('CarbonTracker, including its offset projects', async () => {

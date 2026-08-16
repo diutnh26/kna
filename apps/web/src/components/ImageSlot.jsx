@@ -18,12 +18,16 @@ import { useTranslation } from 'react-i18next';
  *   ratio  — Tailwind aspect class, e.g. "aspect-[4/3]". Omit when the
  *            parent controls height (then pass className="h-full").
  *   theme  — "dark" (default) or "light", matched to the section background.
+ *   showCaption — set false for thumbnails. The label is still the alt
+ *            text, but it is not drawn: at 80px it is unreadable anyway,
+ *            and in a list it repeats the heading sitting beside it.
  */
 export default function ImageSlot({
   src,
   label,
   ratio = 'aspect-[4/3]',
   theme = 'dark',
+  showCaption = true,
   className = '',
 }) {
   const { t } = useTranslation();
@@ -58,7 +62,9 @@ export default function ImageSlot({
       className={`${ratio} ${fill} border border-dashed ${border} flex flex-col items-center justify-center gap-3 p-6 ${className}`}
     >
       <Image className={`w-5 h-5 ${icon}`} strokeWidth={1.5} />
-      <p className={`text-xs ${text} text-center leading-relaxed max-w-[22ch]`}>{caption}</p>
+      {showCaption && (
+        <p className={`text-xs ${text} text-center leading-relaxed max-w-[22ch]`}>{caption}</p>
+      )}
     </div>
   );
 }
