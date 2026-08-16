@@ -234,7 +234,9 @@
         "en": "The Long House",
         "line": "Architecture of the matrilineal family",
         "body": "A house grows with its family. New sections are added as daughters marry, so the length of a longhouse records how many generations have lived under it.",
-        "image": "/images/pillars/kna-longhouse.jpg"
+        "image": "/images/pillars/kna-longhouse.jpg",
+        "alt": "Two carved wooden ladders lean against the raised platform of an Ê Đê longhouse, its thatched gable and open doorway behind, bamboo to one side.",
+        "position": "34% 50%"
       },
       {
         "ede": "Mnga",

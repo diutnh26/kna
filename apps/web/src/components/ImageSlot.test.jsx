@@ -60,4 +60,17 @@ describe('ImageSlot', () => {
     rerender(<ImageSlot src="/x.jpg" label="Gùi carrying basket" showCaption={false} />);
     expect(screen.getByRole('img')).toHaveAccessibleName('Gùi carrying basket');
   });
+
+  it('lets a caller choose what survives the crop', () => {
+    // A landscape photograph in a portrait frame loses half its width.
+    // Which half is an editorial decision, not a default.
+    render(<ImageSlot src="/x.jpg" label="longhouse" position="34% 50%" />);
+    expect(screen.getByRole('img')).toHaveStyle({ objectPosition: '34% 50%' });
+  });
+
+  it('centres the crop when no position is given', () => {
+    render(<ImageSlot src="/x.jpg" label="gongs" />);
+    expect(screen.getByRole('img')).toHaveStyle({ objectPosition: 'center' });
+  });
+
 });

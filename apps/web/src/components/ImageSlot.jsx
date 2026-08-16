@@ -23,6 +23,11 @@ import { useTranslation } from 'react-i18next';
  *   ratio  — Tailwind aspect class, e.g. "aspect-[4/3]". Omit when the
  *            parent controls height (then pass className="h-full").
  *   theme  — "dark" (default) or "light", matched to the section background.
+ *   position — CSS object-position, e.g. "38% 50%". Real photographs
+ *            arrive in whatever shape they were taken in, and a fixed
+ *            frame has to crop something; this chooses what survives.
+ *            Defaults to centre, which is right most of the time and
+ *            wrong exactly when the subject is not central.
  *   showCaption — set false for thumbnails. The label is still the alt
  *            text, but it is not drawn: at 80px it is unreadable anyway,
  *            and in a list it repeats the heading sitting beside it.
@@ -33,6 +38,7 @@ export default function ImageSlot({
   alt,
   ratio = 'aspect-[4/3]',
   theme = 'dark',
+  position = 'center',
   showCaption = true,
   className = '',
 }) {
@@ -52,6 +58,7 @@ export default function ImageSlot({
           loading="lazy"
           decoding="async"
           onError={() => setFailed(true)}
+          style={{ objectPosition: position }}
           className="w-full h-full object-cover"
         />
       </div>

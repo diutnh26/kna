@@ -119,6 +119,7 @@ export default function Explore() {
                   <ImageSlot
                     src={p.image}
                     alt={p.alt}
+                    position={p.position}
                     theme="light"
                     ratio="aspect-[4/5]"
                     label={t('explore.photoLabel', { name: p.en })}
