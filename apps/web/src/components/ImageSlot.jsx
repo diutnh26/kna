@@ -12,9 +12,14 @@ import { useTranslation } from 'react-i18next';
  *
  * Props:
  *   src    — the photograph. Omit (or pass null) for the placeholder.
- *   label  — what the image shows. Used as alt text when there is a
- *            photograph, and as the visible caption when there is not, so
- *            writing a good one is never wasted.
+ *   label  — what the picture in this slot should show. Drawn as the
+ *            placeholder caption, and used as alt text when no better
+ *            description exists.
+ *   alt    — what the photograph actually shows. Separate from `label`
+ *            because they answer different questions: a caption saying
+ *            "documentary photograph, vertical crop" tells a sighted
+ *            reader what is still missing, and tells a screen-reader user
+ *            nothing at all about the picture that is now there.
  *   ratio  — Tailwind aspect class, e.g. "aspect-[4/3]". Omit when the
  *            parent controls height (then pass className="h-full").
  *   theme  — "dark" (default) or "light", matched to the section background.
@@ -25,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 export default function ImageSlot({
   src,
   label,
+  alt,
   ratio = 'aspect-[4/3]',
   theme = 'dark',
   showCaption = true,
@@ -42,7 +48,7 @@ export default function ImageSlot({
       <div className={`${ratio} overflow-hidden ${className}`}>
         <img
           src={src}
-          alt={caption}
+          alt={alt ?? caption}
           loading="lazy"
           decoding="async"
           onError={() => setFailed(true)}

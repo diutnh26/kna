@@ -118,6 +118,7 @@ export default function Explore() {
                 <article key={p.en} className="flex flex-col">
                   <ImageSlot
                     src={p.image}
+                    alt={p.alt}
                     theme="light"
                     ratio="aspect-[4/5]"
                     label={t('explore.photoLabel', { name: p.en })}
