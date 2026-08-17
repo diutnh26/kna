@@ -189,9 +189,12 @@ export default function Landing() {
               ))}
             </div>
 
+            {/* Full width of the column. The parent is a flex column, so
+                dropping self-start is what does it — the default stretch
+                was being overridden. */}
             <a
               href="#explore"
-              className="group inline-flex items-center gap-2 bg-[#1A1614] text-[#F5EDDD] text-sm px-4 py-3 transition hover:bg-black self-start"
+              className="group flex items-center justify-center gap-2 bg-[#1A1614] text-[#F5EDDD] text-sm px-4 py-3.5 transition hover:bg-black"
             >
               {t('landing.culture.cta')}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
