@@ -452,10 +452,11 @@ export default function CarbonTracker() {
                 {t('carbon.ledBy', { led: selected.led })}
                 {selected.joinable ? t('carbon.joinableYes') : t('carbon.joinableNo')}
               </p>
-            </div>
 
-            <div className="md:col-span-5 flex flex-col items-start md:items-end gap-4">
-              <div>
+              {/* The figure belongs beside the sentence it is the figure
+                  for, not across the card from it. The right column is the
+                  controls. */}
+              <div className="mt-8">
                 <div className="font-display price-hero font-medium text-[#E8A33D] leading-none">
                   {chosen === 'DONATE' ? vnd(cost) : t('carbon.free')}
                 </div>
@@ -467,8 +468,10 @@ export default function CarbonTracker() {
                       : ''}
                 </div>
               </div>
+            </div>
 
-              <div className="w-full md:w-auto md:min-w-[19rem] space-y-3">
+            <div className="md:col-span-5">
+              <div className="w-full space-y-3">
                 <div className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
                   {t('carbon.attachEyebrow')}
                 </div>
