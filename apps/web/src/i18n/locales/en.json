@@ -620,19 +620,23 @@
     "pendingNote": "It reaches the public ledger when a coordinator confirms your booking — the same rule the stay itself follows.",
     "howToTakePart": "How would you like to take part?",
     "optionInPerson": "Join the planting",
-    "optionInPersonBody": "A session falls on {{date}}, during your stay. Come and work it — there is nothing to pay.",
+    "optionInPersonBody": "A session runs {{range}}, while you are here. Come and work it — there is nothing to pay.",
     "optionDonate": "Contribute",
     "optionDonateBody": "{{amount}} to the project, on the public ledger once your booking is confirmed.",
     "free": "No charge",
     "internationalRateNote": "Adjusted for a long journey. The Community Fund has already paid for the saplings, so this covers the cost of running the session rather than buying the trees again.",
     "communityFundAlreadyCovers": "Every booking already sends 3% to the Community Fund, and that is what buys and tends the saplings. Anything here is on top of it, not instead of it.",
-    "nextSession": "Next session: {{date}}",
     "noSessions": "Maintained year-round, so there is no session to attend.",
     "ledgerInPersonContribution": "a day's work",
     "ledgerDonateContribution": "towards running the session",
     "ledgerWorkNoMoney": "No money moved, so there is no ledger row — the ledger records what was paid.",
-    "optionInPersonUnavailable": "The next session is {{date}}, after you leave. Contributing is the way to help this time.",
-    "optionInPersonNoSessions": "This project is maintained year-round, so there is no session to join."
+    "optionInPersonUnavailable": "No session runs during your stay. The nearest is {{range}}.",
+    "optionInPersonNoSessions": "This project is maintained year-round, so there is no session to join.",
+    "sessionRange": "{{start}} – {{end}}",
+    "optionNextSession": "Register for the next session",
+    "optionNextSessionBody": "{{range}}, after you leave. You will be counted for it and told once it is confirmed. Nothing to pay.",
+    "optionNextSessionAlt": "Or come back for the following one, {{range}}.",
+    "nextSessionShort": "Next session {{range}}"
   },
   "imageSlot": {
     "fallback": "Image"
@@ -715,6 +719,8 @@
     "offsetKg_other": "{{count}} kg of CO₂e offset",
     "joiningCount_one": "{{count}} planting day you have signed up for",
     "joiningCount_other": "{{count}} planting days you have signed up for",
-    "offsetDonated": "A contribution to the project"
+    "offsetDonated": "A contribution to the project",
+    "offsetNextSession": "You are registered for the session on {{range}}",
+    "offsetSessionRange": "{{start}} – {{end}}"
   }
 }

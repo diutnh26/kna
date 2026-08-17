@@ -16,11 +16,28 @@ import { renderScreen, signIn } from '../test/helpers';
  * Eligibility is decided by the server and read by the screen, so the
  * fixture supplies it exactly as GET /offsets/bookings does.
  */
-const anActivity = (eligible, date = '2026-09-02') => ({
-  yokdon: { nextActivityDate: date, eligible },
-  lak: { nextActivityDate: date, eligible },
-  corridor: { nextActivityDate: null, eligible: false },
-});
+const aWindow = (start, end) => ({ startDate: start, endDate: end });
+
+/**
+ * Formats a window the way the screen does, rather than hardcoding it.
+ * en-GB abbreviates September as "Sept" on some ICU builds and "Sep" on
+ * others, and a test that spells it out fails on whichever it was not
+ * written against.
+ */
+const asRange = (start, end) => {
+  const d = (iso) =>
+    new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `${d(start)} – ${d(end)}`;
+};
+
+const anActivity = (eligible) => {
+  const runs = {
+    current: eligible ? aWindow('2026-09-02', '2026-09-04') : null,
+    next: aWindow('2026-09-16', '2026-09-18'),
+    eligible,
+  };
+  return { yokdon: runs, lak: runs, corridor: { current: null, next: null, eligible: false } };
+};
 
 const aBooking = (over = {}) => ({
   id: 'bk1',
@@ -155,9 +172,46 @@ describe('CarbonTracker offsets', () => {
 
       const join = await screen.findByLabelText(/Join the planting/i);
       expect(join).toBeDisabled();
-      expect(screen.getByText(/after you leave/i)).toBeInTheDocument();
-      // The default falls to the only choice that can be taken.
-      expect(screen.getByLabelText(/^Contribute/i)).toBeChecked();
+      expect(screen.getByText(/No session runs during your stay/i)).toBeInTheDocument();
+    });
+
+    it('offers registering for the next session when the stay misses one', async () => {
+      // Missing every session is not the same as being unable to help.
+      signIn();
+      vi.spyOn(api, 'offsetBookings').mockResolvedValue([
+        aBooking({ activity: anActivity(false) }),
+      ]);
+      renderScreen(<CarbonTracker />);
+
+      expect(await screen.findByLabelText(/Register for the next session/i)).toBeInTheDocument();
+      // Both ends of the window are shown, not just a start date.
+      const range = asRange('2026-09-16', '2026-09-18');
+      expect(screen.getAllByText(new RegExp(range)).length).toBeGreaterThan(0);
+    });
+
+    it('sends NEXT_SESSION when the guest commits to coming back', async () => {
+      signIn();
+      vi.spyOn(api, 'offsetBookings').mockResolvedValue([
+        aBooking({ activity: anActivity(false) }),
+      ]);
+      renderScreen(<CarbonTracker />);
+
+      await userEvent.click(await screen.findByLabelText(/Register for the next session/i));
+      await userEvent.click(screen.getByRole('button', { name: /Add to my booking/i }));
+
+      await waitFor(() => expect(api.attachOffset).toHaveBeenCalled());
+      expect(api.attachOffset.mock.calls[0][0].mode).toBe('NEXT_SESSION');
+    });
+
+    it('shows the running session as a date range when the guest can join', async () => {
+      signIn();
+      vi.spyOn(api, 'offsetBookings').mockResolvedValue([
+        aBooking({ activity: anActivity(true) }),
+      ]);
+      renderScreen(<CarbonTracker />);
+
+      const range = asRange('2026-09-02', '2026-09-04');
+      expect(await screen.findByText(new RegExp(range))).toBeInTheDocument();
     });
 
     it('puts joining above contributing, both times', async () => {
@@ -169,8 +223,7 @@ describe('CarbonTracker offsets', () => {
 
       await screen.findByLabelText(/Join the planting/i);
       const radios = screen.getAllByRole('radio');
-      expect(radios[0]).toHaveAttribute('value', 'IN_PERSON');
-      expect(radios[1]).toHaveAttribute('value', 'DONATE');
+      expect(radios.map((r) => r.value)).toEqual(['IN_PERSON', 'NEXT_SESSION', 'DONATE']);
     });
 
     it('sends IN_PERSON when the guest chooses to work the session', async () => {
@@ -195,6 +248,7 @@ describe('CarbonTracker offsets', () => {
       renderScreen(<CarbonTracker />);
 
       await screen.findByLabelText(/Join the planting/i);
+      await userEvent.click(screen.getByLabelText(/^Contribute/i));
       await userEvent.click(screen.getByRole('button', { name: /Add to my booking/i }));
 
       await waitFor(() => expect(api.attachOffset).toHaveBeenCalled());

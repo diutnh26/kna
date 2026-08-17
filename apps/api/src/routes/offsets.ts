@@ -32,19 +32,23 @@ const PROJECTS = {
     joinable: true,
     activityAnchorDate: "2026-01-10",
     activityIntervalDays: 14,
+    // A planting runs over a long weekend, not an afternoon.
+    activityDurationDays: 3,
   },
   lak: {
     ratePerKgVnd: 950,
     joinable: true,
-    // Offset a week from Yok Đôn so the two do not fall on the same day.
+    // Offset a week from Yok Đôn so the two do not run together.
     activityAnchorDate: "2026-01-17",
     activityIntervalDays: 14,
+    activityDurationDays: 3,
   },
   corridor: {
     ratePerKgVnd: 1350,
     joinable: false,
     activityAnchorDate: null,
     activityIntervalDays: null,
+    activityDurationDays: null,
   },
 } as const;
 
@@ -86,23 +90,47 @@ function utcDay(value: Date | string): number {
 
 const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-/**
- * The first session on or after `fromDate`: the anchor plus whole multiples
- * of the interval. Returns null for a project that does not run sessions.
- */
-export function getNextActivityDate(
-  project: { activityAnchorDate: string | null; activityIntervalDays: number | null },
-  fromDate: Date | string
-): string | null {
-  if (!project.activityAnchorDate || !project.activityIntervalDays) return null;
+/** A session: the days it runs, inclusive. */
+export interface SessionWindow {
+  startDate: string;
+  endDate: string;
+}
 
+interface Schedule {
+  activityAnchorDate: string | null;
+  activityIntervalDays: number | null;
+  activityDurationDays: number | null;
+}
+
+/** The k-th session after the anchor, as a window. */
+function sessionAt(project: Schedule, index: number): SessionWindow | null {
+  if (!project.activityAnchorDate || !project.activityIntervalDays || !project.activityDurationDays) {
+    return null;
+  }
+  const start = utcDay(project.activityAnchorDate) + index * project.activityIntervalDays * MS_PER_DAY;
+  // Inclusive: a three-day session runs start, start+1, start+2.
+  const end = start + (project.activityDurationDays - 1) * MS_PER_DAY;
+  return { startDate: isoDay(start), endDate: isoDay(end) };
+}
+
+/**
+ * The first session that begins on or after `fromDate`.
+ *
+ * Kept exported and taking a date so it can be asked about any moment —
+ * the stay, today, or a date a coordinator is planning around.
+ */
+export function getNextActivityDate(project: Schedule, fromDate: Date | string): string | null {
+  return getNextSession(project, fromDate)?.startDate ?? null;
+}
+
+export function getNextSession(project: Schedule, fromDate: Date | string): SessionWindow | null {
+  if (!project.activityAnchorDate || !project.activityIntervalDays) return null;
   const anchor = utcDay(project.activityAnchorDate);
   const from = utcDay(fromDate);
-  if (from <= anchor) return isoDay(anchor);
+  if (from <= anchor) return sessionAt(project, 0);
 
-  const elapsedDays = (from - anchor) / MS_PER_DAY;
-  const periods = Math.ceil(elapsedDays / project.activityIntervalDays);
-  return isoDay(anchor + periods * project.activityIntervalDays * MS_PER_DAY);
+  const elapsed = (from - anchor) / MS_PER_DAY;
+  return sessionAt(project, Math.ceil(elapsed / project.activityIntervalDays));
 }
 
 /** The last night of a stay: check-in plus one night fewer than booked. */
@@ -111,24 +139,42 @@ function lastNight(checkIn: Date, nights: number): number {
 }
 
 /**
- * Whether a session falls inside the stay, and which one.
+ * What a guest can do about a project, given their dates.
  *
- * Measured from the check-in date rather than from today. A guest booking
- * three months out would otherwise always be told no: the next session
- * from today would fall long before they arrive, and "can I join?" is a
- * question about their stay, not about this week.
+ * `current` is a session whose days overlap the stay — they can work it
+ * while they are here. `next` is the first session beginning after they
+ * leave, which they can register for and come back to. A guest whose
+ * dates miss every session is not the same as a guest who cannot help,
+ * and until now the screen treated them as if they were.
  */
-function activityDuringStay(
+function activityForStay(
   projectId: ProjectId,
   checkIn: Date,
   nights: number
-): { nextActivityDate: string | null; eligible: boolean } {
+): { current: SessionWindow | null; next: SessionWindow | null; eligible: boolean } {
   const project = PROJECTS[projectId];
-  const nextActivityDate = getNextActivityDate(project, checkIn);
-  if (!nextActivityDate) return { nextActivityDate: null, eligible: false };
+  if (!project.activityAnchorDate || !project.activityIntervalDays) {
+    return { current: null, next: null, eligible: false };
+  }
 
-  const eligible = utcDay(nextActivityDate) <= lastNight(checkIn, nights);
-  return { nextActivityDate, eligible };
+  const arrive = utcDay(checkIn);
+  const depart = lastNight(checkIn, nights);
+  const anchor = utcDay(project.activityAnchorDate);
+
+  // The latest session that could still be running when they arrive.
+  const k = Math.floor((depart - anchor) / (project.activityIntervalDays * MS_PER_DAY));
+  let current: SessionWindow | null = null;
+  if (k >= 0) {
+    const candidate = sessionAt(project, k);
+    // Overlap: it starts before they leave and ends after they arrive.
+    if (candidate && utcDay(candidate.endDate) >= arrive) current = candidate;
+  }
+
+  // The first session beginning after the stay ends — what they would come
+  // back for.
+  const next = sessionAt(project, k >= 0 ? k + 1 : 0);
+
+  return { current, next, eligible: current !== null };
 }
 
 /** What the server charges, given the choice and where the guest came from. */
@@ -144,14 +190,14 @@ function amountFor(projectId: ProjectId, mode: Mode, kgCo2e: number, origin: str
   return Math.round(adjusted);
 }
 
-type Mode = "IN_PERSON" | "DONATE";
+type Mode = "IN_PERSON" | "NEXT_SESSION" | "DONATE";
 
 const offsetSchema = z.object({
   bookingId: z.string().min(1),
   projectId: z.enum(["yokdon", "lak", "corridor"]),
   // Bounded like every other figure that reaches the public ledger.
   kgCo2e: z.number().int().min(1).max(20_000),
-  mode: z.enum(["IN_PERSON", "DONATE"]),
+  mode: z.enum(["IN_PERSON", "NEXT_SESSION", "DONATE"]),
   origin: z.enum(["hcmc", "hanoi", "danang", "asia", "europe"]),
 });
 
@@ -159,6 +205,7 @@ const offsetSchema = z.object({
 function ledgerLabel(projectId: ProjectId, mode: Mode, origin: string): string {
   const name = PROJECT_LEDGER_LABEL[projectId];
   if (mode === "IN_PERSON") return `${name} · a day's work`;
+  if (mode === "NEXT_SESSION") return `${name} · returning for the next session`;
   // A long-haul donation covers the cost of running the session, not the
   // saplings — the Community Fund has already paid for those.
   if (PROJECTS[projectId].joinable && INTERNATIONAL_ORIGINS.has(origin)) {
@@ -188,7 +235,10 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
   }
 
   const project = PROJECTS[projectId];
-  const { nextActivityDate, eligible } = activityDuringStay(projectId, booking.checkIn, booking.nights);
+  const { current, next, eligible } = activityForStay(projectId, booking.checkIn, booking.nights);
+
+  // Which session, if any, this choice commits them to.
+  let session: SessionWindow | null = null;
 
   if (!project.joinable) {
     // The corridor is maintained year-round; there is no session to attend.
@@ -197,13 +247,21 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
         .status(400)
         .json({ error: "That project is maintained year-round and does not take visiting help." });
     }
-  } else if (mode === "IN_PERSON" && !eligible) {
+  } else if (mode === "IN_PERSON") {
     // Still checked here rather than trusted from the client: the screen
     // disables the option, and a disabled control is a courtesy, not a
     // constraint.
-    return res.status(400).json({
-      error: "No planting day falls within those dates. You can contribute instead.",
-    });
+    if (!eligible) {
+      return res.status(400).json({
+        error: "No session runs during those dates. You can register for the next one, or contribute.",
+      });
+    }
+    session = current;
+  } else if (mode === "NEXT_SESSION") {
+    if (!next) {
+      return res.status(400).json({ error: "That project has no upcoming session." });
+    }
+    session = next;
   }
 
   const amountVnd = amountFor(projectId, mode, kgCo2e, origin);
@@ -211,8 +269,25 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
   const offset = await prisma.$transaction(async (tx) => {
     const saved = await tx.offsetContribution.upsert({
       where: { bookingId },
-      create: { bookingId, projectId, kgCo2e, amountVnd, mode, origin },
-      update: { projectId, kgCo2e, amountVnd, mode, origin },
+      create: {
+        bookingId,
+        projectId,
+        kgCo2e,
+        amountVnd,
+        mode,
+        origin,
+        sessionStart: session ? new Date(`${session.startDate}T00:00:00Z`) : null,
+        sessionEnd: session ? new Date(`${session.endDate}T00:00:00Z`) : null,
+      },
+      update: {
+        projectId,
+        kgCo2e,
+        amountVnd,
+        mode,
+        origin,
+        sessionStart: session ? new Date(`${session.startDate}T00:00:00Z`) : null,
+        sessionEnd: session ? new Date(`${session.endDate}T00:00:00Z`) : null,
+      },
     });
 
     // One ledger row per offset, replaced rather than added to when the
@@ -239,7 +314,8 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
   res.status(201).json({
     ...offset,
     listingTitle: booking.listing.title,
-    nextActivityDate,
+    current,
+    next,
     eligible,
     settled: booking.status === "CONFIRMED" || booking.status === "COMPLETED",
   });
@@ -279,6 +355,8 @@ offsetsRouter.get("/bookings", requireAuth, async (req: AuthedRequest, res) => {
             amountVnd: b.offset.amountVnd,
             mode: b.offset.mode,
             origin: b.offset.origin,
+            sessionStart: b.offset.sessionStart,
+            sessionEnd: b.offset.sessionEnd,
           }
         : null,
       // Keyed by project, because eligibility depends on which schedule is
@@ -286,7 +364,7 @@ offsetsRouter.get("/bookings", requireAuth, async (req: AuthedRequest, res) => {
       activity: Object.fromEntries(
         (Object.keys(PROJECTS) as ProjectId[]).map((id) => [
           id,
-          activityDuringStay(id, b.checkIn, b.nights),
+          activityForStay(id, b.checkIn, b.nights),
         ])
       ),
     }))

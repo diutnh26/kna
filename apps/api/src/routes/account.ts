@@ -98,9 +98,11 @@ async function describeAccount(userId: string) {
       offsets: bookings.filter((b) => b.offset).length,
       // The commitments a guest has actually made to turn up and work,
       // which is the part they will want reminding of.
-      // Derived from mode rather than a stored flag: "signed up to work"
-      // is exactly IN_PERSON, and a second boolean could disagree with it.
-      offsetsJoining: bookings.filter((b) => b.offset?.mode === "IN_PERSON").length,
+      // Both modes that involve turning up count: joining a session during
+      // the stay, and coming back for the next one.
+      offsetsJoining: bookings.filter(
+        (b) => b.offset?.mode === "IN_PERSON" || b.offset?.mode === "NEXT_SESSION"
+      ).length,
       offsetKgCo2e: settledBookings.reduce((n, b) => n + (b.offset?.kgCo2e ?? 0), 0),
       toOffsetProjectsVnd: settledBookings.reduce((n, b) => n + (b.offset?.amountVnd ?? 0), 0),
     },
@@ -273,6 +275,8 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
             amountVnd: b.offset.amountVnd,
             mode: b.offset.mode,
             origin: b.offset.origin,
+            sessionStart: b.offset.sessionStart,
+            sessionEnd: b.offset.sessionEnd,
           }
         : null,
     })),

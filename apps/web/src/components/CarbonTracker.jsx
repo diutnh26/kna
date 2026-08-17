@@ -144,18 +144,26 @@ export default function CarbonTracker() {
   // Whether a session falls inside this stay is decided by the server and
   // read here. Recomputing it in the browser would risk offering a choice
   // the API then refuses.
-  const activity = chosenBooking?.activity?.[project] ?? { nextActivityDate: null, eligible: false };
+  const activity = chosenBooking?.activity?.[project] ?? { current: null, next: null, eligible: false };
+
+  // A session runs over several days, so it reads as a range.
+  const range = (w) =>
+    w ? t('carbon.sessionRange', { start: dmy(w.startDate), end: dmy(w.endDate) }) : '';
   // Joining is offered first on every project that runs sessions, and is
   // simply unavailable when no session falls inside the stay. It used to
   // be replaced in that case by "leave your place for a later visitor",
   // which took the first slot while being the absence of a contribution
   // rather than one of them.
   const canJoin = selected.joinable && activity.eligible;
+  const canBookNext = selected.joinable && Boolean(activity.next);
 
   // Derived rather than synced. Switching project or booking can make the
   // held choice illegal, and computing the effective one each render keeps
   // it legal without an effect writing state back into itself.
-  const chosen = contribution === 'IN_PERSON' && !canJoin ? 'DONATE' : contribution;
+  const chosen =
+    (contribution === 'IN_PERSON' && !canJoin) || (contribution === 'NEXT_SESSION' && !canBookNext)
+      ? 'DONATE'
+      : contribution;
 
   async function attachOffset() {
     if (!isAuthenticated) {
@@ -473,9 +481,9 @@ export default function CarbonTracker() {
                 <div className="text-xs text-[#F5EDDD]/40 mt-2">
                   {chosen === 'DONATE'
                     ? t('carbon.perPerson')
-                    : activity.nextActivityDate
-                      ? t('carbon.nextSession', { date: dmy(activity.nextActivityDate) })
-                      : ''}
+                    : chosen === 'IN_PERSON'
+                      ? range(activity.current)
+                      : range(activity.next)}
                 </div>
               </div>
             </div>
@@ -591,17 +599,48 @@ export default function CarbonTracker() {
                             </span>
                             <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
                               {canJoin
-                                ? t('carbon.optionInPersonBody', {
-                                    date: dmy(activity.nextActivityDate),
-                                  })
-                                : activity.nextActivityDate
+                                ? t('carbon.optionInPersonBody', { range: range(activity.current) })
+                                : activity.next
                                   ? t('carbon.optionInPersonUnavailable', {
-                                      date: dmy(activity.nextActivityDate),
+                                      range: range(activity.next),
                                     })
                                   : t('carbon.optionInPersonNoSessions')}
                             </span>
                           </span>
                         </label>
+
+                        {/* Missing every session is not the same as being
+                            unable to help. A guest can commit to the next
+                            one and come back for it. */}
+                        {canBookNext && (
+                          <label
+                            className={`flex gap-3 border p-3 cursor-pointer transition ${
+                              chosen === 'NEXT_SESSION'
+                                ? 'border-[#8FA37B] bg-[#8FA37B]/10'
+                                : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="contribution"
+                              value="NEXT_SESSION"
+                              checked={chosen === 'NEXT_SESSION'}
+                              onChange={() => setContribution('NEXT_SESSION')}
+                              className="mt-1 accent-[#8FA37B] shrink-0"
+                            />
+                            <span>
+                              <span className="flex items-baseline gap-2">
+                                <span className="text-sm">{t('carbon.optionNextSession')}</span>
+                                <span className="text-[10px] uppercase tracking-wider text-[#8FA37B]">
+                                  {t('carbon.free')}
+                                </span>
+                              </span>
+                              <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
+                                {t('carbon.optionNextSessionBody', { range: range(activity.next) })}
+                              </span>
+                            </span>
+                          </label>
+                        )}
 
                         <label
                           className={`flex gap-3 border p-3 cursor-pointer transition ${

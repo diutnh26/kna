@@ -475,9 +475,16 @@ export default function Account() {
                                 worth surfacing — it is a date in someone's
                                 calendar, not just a payment. */}
                             <p className="text-xs text-[#F5EDDD]/50 mt-1">
-                              {row.offset.mode === 'IN_PERSON'
-                                ? t('account.offsetJoining')
-                                : t('account.offsetDonated')}
+                              {row.offset.mode === 'DONATE'
+                                ? t('account.offsetDonated')
+                                : row.offset.mode === 'IN_PERSON'
+                                  ? t('account.offsetJoining')
+                                  : t('account.offsetNextSession', {
+                                      range: t('account.offsetSessionRange', {
+                                        start: dmy(row.offset.sessionStart),
+                                        end: dmy(row.offset.sessionEnd),
+                                      }),
+                                    })}
                             </p>
                             {row.status === 'PENDING' && (
                               <p className="text-xs text-[#B87333] mt-1">

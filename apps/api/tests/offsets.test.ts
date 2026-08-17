@@ -215,20 +215,40 @@ describe("offsets", () => {
       return new Date(anchor + periods * 14 * day).toISOString().slice(0, 10);
     }
 
-    it("reports the next session and whether the stay meets it", async () => {
+    it("reports the session running during the stay, and the one after it", async () => {
       const activity = nextYokDon();
-      const meets = await bookAround(activity, 0, 3); // arrives on the day
+      const meets = await bookAround(activity, 0, 3); // arrives on day one
 
       const res = await request(app)
         .get("/offsets/bookings")
         .set("Authorization", `Bearer ${guestToken}`);
       const row = res.body.find((b: { id: string }) => b.id === meets);
 
-      expect(row.activity.yokdon.nextActivityDate).toBe(activity);
+      // A session runs over three days, so it has a start and an end.
+      expect(row.activity.yokdon.current.startDate).toBe(activity);
+      expect(row.activity.yokdon.current.endDate).not.toBe(activity);
       expect(row.activity.yokdon.eligible).toBe(true);
+
+      // And there is always a next one to come back for.
+      expect(row.activity.yokdon.next.startDate > activity).toBe(true);
+
       // The corridor runs no sessions at all.
-      expect(row.activity.corridor.nextActivityDate).toBeNull();
+      expect(row.activity.corridor.current).toBeNull();
+      expect(row.activity.corridor.next).toBeNull();
       expect(row.activity.corridor.eligible).toBe(false);
+    });
+
+    it("counts a stay that begins mid-session as overlapping", async () => {
+      // The session runs three days; arriving on the last of them still
+      // means the guest is here while it happens.
+      const activity = nextYokDon();
+      const late = await bookAround(activity, 2, 1);
+
+      const res = await request(app)
+        .get("/offsets/bookings")
+        .set("Authorization", `Bearer ${guestToken}`);
+      const row = res.body.find((b: { id: string }) => b.id === late);
+      expect(row.activity.yokdon.eligible).toBe(true);
     });
 
     it("accepts working a session that falls inside the stay, for nothing", async () => {
@@ -262,12 +282,10 @@ describe("offsets", () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toMatch(/no planting day/i);
+      expect(res.body.error).toMatch(/no session runs/i);
     });
 
     it("rejects a mode that no longer exists", async () => {
-      // LEAVE_FORWARD let a guest record standing aside as a contribution.
-      // It is gone: the offer is to turn up, and money is the alternative.
       const misses = await bookAround(nextYokDon(), 3, 1);
       const res = await attach({
         bookingId: misses,
@@ -276,6 +294,58 @@ describe("offsets", () => {
         mode: "LEAVE_FORWARD",
       });
       expect(res.status).toBe(400);
+    });
+
+    it("lets a guest who misses every session register for the next one", async () => {
+      const activity = nextYokDon();
+      const misses = await bookAround(activity, 3, 1);
+
+      const res = await attach({
+        bookingId: misses,
+        projectId: "yokdon",
+        kgCo2e: 400,
+        mode: "NEXT_SESSION",
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.body.amountVnd).toBe(0);
+      // Committed to a specific window, and it starts after they leave.
+      expect(res.body.sessionStart).toBeTruthy();
+      expect(res.body.sessionEnd).toBeTruthy();
+      expect(res.body.sessionStart.slice(0, 10) > activity).toBe(true);
+    });
+
+    it("stores the session a guest working during their stay signed up for", async () => {
+      const activity = nextYokDon();
+      const meets = await bookAround(activity, 0, 3);
+
+      const res = await attach({
+        bookingId: meets,
+        projectId: "yokdon",
+        kgCo2e: 400,
+        mode: "IN_PERSON",
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.body.sessionStart.slice(0, 10)).toBe(activity);
+    });
+
+    it("records no session against a donation", async () => {
+      const res = await attach({ bookingId: bookingA, projectId: "yokdon", kgCo2e: 100 });
+      expect(res.status).toBe(201);
+      expect(res.body.sessionStart).toBeNull();
+      expect(res.body.sessionEnd).toBeNull();
+    });
+
+    it("refuses NEXT_SESSION on a project that runs none", async () => {
+      const res = await attach({
+        bookingId: bookingA,
+        projectId: "corridor",
+        kgCo2e: 100,
+        mode: "NEXT_SESSION",
+      });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/year-round/i);
     });
   });
 
