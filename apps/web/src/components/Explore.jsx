@@ -102,9 +102,9 @@ export default function Explore() {
       {/* ── THREE PILLARS ─────────────────────────── */}
       <section className="bg-[#F5EDDD] text-[#1A1614]">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
-          {/* max-w-3xl rather than 2xl: at md:text-5xl the narrower column
-              broke this heading across four short lines. */}
-          <div className="max-w-3xl mb-16">
+          {/* Wide enough for the heading to sit on one line at md and up.
+              It started at max-w-2xl, which broke it across four. */}
+          <div className="max-w-4xl mb-16">
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
               {t('explore.pillarsEyebrow')}
             </div>

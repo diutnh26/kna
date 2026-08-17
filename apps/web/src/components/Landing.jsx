@@ -176,11 +176,11 @@ export default function Landing() {
                     i < CULTURE_MARKS.length - 1 ? 'border-b border-[#1A1614]/10 pb-6' : 'pb-2'
                   }`}
                 >
-                  <span className="text-[#B87333] font-display text-xl font-medium w-6 shrink-0 mt-0.5">
+                  <span className="text-[#1A1614] text-xl font-medium w-6 shrink-0 mt-0.5">
                     {mark}
                   </span>
                   <div>
-                    <div className="font-display text-base font-medium mb-2 text-[#B87333]">
+                    <div className="font-display text-base font-medium mb-2 text-[#1A1614]">
                       {culture[i]?.title}
                     </div>
                     <p className="text-sm text-[#1A1614]/60 leading-relaxed">{culture[i]?.body}</p>
@@ -191,7 +191,7 @@ export default function Landing() {
 
             <a
               href="#explore"
-              className="group inline-flex items-center gap-2 bg-[#1A1614] text-[#F5EDDD] text-sm uppercase tracking-[0.15em] px-4 py-3 transition hover:bg-black self-start"
+              className="group inline-flex items-center gap-2 bg-[#1A1614] text-[#F5EDDD] text-sm px-4 py-3 transition hover:bg-black self-start"
             >
               {t('landing.culture.cta')}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />

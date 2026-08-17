@@ -419,7 +419,7 @@ export default function Travel() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
               {t('travel.splitEyebrow')}
             </div>
-            <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
+            <h2 className="font-display page-title-sm font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
               {t('travel.splitHeading')}
             </h2>
             <p className="text-lg text-[#1A1614]/70 leading-relaxed">

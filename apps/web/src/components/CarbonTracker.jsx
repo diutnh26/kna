@@ -381,7 +381,7 @@ export default function CarbonTracker() {
               <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
                 {t('carbon.projectsEyebrow')}
               </div>
-              <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+              <h2 className="font-display page-title-sm font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
                 {t('carbon.projectsHeading')}
               </h2>
             </div>
