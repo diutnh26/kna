@@ -22,10 +22,18 @@ export const SETTLED_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
   OR: [
     { booking: { status: { in: ["CONFIRMED", "COMPLETED"] } } },
     { order: { status: { in: ["PAID", "FULFILLED"] } } },
+    // An offset carries no status of its own: it is paid with the stay, so
+    // it is settled exactly when its booking is. One rule, read through
+    // the parent, rather than a second flag that could disagree with it.
+    { offset: { booking: { status: { in: ["CONFIRMED", "COMPLETED"] } } } },
   ],
 };
 
 /** The counterpart: promised, but not yet money. Reported, never summed in. */
 export const PENDING_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
-  OR: [{ booking: { status: "PENDING" } }, { order: { status: "PENDING" } }],
+  OR: [
+    { booking: { status: "PENDING" } },
+    { order: { status: "PENDING" } },
+    { offset: { booking: { status: "PENDING" } } },
+  ],
 };

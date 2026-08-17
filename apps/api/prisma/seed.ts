@@ -94,6 +94,10 @@ async function reset() {
   // Delete in foreign-key-safe order (children before parents).
   await prisma.ledgerEntry.deleteMany();
   await prisma.orderItem.deleteMany();
+  // Before Booking: OffsetContribution holds a NoAction foreign key to it,
+  // so deleting bookings first fails on the constraint. The test suite went
+  // green while logging that failure, because afterAll swallowed it.
+  await prisma.offsetContribution.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.order.deleteMany();
   await prisma.availabilitySlot.deleteMany();

@@ -85,6 +85,13 @@ export const api = {
   changePassword: (payload, token) =>
     request('/account/password', { method: 'POST', body: payload, token }),
   accountActivity: (token) => request('/account/activity', { token }),
+
+  // Carbon offsets hang off a booking: the guest pays for one with the
+  // stay, so there has to be a stay to attach it to.
+  offsetBookings: (token) => request('/offsets/bookings', { token }),
+  attachOffset: (payload, token) => request('/offsets', { method: 'POST', body: payload, token }),
+  removeOffset: (bookingId, token) =>
+    request(`/offsets/${bookingId}`, { method: 'DELETE', token }),
   createOrder: (payload, token) => request('/orders', { method: 'POST', body: payload, token }),
 
   archive: (params) => request(`/archive${query(params)}`),

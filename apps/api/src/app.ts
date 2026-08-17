@@ -10,6 +10,7 @@ import { communityRouter } from "./routes/community";
 import { archiveRouter } from "./routes/archive";
 import { providersRouter } from "./routes/providers";
 import { accountRouter } from "./routes/account";
+import { offsetsRouter } from "./routes/offsets";
 
 /**
  * Accepts an origin with or without a scheme.
@@ -42,6 +43,7 @@ export function createApp() {
   app.use("/archive", archiveRouter);
   app.use("/providers", providersRouter);
   app.use("/account", accountRouter);
+  app.use("/offsets", offsetsRouter);
 
   app.use((req, res) => {
     res.status(404).json({ error: `No route for ${req.method} ${req.path}` });

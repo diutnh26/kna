@@ -9,6 +9,10 @@ export const PASSWORD = "test-password";
 export async function resetDb() {
   await prisma.ledgerEntry.deleteMany();
   await prisma.orderItem.deleteMany();
+  // Before Booking: OffsetContribution holds a NoAction foreign key to it,
+  // so deleting bookings first fails on the constraint. The test suite went
+  // green while logging that failure, because afterAll swallowed it.
+  await prisma.offsetContribution.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.order.deleteMany();
   await prisma.availabilitySlot.deleteMany();

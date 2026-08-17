@@ -600,7 +600,26 @@
     "ledgerSurvivalValue": "38 trên 41",
     "handoffHeading": "Ai quyết định dự án nào được tài trợ?",
     "handoffBody": "Hội đồng Quản trị Cộng đồng. Biên bản, quyết định và các khoản phân bổ quỹ của họ đều được công bố tại không gian cộng đồng.",
-    "handoffCta": "Xem không gian cộng đồng"
+    "handoffCta": "Xem không gian cộng đồng",
+    "attachEyebrow": "Thêm khoản này vào một chuyến đi",
+    "signedOut": "Đăng nhập để thêm khoản bù đắp vào một đơn đặt chỗ của bạn.",
+    "signIn": "Đăng nhập",
+    "noBookings": "Bạn chưa có đơn đặt chỗ nào.",
+    "noBookingsBody": "Khoản bù đắp được thanh toán cùng chuyến đi, nên cần có một chuyến đi để gắn vào. Hãy đặt một trải nghiệm và nó sẽ xuất hiện ở đây.",
+    "seeExperiences": "Xem các trải nghiệm",
+    "chooseBooking": "Chọn đơn đặt chỗ",
+    "bookingOption": "{{title}} · đến ngày {{date}}",
+    "onlyBooking": "Sẽ thêm vào chuyến đi của bạn tại {{title}}, đến ngày {{date}}.",
+    "joinLabel": "Tôi muốn cùng trồng cây vào ngày cuối của chuyến đi",
+    "joinUnavailable": "Dự án này được duy trì quanh năm và không nhận người đến phụ giúp.",
+    "attach": "Thêm vào đơn đặt của tôi",
+    "attaching": "Đang thêm…",
+    "attached": "Đã thêm vào đơn đặt chỗ của bạn.",
+    "attachError": "Không thêm được. Vui lòng thử lại.",
+    "replaceNote": "Đơn đặt này đã có khoản bù đắp cho {{project}}. Thêm lần nữa sẽ thay thế khoản cũ chứ không tính tiền hai lần.",
+    "remove": "Gỡ bỏ",
+    "removed": "Đã gỡ khoản bù đắp.",
+    "pendingNote": "Khoản này sẽ lên sổ cái công khai khi điều phối viên xác nhận đơn đặt của bạn — đúng theo quy tắc mà chính chuyến đi tuân theo."
   },
   "imageSlot": {
     "fallback": "Hình ảnh"

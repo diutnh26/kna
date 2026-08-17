@@ -145,6 +145,36 @@ model Booking {
   createdAt         DateTime @default(now())
 
   ledgerEntries LedgerEntry[]
+  offset        OffsetContribution?
+}
+
+/**
+ * A carbon offset attached to a booking.
+ *
+ * Attached rather than standalone on purpose: the guest pays for it with
+ * the stay, and it is settled when the stay is. So there is no status
+ * column here — an offset is exactly as real as the booking it hangs off,
+ * and deriving that avoids a second copy of the truth that could drift.
+ *
+ * At most one per booking. Offsetting the same trip twice would double
+ * count on the public ledger, which is the one place this platform cannot
+ * afford an inflated number.
+ */
+model OffsetContribution {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // "yokdon" | "lak" | "corridor" — CHECK-constrained, like every other
+  // enum-shaped column in this schema.
+  projectId String
+  kgCo2e    Int
+  amountVnd Int
+  // Whether the guest intends to join the planting at the end of the stay.
+  // Only two of the three projects accept help; the API enforces that.
+  joining   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ledgerEntries LedgerEntry[]
 }
 
 model Product {
@@ -205,6 +235,8 @@ model LedgerEntry {
   booking          Booking? @relation(fields: [bookingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orderId          String?
   order            Order?   @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  offsetId         String?
+  offset           OffsetContribution? @relation(fields: [offsetId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   fromLabel        String // "Traveler #4821"
   toLabel          String // "H'Bia Homestay"
   totalVnd         Int

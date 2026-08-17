@@ -191,6 +191,7 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
             provider: { select: { displayName: true, buon: true } },
           },
         },
+        offset: true,
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -242,6 +243,11 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
       totalVnd: b.totalVnd,
       toProviderVnd: b.providerPayoutVnd,
       toCommunityFundVnd: b.communityFundVnd,
+      // Shown on the booking rather than as its own row: an offset is part
+      // of the stay, not a separate transaction the guest made.
+      offset: b.offset
+        ? { projectId: b.offset.projectId, kgCo2e: b.offset.kgCo2e, amountVnd: b.offset.amountVnd, joining: b.offset.joining }
+        : null,
     })),
     ...orders.map((o) => {
       const first = o.items[0]?.product;

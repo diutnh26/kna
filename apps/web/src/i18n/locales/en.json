@@ -600,7 +600,26 @@
     "ledgerSurvivalValue": "38 of 41",
     "handoffHeading": "Who decides which projects get funded?",
     "handoffBody": "The Community Governance Committee. Their minutes, decisions, and fund allocations are published in the community space.",
-    "handoffCta": "See the community space"
+    "handoffCta": "See the community space",
+    "attachEyebrow": "Add this to a stay",
+    "signedOut": "Sign in to add an offset to one of your bookings.",
+    "signIn": "Sign in",
+    "noBookings": "You have no bookings yet.",
+    "noBookingsBody": "An offset is paid with a stay, so there has to be a stay to attach it to. Book an experience and it will appear here.",
+    "seeExperiences": "See experiences",
+    "chooseBooking": "Which booking?",
+    "bookingOption": "{{title}} · arriving {{date}}",
+    "onlyBooking": "Adding to your stay at {{title}}, arriving {{date}}.",
+    "joinLabel": "I would like to join the planting on my last day",
+    "joinUnavailable": "This project is maintained year-round and does not take visiting help.",
+    "attach": "Add to my booking",
+    "attaching": "Adding…",
+    "attached": "Added to your booking.",
+    "attachError": "Could not add that. Try again.",
+    "replaceNote": "This booking already carries an offset to {{project}}. Adding again replaces it rather than charging twice.",
+    "remove": "Remove",
+    "removed": "Offset removed.",
+    "pendingNote": "It reaches the public ledger when a coordinator confirms your booking — the same rule the stay itself follows."
   },
   "imageSlot": {
     "fallback": "Image"

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
@@ -12,6 +12,8 @@ import {
   Info,
 } from 'lucide-react';
 import Navbar from './Navbar';
+import { api, ApiError } from '../lib/api';
+import { useAuth } from '../context/useAuth';
 import ImageSlot from './ImageSlot';
 
 /* ── Emission factors ─────────────────────────────
@@ -46,6 +48,8 @@ const PROJECT_FACTS = {
 };
 
 const vnd = (n) => Math.round(n).toLocaleString('vi-VN') + ' ₫';
+const dmy = (iso) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 export default function CarbonTracker() {
   const { t } = useTranslation();
@@ -58,6 +62,38 @@ export default function CarbonTracker() {
   const [mode, setMode] = useState('flight');
   const [nights, setNights] = useState(3);
   const [project, setProject] = useState('yokdon');
+
+  // An offset is paid with a stay, so it hangs off a booking rather than
+  // standing alone. The picker below only appears once there is a choice
+  // to make.
+  const { token, isAuthenticated, openAuthModal } = useAuth();
+  const [bookings, setBookings] = useState([]);
+  const [bookingId, setBookingId] = useState('');
+  const [joining, setJoining] = useState(false);
+  const [attachState, setAttachState] = useState({ busy: false, message: '', error: '' });
+
+  const loadBookings = useCallback(async () => {
+    if (!isAuthenticated) return [];
+    return api.offsetBookings(token);
+  }, [isAuthenticated, token]);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadBookings()
+      .then((rows) => {
+        if (cancelled) return;
+        setBookings(rows);
+        // Preselect the soonest stay; the API already returns them in
+        // arrival order, which is the one a guest is thinking about.
+        setBookingId((current) => current || rows[0]?.id || '');
+      })
+      .catch(() => {
+        if (!cancelled) setBookings([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadBookings]);
 
   const originData = ORIGINS.find((o) => o.id === origin);
   const availableModes = MODES.filter((m) => originData[m.id] !== null);
@@ -76,6 +112,48 @@ export default function CarbonTracker() {
   const cost = breakdown.total * selected.rate;
 
   const bar = (value) => `${(value / breakdown.total) * 100}%`;
+
+  const chosenBooking = bookings.find((b) => b.id === bookingId) ?? null;
+  const existingOffset = chosenBooking?.offset ?? null;
+
+  async function attachOffset() {
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
+    if (!bookingId) return;
+
+    setAttachState({ busy: true, message: '', error: '' });
+    try {
+      await api.attachOffset(
+        { bookingId, projectId: project, kgCo2e: breakdown.total, joining },
+        token
+      );
+      setBookings(await loadBookings());
+      setAttachState({ busy: false, message: t('carbon.attached'), error: '' });
+    } catch (err) {
+      setAttachState({
+        busy: false,
+        message: '',
+        error: err instanceof ApiError ? err.message : t('carbon.attachError'),
+      });
+    }
+  }
+
+  async function removeOffset() {
+    setAttachState({ busy: true, message: '', error: '' });
+    try {
+      await api.removeOffset(bookingId, token);
+      setBookings(await loadBookings());
+      setAttachState({ busy: false, message: t('carbon.removed'), error: '' });
+    } catch (err) {
+      setAttachState({
+        busy: false,
+        message: '',
+        error: err instanceof ApiError ? err.message : t('carbon.attachError'),
+      });
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
@@ -333,10 +411,133 @@ export default function CarbonTracker() {
                   {t('carbon.perPerson')}
                 </div>
               </div>
-              <button className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition">
-                {t('carbon.addToBooking')}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-              </button>
+
+              <div className="w-full md:w-auto md:min-w-[19rem] space-y-3">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
+                  {t('carbon.attachEyebrow')}
+                </div>
+
+                {!isAuthenticated ? (
+                  <>
+                    <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">
+                      {t('carbon.signedOut')}
+                    </p>
+                    <button
+                      onClick={openAuthModal}
+                      className="w-full bg-[#C8302E] hover:bg-[#A82826] px-6 py-3 text-sm uppercase tracking-wider transition"
+                    >
+                      {t('carbon.signIn')}
+                    </button>
+                  </>
+                ) : bookings.length === 0 ? (
+                  <>
+                    <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">
+                      <span className="text-[#F5EDDD]/80">{t('carbon.noBookings')}</span>{' '}
+                      {t('carbon.noBookingsBody')}
+                    </p>
+                    <a
+                      href="#travel"
+                      className="inline-flex items-center gap-2 text-sm text-[#E8A33D] underline underline-offset-4"
+                    >
+                      {t('carbon.seeExperiences')}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    {/* One booking needs no choosing; two or more do. */}
+                    {bookings.length >= 2 ? (
+                      <div>
+                        <label
+                          htmlFor="offset-booking"
+                          className="block text-xs text-[#F5EDDD]/50 mb-2"
+                        >
+                          {t('carbon.chooseBooking')}
+                        </label>
+                        <select
+                          id="offset-booking"
+                          value={bookingId}
+                          onChange={(e) => {
+                            setBookingId(e.target.value);
+                            setAttachState({ busy: false, message: '', error: '' });
+                          }}
+                          className="w-full bg-[#1A1614] border border-[#F5EDDD]/25 text-sm px-3 py-2.5 focus:outline-none focus:border-[#F5EDDD]/60"
+                        >
+                          {bookings.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {t('carbon.bookingOption', {
+                                title: b.listingTitle,
+                                date: dmy(b.checkIn),
+                              })}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      chosenBooking && (
+                        <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">
+                          {t('carbon.onlyBooking', {
+                            title: chosenBooking.listingTitle,
+                            date: dmy(chosenBooking.checkIn),
+                          })}
+                        </p>
+                      )
+                    )}
+
+                    {selected.joinable ? (
+                      <label className="flex items-start gap-2.5 text-sm text-[#F5EDDD]/70 leading-snug cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={joining}
+                          onChange={(e) => setJoining(e.target.checked)}
+                          className="mt-0.5 accent-[#C8302E]"
+                        />
+                        {t('carbon.joinLabel')}
+                      </label>
+                    ) : (
+                      <p className="text-xs text-[#F5EDDD]/40 leading-snug">
+                        {t('carbon.joinUnavailable')}
+                      </p>
+                    )}
+
+                    {existingOffset && (
+                      <p className="text-xs text-[#B87333] leading-snug">
+                        {t('carbon.replaceNote', {
+                          project: PROJECTS.find((p) => p.id === existingOffset.projectId)?.name ?? '',
+                        })}
+                      </p>
+                    )}
+
+                    <button
+                      onClick={attachOffset}
+                      disabled={attachState.busy || !bookingId}
+                      className="group w-full inline-flex items-center justify-center gap-3 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-6 py-3.5 text-sm transition"
+                    >
+                      {attachState.busy ? t('carbon.attaching') : t('carbon.attach')}
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+                    </button>
+
+                    {existingOffset && !attachState.busy && (
+                      <button
+                        onClick={removeOffset}
+                        className="w-full text-xs text-[#F5EDDD]/45 underline underline-offset-4 hover:text-[#F5EDDD]/70"
+                      >
+                        {t('carbon.remove')}
+                      </button>
+                    )}
+
+                    {attachState.message && (
+                      <p className="text-sm text-[#8FA37B]">
+                        {attachState.message}{' '}
+                        <span className="text-[#F5EDDD]/45">{t('carbon.pendingNote')}</span>
+                      </p>
+                    )}
+                    {attachState.error && (
+                      <p className="text-sm text-[#E8A33D]">{attachState.error}</p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
