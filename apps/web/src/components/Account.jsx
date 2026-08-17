@@ -463,15 +463,23 @@ export default function Account() {
                                 kg: row.offset.kgCo2e.toLocaleString('vi-VN'),
                                 project: offsetProjectName(row.offset.projectId),
                               })}
-                              <span className="text-[#F5EDDD]/45"> · {vnd(row.offset.amountVnd)}</span>
+                              {/* Only a donation has an amount; a day's work
+                                  and a place left forward both cost nothing,
+                                  and printing 0 ₫ beside them would read as
+                                  a failed payment. */}
+                              {row.offset.amountVnd > 0 && (
+                                <span className="text-[#F5EDDD]/45"> · {vnd(row.offset.amountVnd)}</span>
+                              )}
                             </p>
                             {/* The commitment to turn up and work is the part
                                 worth surfacing — it is a date in someone's
                                 calendar, not just a payment. */}
                             <p className="text-xs text-[#F5EDDD]/50 mt-1">
-                              {row.offset.joining
+                              {row.offset.mode === 'IN_PERSON'
                                 ? t('account.offsetJoining')
-                                : t('account.offsetNotJoining')}
+                                : row.offset.mode === 'LEAVE_FORWARD'
+                                  ? t('account.offsetLeftForward')
+                                  : t('account.offsetDonated')}
                             </p>
                             {row.status === 'PENDING' && (
                               <p className="text-xs text-[#B87333] mt-1">

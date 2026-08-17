@@ -51,7 +51,12 @@ describe("offsets", () => {
   });
 
   const attach = (body: object, token = guestToken) =>
-    request(app).post("/offsets").set("Authorization", `Bearer ${token}`).send(body);
+    request(app)
+      .post("/offsets")
+      .set("Authorization", `Bearer ${token}`)
+      // Every call needs a mode and an origin now; individual tests
+      // override whichever they are about.
+      .send({ mode: "DONATE", origin: "hcmc", ...body });
 
   it("refuses an anonymous caller", async () => {
     expect((await request(app).post("/offsets").send({})).status).toBe(401);
@@ -71,7 +76,8 @@ describe("offsets", () => {
   });
 
   it("prices the offset on the server, not from the request", async () => {
-    // Yok Đôn is 1,100₫/kg. A client that could name its own price could
+    // Yok Đôn is 1,100₫/kg, and Ho Chi Minh City is domestic, so the
+    // full rate applies. A client that could name its own price could
     // donate 1₫ and have the public ledger say so.
     const res = await attach({ bookingId: bookingA, projectId: "yokdon", kgCo2e: 600 });
 
@@ -141,26 +147,12 @@ describe("offsets", () => {
     expect(res.status).toBe(404);
   });
 
-  it("refuses to join a project that does not take visiting help", async () => {
-    const res = await attach({
-      bookingId: bookingB,
-      projectId: "corridor",
-      kgCo2e: 200,
-      joining: true,
-    });
-    expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/year-round/i);
-  });
-
-  it("accepts joining on a project that does", async () => {
-    const res = await attach({
-      bookingId: bookingB,
-      projectId: "yokdon",
-      kgCo2e: 200,
-      joining: true,
-    });
-    expect(res.status).toBe(201);
-    expect(res.body.joining).toBe(true);
+  it("refuses to work a project that runs no sessions", async () => {
+    for (const mode of ["IN_PERSON", "LEAVE_FORWARD"]) {
+      const res = await attach({ bookingId: bookingB, projectId: "corridor", kgCo2e: 200, mode });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/year-round/i);
+    }
   });
 
   it("rejects an unknown project and an absurd footprint", async () => {
@@ -168,6 +160,8 @@ describe("offsets", () => {
       { bookingId: bookingB, projectId: "mars", kgCo2e: 100 },
       { bookingId: bookingB, projectId: "yokdon", kgCo2e: 0 },
       { bookingId: bookingB, projectId: "yokdon", kgCo2e: 999_999 },
+      { bookingId: bookingB, projectId: "yokdon", kgCo2e: 100, mode: "SOMEDAY" },
+      { bookingId: bookingB, projectId: "yokdon", kgCo2e: 100, origin: "mars" },
     ]) {
       expect((await attach(body)).status).toBe(400);
     }
@@ -192,4 +186,183 @@ describe("offsets", () => {
     const booking = res.body.find((r: { id: string }) => r.id === bookingA);
     expect(booking.offset).toMatchObject({ projectId: "lak", kgCo2e: 600, amountVnd: 570_000 });
   });
+
+  // ── Two ways to take part ──────────────────────────────────────────
+  //
+  // Only yokdon and lak run sessions. Whether a guest can work one is a
+  // fact about the calendar, so the server decides it: a client that could
+  // assert its own eligibility could claim a free offset on any dates.
+
+  describe("choosing how to take part", () => {
+    /** A stay that certainly meets a session, and one that certainly does not. */
+    async function bookAround(activityIso: string, offsetDays: number, nights: number) {
+      const d = new Date(`${activityIso}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + offsetDays);
+      const checkIn = d.toISOString().slice(0, 10);
+      const res = await request(app)
+        .post("/bookings")
+        .set("Authorization", `Bearer ${guestToken}`)
+        .send({ listingId, guests: 1, nights, checkIn });
+      return res.body.id as string;
+    }
+
+    /** The first Yok Đôn session comfortably in the future. */
+    function nextYokDon(): string {
+      const anchor = Date.UTC(2026, 0, 10);
+      const day = 86_400_000;
+      const soon = Date.now() + 60 * day;
+      const periods = Math.ceil((soon - anchor) / (14 * day));
+      return new Date(anchor + periods * 14 * day).toISOString().slice(0, 10);
+    }
+
+    it("reports the next session and whether the stay meets it", async () => {
+      const activity = nextYokDon();
+      const meets = await bookAround(activity, 0, 3); // arrives on the day
+
+      const res = await request(app)
+        .get("/offsets/bookings")
+        .set("Authorization", `Bearer ${guestToken}`);
+      const row = res.body.find((b: { id: string }) => b.id === meets);
+
+      expect(row.activity.yokdon.nextActivityDate).toBe(activity);
+      expect(row.activity.yokdon.eligible).toBe(true);
+      // The corridor runs no sessions at all.
+      expect(row.activity.corridor.nextActivityDate).toBeNull();
+      expect(row.activity.corridor.eligible).toBe(false);
+    });
+
+    it("accepts working a session that falls inside the stay, for nothing", async () => {
+      const activity = nextYokDon();
+      const meets = await bookAround(activity, 0, 3);
+
+      const res = await attach({
+        bookingId: meets,
+        projectId: "yokdon",
+        kgCo2e: 400,
+        mode: "IN_PERSON",
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.body.amountVnd).toBe(0);
+      expect(res.body.eligible).toBe(true);
+      // Work is not money, so it writes no ledger row.
+      const rows = await prisma.ledgerEntry.findMany({ where: { offsetId: res.body.id } });
+      expect(rows).toHaveLength(0);
+    });
+
+    it("refuses IN_PERSON when no session falls in the dates", async () => {
+      const activity = nextYokDon();
+      const misses = await bookAround(activity, 3, 1); // three days after, one night
+
+      const res = await attach({
+        bookingId: misses,
+        projectId: "yokdon",
+        kgCo2e: 400,
+        mode: "IN_PERSON",
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/no planting day/i);
+    });
+
+    it("accepts LEAVE_FORWARD only when the guest genuinely cannot attend", async () => {
+      const activity = nextYokDon();
+
+      const misses = await bookAround(activity, 3, 1);
+      const left = await attach({
+        bookingId: misses,
+        projectId: "yokdon",
+        kgCo2e: 400,
+        mode: "LEAVE_FORWARD",
+      });
+      expect(left.status).toBe(201);
+      expect(left.body.amountVnd).toBe(0);
+
+      // Somebody who *can* attend is told to attend rather than stand aside.
+      const meets = await bookAround(activity, 0, 3);
+      const refused = await attach({
+        bookingId: meets,
+        projectId: "yokdon",
+        kgCo2e: 400,
+        mode: "LEAVE_FORWARD",
+      });
+      expect(refused.status).toBe(400);
+      expect(refused.body.error).toMatch(/join it yourself/i);
+    });
+  });
+
+  // ── What a donation costs ──────────────────────────────────────────
+
+  describe("donation rates", () => {
+    it("charges a long-haul guest the adjusted share on a session project", async () => {
+      // The Community Fund already pays for the saplings, so a guest who
+      // has flown in covers the cost of running the session, not the trees.
+      for (const origin of ["asia", "europe"]) {
+        const res = await attach({
+          bookingId: bookingA,
+          projectId: "yokdon",
+          kgCo2e: 600,
+          mode: "DONATE",
+          origin,
+        });
+        expect(res.status).toBe(201);
+        expect(res.body.amountVnd).toBe(Math.round(600 * 1100 * 0.35));
+        expect(res.body.origin).toBe(origin);
+      }
+    });
+
+    it("charges a domestic guest the full rate, unadjusted", async () => {
+      for (const origin of ["hcmc", "hanoi", "danang"]) {
+        const res = await attach({
+          bookingId: bookingA,
+          projectId: "lak",
+          kgCo2e: 600,
+          mode: "DONATE",
+          origin,
+        });
+        expect(res.status).toBe(201);
+        expect(res.body.amountVnd).toBe(600 * 950);
+      }
+    });
+
+    it("charges the corridor at full rate from anywhere", async () => {
+      // No sessions, no adjustment — this project is unchanged.
+      for (const origin of ["hcmc", "hanoi", "danang", "asia", "europe"]) {
+        const res = await attach({
+          bookingId: bookingA,
+          projectId: "corridor",
+          kgCo2e: 200,
+          mode: "DONATE",
+          origin,
+        });
+        expect(res.status).toBe(201);
+        expect(res.body.amountVnd).toBe(200 * 1350);
+      }
+    });
+
+    it("says on the ledger what kind of contribution a long-haul donation is", async () => {
+      const res = await attach({
+        bookingId: bookingA,
+        projectId: "yokdon",
+        kgCo2e: 600,
+        mode: "DONATE",
+        origin: "europe",
+      });
+      const row = await prisma.ledgerEntry.findFirstOrThrow({ where: { offsetId: res.body.id } });
+      expect(row.toLabel).toMatch(/towards running the session/i);
+
+      const domestic = await attach({
+        bookingId: bookingA,
+        projectId: "yokdon",
+        kgCo2e: 600,
+        mode: "DONATE",
+        origin: "hcmc",
+      });
+      const plain = await prisma.ledgerEntry.findFirstOrThrow({
+        where: { offsetId: domestic.body.id },
+      });
+      expect(plain.toLabel).toBe("Yok Đôn buffer replanting");
+    });
+  });
+
 });

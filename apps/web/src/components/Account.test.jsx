@@ -57,7 +57,7 @@ const activity = [
     totalVnd: 1_000_000,
     toProviderVnd: 900_000,
     toCommunityFundVnd: 30_000,
-    offset: { projectId: 'yokdon', kgCo2e: 612, amountVnd: 673_200, joining: true },
+    offset: { projectId: 'yokdon', kgCo2e: 612, amountVnd: 0, mode: 'IN_PERSON' },
   },
   {
     kind: 'order',
@@ -193,8 +193,9 @@ describe('Account', () => {
 
     await screen.findByText(/Two nights in Amí H'Bia/);
     expect(screen.getByText(/612 kg through/)).toBeInTheDocument();
-    // Twice on purpose: once on the booking, once in the summary total.
-    expect(screen.getAllByText(/673\.200 ₫/)).toHaveLength(2);
+    // A day's work costs nothing, so no amount is printed beside it —
+    // "0 ₫" there would read as a failed payment.
+    expect(screen.getByText(/612 kg through/).textContent).not.toMatch(/₫/);
   });
 
   it('surfaces the planting day the guest committed to', async () => {
@@ -215,7 +216,7 @@ describe('Account', () => {
     renderScreen(<Account />);
 
     expect(await screen.findByText(/to carbon offset projects/)).toBeInTheDocument();
-    expect(screen.getAllByText(/673\.200 ₫/).length).toBeGreaterThan(0);
+    expect(screen.getByText('673.200 ₫')).toBeInTheDocument();
     // Kept out of the households figure.
     expect(screen.getByText('1.280.000 ₫')).toBeInTheDocument();
   });

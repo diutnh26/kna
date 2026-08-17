@@ -48,6 +48,28 @@ const PROJECT_FACTS = {
 };
 
 const vnd = (n) => Math.round(n).toLocaleString('vi-VN') + ' ₫';
+
+/**
+ * Kept in step with apps/api/src/routes/offsets.ts.
+ *
+ * The server is the authority on what anything costs — it recomputes this
+ * from the origin id the client sends. This exists only so the figure the
+ * guest reads before pressing the button is the figure they are charged.
+ * A preview that disagreed with the receipt would be worse than no preview.
+ */
+const DONATION_SHARE_INTERNATIONAL = 0.35;
+const INTERNATIONAL_ORIGINS = new Set(['asia', 'europe']);
+
+function donationFor(project, kg, originId) {
+  const full = kg * project.rate;
+  // Only the two projects that run sessions carry the adjusted share; the
+  // corridor is year-round and unchanged.
+  const adjusted =
+    project.joinable && INTERNATIONAL_ORIGINS.has(originId)
+      ? full * DONATION_SHARE_INTERNATIONAL
+      : full;
+  return Math.round(adjusted);
+}
 const dmy = (iso) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -69,7 +91,9 @@ export default function CarbonTracker() {
   const { token, isAuthenticated, openAuthModal } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [bookingId, setBookingId] = useState('');
-  const [joining, setJoining] = useState(false);
+  // Named `contribution` rather than `mode`: this component already has a
+  // `mode` for how the guest travels.
+  const [contribution, setContribution] = useState('DONATE');
   const [attachState, setAttachState] = useState({ busy: false, message: '', error: '' });
 
   const loadBookings = useCallback(async () => {
@@ -109,12 +133,26 @@ export default function CarbonTracker() {
   }, [originData, activeMode, nights]);
 
   const selected = PROJECTS.find((p) => p.id === project);
-  const cost = breakdown.total * selected.rate;
+  const cost = donationFor(selected, breakdown.total, origin);
+  const isInternational = INTERNATIONAL_ORIGINS.has(origin);
 
   const bar = (value) => `${(value / breakdown.total) * 100}%`;
 
   const chosenBooking = bookings.find((b) => b.id === bookingId) ?? null;
   const existingOffset = chosenBooking?.offset ?? null;
+
+  // Whether a session falls inside this stay is decided by the server and
+  // read here. Recomputing it in the browser would risk offering a choice
+  // the API then refuses.
+  const activity = chosenBooking?.activity?.[project] ?? { nextActivityDate: null, eligible: false };
+  const freeOption = selected.joinable ? (activity.eligible ? 'IN_PERSON' : 'LEAVE_FORWARD') : null;
+
+  // Derived rather than synced. Switching project or booking can make the
+  // held choice illegal — the corridor has no free option at all, and the
+  // free one differs by whether a session falls in the stay. Computing the
+  // effective choice each render keeps it legal without an effect writing
+  // state back into itself.
+  const chosen = contribution !== 'DONATE' && contribution !== freeOption ? 'DONATE' : contribution;
 
   async function attachOffset() {
     if (!isAuthenticated) {
@@ -126,7 +164,15 @@ export default function CarbonTracker() {
     setAttachState({ busy: true, message: '', error: '' });
     try {
       await api.attachOffset(
-        { bookingId, projectId: project, kgCo2e: breakdown.total, joining },
+        {
+          bookingId,
+          projectId: project,
+          kgCo2e: breakdown.total,
+          mode: chosen,
+          // The server classifies this as domestic or not; it never accepts
+          // a "this is international" flag from the browser.
+          origin,
+        },
         token
       );
       setBookings(await loadBookings());
@@ -337,6 +383,12 @@ export default function CarbonTracker() {
             <p className="text-lg text-[#1A1614]/70 leading-relaxed">
               {t('carbon.projectsBody')}
             </p>
+            {/* Said plainly here rather than only in the donation note: the
+                saplings are already paid for, and a visitor should know
+                that before deciding what to add. */}
+            <p className="text-sm text-[#1A1614]/60 leading-relaxed mt-4">
+              {t('carbon.communityFundAlreadyCovers')}
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-14">
@@ -405,10 +457,14 @@ export default function CarbonTracker() {
             <div className="md:col-span-5 flex flex-col items-start md:items-end gap-4">
               <div>
                 <div className="font-display price-hero font-medium text-[#E8A33D] leading-none">
-                  {vnd(cost)}
+                  {chosen === 'DONATE' ? vnd(cost) : t('carbon.free')}
                 </div>
                 <div className="text-xs text-[#F5EDDD]/40 mt-2">
-                  {t('carbon.perPerson')}
+                  {chosen === 'DONATE'
+                    ? t('carbon.perPerson')
+                    : activity.nextActivityDate
+                      ? t('carbon.nextSession', { date: dmy(activity.nextActivityDate) })
+                      : ''}
                 </div>
               </div>
 
@@ -485,18 +541,88 @@ export default function CarbonTracker() {
                     )}
 
                     {selected.joinable ? (
-                      <label className="flex items-start gap-2.5 text-sm text-[#F5EDDD]/70 leading-snug cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={joining}
-                          onChange={(e) => setJoining(e.target.checked)}
-                          className="mt-0.5 accent-[#C8302E]"
-                        />
-                        {t('carbon.joinLabel')}
-                      </label>
+                      <fieldset className="space-y-2">
+                        <legend className="text-xs text-[#F5EDDD]/50 mb-2">
+                          {t('carbon.howToTakePart')}
+                        </legend>
+
+                        {/* Exactly one free option, and which one is a fact
+                            about the calendar rather than a preference. */}
+                        <label
+                          className={`flex gap-3 border p-3 cursor-pointer transition ${
+                            chosen === freeOption
+                              ? 'border-[#8FA37B] bg-[#8FA37B]/10'
+                              : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="contribution"
+                            value={freeOption}
+                            checked={chosen === freeOption}
+                            onChange={() => setContribution(freeOption)}
+                            className="mt-1 accent-[#8FA37B] shrink-0"
+                          />
+                          <span>
+                            <span className="flex items-baseline gap-2">
+                              <span className="text-sm">
+                                {activity.eligible
+                                  ? t('carbon.optionInPerson')
+                                  : t('carbon.optionLeaveForward')}
+                              </span>
+                              <span className="text-[10px] uppercase tracking-wider text-[#8FA37B]">
+                                {t('carbon.free')}
+                              </span>
+                            </span>
+                            <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
+                              {activity.eligible
+                                ? t('carbon.optionInPersonBody', {
+                                    date: activity.nextActivityDate
+                                      ? dmy(activity.nextActivityDate)
+                                      : '',
+                                  })
+                                : t('carbon.optionLeaveForwardBody', {
+                                    date: activity.nextActivityDate
+                                      ? dmy(activity.nextActivityDate)
+                                      : '',
+                                  })}
+                            </span>
+                          </span>
+                        </label>
+
+                        <label
+                          className={`flex gap-3 border p-3 cursor-pointer transition ${
+                            chosen === 'DONATE'
+                              ? 'border-[#E8A33D] bg-[#E8A33D]/10'
+                              : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="contribution"
+                            value="DONATE"
+                            checked={chosen === 'DONATE'}
+                            onChange={() => setContribution('DONATE')}
+                            className="mt-1 accent-[#E8A33D] shrink-0"
+                          />
+                          <span>
+                            <span className="text-sm">{t('carbon.optionDonate')}</span>
+                            <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
+                              {activity.eligible
+                                ? t('carbon.optionDonateBody', { amount: vnd(cost) })
+                                : t('carbon.optionDonateBodyMissed', { amount: vnd(cost) })}
+                            </span>
+                            {isInternational && (
+                              <span className="block text-[11px] text-[#B87333] leading-snug mt-1.5">
+                                {t('carbon.internationalRateNote')}
+                              </span>
+                            )}
+                          </span>
+                        </label>
+                      </fieldset>
                     ) : (
                       <p className="text-xs text-[#F5EDDD]/40 leading-snug">
-                        {t('carbon.joinUnavailable')}
+                        {t('carbon.noSessions')}
                       </p>
                     )}
 
@@ -571,7 +697,16 @@ export default function CarbonTracker() {
             <dl className="space-y-4 text-xs">
               {[
                 [t('carbon.ledgerReference'), 'KNA-OF-1182'],
-                [t('carbon.ledgerContribution'), '612 kg CO₂e'],
+                [
+                  t('carbon.ledgerContribution'),
+                  chosen === 'IN_PERSON'
+                    ? t('carbon.ledgerInPersonContribution')
+                    : chosen === 'LEAVE_FORWARD'
+                      ? t('carbon.ledgerLeaveForwardContribution')
+                      : isInternational && selected.joinable
+                        ? t('carbon.ledgerDonateContribution')
+                        : `${breakdown.total.toLocaleString('vi-VN')} kg CO₂e`,
+                ],
                 [t('carbon.ledgerProject'), PROJECTS[0].name],
                 [t('carbon.ledgerReceivedBy'), PROJECTS[0].led],
                 [t('carbon.ledgerPlanted'), t('carbon.ledgerPlantedValue')],

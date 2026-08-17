@@ -45,7 +45,7 @@ async function describeAccount(userId: string) {
         totalVnd: true,
         communityFundVnd: true,
         providerPayoutVnd: true,
-        offset: { select: { amountVnd: true, kgCo2e: true, joining: true } },
+        offset: { select: { amountVnd: true, kgCo2e: true, mode: true } },
       },
     }),
     prisma.order.findMany({
@@ -98,7 +98,9 @@ async function describeAccount(userId: string) {
       offsets: bookings.filter((b) => b.offset).length,
       // The commitments a guest has actually made to turn up and work,
       // which is the part they will want reminding of.
-      offsetsJoining: bookings.filter((b) => b.offset?.joining).length,
+      // Derived from mode rather than a stored flag: "signed up to work"
+      // is exactly IN_PERSON, and a second boolean could disagree with it.
+      offsetsJoining: bookings.filter((b) => b.offset?.mode === "IN_PERSON").length,
       offsetKgCo2e: settledBookings.reduce((n, b) => n + (b.offset?.kgCo2e ?? 0), 0),
       toOffsetProjectsVnd: settledBookings.reduce((n, b) => n + (b.offset?.amountVnd ?? 0), 0),
     },
@@ -265,7 +267,13 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
       // Shown on the booking rather than as its own row: an offset is part
       // of the stay, not a separate transaction the guest made.
       offset: b.offset
-        ? { projectId: b.offset.projectId, kgCo2e: b.offset.kgCo2e, amountVnd: b.offset.amountVnd, joining: b.offset.joining }
+        ? {
+            projectId: b.offset.projectId,
+            kgCo2e: b.offset.kgCo2e,
+            amountVnd: b.offset.amountVnd,
+            mode: b.offset.mode,
+            origin: b.offset.origin,
+          }
         : null,
     })),
     ...orders.map((o) => {

@@ -619,7 +619,24 @@
     "replaceNote": "This booking already carries an offset to {{project}}. Adding again replaces it rather than charging twice.",
     "remove": "Remove",
     "removed": "Offset removed.",
-    "pendingNote": "It reaches the public ledger when a coordinator confirms your booking — the same rule the stay itself follows."
+    "pendingNote": "It reaches the public ledger when a coordinator confirms your booking — the same rule the stay itself follows.",
+    "howToTakePart": "How would you like to take part?",
+    "optionInPerson": "Join the planting",
+    "optionInPersonBody": "A session falls on {{date}}, during your stay. Come and work it — there is nothing to pay.",
+    "optionLeaveForward": "Leave your place for a later visitor",
+    "optionLeaveForwardBody": "The next session is {{date}}, after you leave. Your place goes to someone whose dates meet it. Nothing to pay.",
+    "optionDonate": "Contribute",
+    "optionDonateBody": "{{amount}} to the project, on the public ledger once your booking is confirmed.",
+    "optionDonateBodyMissed": "{{amount}} to the project instead, on the public ledger once your booking is confirmed.",
+    "free": "No charge",
+    "internationalRateNote": "Adjusted for a long journey. The Community Fund has already paid for the saplings, so this covers the cost of running the session rather than buying the trees again.",
+    "communityFundAlreadyCovers": "Every booking already sends 3% to the Community Fund, and that is what buys and tends the saplings. Anything here is on top of it, not instead of it.",
+    "nextSession": "Next session: {{date}}",
+    "noSessions": "Maintained year-round, so there is no session to attend.",
+    "ledgerInPersonContribution": "a day's work",
+    "ledgerLeaveForwardContribution": "place left for a later visitor",
+    "ledgerDonateContribution": "towards running the session",
+    "ledgerWorkNoMoney": "No money moved, so there is no ledger row — the ledger records what was paid."
   },
   "imageSlot": {
     "fallback": "Image"
@@ -701,6 +718,8 @@
     "offsetKg_one": "{{count}} kg of CO₂e offset",
     "offsetKg_other": "{{count}} kg of CO₂e offset",
     "joiningCount_one": "{{count}} planting day you have signed up for",
-    "joiningCount_other": "{{count}} planting days you have signed up for"
+    "joiningCount_other": "{{count}} planting days you have signed up for",
+    "offsetLeftForward": "Your place was left for a visitor whose dates meet a session",
+    "offsetDonated": "A contribution to the project"
   }
 }

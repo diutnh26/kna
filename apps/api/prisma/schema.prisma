@@ -169,9 +169,20 @@ model OffsetContribution {
   projectId String
   kgCo2e    Int
   amountVnd Int
-  // Whether the guest intends to join the planting at the end of the stay.
-  // Only two of the three projects accept help; the API enforces that.
-  joining   Boolean  @default(false)
+  // How the guest chose to contribute.
+  //   IN_PERSON     — they will work the planting during their stay
+  //   LEAVE_FORWARD — no session falls in their dates, so their share is
+  //                   left for a visitor who can attend
+  //   DONATE        — money
+  // Replaces a `joining` boolean: three states do not fit in two, and the
+  // boolean could not say why somebody was not joining.
+  mode      String
+  // The origin the guest travelled from. Kept so a donation can be audited
+  // back to the rate it was charged at — the international share only
+  // applies to some origins, and a figure on a public ledger should be
+  // reconstructable a year later. CHECK-constrained like every other
+  // enum-shaped column here.
+  origin    String
   createdAt DateTime @default(now())
 
   ledgerEntries LedgerEntry[]
