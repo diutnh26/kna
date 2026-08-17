@@ -40,7 +40,13 @@ async function describeAccount(userId: string) {
   const [bookings, orders, contributions] = await Promise.all([
     prisma.booking.findMany({
       where: { guestId: userId },
-      select: { status: true, totalVnd: true, communityFundVnd: true, providerPayoutVnd: true },
+      select: {
+        status: true,
+        totalVnd: true,
+        communityFundVnd: true,
+        providerPayoutVnd: true,
+        offset: { select: { amountVnd: true, kgCo2e: true, joining: true } },
+      },
     }),
     prisma.order.findMany({
       where: { buyerId: userId },
@@ -73,8 +79,10 @@ async function describeAccount(userId: string) {
       // Settled only. Showing a pending booking as money spent would
       // overstate it in the person's own favour, which is the same error
       // the public ledger used to make in the platform's favour.
+      // Includes settled offsets: the guest paid them, so leaving them out
+      // would understate what this platform cost them.
       spentVnd:
-        settledBookings.reduce((n, b) => n + b.totalVnd, 0) +
+        settledBookings.reduce((n, b) => n + b.totalVnd + (b.offset?.amountVnd ?? 0), 0) +
         settledOrders.reduce((n, o) => n + o.totalVnd, 0),
       // What actually reached the people they bought from. Artisans keep
       // 95% of a marketplace order; a booking's household share is stored.
@@ -82,6 +90,17 @@ async function describeAccount(userId: string) {
         settledBookings.reduce((n, b) => n + b.providerPayoutVnd, 0) +
         settledOrders.reduce((n, o) => n + (o.totalVnd - o.marketplaceFeeVnd), 0),
       toCommunityFundVnd: settledBookings.reduce((n, b) => n + b.communityFundVnd, 0),
+
+      // Offsets are counted apart from the rest, not folded into it. An
+      // offset takes no commission and no Fund share — the whole amount
+      // reaches the project — so adding it to `toProvidersVnd` would
+      // credit a household with money that went to a planting site.
+      offsets: bookings.filter((b) => b.offset).length,
+      // The commitments a guest has actually made to turn up and work,
+      // which is the part they will want reminding of.
+      offsetsJoining: bookings.filter((b) => b.offset?.joining).length,
+      offsetKgCo2e: settledBookings.reduce((n, b) => n + (b.offset?.kgCo2e ?? 0), 0),
+      toOffsetProjectsVnd: settledBookings.reduce((n, b) => n + (b.offset?.amountVnd ?? 0), 0),
     },
   };
 }

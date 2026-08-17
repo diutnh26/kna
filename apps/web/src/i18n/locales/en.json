@@ -687,6 +687,20 @@
     "statusIN_REVIEW": "With the Committee",
     "statusPUBLISHED": "Published",
     "statusREJECTED": "Not published",
-    "statusDRAFT": "Draft"
+    "statusDRAFT": "Draft",
+    "filterOffsets": "Offsets",
+    "offsetTitle": "Carbon offset",
+    "offsetLine": "{{kg}} kg through {{project}}",
+    "offsetJoining": "You are joining the planting on your last day",
+    "offsetNotJoining": "Maintained year-round by the conservation group",
+    "offsetPending": "Reaches the ledger when this booking is confirmed",
+    "offsetsNone": "No offsets yet.",
+    "offsetsNoneBody": "An offset is added to a booking from the impact tracker.",
+    "openTracker": "Open the impact tracker",
+    "toOffsets": "to carbon offset projects",
+    "offsetKg_one": "{{count}} kg of CO₂e offset",
+    "offsetKg_other": "{{count}} kg of CO₂e offset",
+    "joiningCount_one": "{{count}} planting day you have signed up for",
+    "joiningCount_other": "{{count}} planting days you have signed up for"
   }
 }

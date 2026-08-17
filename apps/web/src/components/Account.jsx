@@ -9,6 +9,7 @@ import {
   Clock,
   Check,
   X,
+  Sprout,
 } from 'lucide-react';
 import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
@@ -51,6 +52,11 @@ const KIND_ICON = { booking: CalendarDays, order: ShoppingBag, contribution: Fil
  */
 export default function Account() {
   const { t } = useTranslation();
+  // Project names come from the impact tracker's own locale data rather
+  // than a second list here, so the two screens cannot drift into calling
+  // the same project different things.
+  const offsetProjectName = (id) =>
+    t('carbon.projects', { returnObjects: true }).find((p) => p.id === id)?.name ?? id;
   const { token, isAuthenticated, openAuthModal, refreshUser, setToken } = useAuth();
 
   const [data, setData] = useState(null);
@@ -129,6 +135,9 @@ export default function Account() {
     if (filter === 'all') return true;
     if (filter === 'bookings') return row.kind === 'booking';
     if (filter === 'orders') return row.kind === 'order';
+    // An offset is not its own row — it rides on the booking that paid
+    // for it — so this filter narrows to the bookings carrying one.
+    if (filter === 'offsets') return row.kind === 'booking' && row.offset;
     return row.kind === 'contribution';
   });
 
@@ -192,7 +201,7 @@ export default function Account() {
                 {t('account.summaryEyebrow')}
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-8 mb-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
                 <div>
                   <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
                     {vnd(data.totals.spentVnd)}
@@ -210,6 +219,22 @@ export default function Account() {
                     {vnd(data.totals.toCommunityFundVnd)}
                   </div>
                   <p className="text-sm text-[#1A1614]/60">{t('account.toFund')}</p>
+                </div>
+                <div>
+                  <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
+                    {vnd(data.totals.toOffsetProjectsVnd)}
+                  </div>
+                  <p className="text-sm text-[#1A1614]/60">{t('account.toOffsets')}</p>
+                  {data.totals.offsetKgCo2e > 0 && (
+                    <p className="text-xs text-[#1A1614]/45 mt-1">
+                      {t('account.offsetKg', { count: data.totals.offsetKgCo2e })}
+                    </p>
+                  )}
+                  {data.totals.offsetsJoining > 0 && (
+                    <p className="text-xs text-[#4F5D3A] mt-1">
+                      {t('account.joiningCount', { count: data.totals.offsetsJoining })}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -337,6 +362,7 @@ export default function Account() {
                   ['all', t('account.filterAll')],
                   ['bookings', t('account.filterBookings')],
                   ['orders', t('account.filterOrders')],
+                  ['offsets', t('account.filterOffsets')],
                   ['contributions', t('account.filterContributions')],
                 ].map(([key, label]) => (
                   <button
@@ -356,8 +382,20 @@ export default function Account() {
 
             {shown.length === 0 ? (
               <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
-                <p className="font-display text-2xl mb-2">{t('account.activityEmpty')}</p>
-                <p className="text-sm text-[#F5EDDD]/60">{t('account.activityEmptyBody')}</p>
+                <p className="font-display text-2xl mb-2">
+                  {filter === 'offsets' ? t('account.offsetsNone') : t('account.activityEmpty')}
+                </p>
+                <p className="text-sm text-[#F5EDDD]/60">
+                  {filter === 'offsets' ? t('account.offsetsNoneBody') : t('account.activityEmptyBody')}
+                </p>
+                {filter === 'offsets' && (
+                  <a
+                    href="#impact"
+                    className="inline-block mt-4 text-sm text-[#E8A33D] underline underline-offset-4"
+                  >
+                    {t('account.openTracker')}
+                  </a>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -412,6 +450,35 @@ export default function Account() {
                             {t('account.from', { name: row.from })}
                             {row.buon ? ` · ${row.buon}` : ''}
                           </p>
+                        )}
+
+                        {row.kind === 'booking' && row.offset && (
+                          <div className="mt-3 border-l-2 border-[#8FA37B]/50 pl-3">
+                            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#8FA37B] mb-1">
+                              <Sprout className="w-3 h-3 shrink-0" />
+                              {t('account.offsetTitle')}
+                            </div>
+                            <p className="text-sm text-[#F5EDDD]/70">
+                              {t('account.offsetLine', {
+                                kg: row.offset.kgCo2e.toLocaleString('vi-VN'),
+                                project: offsetProjectName(row.offset.projectId),
+                              })}
+                              <span className="text-[#F5EDDD]/45"> · {vnd(row.offset.amountVnd)}</span>
+                            </p>
+                            {/* The commitment to turn up and work is the part
+                                worth surfacing — it is a date in someone's
+                                calendar, not just a payment. */}
+                            <p className="text-xs text-[#F5EDDD]/50 mt-1">
+                              {row.offset.joining
+                                ? t('account.offsetJoining')
+                                : t('account.offsetNotJoining')}
+                            </p>
+                            {row.status === 'PENDING' && (
+                              <p className="text-xs text-[#B87333] mt-1">
+                                {t('account.offsetPending')}
+                              </p>
+                            )}
+                          </div>
                         )}
 
                         {row.kind === 'contribution' && (

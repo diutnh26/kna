@@ -33,6 +33,10 @@ const anAccount = (overrides = {}) => ({
     spentVnd: 1_400_000,
     toProvidersVnd: 1_280_000,
     toCommunityFundVnd: 30_000,
+    offsets: 1,
+    offsetsJoining: 1,
+    offsetKgCo2e: 612,
+    toOffsetProjectsVnd: 673_200,
   },
   ...overrides,
 });
@@ -53,6 +57,7 @@ const activity = [
     totalVnd: 1_000_000,
     toProviderVnd: 900_000,
     toCommunityFundVnd: 30_000,
+    offset: { projectId: 'yokdon', kgCo2e: 612, amountVnd: 673_200, joining: true },
   },
   {
     kind: 'order',
@@ -179,4 +184,66 @@ describe('Account', () => {
 
     expect(await screen.findByText(/That is not your current password/)).toBeInTheDocument();
   });
+
+  // ── Carbon offsets ─────────────────────────────────────────────────
+
+  it('shows an offset on the booking that paid for it', async () => {
+    signIn();
+    renderScreen(<Account />);
+
+    await screen.findByText(/Two nights in Amí H'Bia/);
+    expect(screen.getByText(/612 kg through/)).toBeInTheDocument();
+    // Twice on purpose: once on the booking, once in the summary total.
+    expect(screen.getAllByText(/673\.200 ₫/)).toHaveLength(2);
+  });
+
+  it('surfaces the planting day the guest committed to', async () => {
+    // The part worth reminding someone of is not the payment, it is the
+    // date they said they would turn up and work.
+    signIn();
+    renderScreen(<Account />);
+
+    expect(await screen.findByText(/joining the planting on your last day/)).toBeInTheDocument();
+    expect(screen.getByText(/1 planting day you have signed up for/)).toBeInTheDocument();
+  });
+
+  it('counts offset money apart from what reached households', async () => {
+    // An offset takes no commission and no Fund share, so folding it into
+    // toProviders would credit a household with money that went to a
+    // planting site.
+    signIn();
+    renderScreen(<Account />);
+
+    expect(await screen.findByText(/to carbon offset projects/)).toBeInTheDocument();
+    expect(screen.getAllByText(/673\.200 ₫/).length).toBeGreaterThan(0);
+    // Kept out of the households figure.
+    expect(screen.getByText('1.280.000 ₫')).toBeInTheDocument();
+  });
+
+  it('filters the timeline down to bookings carrying an offset', async () => {
+    signIn();
+    renderScreen(<Account />);
+    await screen.findByText(/Two nights in Amí H'Bia/);
+
+    await userEvent.click(screen.getByRole('button', { name: /^Offsets$/i }));
+
+    expect(screen.getByText(/Two nights in Amí H'Bia/)).toBeInTheDocument();
+    // The purchase has no offset, so it drops out.
+    expect(screen.queryByText(/Gùi carrying basket/)).not.toBeInTheDocument();
+  });
+
+  it('points at the tracker when there are no offsets to show', async () => {
+    signIn();
+    vi.spyOn(api, 'accountActivity').mockResolvedValue([
+      { ...activity[1] }, // the order only
+    ]);
+    renderScreen(<Account />);
+    await screen.findByText(/Gùi carrying basket/);
+
+    await userEvent.click(screen.getByRole('button', { name: /^Offsets$/i }));
+
+    expect(screen.getByText(/No offsets yet/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Open the impact tracker/i })).toBeInTheDocument();
+  });
+
 });

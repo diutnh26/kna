@@ -687,6 +687,20 @@
     "statusIN_REVIEW": "Đang chờ Hội đồng",
     "statusPUBLISHED": "Đã đăng",
     "statusREJECTED": "Không được đăng",
-    "statusDRAFT": "Bản nháp"
+    "statusDRAFT": "Bản nháp",
+    "filterOffsets": "Bù đắp carbon",
+    "offsetTitle": "Khoản bù đắp carbon",
+    "offsetLine": "{{kg}} kg thông qua {{project}}",
+    "offsetJoining": "Bạn sẽ cùng trồng cây vào ngày cuối của chuyến đi",
+    "offsetNotJoining": "Do nhóm bảo tồn duy trì quanh năm",
+    "offsetPending": "Sẽ lên sổ cái khi đơn đặt này được xác nhận",
+    "offsetsNone": "Chưa có khoản bù đắp nào.",
+    "offsetsNoneBody": "Khoản bù đắp được thêm vào một đơn đặt chỗ từ công cụ theo dõi tác động.",
+    "openTracker": "Mở công cụ theo dõi tác động",
+    "toOffsets": "cho các dự án bù đắp carbon",
+    "offsetKg_one": "{{count}} kg CO₂e đã bù đắp",
+    "offsetKg_other": "{{count}} kg CO₂e đã bù đắp",
+    "joiningCount_one": "{{count}} ngày trồng cây bạn đã đăng ký",
+    "joiningCount_other": "{{count}} ngày trồng cây bạn đã đăng ký"
   }
 }
