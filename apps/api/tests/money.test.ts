@@ -254,9 +254,49 @@ describe("marketplace money path", () => {
     expect(res.body.error).toContain("Test basket");
   });
 
-  it("hides sold-out pieces from the public list", async () => {
+  it("keeps a sold-out piece on the public list, marked rather than hidden", async () => {
+    // This test previously asserted the opposite. Filtering sold-out
+    // pieces out made the card's own "Sold out" state unreachable, and
+    // let a buyer see a purchase in their account that the marketplace
+    // said did not exist.
     const res = await request(app).get("/products");
-    expect(res.body.map((p: { id: string }) => p.id)).not.toContain(productId);
+    const sold = res.body.find((p: { id: string }) => p.id === productId);
+
+    expect(sold).toBeDefined();
+    expect(sold.stock).toBe(0);
+  });
+
+  it("orders what can still be bought ahead of what cannot", async () => {
+    // A second piece, in stock, created after the sold-out one — so
+    // creation order alone would put it second.
+    const maker = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
+    await prisma.product.create({
+      data: {
+        providerId: maker.providerId,
+        category: "Textile",
+        title: "Still available",
+        note: "n",
+        priceVnd: 100_000,
+        stock: 3,
+        published: true,
+      },
+    });
+
+    const res = await request(app).get("/products");
+    const stocks = res.body.map((p: { stock: number }) => p.stock > 0);
+    // Every available piece precedes every sold-out one.
+    expect(stocks).toEqual([...stocks].sort((a, b) => Number(b) - Number(a)));
+    expect(res.body[res.body.length - 1].id).toBe(productId);
+  });
+
+  it("still refuses to sell a piece that has none left", async () => {
+    const res = await request(app)
+      .post("/orders")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ items: [{ productId, quantity: 1 }] });
+
+    // Visible is not buyable.
+    expect(res.status).toBe(409);
   });
 
 });

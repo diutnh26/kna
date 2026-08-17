@@ -275,19 +275,34 @@ export default function Marketplace() {
                   return (
                     <article
                       key={p.id}
-                      className="group border border-[#F5EDDD]/10 hover:border-[#F5EDDD]/30 transition flex flex-col"
+                      className={`group border transition flex flex-col ${
+                        soldOut
+                          ? 'border-[#F5EDDD]/10'
+                          : 'border-[#F5EDDD]/10 hover:border-[#F5EDDD]/30'
+                      }`}
                     >
                       <div className="relative">
-                        <ImageSlot
-                          src={p.imageUrl}
-                          ratio="aspect-square"
-                          label={t('marketplace.photoLabel', { title: p.title, maker: p.provider.displayName })}
-                          className="border-0 border-b border-dashed"
-                        />
-                        {p.stock === 1 && (
-                          <span className="absolute top-4 left-4 bg-[#C8302E] text-[#F5EDDD] text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
-                            {t('marketplace.oneOfAKind')}
+                        {/* Dim the photograph, not the words. A sold piece
+                            still has a maker and a story worth reading —
+                            it just cannot be bought. */}
+                        <div className={soldOut ? 'opacity-45' : ''}>
+                          <ImageSlot
+                            src={p.imageUrl}
+                            ratio="aspect-square"
+                            label={t('marketplace.photoLabel', { title: p.title, maker: p.provider.displayName })}
+                            className="border-0 border-b border-dashed"
+                          />
+                        </div>
+                        {soldOut ? (
+                          <span className="absolute top-4 left-4 bg-[#1A1614] text-[#F5EDDD]/70 border border-[#F5EDDD]/25 text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
+                            {t('marketplace.soldOut')}
                           </span>
+                        ) : (
+                          p.stock === 1 && (
+                            <span className="absolute top-4 left-4 bg-[#C8302E] text-[#F5EDDD] text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
+                              {t('marketplace.oneOfAKind')}
+                            </span>
+                          )
                         )}
                       </div>
 
@@ -344,7 +359,9 @@ export default function Marketplace() {
                                 {t('marketplace.ordered')}
                               </span>
                             ) : soldOut ? (
-                              <span className="text-xs text-[#F5EDDD]/40 uppercase tracking-wider">Sold out</span>
+                              <span className="text-xs text-[#F5EDDD]/40 uppercase tracking-wider">
+                                {t('marketplace.soldOut')}
+                              </span>
                             ) : (
                               <div className="flex items-center gap-3">
                                 <label className="sr-only" htmlFor={`qty-${p.id}`}>{t('marketplace.quantity')}</label>
