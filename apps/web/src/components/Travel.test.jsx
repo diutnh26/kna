@@ -146,4 +146,23 @@ describe('Travel', () => {
     expect(await screen.findByText(/Choose an arrival date first/i)).toBeInTheDocument();
   });
 
+
+  it('keeps the price on one line, in its own row', async () => {
+    // The price used to share a flex row with the booking controls. That
+    // was fine while those were a number box and a button; the date picker
+    // pushed the row past the card width and the parent took the space out
+    // of the price, wrapping "2.500.000 ₫" mid-figure.
+    //
+    // jsdom cannot measure layout, so this asserts the two things that
+    // actually prevent it: the price does not wrap, and it is not a
+    // sibling of the controls.
+    renderScreen(<Travel />);
+    const price = await screen.findByText('500.000 ₫');
+
+    expect(price).toHaveClass('whitespace-nowrap');
+
+    const date = screen.getByLabelText(/Arrival date/i);
+    expect(price.parentElement.contains(date)).toBe(false);
+  });
+
 });

@@ -336,20 +336,26 @@ export default function Travel() {
                         )}
 
                         <div className="mt-auto space-y-4">
-                          <div className="flex items-end justify-between gap-4">
-                            <div>
-                              <div className="font-display price-sm text-[#E8A33D] leading-none">
-                                {vnd(l.priceVnd)}
-                              </div>
-                              <div className="text-[11px] text-[#F5EDDD]/40 mt-1">{l.unit}</div>
+                          {/* The price gets its own row. It used to share one
+                              with the booking controls, which was fine while
+                              those were a number box and a button — adding the
+                              date picker pushed the row past the card width, and
+                              the flex parent took the space out of the price,
+                              wrapping it mid-figure. */}
+                          <div className="flex items-baseline justify-between gap-3">
+                            <div className="font-display price-sm text-[#E8A33D] leading-none whitespace-nowrap">
+                              {vnd(l.priceVnd)}
                             </div>
+                            <div className="text-[11px] text-[#F5EDDD]/40 whitespace-nowrap">{l.unit}</div>
+                          </div>
 
+                          <div>
                             {booking?.status === 'done' ? (
                               <span className="text-xs text-[#E8A33D] uppercase tracking-wider">
                                 {t('travel.requested')}
                               </span>
                             ) : (
-                              <div className="flex items-center gap-3 flex-wrap justify-end">
+                              <div className="space-y-3">
                                 <label className="sr-only" htmlFor={`checkin-${l.id}`}>
                                   {t('travel.arrivalDate')}
                                 </label>
@@ -359,28 +365,30 @@ export default function Travel() {
                                   min={today}
                                   value={checkInFor(l)}
                                   onChange={(e) => setCheckIn(l, e.target.value)}
-                                  className="bg-transparent border border-[#F5EDDD]/25 text-sm py-2 px-2 focus:outline-none focus:border-[#F5EDDD]/60 [color-scheme:dark]"
+                                  className="w-full bg-transparent border border-[#F5EDDD]/25 text-sm py-2 px-3 focus:outline-none focus:border-[#F5EDDD]/60 [color-scheme:dark]"
                                 />
-                                <label className="sr-only" htmlFor={`qty-${l.id}`}>
-                                  {perNight ? t('travel.nights') : t('travel.guests')}
-                                </label>
-                                <input
-                                  id={`qty-${l.id}`}
-                                  type="number"
-                                  min={1}
-                                  max={perNight ? 30 : 20}
-                                  value={qtyFor(l)}
-                                  onChange={(e) => setQty(l, Number(e.target.value))}
-                                  className="w-14 bg-transparent border border-[#F5EDDD]/25 text-sm text-center py-2 focus:outline-none focus:border-[#F5EDDD]/60"
-                                />
-                                <button
-                                  onClick={() => handleBook(l)}
-                                  disabled={booking?.status === 'submitting'}
-                                  className="group/btn inline-flex items-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-5 py-3 text-sm transition"
-                                >
-                                  {booking?.status === 'submitting' ? t('travel.sending') : t('travel.book')}
-                                  <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition" />
-                                </button>
+                                <div className="flex items-stretch gap-3">
+                                  <label className="sr-only" htmlFor={`qty-${l.id}`}>
+                                    {perNight ? t('travel.nights') : t('travel.guests')}
+                                  </label>
+                                  <input
+                                    id={`qty-${l.id}`}
+                                    type="number"
+                                    min={1}
+                                    max={perNight ? 30 : 20}
+                                    value={qtyFor(l)}
+                                    onChange={(e) => setQty(l, Number(e.target.value))}
+                                    className="w-16 shrink-0 bg-transparent border border-[#F5EDDD]/25 text-sm text-center py-2 focus:outline-none focus:border-[#F5EDDD]/60"
+                                  />
+                                  <button
+                                    onClick={() => handleBook(l)}
+                                    disabled={booking?.status === 'submitting'}
+                                    className="group/btn flex-1 inline-flex items-center justify-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-5 py-3 text-sm transition"
+                                  >
+                                    {booking?.status === 'submitting' ? t('travel.sending') : t('travel.book')}
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition" />
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
