@@ -70,7 +70,7 @@ export default function Explore() {
             <span className="h-px w-12 bg-[#B87333]" />
             <span>{t('explore.eyebrow')}</span>
           </div>
-          <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
+          <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
             {t('explore.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
@@ -102,7 +102,9 @@ export default function Explore() {
       {/* ── THREE PILLARS ─────────────────────────── */}
       <section className="bg-[#F5EDDD] text-[#1A1614]">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
-          <div className="max-w-2xl mb-16">
+          {/* max-w-3xl rather than 2xl: at md:text-5xl the narrower column
+              broke this heading across four short lines. */}
+          <div className="max-w-3xl mb-16">
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
               {t('explore.pillarsEyebrow')}
             </div>

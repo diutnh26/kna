@@ -75,7 +75,7 @@ export default function Community() {
             <span className="h-px w-12 bg-[#B87333]" />
             <span>{t('community.eyebrow')}</span>
           </div>
-          <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
+          <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
             {t('community.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
@@ -167,20 +167,27 @@ export default function Community() {
 
           {/* ── FUND ──────────────────────────────────── */}
           <section className="px-8 lg:px-12 xl:px-16 py-24">
-            <div className="flex flex-wrap items-end justify-between gap-8 mb-12">
-              <div className="max-w-xl">
+            {/* Title left, prose right. It was a max-w-xl column beside a
+                short row of quarter buttons, so the heading wrapped into
+                several lines while most of the row sat empty. */}
+            <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-10">
+              <div className="md:col-span-5">
                 <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
                   <Wallet className="w-4 h-4" />
                   {t('community.fundEyebrow')}
                 </div>
-                <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight mb-6">
+                <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight">
                   {t('community.fundHeading')}
                 </h2>
+              </div>
+              <div className="md:col-span-7 md:pt-10">
                 <p className="text-lg text-[#F5EDDD]/70 leading-relaxed">
                   {t('community.fundBody')}
                 </p>
               </div>
+            </div>
 
+            <div className="flex flex-wrap items-center gap-8 mb-12">
               <div className="flex gap-2">
                 {quarters.map((q, i) => (
                   <button
@@ -239,17 +246,21 @@ export default function Community() {
           {/* ── DECISIONS ─────────────────────────────── */}
           <section className="bg-[#F5EDDD] text-[#1A1614]">
             <div className="px-8 lg:px-12 xl:px-16 py-24">
-              <div className="max-w-2xl mb-14">
-                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
-                  <FileText className="w-4 h-4" />
-                  {t('community.minutesEyebrow')}
+              <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-14">
+                <div className="md:col-span-5">
+                  <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+                    <FileText className="w-4 h-4" />
+                    {t('community.minutesEyebrow')}
+                  </div>
+                  <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+                    {t('community.minutesHeading')}
+                  </h2>
                 </div>
-                <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-6">
-                  {t('community.minutesHeading')}
-                </h2>
-                <p className="text-lg text-[#1A1614]/70 leading-relaxed">
-                  {t('community.minutesBody')}
-                </p>
+                <div className="md:col-span-7 md:pt-10">
+                  <p className="text-lg text-[#1A1614]/70 leading-relaxed">
+                    {t('community.minutesBody')}
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-px bg-[#1A1614]/10">

@@ -94,7 +94,7 @@ export default function Dashboard() {
           <span className="h-px w-12 bg-[#B87333]" />
           <span>{t('dashboard.eyebrow')}</span>
         </div>
-        <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-6">
+        <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-6">
           {data ? data.provider.displayName : t('dashboard.fallbackTitle')}
         </h1>
         {data && (

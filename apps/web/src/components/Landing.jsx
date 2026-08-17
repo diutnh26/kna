@@ -76,7 +76,7 @@ export default function Landing() {
               <span className="h-px w-12 bg-[#B87333]" />
               <span>{t('landing.hero.eyebrow')}</span>
             </div>
-            <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-10 text-[#1A1614]">
+            <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-10 text-[#1A1614]">
               {t('landing.hero.titleLine1')}{' '}
               <span className="text-[#C8302E]">{t('landing.hero.titleEm')}</span>{' '}
               {t('landing.hero.titleRest')}
@@ -162,8 +162,7 @@ export default function Landing() {
               {t('landing.culture.eyebrow')}
             </div>
             <h2 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8 text-[#1A1614]">
-              {t('landing.culture.headingLine1')}{' '}
-              <span className="text-[#C8302E]">{t('landing.culture.headingEm')}</span>
+              {t('landing.culture.headingLine1')}
             </h2>
             <p className="text-lg leading-relaxed text-[#1A1614]/80 mb-10">
               {t('landing.culture.body')}
@@ -213,9 +212,6 @@ export default function Landing() {
             </h2>
             <p className="text-lg leading-relaxed text-[#F5EDDD]/90 mb-8">
               {t('landing.transparency.body')}
-            </p>
-            <p className="font-display text-2xl leading-snug">
-              {t('landing.transparency.quote')}
             </p>
           </div>
 

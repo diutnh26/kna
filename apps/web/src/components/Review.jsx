@@ -80,7 +80,7 @@ export default function Review() {
           <span className="h-px w-12 bg-[#B87333]" />
           <span>{t('review.eyebrow')}</span>
         </div>
-        <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
+        <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
           {t('review.title')}
         </h1>
         <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">

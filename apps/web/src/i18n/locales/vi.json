@@ -61,8 +61,7 @@
     },
     "culture": {
       "eyebrow": "Người Ê Đê",
-      "headingLine1": "Một nền văn hóa sống,",
-      "headingEm": "vẫn đang thở.",
+      "headingLine1": "Một nền văn hoá sống.",
       "body": "Người Ê Đê là một trong những dân tộc thiểu số lớn nhất ở Tây Nguyên Việt Nam, với cấu trúc xã hội mẫu hệ đã điều hành đời sống cộng đồng qua nhiều thế hệ. Văn hóa của họ được gìn giữ trong nhịp điệu của Cồng Chiêng, trong nghề dệt của những người thợ, và trong kiến trúc trường tồn của ngôi nhà dài.",
       "items": [
         {
@@ -84,7 +83,6 @@
       "eyebrow": "Minh bạch tài chính",
       "heading": "Được theo dõi, không chỉ hứa hẹn.",
       "body": "Mọi giao dịch trên KNĂ đều được ghi lại trên một sổ cái công khai. Du khách thấy tiền của mình đi về đâu. Cộng đồng thấy mình đã kiếm được gì. Đối tác xác minh những gì họ công bố.",
-      "quote": "“Minh bạch không còn là khẩu hiệu khi ai cũng có thể kiểm chứng.”",
       "ledgerLabel": "Sổ cái công khai · mẫu trực tiếp",
       "ledgerMore": "+ còn {{count}} giao dịch khác hôm nay",
       "ledgerEmpty": "Chưa có giao dịch nào được ghi nhận."
@@ -219,7 +217,7 @@
     "statBuon": "buôn đang đóng góp",
     "statLanguages": "ngôn ngữ được lưu giữ",
     "pillarsEyebrow": "Nơi kho lưu trữ bắt đầu",
-    "pillarsHeading": "Ba truyền thống mang phần lớn những gì người Ê Đê hiểu về chính mình.",
+    "pillarsHeading": "Ba truyền thống mang phần lớn hiểu biết của người Ê Đê.",
     "pillars": [
       {
         "ede": "Ching Kram",
@@ -327,7 +325,7 @@
   },
   "marketplace": {
     "eyebrow": "Chợ cộng đồng",
-    "title": "Được làm bởi một người mà bạn có thể gọi tên.",
+    "title": "Làm chậm, bởi một người, một cách có chủ ý.",
     "intro": "Nghệ nhân tự đặt giá và giữ lại 95% số tiền bạn trả — được xác minh bởi chính những đại diện cộng đồng đã xác minh các chủ nhà và hướng dẫn viên.",
     "statArtisanShare": "ở lại với nghệ nhân",
     "statMakers": "nghệ nhân đang bán trong giai đoạn thí điểm",
@@ -399,14 +397,14 @@
   },
   "community": {
     "eyebrow": "Không gian cộng đồng",
-    "title": "Các quyết định được đưa ra ở đây, một cách công khai.",
+    "title": "Được quản trị công khai, không phải sau cánh cửa đóng.",
     "intro": "Đại diện của các buôn đã tham gia quyết định điều gì được công bố, Quỹ Cộng đồng chi cho việc gì, và ai được phép đăng dịch vụ trên nền tảng. Biên bản và các khoản phân bổ đều công khai, kể cả những quyết định đi ngược lại lợi ích của nền tảng.",
     "statMembers": "thành viên hội đồng, tất cả đều là người Ê Đê",
     "statMonthly": "Hằng tháng",
     "statMeetings": "cuộc họp, biên bản công bố trong vòng một tuần",
     "statNoVote": "nhân sự KNĂ có quyền biểu quyết",
     "committeeEyebrow": "Hội đồng Quản trị Cộng đồng",
-    "committeeHeading": "Những con người có tên tuổi, không phải một ban cố vấn.",
+    "committeeHeading": "Người của buôn, không phải chuyên gia từ nơi khác.",
     "committeeBody": "Thành viên do chính buôn của mình đề cử và giữ nhiệm kỳ một năm. KNĂ dự họp để trả lời câu hỏi và không có quyền biểu quyết.",
     "portrait": "Chân dung",
     "servingSince": "Tham gia từ {{date}}",
@@ -523,7 +521,7 @@
   },
   "carbon": {
     "eyebrow": "Theo dõi carbon",
-    "title": "Việc đến đây có cái giá của nó. Đây là con số.",
+    "title": "Con số mà hãng bay không cho bạn thấy.",
     "intro": "Phần lớn dấu chân carbon của một chuyến đi nằm ở hành trình, không phải ở kỳ lưu trú. Công cụ này cho bạn thấy toàn bộ, rồi chuyển khoản bù đắp đến một dự án do chính cộng đồng vận hành.",
     "communityLedTitle": "Do cộng đồng dẫn dắt, không phải do thuật toán",
     "communityLedBody": "Các dự án do chính buôn đề xuất, được Hội đồng Quản trị Cộng đồng phê duyệt, và do các hộ gia đình trực tiếp làm việc báo cáo kết quả.",

@@ -30,6 +30,21 @@
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
   }
 
+  /* Page titles.
+
+     Every h1 on the platform used `text-4xl md:text-6xl`. These are those
+     two sizes at 85%. Named, like the price scale, so the next tune is one
+     edit rather than ten files — and so the two h1 sizes cannot drift
+     apart from each other. */
+  .page-title {
+    font-size: 1.9125rem;
+  } /* was text-4xl, 2.25rem */
+  @media (min-width: 768px) {
+    .page-title {
+      font-size: 3.1875rem;
+    } /* was md:text-6xl, 3.75rem */
+  }
+
   /* Price figures.
 
      Back at the Tailwind sizes they started from. They spent a spell at

@@ -61,8 +61,7 @@
     },
     "culture": {
       "eyebrow": "The Ê Đê people",
-      "headingLine1": "A living culture,",
-      "headingEm": "still breathing.",
+      "headingLine1": "A living culture.",
       "body": "The Ê Đê are one of the largest ethnic minority groups in the Central Highlands of Vietnam, with a matrilineal social structure that has governed community life for generations. Their culture is preserved in the rhythm of the Cồng Chiêng, the craft of their weavers, and the enduring architecture of the longhouse.",
       "items": [
         {
@@ -84,7 +83,6 @@
       "eyebrow": "Financial transparency",
       "heading": "Tracked, not promised.",
       "body": "Every transaction on KNĂ is recorded on a public ledger. Travelers see where their money goes. Communities see what they earned. Partners verify what they claim.",
-      "quote": "“Transparency stops being a slogan when anyone can check.”",
       "ledgerLabel": "Public ledger · live sample",
       "ledgerMore": "+ {{count}} more transactions today",
       "ledgerEmpty": "No transactions recorded yet."
@@ -219,7 +217,7 @@
     "statBuon": "buôn contributing",
     "statLanguages": "languages carried",
     "pillarsEyebrow": "Where the archive begins",
-    "pillarsHeading": "Three traditions carry most of what the Ê Đê know about themselves.",
+    "pillarsHeading": "Three traditions carry most of what the Ê Đê know.",
     "pillars": [
       {
         "ede": "Ching Kram",
@@ -327,7 +325,7 @@
   },
   "marketplace": {
     "eyebrow": "Community Marketplace",
-    "title": "Made by a person you can name.",
+    "title": "Made slowly, by one person, on purpose.",
     "intro": "Artisans set their own prices and keep 95% of what you pay — verified by the same community representatives who verify hosts and guides.",
     "statArtisanShare": "stays with the artisan",
     "statMakers": "makers listing in the pilot",
@@ -399,14 +397,14 @@
   },
   "community": {
     "eyebrow": "Community space",
-    "title": "The decisions are made here, in the open.",
+    "title": "Governed in public, not in private.",
     "intro": "Representatives from the onboarded buôn govern what is published, what the Community Fund pays for, and who may list on the platform. Minutes and allocations are public, including the decisions that went against the platform.",
     "statMembers": "committee members, all Ê Đê",
     "statMonthly": "Monthly",
     "statMeetings": "meetings, minutes published within a week",
     "statNoVote": "KNĂ staff with a vote",
     "committeeEyebrow": "Community Governance Committee",
-    "committeeHeading": "Named people, not a board of advisors.",
+    "committeeHeading": "People from the buôn, not consultants from outside.",
     "committeeBody": "Members are nominated by their own buôn and serve one-year terms. KNĂ attends meetings to answer questions and has no vote.",
     "portrait": "Portrait",
     "servingSince": "Serving since {{date}}",
@@ -523,7 +521,7 @@
   },
   "carbon": {
     "eyebrow": "Carbon tracker",
-    "title": "Getting here has a cost. Here is the number.",
+    "title": "A number the airline doesn't show you.",
     "intro": "Most of a trip’s footprint is the journey, not the stay. The tracker shows the whole of it, then routes an offset to a project the community actually runs.",
     "communityLedTitle": "Community-led, not algorithm-led",
     "communityLedBody": "Projects are identified by the buôn, approved by the Community Governance Committee, and reported on by the households doing the work.",

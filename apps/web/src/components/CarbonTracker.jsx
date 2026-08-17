@@ -212,7 +212,7 @@ export default function CarbonTracker() {
             <span className="h-px w-12 bg-[#B87333]" />
             <span>{t('carbon.eyebrow')}</span>
           </div>
-          <h1 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
+          <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
             {t('carbon.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
@@ -373,22 +373,29 @@ export default function CarbonTracker() {
       {/* ── OFFSET PROJECTS ───────────────────────── */}
       <section className="bg-[#F5EDDD] text-[#1A1614]">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
-          <div className="max-w-2xl mb-14">
-            <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
-              {t('carbon.projectsEyebrow')}
+          {/* Title left, prose right, filling the row. It was a max-w-2xl
+              column, which wrapped the heading into several short lines and
+              left the other half of the section empty. */}
+          <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-14">
+            <div className="md:col-span-5">
+              <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+                {t('carbon.projectsEyebrow')}
+              </div>
+              <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+                {t('carbon.projectsHeading')}
+              </h2>
             </div>
-            <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-6">
-              {t('carbon.projectsHeading')}
-            </h2>
-            <p className="text-lg text-[#1A1614]/70 leading-relaxed">
-              {t('carbon.projectsBody')}
-            </p>
-            {/* Said plainly here rather than only in the donation note: the
-                saplings are already paid for, and a visitor should know
-                that before deciding what to add. */}
-            <p className="text-sm text-[#1A1614]/60 leading-relaxed mt-4">
-              {t('carbon.communityFundAlreadyCovers')}
-            </p>
+            <div className="md:col-span-7 md:pt-10">
+              <p className="text-lg text-[#1A1614]/70 leading-relaxed">
+                {t('carbon.projectsBody')}
+              </p>
+              {/* Said plainly here rather than only in the donation note: the
+                  saplings are already paid for, and a visitor should know
+                  that before deciding what to add. */}
+              <p className="text-sm text-[#1A1614]/60 leading-relaxed mt-4">
+                {t('carbon.communityFundAlreadyCovers')}
+              </p>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-14">
@@ -637,23 +644,28 @@ export default function CarbonTracker() {
                       </p>
                     )}
 
-                    <button
-                      onClick={attachOffset}
-                      disabled={attachState.busy || !bookingId}
-                      className="group w-full inline-flex items-center justify-center gap-3 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-6 py-3.5 text-sm transition"
-                    >
-                      {attachState.busy ? t('carbon.attaching') : t('carbon.attach')}
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-                    </button>
-
-                    {existingOffset && !attachState.busy && (
+                    {/* Remove sits beside the action rather than under it:
+                        it is the smaller of the two decisions and does not
+                        need a line of its own. */}
+                    <div className="flex items-center gap-4">
                       <button
-                        onClick={removeOffset}
-                        className="w-full text-xs text-[#F5EDDD]/45 underline underline-offset-4 hover:text-[#F5EDDD]/70"
+                        onClick={attachOffset}
+                        disabled={attachState.busy || !bookingId}
+                        className="group inline-flex items-center justify-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-4 py-2.5 text-xs uppercase tracking-wider transition"
                       >
-                        {t('carbon.remove')}
+                        {attachState.busy ? t('carbon.attaching') : t('carbon.attach')}
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
                       </button>
-                    )}
+
+                      {existingOffset && !attachState.busy && (
+                        <button
+                          onClick={removeOffset}
+                          className="text-xs text-[#F5EDDD]/45 underline underline-offset-4 hover:text-[#F5EDDD]/70"
+                        >
+                          {t('carbon.remove')}
+                        </button>
+                      )}
+                    </div>
 
                     {attachState.message && (
                       <p className="text-sm text-[#8FA37B]">
