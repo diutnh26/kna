@@ -45,6 +45,28 @@
     } /* was md:text-6xl, 3.75rem */
   }
 
+  /* An inner page's title: 20% below the landing hero, which stays the
+     largest thing on the platform. */
+  .page-title-sm {
+    font-size: 1.53rem;
+  }
+  @media (min-width: 768px) {
+    .page-title-sm {
+      font-size: 2.55rem;
+    }
+  }
+
+  /* Section headings inside a page: 20% below the text-4xl/md:text-5xl
+     they used to be. */
+  .section-title {
+    font-size: 1.8rem;
+  } /* was text-4xl, 2.25rem */
+  @media (min-width: 768px) {
+    .section-title {
+      font-size: 2.4rem;
+    } /* was md:text-5xl, 3rem */
+  }
+
   /* Price figures.
 
      Back at the Tailwind sizes they started from. They spent a spell at

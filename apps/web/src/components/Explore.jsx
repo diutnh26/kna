@@ -108,7 +108,7 @@ export default function Explore() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
               {t('explore.pillarsEyebrow')}
             </div>
-            <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+            <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
               {t('explore.pillarsHeading')}
             </h2>
           </div>
@@ -150,7 +150,7 @@ export default function Explore() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
               {t('explore.browseEyebrow')}
             </div>
-            <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight">
+            <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight">
               {t('explore.browseHeading')}
             </h2>
           </div>
@@ -248,7 +248,7 @@ export default function Explore() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
               {t('explore.phrasesEyebrow')}
             </div>
-            <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
+            <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
               {t('explore.phrasesHeading', { count: phrases.length })}
             </h2>
             <p className="text-lg text-[#1A1614]/70 leading-relaxed mb-6">

@@ -122,7 +122,7 @@ export default function Marketplace() {
             <span className="h-px w-12 bg-[#B87333]" />
             <span>{t('marketplace.eyebrow')}</span>
           </div>
-          <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
+          <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
             {t('marketplace.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
@@ -159,7 +159,7 @@ export default function Marketplace() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
               {t('marketplace.certEyebrow')}
             </div>
-            <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
+            <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
               {t('marketplace.certHeading')}
             </h2>
             <p className="text-lg text-[#1A1614]/70 leading-relaxed mb-6">

@@ -212,7 +212,7 @@ export default function CarbonTracker() {
             <span className="h-px w-12 bg-[#B87333]" />
             <span>{t('carbon.eyebrow')}</span>
           </div>
-          <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
+          <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
             {t('carbon.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
@@ -690,7 +690,7 @@ export default function CarbonTracker() {
           <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
             {t('carbon.afterwardsEyebrow')}
           </div>
-          <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight mb-8">
+          <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight mb-8">
             {t('carbon.afterwardsHeading')}
           </h2>
           <p className="text-lg text-[#F5EDDD]/70 leading-relaxed mb-6">

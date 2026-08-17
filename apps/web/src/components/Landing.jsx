@@ -121,7 +121,7 @@ export default function Landing() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
               {t('landing.pillars.eyebrow')}
             </div>
-            <h2 className="font-display text-5xl md:text-6xl font-medium leading-[1.05] tracking-tight text-white">
+            <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight text-white">
               {t('landing.pillars.headingLine1')}
               <span> {t('landing.pillars.headingEm')}</span>
             </h2>
@@ -161,7 +161,7 @@ export default function Landing() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
               {t('landing.culture.eyebrow')}
             </div>
-            <h2 className="font-display text-4xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8 text-[#1A1614]">
+            <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8 text-[#C8302E]">
               {t('landing.culture.headingLine1')}
             </h2>
             <p className="text-lg leading-relaxed text-[#1A1614]/80 mb-10">
@@ -207,7 +207,7 @@ export default function Landing() {
             <div className="text-xs uppercase tracking-[0.25em] text-[#F5EDDD]/70 mb-6">
               {t('landing.transparency.eyebrow')}
             </div>
-            <h2 className="font-display text-5xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8">
+            <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
               {t('landing.transparency.heading')}
             </h2>
             <p className="text-lg leading-relaxed text-[#F5EDDD]/90 mb-8">
@@ -262,7 +262,7 @@ export default function Landing() {
               <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
                 {t('landing.community.eyebrow')}
               </div>
-              <h2 className="font-display text-5xl md:text-6xl font-medium leading-[1.05] tracking-tight mb-8 text-[#6B1A1A]">
+              <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8 text-[#6B1A1A]">
                 {t('landing.community.headingLine1')}
                 <br />
                 <span>{t('landing.community.headingEm')}</span>{' '}

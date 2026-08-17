@@ -75,7 +75,7 @@ export default function Community() {
             <span className="h-px w-12 bg-[#B87333]" />
             <span>{t('community.eyebrow')}</span>
           </div>
-          <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
+          <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
             {t('community.title')}
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
@@ -120,7 +120,7 @@ export default function Community() {
                     <Gavel className="w-4 h-4" />
                     {t('community.committeeEyebrow')}
                   </div>
-                  <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+                  <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
                     {t('community.committeeHeading')}
                   </h2>
                 </div>
@@ -176,7 +176,7 @@ export default function Community() {
                   <Wallet className="w-4 h-4" />
                   {t('community.fundEyebrow')}
                 </div>
-                <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight">
+                <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight">
                   {t('community.fundHeading')}
                 </h2>
               </div>
@@ -252,7 +252,7 @@ export default function Community() {
                     <FileText className="w-4 h-4" />
                     {t('community.minutesEyebrow')}
                   </div>
-                  <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+                  <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
                     {t('community.minutesHeading')}
                   </h2>
                 </div>
