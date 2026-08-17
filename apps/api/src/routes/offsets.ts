@@ -133,7 +133,7 @@ function activityDuringStay(
 
 /** What the server charges, given the choice and where the guest came from. */
 function amountFor(projectId: ProjectId, mode: Mode, kgCo2e: number, origin: string): number {
-  // Turning up, or standing aside so someone else can, costs nothing.
+  // Turning up costs nothing.
   if (mode !== "DONATE") return 0;
 
   const full = kgCo2e * PROJECTS[projectId].ratePerKgVnd;
@@ -144,14 +144,14 @@ function amountFor(projectId: ProjectId, mode: Mode, kgCo2e: number, origin: str
   return Math.round(adjusted);
 }
 
-type Mode = "IN_PERSON" | "LEAVE_FORWARD" | "DONATE";
+type Mode = "IN_PERSON" | "DONATE";
 
 const offsetSchema = z.object({
   bookingId: z.string().min(1),
   projectId: z.enum(["yokdon", "lak", "corridor"]),
   // Bounded like every other figure that reaches the public ledger.
   kgCo2e: z.number().int().min(1).max(20_000),
-  mode: z.enum(["IN_PERSON", "LEAVE_FORWARD", "DONATE"]),
+  mode: z.enum(["IN_PERSON", "DONATE"]),
   origin: z.enum(["hcmc", "hanoi", "danang", "asia", "europe"]),
 });
 
@@ -159,7 +159,6 @@ const offsetSchema = z.object({
 function ledgerLabel(projectId: ProjectId, mode: Mode, origin: string): string {
   const name = PROJECT_LEDGER_LABEL[projectId];
   if (mode === "IN_PERSON") return `${name} · a day's work`;
-  if (mode === "LEAVE_FORWARD") return `${name} · place left for a later visitor`;
   // A long-haul donation covers the cost of running the session, not the
   // saplings — the Community Fund has already paid for those.
   if (PROJECTS[projectId].joinable && INTERNATIONAL_ORIGINS.has(origin)) {
@@ -199,12 +198,11 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
         .json({ error: "That project is maintained year-round and does not take visiting help." });
     }
   } else if (mode === "IN_PERSON" && !eligible) {
+    // Still checked here rather than trusted from the client: the screen
+    // disables the option, and a disabled control is a courtesy, not a
+    // constraint.
     return res.status(400).json({
-      error: "No planting day falls within those dates. You can leave your place for a later visitor, or contribute.",
-    });
-  } else if (mode === "LEAVE_FORWARD" && eligible) {
-    return res.status(400).json({
-      error: "A planting day falls within your stay, so you can join it yourself.",
+      error: "No planting day falls within those dates. You can contribute instead.",
     });
   }
 

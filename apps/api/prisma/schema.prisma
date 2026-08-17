@@ -170,12 +170,11 @@ model OffsetContribution {
   kgCo2e    Int
   amountVnd Int
   // How the guest chose to contribute.
-  //   IN_PERSON     — they will work the planting during their stay
-  //   LEAVE_FORWARD — no session falls in their dates, so their share is
-  //                   left for a visitor who can attend
-  //   DONATE        — money
-  // Replaces a `joining` boolean: three states do not fit in two, and the
-  // boolean could not say why somebody was not joining.
+  //   IN_PERSON — they will work a planting session during their stay
+  //   DONATE    — money
+  // A third mode, LEAVE_FORWARD, existed briefly for guests whose dates
+  // met no session. It was removed: standing aside is not a contribution,
+  // and offering it as one made a non-action look like a choice.
   mode      String
   // The origin the guest travelled from. Kept so a donation can be audited
   // back to the rate it was charged at — the international share only

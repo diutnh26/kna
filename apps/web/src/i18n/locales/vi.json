@@ -621,20 +621,18 @@
     "howToTakePart": "Bạn muốn tham gia theo cách nào?",
     "optionInPerson": "Cùng trồng cây",
     "optionInPersonBody": "Có một buổi vào ngày {{date}}, trong thời gian bạn lưu trú. Hãy đến cùng làm — không mất phí.",
-    "optionLeaveForward": "Nhường suất cho người đến sau",
-    "optionLeaveForwardBody": "Buổi kế tiếp là ngày {{date}}, sau khi bạn rời đi. Suất của bạn sẽ dành cho người có lịch phù hợp. Không mất phí.",
     "optionDonate": "Đóng góp",
     "optionDonateBody": "{{amount}} cho dự án, sẽ lên sổ cái công khai khi đơn đặt của bạn được xác nhận.",
-    "optionDonateBodyMissed": "Thay vào đó, đóng góp {{amount}} cho dự án, sẽ lên sổ cái công khai khi đơn đặt của bạn được xác nhận.",
     "free": "Miễn phí",
     "internationalRateNote": "Đã điều chỉnh cho hành trình dài. Quỹ Cộng đồng đã chi trả cho cây giống, nên khoản này dành cho chi phí tổ chức buổi trồng chứ không phải mua lại cây lần nữa.",
     "communityFundAlreadyCovers": "Mỗi đơn đặt chỗ đã trích 3% cho Quỹ Cộng đồng, và chính khoản đó mua và chăm sóc cây giống. Phần ở đây là cộng thêm, không phải thay thế.",
     "nextSession": "Buổi kế tiếp: {{date}}",
     "noSessions": "Được duy trì quanh năm, nên không có buổi nào để tham dự.",
     "ledgerInPersonContribution": "một ngày công",
-    "ledgerLeaveForwardContribution": "suất đã nhường cho người đến sau",
     "ledgerDonateContribution": "cho chi phí tổ chức buổi trồng",
-    "ledgerWorkNoMoney": "Không có tiền chuyển đi, nên không có dòng nào trên sổ cái — sổ cái ghi lại những khoản đã trả."
+    "ledgerWorkNoMoney": "Không có tiền chuyển đi, nên không có dòng nào trên sổ cái — sổ cái ghi lại những khoản đã trả.",
+    "optionInPersonUnavailable": "Buổi kế tiếp là ngày {{date}}, sau khi bạn rời đi. Lần này bạn có thể góp sức bằng cách đóng góp.",
+    "optionInPersonNoSessions": "Dự án này được duy trì quanh năm, nên không có buổi nào để tham gia."
   },
   "imageSlot": {
     "fallback": "Hình ảnh"
@@ -717,7 +715,6 @@
     "offsetKg_other": "{{count}} kg CO₂e đã bù đắp",
     "joiningCount_one": "{{count}} ngày trồng cây bạn đã đăng ký",
     "joiningCount_other": "{{count}} ngày trồng cây bạn đã đăng ký",
-    "offsetLeftForward": "Suất của bạn đã được nhường cho khách có lịch phù hợp với buổi trồng",
     "offsetDonated": "Một khoản đóng góp cho dự án"
   }
 }

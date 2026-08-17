@@ -145,14 +145,17 @@ export default function CarbonTracker() {
   // read here. Recomputing it in the browser would risk offering a choice
   // the API then refuses.
   const activity = chosenBooking?.activity?.[project] ?? { nextActivityDate: null, eligible: false };
-  const freeOption = selected.joinable ? (activity.eligible ? 'IN_PERSON' : 'LEAVE_FORWARD') : null;
+  // Joining is offered first on every project that runs sessions, and is
+  // simply unavailable when no session falls inside the stay. It used to
+  // be replaced in that case by "leave your place for a later visitor",
+  // which took the first slot while being the absence of a contribution
+  // rather than one of them.
+  const canJoin = selected.joinable && activity.eligible;
 
   // Derived rather than synced. Switching project or booking can make the
-  // held choice illegal — the corridor has no free option at all, and the
-  // free one differs by whether a session falls in the stay. Computing the
-  // effective choice each render keeps it legal without an effect writing
-  // state back into itself.
-  const chosen = contribution !== 'DONATE' && contribution !== freeOption ? 'DONATE' : contribution;
+  // held choice illegal, and computing the effective one each render keeps
+  // it legal without an effect writing state back into itself.
+  const chosen = contribution === 'IN_PERSON' && !canJoin ? 'DONATE' : contribution;
 
   async function attachOffset() {
     if (!isAuthenticated) {
@@ -556,46 +559,46 @@ export default function CarbonTracker() {
                           {t('carbon.howToTakePart')}
                         </legend>
 
-                        {/* Exactly one free option, and which one is a fact
-                            about the calendar rather than a preference. */}
+                        {/* Always first, whether or not it can be taken.
+                            Seeing what is on offer and why it is closed
+                            reads better than never seeing it at all. */}
                         <label
-                          className={`flex gap-3 border p-3 cursor-pointer transition ${
-                            chosen === freeOption
-                              ? 'border-[#8FA37B] bg-[#8FA37B]/10'
-                              : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40'
+                          className={`flex gap-3 border p-3 transition ${
+                            !canJoin
+                              ? 'border-[#F5EDDD]/10 opacity-45 cursor-not-allowed'
+                              : chosen === 'IN_PERSON'
+                                ? 'border-[#8FA37B] bg-[#8FA37B]/10 cursor-pointer'
+                                : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40 cursor-pointer'
                           }`}
                         >
                           <input
                             type="radio"
                             name="contribution"
-                            value={freeOption}
-                            checked={chosen === freeOption}
-                            onChange={() => setContribution(freeOption)}
+                            value="IN_PERSON"
+                            checked={chosen === 'IN_PERSON'}
+                            disabled={!canJoin}
+                            onChange={() => setContribution('IN_PERSON')}
                             className="mt-1 accent-[#8FA37B] shrink-0"
                           />
                           <span>
                             <span className="flex items-baseline gap-2">
-                              <span className="text-sm">
-                                {activity.eligible
-                                  ? t('carbon.optionInPerson')
-                                  : t('carbon.optionLeaveForward')}
-                              </span>
-                              <span className="text-[10px] uppercase tracking-wider text-[#8FA37B]">
-                                {t('carbon.free')}
-                              </span>
+                              <span className="text-sm">{t('carbon.optionInPerson')}</span>
+                              {canJoin && (
+                                <span className="text-[10px] uppercase tracking-wider text-[#8FA37B]">
+                                  {t('carbon.free')}
+                                </span>
+                              )}
                             </span>
                             <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
-                              {activity.eligible
+                              {canJoin
                                 ? t('carbon.optionInPersonBody', {
-                                    date: activity.nextActivityDate
-                                      ? dmy(activity.nextActivityDate)
-                                      : '',
+                                    date: dmy(activity.nextActivityDate),
                                   })
-                                : t('carbon.optionLeaveForwardBody', {
-                                    date: activity.nextActivityDate
-                                      ? dmy(activity.nextActivityDate)
-                                      : '',
-                                  })}
+                                : activity.nextActivityDate
+                                  ? t('carbon.optionInPersonUnavailable', {
+                                      date: dmy(activity.nextActivityDate),
+                                    })
+                                  : t('carbon.optionInPersonNoSessions')}
                             </span>
                           </span>
                         </label>
@@ -618,9 +621,7 @@ export default function CarbonTracker() {
                           <span>
                             <span className="text-sm">{t('carbon.optionDonate')}</span>
                             <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
-                              {activity.eligible
-                                ? t('carbon.optionDonateBody', { amount: vnd(cost) })
-                                : t('carbon.optionDonateBodyMissed', { amount: vnd(cost) })}
+                              {t('carbon.optionDonateBody', { amount: vnd(cost) })}
                             </span>
                             {isInternational && (
                               <span className="block text-[11px] text-[#B87333] leading-snug mt-1.5">
@@ -716,11 +717,9 @@ export default function CarbonTracker() {
                   t('carbon.ledgerContribution'),
                   chosen === 'IN_PERSON'
                     ? t('carbon.ledgerInPersonContribution')
-                    : chosen === 'LEAVE_FORWARD'
-                      ? t('carbon.ledgerLeaveForwardContribution')
-                      : isInternational && selected.joinable
-                        ? t('carbon.ledgerDonateContribution')
-                        : `${breakdown.total.toLocaleString('vi-VN')} kg CO₂e`,
+                    : isInternational && selected.joinable
+                      ? t('carbon.ledgerDonateContribution')
+                      : `${breakdown.total.toLocaleString('vi-VN')} kg CO₂e`,
                 ],
                 [t('carbon.ledgerProject'), PROJECTS[0].name],
                 [t('carbon.ledgerReceivedBy'), PROJECTS[0].led],

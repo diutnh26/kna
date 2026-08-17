@@ -148,7 +148,7 @@ describe("offsets", () => {
   });
 
   it("refuses to work a project that runs no sessions", async () => {
-    for (const mode of ["IN_PERSON", "LEAVE_FORWARD"]) {
+    for (const mode of ["IN_PERSON"]) {
       const res = await attach({ bookingId: bookingB, projectId: "corridor", kgCo2e: 200, mode });
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/year-round/i);
@@ -265,29 +265,17 @@ describe("offsets", () => {
       expect(res.body.error).toMatch(/no planting day/i);
     });
 
-    it("accepts LEAVE_FORWARD only when the guest genuinely cannot attend", async () => {
-      const activity = nextYokDon();
-
-      const misses = await bookAround(activity, 3, 1);
-      const left = await attach({
+    it("rejects a mode that no longer exists", async () => {
+      // LEAVE_FORWARD let a guest record standing aside as a contribution.
+      // It is gone: the offer is to turn up, and money is the alternative.
+      const misses = await bookAround(nextYokDon(), 3, 1);
+      const res = await attach({
         bookingId: misses,
         projectId: "yokdon",
         kgCo2e: 400,
         mode: "LEAVE_FORWARD",
       });
-      expect(left.status).toBe(201);
-      expect(left.body.amountVnd).toBe(0);
-
-      // Somebody who *can* attend is told to attend rather than stand aside.
-      const meets = await bookAround(activity, 0, 3);
-      const refused = await attach({
-        bookingId: meets,
-        projectId: "yokdon",
-        kgCo2e: 400,
-        mode: "LEAVE_FORWARD",
-      });
-      expect(refused.status).toBe(400);
-      expect(refused.body.error).toMatch(/join it yourself/i);
+      expect(res.status).toBe(400);
     });
   });
 

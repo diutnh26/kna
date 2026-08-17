@@ -144,15 +144,33 @@ describe('CarbonTracker offsets', () => {
       expect(screen.queryByLabelText(/Leave your place/i)).not.toBeInTheDocument();
     });
 
-    it('offers leaving the place forward when no session falls in the stay', async () => {
+    it('still shows joining first when no session falls in the stay, disabled', async () => {
+      // Offered but closed, with the reason. Hiding it would leave the
+      // guest with a single option and no idea what they had missed.
       signIn();
       vi.spyOn(api, 'offsetBookings').mockResolvedValue([
         aBooking({ activity: anActivity(false) }),
       ]);
       renderScreen(<CarbonTracker />);
 
-      expect(await screen.findByLabelText(/Leave your place/i)).toBeInTheDocument();
-      expect(screen.queryByLabelText(/Join the planting/i)).not.toBeInTheDocument();
+      const join = await screen.findByLabelText(/Join the planting/i);
+      expect(join).toBeDisabled();
+      expect(screen.getByText(/after you leave/i)).toBeInTheDocument();
+      // The default falls to the only choice that can be taken.
+      expect(screen.getByLabelText(/^Contribute/i)).toBeChecked();
+    });
+
+    it('puts joining above contributing, both times', async () => {
+      signIn();
+      vi.spyOn(api, 'offsetBookings').mockResolvedValue([
+        aBooking({ activity: anActivity(true) }),
+      ]);
+      renderScreen(<CarbonTracker />);
+
+      await screen.findByLabelText(/Join the planting/i);
+      const radios = screen.getAllByRole('radio');
+      expect(radios[0]).toHaveAttribute('value', 'IN_PERSON');
+      expect(radios[1]).toHaveAttribute('value', 'DONATE');
     });
 
     it('sends IN_PERSON when the guest chooses to work the session', async () => {
@@ -169,18 +187,18 @@ describe('CarbonTracker offsets', () => {
       expect(api.attachOffset.mock.calls[0][0].mode).toBe('IN_PERSON');
     });
 
-    it('sends LEAVE_FORWARD when the dates do not meet a session', async () => {
+    it('sends DONATE when the dates do not meet a session', async () => {
       signIn();
       vi.spyOn(api, 'offsetBookings').mockResolvedValue([
         aBooking({ activity: anActivity(false) }),
       ]);
       renderScreen(<CarbonTracker />);
 
-      await userEvent.click(await screen.findByLabelText(/Leave your place/i));
+      await screen.findByLabelText(/Join the planting/i);
       await userEvent.click(screen.getByRole('button', { name: /Add to my booking/i }));
 
       await waitFor(() => expect(api.attachOffset).toHaveBeenCalled());
-      expect(api.attachOffset.mock.calls[0][0].mode).toBe('LEAVE_FORWARD');
+      expect(api.attachOffset.mock.calls[0][0].mode).toBe('DONATE');
     });
 
     it('gives the corridor no choice at all, since it runs no sessions', async () => {
@@ -193,7 +211,6 @@ describe('CarbonTracker offsets', () => {
 
       expect(screen.getByText(/no session to attend/i)).toBeInTheDocument();
       expect(screen.queryByLabelText(/Join the planting/i)).not.toBeInTheDocument();
-      expect(screen.queryByLabelText(/Leave your place/i)).not.toBeInTheDocument();
     });
   });
 

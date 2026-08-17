@@ -477,9 +477,7 @@ export default function Account() {
                             <p className="text-xs text-[#F5EDDD]/50 mt-1">
                               {row.offset.mode === 'IN_PERSON'
                                 ? t('account.offsetJoining')
-                                : row.offset.mode === 'LEAVE_FORWARD'
-                                  ? t('account.offsetLeftForward')
-                                  : t('account.offsetDonated')}
+                                : t('account.offsetDonated')}
                             </p>
                             {row.status === 'PENDING' && (
                               <p className="text-xs text-[#B87333] mt-1">
