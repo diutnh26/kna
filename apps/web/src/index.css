@@ -26,6 +26,21 @@
     font-optical-sizing: auto;
   }
 
+  /* Fraunces carries an optical-size axis (9–144), and .font-display leaves
+     it on `auto`. The browser therefore draws a different master at 16px
+     than at 31px — chunkier, wider, far less stroke contrast. That is
+     normally exactly what you want, and it is why optical sizing exists,
+     but it made the culture list titles read as a different typeface from
+     the heading above them.
+
+     Pinning opsz to the display end of the axis matches the heading. wght
+     is pinned alongside because font-variation-settings takes over from the
+     font-weight mapping rather than merging with it — set one axis and the
+     other silently reverts to its default. */
+  .font-display-optical {
+    font-variation-settings: 'opsz' 40, 'wght' 500;
+  }
+
   .font-body {
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
   }

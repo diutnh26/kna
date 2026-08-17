@@ -180,7 +180,7 @@ export default function Landing() {
                     {mark}
                   </span>
                   <div>
-                    <div className="font-display text-base font-medium mb-2 text-[#1A1614]">
+                    <div className="font-display font-display-optical text-base font-medium mb-2 text-[#1A1614]">
                       {culture[i]?.title}
                     </div>
                     <p className="text-sm text-[#1A1614]/60 leading-relaxed">{culture[i]?.body}</p>
