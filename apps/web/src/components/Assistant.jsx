@@ -56,7 +56,10 @@ export default function Assistant() {
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">
-        <div className="md:col-span-7">
+        {/* Eight columns rather than seven: the title needs about 900px to
+            sit on one line, and seven gave it 793px at a 1536px viewport.
+            Eight clears it, and the note beside it stays readable at four. */}
+        <div className="md:col-span-8">
           <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
             <span className="h-px w-12 bg-[#B87333]" />
             <span>{t('assistant.eyebrow')}</span>
@@ -69,7 +72,7 @@ export default function Assistant() {
           </p>
         </div>
 
-        <div className="md:col-span-5">
+        <div className="md:col-span-4">
           <div className="border border-[#F5EDDD]/15 p-6 flex gap-4">
             <AlertCircle className="w-4 h-4 text-[#B87333] shrink-0 mt-0.5" />
             <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
