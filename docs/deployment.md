@@ -85,7 +85,27 @@ guard exists precisely for this moment.
    |---|---|
    | `DATABASE_URL` | Neon **pooled** string (`…-pooler.…`), with `?sslmode=require` |
    | `DIRECT_DATABASE_URL` | Neon **direct** string (no `-pooler`), same options |
-   | `JWT_SECRET` | 32+ chars — `openssl rand -base64 48` |
+   | `JWT_SECRET` | 32+ chars — see below |
+
+   To generate a `JWT_SECRET`, either — in **Git Bash**, which ships with
+   Git for Windows and bundles OpenSSL:
+
+   ```bash
+   openssl rand -base64 48
+   ```
+
+   or in **PowerShell**, which has no `openssl` and will report
+   "not recognized as a name of a cmdlet". This needs nothing installed:
+
+   ```powershell
+   $bytes = [byte[]]::new(48)
+   [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+   [Convert]::ToBase64String($bytes)
+   ```
+
+   Generate it in your own terminal and paste it straight into Render.
+   Do not paste it into a chat, a screenshot, a commit or a ticket — see
+   "Rotating JWT_SECRET" below for why that is expensive.
 
    Paste the **bare URL only**. Neon's dashboard can hand you a `psql '…'`
    command; copying that whole line is the most common way this fails, and
@@ -121,6 +141,32 @@ To build the frontend locally you must therefore pass one:
 ```bash
 VITE_API_URL=https://kna-api.onrender.com npm run build:web
 ```
+
+## Rotating JWT_SECRET
+
+Rotate on **exposure**, not on a schedule. A JWT secret is not a password
+that benefits from routine churn — rotate it when it has been *seen*:
+a screenshot, a screen share, a chat paste, a commit, a log line, a CI
+artifact, or when somebody with Render dashboard access leaves.
+
+There is one key and no fallback verification (`apps/api/src/middleware/auth.ts`),
+so **rotating signs everyone out immediately** — not over the seven-day
+token lifetime. With a handful of demo accounts that costs nothing; mid-pilot,
+with households and a coordinator working the queue, do it at a quiet hour.
+
+Two different tools, and reaching for the wrong one leaves you exposed:
+
+| Problem | Tool |
+|---|---|
+| One account compromised | `POST /auth/sign-out-everywhere`, or bump that user's `tokenVersion` |
+| The secret itself leaked | Rotate `JWT_SECRET` |
+
+`tokenVersion` does **not** help against a leaked secret: anyone holding the
+key can forge a token carrying any `tokenVersion` they like. It defends
+against a stolen token, not a stolen key.
+
+If signing everyone out ever becomes unacceptable, accept two keys during a
+transition — verify against current *and* previous, sign only with current.
 
 ## What "free" actually costs here
 

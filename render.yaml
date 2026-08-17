@@ -68,7 +68,9 @@ services:
       #   DATABASE_URL:        Neon POOLED string (…-pooler.…), ?sslmode=require
       #   DIRECT_DATABASE_URL: Neon DIRECT string (no -pooler), for migrations —
       #                        the pooler is PgBouncer and cannot run them
-      #   JWT_SECRET:          32+ chars; `openssl rand -base64 48`
+      #   JWT_SECRET:          32+ chars. `openssl rand -base64 48` in Git
+      #                        Bash; PowerShell has no openssl — see
+      #                        docs/deployment.md for the .NET equivalent.
       # The API refuses to start if either is missing or weak
       # (apps/api/src/lib/config.ts).
       - key: DATABASE_URL
