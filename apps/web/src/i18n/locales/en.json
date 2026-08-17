@@ -420,9 +420,9 @@
     "statusOpen": "Open",
     "boardEyebrow": "Provider board",
     "boardHeading": "Hosts talking to hosts.",
-    "boardBody": "Planned to be readable by anyone, with posting limited to verified providers and Committee members.",
+    "boardBody": "Two spaces are planned: one where verified providers and Committee members talk to each other, and one where visitors can ask questions and compare notes. Both readable by anyone.",
     "boardNotBuiltLabel": "Not yet built · ",
-    "boardNotBuiltBody": "The board is on the roadmap and nobody has posted to it. The cards below are examples of what hosts told us they would use it for.",
+    "boardNotBuiltBody": "Neither space is built and nobody has posted to either. The cards below are examples of what hosts told us they would use the provider board for; the visitor side will work the same way.",
     "threads": [
       {
         "author": "A guide",
@@ -722,5 +722,22 @@
     "offsetDonated": "A contribution to the project",
     "offsetNextSession": "You are registered for the session on {{range}}",
     "offsetSessionRange": "{{start}} – {{end}}"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Nothing yet.",
+    "markAllRead": "Mark all read",
+    "type": {
+      "BOOKING_CONFIRMED": "Your booking for {{listing}} on {{date}} is confirmed.",
+      "BOOKING_DECLINED": "Your booking for {{listing}} on {{date}} could not be taken.",
+      "BOOKING_RECEIVED": "A guest has asked for {{listing}} on {{date}}, {{nights}} night(s).",
+      "BOOKING_AWAITING_DECISION": "{{listing}} on {{date}} is waiting for a decision.",
+      "ORDER_SETTLED": "Your order of {{count}} piece(s) is settled.",
+      "ORDER_CANCELLED": "Your order of {{count}} piece(s) was cancelled.",
+      "ORDER_AWAITING_SETTLEMENT": "An order for {{piece}} by {{maker}} is waiting to be settled.",
+      "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) is waiting for the Committee.",
+      "ARCHIVE_PUBLISHED": "{{title}} has been published to the archive.",
+      "ARCHIVE_REJECTED": "{{title}} was not published. {{note}}"
+    }
   }
 }

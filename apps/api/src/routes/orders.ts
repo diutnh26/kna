@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { splitOrder } from "../lib/fees";
 import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
+import { coordinatorIds, notify, notifyAll } from "../lib/notify";
 
 export const ordersRouter = Router();
 
@@ -139,6 +140,12 @@ ordersRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     throw err;
   }
 
+  await notifyAll(prisma, await coordinatorIds(), {
+    type: "ORDER_AWAITING_SETTLEMENT",
+    params: { piece: products[0].title, maker: primaryMaker },
+    href: "#dashboard",
+  });
+
   const { ledgerEntries, ...rest } = order;
   res.status(201).json({ ...rest, ledgerEntry: ledgerEntries[0] ?? null });
 });
@@ -203,10 +210,19 @@ ordersRouter.post(
         // No money moved, so the promise leaves no trace on the ledger.
         await tx.ledgerEntry.deleteMany({ where: { orderId: order.id } });
       }
-      return tx.order.update({
+      const saved = await tx.order.update({
         where: { id: order.id },
         data: { status: parsed.data.decision === "settle" ? "PAID" : "CANCELLED" },
       });
+
+      await notify(tx, {
+        userId: order.buyerId,
+        type: parsed.data.decision === "settle" ? "ORDER_SETTLED" : "ORDER_CANCELLED",
+        params: { count: order.items.reduce((n, i) => n + i.quantity, 0) },
+        href: "#account",
+      });
+
+      return saved;
     });
 
     res.json(updated);

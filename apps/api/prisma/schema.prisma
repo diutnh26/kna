@@ -54,6 +54,38 @@ model User {
 
   contributedEntries ArchiveEntry[] @relation("ArchiveContributor")
   moderatedEntries   ArchiveEntry[] @relation("ArchiveModerator")
+  notifications      Notification[]
+}
+
+/**
+ * Something that happened which a particular person should know about.
+ *
+ * Stores a key and its parameters rather than a rendered sentence. This
+ * platform is bilingual and a person can change their language at any
+ * time; a notification written in English at the moment a coordinator
+ * pressed confirm would still be English a month later, on a screen the
+ * rest of which had switched to Vietnamese.
+ *
+ * Every row belongs to exactly one reader. A booking confirmation is news
+ * to the guest and to the household, and each gets their own row — they
+ * read it at different times, and one marking it read must not clear it
+ * for the other.
+ */
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // CHECK-constrained, like every other enum-shaped column here.
+  type      String
+  // Interpolation values for the i18n key named by `type`.
+  params    Json     @default("{}")
+  // Where reading it should take the person, e.g. "#account".
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }
 
 // ── Supply ────────────────────────────────────────────────

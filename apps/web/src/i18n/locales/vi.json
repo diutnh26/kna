@@ -420,9 +420,9 @@
     "statusOpen": "Đang mở",
     "boardEyebrow": "Diễn đàn nhà cung cấp",
     "boardHeading": "Nơi các chủ nhà trò chuyện với nhau.",
-    "boardBody": "Dự kiến ai cũng đọc được, nhưng chỉ nhà cung cấp đã xác minh và thành viên Hội đồng mới được đăng bài.",
+    "boardBody": "Dự kiến sẽ có hai không gian: một nơi để các nhà cung cấp đã xác minh và thành viên Hội đồng trao đổi với nhau, và một nơi để du khách đặt câu hỏi và chia sẻ trải nghiệm. Cả hai đều ai cũng đọc được.",
     "boardNotBuiltLabel": "Chưa xây dựng · ",
-    "boardNotBuiltBody": "Diễn đàn còn nằm trong lộ trình và chưa ai đăng bài. Các thẻ bên dưới là ví dụ về những gì các chủ nhà nói rằng họ sẽ dùng nó để làm.",
+    "boardNotBuiltBody": "Cả hai không gian đều chưa được xây dựng và chưa ai đăng bài. Các thẻ bên dưới là ví dụ về những gì các chủ nhà nói rằng họ sẽ dùng diễn đàn nhà cung cấp để làm; phía du khách cũng sẽ hoạt động tương tự.",
     "threads": [
       {
         "author": "Một hướng dẫn viên",
@@ -722,5 +722,22 @@
     "offsetDonated": "Một khoản đóng góp cho dự án",
     "offsetNextSession": "Bạn đã đăng ký buổi trồng ngày {{range}}",
     "offsetSessionRange": "{{start}} – {{end}}"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Chưa có gì.",
+    "markAllRead": "Đánh dấu đã đọc tất cả",
+    "type": {
+      "BOOKING_CONFIRMED": "Đơn đặt {{listing}} ngày {{date}} của bạn đã được xác nhận.",
+      "BOOKING_DECLINED": "Đơn đặt {{listing}} ngày {{date}} của bạn không thể được nhận.",
+      "BOOKING_RECEIVED": "Một khách đã hỏi đặt {{listing}} ngày {{date}}, {{nights}} đêm.",
+      "BOOKING_AWAITING_DECISION": "{{listing}} ngày {{date}} đang chờ được quyết định.",
+      "ORDER_SETTLED": "Đơn mua {{count}} sản phẩm của bạn đã được thanh toán.",
+      "ORDER_CANCELLED": "Đơn mua {{count}} sản phẩm của bạn đã bị huỷ.",
+      "ORDER_AWAITING_SETTLEMENT": "Đơn mua {{piece}} của {{maker}} đang chờ ghi nhận thanh toán.",
+      "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) đang chờ Hội đồng duyệt.",
+      "ARCHIVE_PUBLISHED": "{{title}} đã được đăng vào kho lưu trữ.",
+      "ARCHIVE_REJECTED": "{{title}} không được đăng. {{note}}"
+    }
   }
 }

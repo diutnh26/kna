@@ -687,11 +687,14 @@ export default function CarbonTracker() {
                     {/* Remove sits beside the action rather than under it:
                         it is the smaller of the two decisions and does not
                         need a line of its own. */}
-                    <div className="flex items-center gap-4">
+                    {/* Spans the panel, like the option boxes above it —
+                        a short button under full-width choices read as an
+                        afterthought rather than the action they lead to. */}
+                    <div className="flex items-center gap-3 w-full">
                       <button
                         onClick={attachOffset}
                         disabled={attachState.busy || !bookingId}
-                        className="group inline-flex items-center justify-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-4 py-2.5 text-xs uppercase tracking-wider transition"
+                        className="group flex-1 inline-flex items-center justify-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-4 py-2.5 text-xs uppercase tracking-wider transition"
                       >
                         {attachState.busy ? t('carbon.attaching') : t('carbon.attach')}
                         <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
@@ -700,7 +703,7 @@ export default function CarbonTracker() {
                       {existingOffset && !attachState.busy && (
                         <button
                           onClick={removeOffset}
-                          className="text-xs text-[#F5EDDD]/45 underline underline-offset-4 hover:text-[#F5EDDD]/70"
+                          className="shrink-0 text-xs text-[#F5EDDD]/45 underline underline-offset-4 hover:text-[#F5EDDD]/70"
                         >
                           {t('carbon.remove')}
                         </button>

@@ -86,6 +86,12 @@ export const api = {
     request('/account/password', { method: 'POST', body: payload, token }),
   accountActivity: (token) => request('/account/activity', { token }),
 
+  // The bell polls the count; the list is only fetched when the panel opens.
+  notifications: (token) => request('/notifications', { token }),
+  unreadNotifications: (token) => request('/notifications/unread-count', { token }),
+  readNotifications: (payload, token) =>
+    request('/notifications/read', { method: 'POST', body: payload, token }),
+
   // Carbon offsets hang off a booking: the guest pays for one with the
   // stay, so there has to be a stay to attach it to.
   offsetBookings: (token) => request('/offsets/bookings', { token }),

@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { splitBooking } from "../lib/fees";
 import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
 import { getPaymentGateway } from "../payments/gateway";
+import { coordinatorIds, notify, notifyAll } from "../lib/notify";
 
 export const bookingsRouter = Router();
 
@@ -81,6 +82,27 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     include: { ledgerEntries: true },
   });
 
+  // The household hears that somebody wants their dates, and whoever can
+  // confirm hears there is something waiting. Neither is a side effect the
+  // booking depends on — notify() never throws.
+  const listingOwner = await prisma.provider.findUnique({
+    where: { id: listing.providerId },
+    select: { userId: true },
+  });
+  if (listingOwner) {
+    await notify(prisma, {
+      userId: listingOwner.userId,
+      type: "BOOKING_RECEIVED",
+      params: { listing: listing.title, date: checkIn, nights },
+      href: "#dashboard",
+    });
+  }
+  await notifyAll(prisma, await coordinatorIds(), {
+    type: "BOOKING_AWAITING_DECISION",
+    params: { listing: listing.title, date: checkIn },
+    href: "#dashboard",
+  });
+
   // What the guest is told about paying comes from the configured gateway,
   // not from hardcoded copy — so switching to VNPay/MoMo changes the
   // instruction everywhere at once instead of leaving stale promises.
@@ -145,7 +167,11 @@ bookingsRouter.post(
       return res.status(400).json({ error: "A decision of 'confirm' or 'decline' is required." });
     }
 
-    const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
+    const booking = await prisma.booking.findUnique({
+      where: { id: req.params.id },
+      include: { listing: { select: { title: true } } },
+    });
+    const listing = booking?.listing;
     if (!booking) {
       return res.status(404).json({ error: "That booking no longer exists." });
     }
@@ -159,10 +185,21 @@ bookingsRouter.post(
       if (parsed.data.decision === "decline") {
         await tx.ledgerEntry.deleteMany({ where: { bookingId: booking.id } });
       }
-      return tx.booking.update({
+      const saved = await tx.booking.update({
         where: { id: booking.id },
         data: { status: parsed.data.decision === "confirm" ? "CONFIRMED" : "CANCELLED" },
       });
+
+      // Inside the transaction: a decline that rolls back must not leave
+      // the guest holding a message saying it happened.
+      await notify(tx, {
+        userId: booking.guestId,
+        type: parsed.data.decision === "confirm" ? "BOOKING_CONFIRMED" : "BOOKING_DECLINED",
+        params: { listing: listing?.title ?? "", date: booking.checkIn.toISOString().slice(0, 10) },
+        href: "#account",
+      });
+
+      return saved;
     });
 
     res.json(updated);

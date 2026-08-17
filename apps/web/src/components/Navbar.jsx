@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, UserRound } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 import { useAuth } from '../context/useAuth';
 
 /**
@@ -94,14 +95,20 @@ export default function Navbar({ active = '', theme = 'dark' }) {
             </button>
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
-                {/* The greeting is the way in, rather than another nav
-                    item: an account link is only meaningful once you are
-                    signed in, and the name is already where people look. */}
+                {/* The greeting is a greeting; the icon is the door. Making
+                    the whole phrase a link meant the only route to an
+                    account was a piece of text that did not look like one. */}
+                <span className={`${muted} text-xs`}>
+                  {t('auth.greeting', { name: user.fullName.split(' ')[0] })}
+                </span>
+                <NotificationBell theme={theme} />
                 <a
                   href="#account"
-                  className={`${muted} text-xs hover:text-current underline-offset-4 hover:underline`}
+                  aria-label={t('nav.account')}
+                  title={t('nav.account')}
+                  className={`inline-flex items-center justify-center w-8 h-8 border ${btnBorder} transition`}
                 >
-                  {t('auth.greeting', { name: user.fullName.split(' ')[0] })}
+                  <UserRound className="w-4 h-4" />
                 </a>
                 <button
                   onClick={logout}

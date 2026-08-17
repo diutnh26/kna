@@ -11,6 +11,7 @@ import { archiveRouter } from "./routes/archive";
 import { providersRouter } from "./routes/providers";
 import { accountRouter } from "./routes/account";
 import { offsetsRouter } from "./routes/offsets";
+import { notificationsRouter } from "./routes/notifications";
 
 /**
  * Accepts an origin with or without a scheme.
@@ -44,6 +45,7 @@ export function createApp() {
   app.use("/providers", providersRouter);
   app.use("/account", accountRouter);
   app.use("/offsets", offsetsRouter);
+  app.use("/notifications", notificationsRouter);
 
   app.use((req, res) => {
     res.status(404).json({ error: `No route for ${req.method} ${req.path}` });

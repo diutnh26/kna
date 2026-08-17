@@ -322,7 +322,10 @@ export default function Community() {
           {exampleThreads.map((thread) => (
             <article key={thread.title} className="border border-dashed border-[#F5EDDD]/15 p-6 flex flex-col">
               <div className="flex items-center gap-3 mb-5">
-                <ImageSlot ratio="aspect-square" label="" className="w-9 shrink-0 p-0" />
+                {/* A monogram, not a face. These posts are illustrative —
+                    there is no real person to photograph, and a generated
+                    portrait would imply one. */}
+                <InitialAvatar name={thread.author} className="w-9 shrink-0" />
                 <div className="min-w-0">
                   <div className="text-sm truncate">{thread.author}</div>
                   <div className="text-[11px] text-[#F5EDDD]/45 truncate">{thread.role}</div>

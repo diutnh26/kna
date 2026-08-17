@@ -92,6 +92,7 @@ function assertSafe() {
 
 async function reset() {
   // Delete in foreign-key-safe order (children before parents).
+  await prisma.notification.deleteMany();
   await prisma.ledgerEntry.deleteMany();
   await prisma.orderItem.deleteMany();
   // Before Booking: OffsetContribution holds a NoAction foreign key to it,

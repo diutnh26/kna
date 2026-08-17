@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import { notify, notifyAll, reviewerIds } from "../lib/notify";
 import {
   requireAuth,
   requireCommittee,
@@ -111,6 +112,15 @@ archiveRouter.post(
         contributedById: req.user!.id,
       },
     });
+
+    // The Committee is the reason nothing publishes itself; they should not
+    // have to poll the queue to find out there is something in it.
+    await notifyAll(prisma, await reviewerIds(), {
+      type: "ARCHIVE_AWAITING_REVIEW",
+      params: { title: entry.title, type: entry.type },
+      href: "#review",
+    });
+
     res.status(201).json(entry);
   }
 );
@@ -195,6 +205,18 @@ archiveRouter.post(
         moderationNote: note?.trim() || null,
       },
     });
+
+    // A refusal reaches the contributor with the reason attached. A
+    // governance record nobody is told about is not much of a record.
+    if (entry.contributedById) {
+      await notify(prisma, {
+        userId: entry.contributedById,
+        type: decision === "publish" ? "ARCHIVE_PUBLISHED" : "ARCHIVE_REJECTED",
+        params: { title: entry.title, note: note?.trim() ?? "" },
+        href: "#account",
+      });
+    }
+
     res.json(updated);
   }
 );
