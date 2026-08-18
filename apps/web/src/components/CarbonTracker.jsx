@@ -228,7 +228,6 @@ export default function CarbonTracker() {
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
             {t('carbon.intro')}
-            run, and measure themselves.
           </p>
         </div>
 
@@ -240,7 +239,6 @@ export default function CarbonTracker() {
             </div>
             <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
               {t('carbon.communityLedBody')}
-              credits on your behalf.
             </p>
           </div>
         </div>

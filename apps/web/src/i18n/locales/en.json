@@ -517,7 +517,9 @@
     ],
     "handoffHeading": "Ready to work out your footprint?",
     "handoffBody": "The assistant can estimate it, or you can do it yourself in the impact tracker.",
-    "handoffCta": "Open the tracker"
+    "handoffCta": "Open the tracker",
+    "guardrailsBody": "A model that answers confidently about Ê Đê custom without a source is just a faster way to spread a wrong idea. These four rules are design constraints, not settings.",
+    "inputLabel": "Ask the assistant"
   },
   "carbon": {
     "eyebrow": "Carbon tracker",

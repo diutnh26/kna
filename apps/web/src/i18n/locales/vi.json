@@ -517,7 +517,9 @@
     ],
     "handoffHeading": "Sẵn sàng tính dấu chân carbon của bạn?",
     "handoffBody": "Trợ lý có thể ước tính giúp bạn, hoặc bạn tự tính trong công cụ theo dõi tác động.",
-    "handoffCta": "Mở công cụ theo dõi"
+    "handoffCta": "Mở công cụ theo dõi",
+    "guardrailsBody": "Một mô hình trả lời chắc nịch về phong tục Ê Đê mà không dẫn nguồn chỉ là cách lan truyền một hiểu biết sai nhanh hơn. Bốn nguyên tắc này là ràng buộc thiết kế, không phải tuỳ chọn.",
+    "inputLabel": "Hỏi trợ lý"
   },
   "carbon": {
     "eyebrow": "Theo dõi carbon",
