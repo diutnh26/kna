@@ -75,15 +75,19 @@ export default function Review() {
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
       <Navbar active="review" theme="dark" />
 
-      <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 max-w-5xl">
+      {/* max-w-6xl, matching Account and Dashboard. Review was the only
+          signed-in page held at 5xl, which cost it 8rem of measure and left
+          the title and the two blurbs wrapping earlier than anywhere else.
+          Both sections move together so the queue stays under the header. */}
+      <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 max-w-6xl">
         <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
           <span className="h-px w-12 bg-[#B87333]" />
           <span>{t('review.eyebrow')}</span>
         </div>
-        <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
+        <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight text-balance mb-8">
           {t('review.title')}
         </h1>
-        <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
+        <p className="text-lg text-[#F5EDDD]/70 max-w-4xl leading-relaxed">
           {t('review.intro')}
         </p>
       </section>
@@ -115,7 +119,7 @@ export default function Review() {
 
       {mayReview && (
         <>
-          <section className="px-8 lg:px-12 xl:px-16 pb-16 max-w-5xl">
+          <section className="px-8 lg:px-12 xl:px-16 pb-16 max-w-6xl">
             <div className="flex items-center gap-3 text-sm text-[#E8A33D] border border-[#E8A33D]/30 bg-[#E8A33D]/5 px-5 py-3 mb-12">
               <ShieldCheck className="w-4 h-4 shrink-0" />
               {t('review.signedInAs', { name: user.fullName })}
@@ -224,7 +228,7 @@ export default function Review() {
               <h2 className="font-display text-3xl font-medium mb-2 text-[#6B1A1A]">
                 {t('review.decidedTitle')}
               </h2>
-              <p className="text-sm text-[#1A1614]/60 mb-8 max-w-xl leading-relaxed">
+              <p className="text-sm text-[#1A1614]/60 mb-8 max-w-3xl leading-relaxed">
                 {t('review.decidedBody')}
               </p>
 

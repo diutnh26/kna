@@ -149,7 +149,7 @@ export default function Dashboard() {
             {t('dashboard.queueTitle')}
             <span className="text-[#B87333] ml-3 text-2xl">{pending?.length ?? 0}</span>
           </h2>
-          <p className="text-sm text-[#F5EDDD]/50 mb-8 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[#F5EDDD]/50 mb-8 max-w-4xl leading-relaxed">
             {t('dashboard.queueIntro')}
           </p>
 
