@@ -147,7 +147,7 @@ export default function Landing() {
             {PILLAR_ICONS.map((p, i) => (
               <div
                 key={p.vn}
-                className="bg-[#1A1614] p-8 flex flex-col min-h-[320px] items-start text-left"
+                className="bg-[#1A1614] p-6 flex flex-col min-h-[320px] items-start text-left"
               >
                 <p.icon className="w-5 h-5 text-[#B87333] mb-10" />
                 <div className="font-display text-lg text-[#B87333] mb-2">{p.vn}</div>
@@ -169,7 +169,7 @@ export default function Landing() {
                 alt={t('landing.pillars.sdgWheelAlt')}
                 width="256"
                 height="256"
-                className="w-16 h-16 md:w-20 md:h-20 rounded shrink-0"
+                className="w-24 h-24 md:w-28 md:h-28 rounded shrink-0"
               />
               <p className="text-sm text-[#F5EDDD]/55 max-w-xs leading-relaxed">
                 {t('landing.pillars.sdgLine')}
@@ -184,7 +184,7 @@ export default function Landing() {
                     width="256"
                     height="256"
                     loading="lazy"
-                    className="w-16 h-16 md:w-[72px] md:h-[72px]"
+                    className="w-20 h-20 md:w-24 md:h-24"
                   />
                 </li>
               ))}
