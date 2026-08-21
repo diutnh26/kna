@@ -57,6 +57,14 @@
           "title": "Community Engagement",
           "body": "Governance structures that give the Ê Đê community a direct voice in how the platform evolves and how revenue is distributed."
         }
+      ],
+      "sdgLine": "Aligned to four of the United Nations Sustainable Development Goals.",
+      "sdgWheelAlt": "The Global Goals for Sustainable Development logo.",
+      "sdgAlts": [
+        "Sustainable Development Goal 9: Industry, Innovation and Infrastructure.",
+        "Sustainable Development Goal 10: Reduced Inequalities.",
+        "Sustainable Development Goal 12: Responsible Consumption and Production.",
+        "Sustainable Development Goal 13: Climate Action."
       ]
     },
     "culture": {
@@ -435,44 +443,6 @@
     "statusPassed": "Passed",
     "statusDeclined": "Declined",
     "statusOpen": "Open",
-    "sdg": {
-      "eyebrow": "External framework",
-      "heading": "Not a badge. A mechanism for each one.",
-      "body": "KNĂ's social contribution maps onto four of the United Nations Sustainable Development Goals, which give an internationally recognised framework for evaluating it. Each is listed with the part of the platform that carries it, and a link to the screen where the claim can be checked rather than taken on trust.",
-      "coreLabel": "Core goal",
-      "wheelAlt": "The Global Goals for Sustainable Development logo.",
-      "note": "Goal icons are the official Global Goals marks, reproduced unaltered.",
-      "goals": [
-        {
-          "number": "SDG 9",
-          "name": "Industry, Innovation and Infrastructure",
-          "mechanism": "The platform is the infrastructure: a public revenue ledger, the digital cultural heritage archive, and the travel assistant. Settlement moves from the database ledger to smart contracts in Phase 2, after a month running in parallel with it.",
-          "linkLabel": "The cultural archive",
-          "alt": "Sustainable Development Goal 9: Industry, Innovation and Infrastructure."
-        },
-        {
-          "number": "SDG 10",
-          "name": "Reduced Inequalities",
-          "mechanism": "The community governs rather than only supplies. The Governance Committee decides what is published and what the Fund pays for, and 90% of every booking is paid straight to the household.",
-          "linkLabel": "The split on every booking",
-          "alt": "Sustainable Development Goal 10: Reduced Inequalities."
-        },
-        {
-          "number": "SDG 12",
-          "name": "Responsible Consumption and Production",
-          "mechanism": "Every settled transaction is written to a public ledger, so a traveller can see what actually reached a household before deciding. Marketplace pieces name the person who made them, and that person keeps 95% of the price.",
-          "linkLabel": "The public ledger",
-          "alt": "Sustainable Development Goal 12: Responsible Consumption and Production."
-        },
-        {
-          "number": "SDG 13",
-          "name": "Climate Action",
-          "mechanism": "A trip's carbon footprint is estimated on the Carbon Trail, and can be offset by joining a planting session or funding the cost of running one. The Community Fund pays for the sessions, which run at least fortnightly.",
-          "linkLabel": "The Carbon Trail",
-          "alt": "Sustainable Development Goal 13: Climate Action."
-        }
-      ]
-    },
     "boardEyebrow": "Provider board",
     "boardHeading": "Hosts talking to hosts.",
     "boardBody": "Two spaces are planned: one where verified providers and Committee members talk to each other, and one where visitors can ask questions and compare notes. Both readable by anyone.",

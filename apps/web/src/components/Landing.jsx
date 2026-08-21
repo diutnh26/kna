@@ -16,6 +16,16 @@ const PILLAR_ICONS = [
   { icon: Users, vn: 'Cộng đồng' },
 ];
 
+// The four goals the project claims, in the order they are shown. Paths
+// rather than locale strings: an icon is not a translation, and the marks
+// are reproduced unaltered as the Global Goals guidelines require.
+const SDG_ICONS = [
+  '/images/sdg/sdg-09.png',
+  '/images/sdg/sdg-10.png',
+  '/images/sdg/sdg-12.png',
+  '/images/sdg/sdg-13.png',
+];
+
 const CULTURE_MARKS = ['①', '②', '③'];
 
 const FOOTER_HREFS = [
@@ -33,6 +43,7 @@ export default function Landing() {
   const pillars = t('landing.pillars.items', { returnObjects: true });
   const culture = t('landing.culture.items', { returnObjects: true });
   const statLabels = t('landing.community.stats', { returnObjects: true });
+  const sdgAlts = t('landing.pillars.sdgAlts', { returnObjects: true });
   const footerColumns = t('landing.footer.columns', { returnObjects: true });
 
   const [ledger, setLedger] = useState([]);
@@ -146,6 +157,38 @@ export default function Landing() {
                 <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">{pillars[i]?.body}</p>
               </div>
             ))}
+          </div>
+
+          {/* The same four foundations, named in a vocabulary a partner or
+              an assessor already reads. Marks only: the goals are evidence
+              for the pillars above, not a fifth thing to read. */}
+          <div className="mt-16 pt-10 border-t border-[#F5EDDD]/10 flex flex-wrap items-center justify-between gap-x-12 gap-y-8">
+            <div className="flex items-center gap-4">
+              <img
+                src="/images/sdg/sdg-wheel.png"
+                alt={t('landing.pillars.sdgWheelAlt')}
+                width="256"
+                height="256"
+                className="w-11 h-11 rounded shrink-0"
+              />
+              <p className="text-sm text-[#F5EDDD]/55 max-w-xs leading-relaxed">
+                {t('landing.pillars.sdgLine')}
+              </p>
+            </div>
+            <ul className="flex flex-wrap items-center gap-3">
+              {SDG_ICONS.map((src, i) => (
+                <li key={src}>
+                  <img
+                    src={src}
+                    alt={sdgAlts[i]}
+                    width="256"
+                    height="256"
+                    loading="lazy"
+                    className="w-16 h-16 md:w-[72px] md:h-[72px]"
+                  />
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>

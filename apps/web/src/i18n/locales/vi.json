@@ -57,6 +57,14 @@
           "title": "Gắn Kết Cộng Đồng",
           "body": "Cơ chế quản trị trao cho cộng đồng Ê Đê tiếng nói trực tiếp trong cách nền tảng phát triển và cách doanh thu được phân phối."
         }
+      ],
+      "sdgLine": "Gắn với bốn Mục tiêu Phát triển Bền vững của Liên Hợp Quốc.",
+      "sdgWheelAlt": "Biểu trưng The Global Goals for Sustainable Development.",
+      "sdgAlts": [
+        "Mục tiêu Phát triển Bền vững 9: Công nghiệp, Đổi mới và Hạ tầng.",
+        "Mục tiêu Phát triển Bền vững 10: Giảm Bất bình đẳng.",
+        "Mục tiêu Phát triển Bền vững 12: Tiêu dùng và Sản xuất có Trách nhiệm.",
+        "Mục tiêu Phát triển Bền vững 13: Hành động vì Khí hậu."
       ]
     },
     "culture": {
@@ -435,44 +443,6 @@
     "statusPassed": "Đã thông qua",
     "statusDeclined": "Đã từ chối",
     "statusOpen": "Đang mở",
-    "sdg": {
-      "eyebrow": "Khung tham chiếu quốc tế",
-      "heading": "Không phải huy hiệu. Là cơ chế cho từng mục tiêu.",
-      "body": "Đóng góp xã hội của KNĂ tương ứng với bốn Mục tiêu Phát triển Bền vững của Liên Hợp Quốc, một khung đánh giá được quốc tế công nhận. Mỗi mục tiêu được nêu kèm phần nền tảng đảm nhận nó, và một đường dẫn tới màn hình nơi bạn có thể tự kiểm chứng thay vì phải tin.",
-      "coreLabel": "Mục tiêu trọng tâm",
-      "wheelAlt": "Biểu trưng The Global Goals for Sustainable Development.",
-      "note": "Biểu tượng các mục tiêu là bộ nhận diện chính thức của The Global Goals, được giữ nguyên không chỉnh sửa.",
-      "goals": [
-        {
-          "number": "SDG 9",
-          "name": "Công nghiệp, Đổi mới và Hạ tầng",
-          "mechanism": "Chính nền tảng là hạ tầng: sổ cái doanh thu công khai, kho lưu trữ di sản văn hóa số, và trợ lý du lịch. Việc thanh toán sẽ chuyển từ sổ cái cơ sở dữ liệu sang hợp đồng thông minh ở Giai đoạn 2, sau một tháng chạy song song với nó.",
-          "linkLabel": "Kho lưu trữ văn hóa",
-          "alt": "Mục tiêu Phát triển Bền vững 9: Công nghiệp, Đổi mới và Hạ tầng."
-        },
-        {
-          "number": "SDG 10",
-          "name": "Giảm Bất bình đẳng",
-          "mechanism": "Cộng đồng nắm quyền quản trị chứ không chỉ cung cấp dịch vụ. Hội đồng Quản trị Cộng đồng quyết định nội dung được công bố và khoản chi của Quỹ, và 90% mỗi đơn đặt được trả thẳng cho hộ gia đình.",
-          "linkLabel": "Tỷ lệ phân chia mỗi đơn đặt",
-          "alt": "Mục tiêu Phát triển Bền vững 10: Giảm Bất bình đẳng."
-        },
-        {
-          "number": "SDG 12",
-          "name": "Tiêu dùng và Sản xuất có Trách nhiệm",
-          "mechanism": "Mọi giao dịch đã tất toán đều được ghi vào sổ cái công khai, để khách thấy được khoản tiền thực sự đến với hộ gia đình trước khi quyết định. Sản phẩm trên chợ đều ghi tên người làm ra, và người đó giữ lại 95% giá bán.",
-          "linkLabel": "Sổ cái công khai",
-          "alt": "Mục tiêu Phát triển Bền vững 12: Tiêu dùng và Sản xuất có Trách nhiệm."
-        },
-        {
-          "number": "SDG 13",
-          "name": "Hành động vì Khí hậu",
-          "mechanism": "Dấu chân carbon của chuyến đi được ước tính trong Hành trình Carbon, và có thể bù đắp bằng cách tham gia một buổi trồng cây hoặc góp kinh phí tổ chức. Quỹ Cộng đồng chi trả cho các buổi này, diễn ra ít nhất hai tuần một lần.",
-          "linkLabel": "Hành trình Carbon",
-          "alt": "Mục tiêu Phát triển Bền vững 13: Hành động vì Khí hậu."
-        }
-      ]
-    },
     "boardEyebrow": "Diễn đàn nhà cung cấp",
     "boardHeading": "Nơi các chủ nhà trò chuyện với nhau.",
     "boardBody": "Dự kiến sẽ có hai không gian: một nơi để các nhà cung cấp đã xác minh và thành viên Hội đồng trao đổi với nhau, và một nơi để du khách đặt câu hỏi và chia sẻ trải nghiệm. Cả hai đều ai cũng đọc được.",
