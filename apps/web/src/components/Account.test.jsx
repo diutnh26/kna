@@ -244,7 +244,7 @@ describe('Account', () => {
     await userEvent.click(screen.getByRole('button', { name: /^Offsets$/i }));
 
     expect(screen.getByText(/No offsets yet/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Open the Carbon Trail/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Open the Carbon Journey/i })).toBeInTheDocument();
   });
 
 });

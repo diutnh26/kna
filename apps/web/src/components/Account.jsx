@@ -52,7 +52,7 @@ const KIND_ICON = { booking: CalendarDays, order: ShoppingBag, contribution: Fil
  */
 export default function Account() {
   const { t } = useTranslation();
-  // Project names come from the Carbon Trail's own locale data rather
+  // Project names come from the Carbon Journey's own locale data rather
   // than a second list here, so the two screens cannot drift into calling
   // the same project different things.
   const offsetProjectName = (id) =>
