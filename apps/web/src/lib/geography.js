@@ -55,10 +55,11 @@ export const DAK_LAK = [
 // The province before the merger, landlocked and stopping short of the
 // coast at about 108.95°E.
 //
-// Still drawn by VietnamMap, which was left alone deliberately when the
-// boundary above was corrected. That means the two maps on Explore show
-// different provinces side by side, the schematic one not reaching the
-// sea. Known, and worth closing: point VietnamMap at DAK_LAK instead.
+// Still the operating area. KNĂ works with buôn inside the old boundary,
+// not the coastal districts Phú Yên brought in, so VietnamMap draws this
+// one and labels it as where the platform works. The two maps on Explore
+// therefore show different shapes on purpose: this is the ground covered,
+// DAK_LAK is the province on today's administrative map.
 export const DAK_LAK_PRE_MERGER = [
   [13.30, 107.90], [13.22, 108.40], [12.95, 108.92], [12.60, 108.95],
   [12.35, 108.62], [12.20, 108.20], [12.25, 107.80], [12.50, 107.55],

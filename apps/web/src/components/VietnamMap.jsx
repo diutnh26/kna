@@ -51,6 +51,7 @@ const shape = (points) =>
 
 export default function VietnamMap() {
   const { t } = useTranslation();
+  const workArea = t('explore.map.workArea', { returnObjects: true });
 
   return (
     <svg
@@ -83,10 +84,10 @@ export default function VietnamMap() {
         strokeLinejoin="round"
       />
 
-      {/* Đắk Lắk, as it was before the 2025 merger with Phú Yên. The
-          zoomable map beside this one draws the current province, which
-          reaches the coast; this one does not, and should be brought into
-          line. See the note in lib/geography. */}
+      {/* Đắk Lắk as it was before the 2025 merger with Phú Yên, which is
+          the area KNĂ works in. Deliberately not the current province the
+          zoomable map draws: that one reaches the coast, this one shows
+          the ground the platform actually covers. Labelled as such. */}
       <path
         d={shape(DAK_LAK_PRE_MERGER)}
         fill="#C8302E"
@@ -169,6 +170,24 @@ export default function VietnamMap() {
         strokeOpacity="0.4"
         strokeWidth="1.5"
       />
+
+      {/* Why this outline stops short of the coast while the zoomable map
+          beside it does not. The red shape is the pre-merger province,
+          which is the area KNĂ actually operates in, so the difference is
+          the point rather than an oversight. Sits under the two labels it
+          qualifies, and clear of the Trường Sa cluster to its right. */}
+      <g
+        fontSize="16"
+        fill="#F5EDDD"
+        fillOpacity="0.5"
+        fontFamily="'Be Vietnam Pro', sans-serif"
+      >
+        {workArea.map((line, i) => (
+          <text key={line} x={x(109.7)} y={y(11.0) + i * 22}>
+            {line}
+          </text>
+        ))}
+      </g>
     </svg>
   );
 }
