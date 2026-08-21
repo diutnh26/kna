@@ -33,8 +33,33 @@ export const MAINLAND = [
   [21.30, 103.00], [21.70, 102.80],
 ];
 
-// Đắk Lắk. Roughly 12.2°–13.35°N, 107.5°–108.95°E.
+// Đắk Lắk as it is now. The 2025 provincial merger absorbed Phú Yên, so
+// the province runs from the Cambodian border to the East Sea and has a
+// coastline for the first time: roughly 12.2°–13.47°N, 107.48°–109.37°E,
+// about 18,100 km². Traced clockwise from the north-west corner.
+//
+// Traced off the boundary Google Maps draws, not from an official
+// dataset, so it is the right province at the wrong precision. Good
+// enough to show the shape and the reach to the coast; not good enough
+// to measure. Replace with published GeoJSON when there is any.
 export const DAK_LAK = [
+  [13.30, 107.50], [13.33, 107.80], [13.28, 108.15], [13.22, 108.45],
+  [13.18, 108.70], [13.28, 108.85], [13.40, 109.02], [13.46, 109.18],
+  [13.47, 109.28], [13.30, 109.31], [13.15, 109.33], [13.05, 109.34],
+  [12.95, 109.37], [12.88, 109.34], [12.84, 109.15], [12.80, 108.98],
+  [12.68, 108.95], [12.55, 108.93], [12.40, 108.72], [12.28, 108.40],
+  [12.22, 108.10], [12.25, 107.85], [12.42, 107.62], [12.70, 107.52],
+  [13.00, 107.48], [13.15, 107.55],
+];
+
+// The province before the merger, landlocked and stopping short of the
+// coast at about 108.95°E.
+//
+// Still drawn by VietnamMap, which was left alone deliberately when the
+// boundary above was corrected. That means the two maps on Explore show
+// different provinces side by side, the schematic one not reaching the
+// sea. Known, and worth closing: point VietnamMap at DAK_LAK instead.
+export const DAK_LAK_PRE_MERGER = [
   [13.30, 107.90], [13.22, 108.40], [12.95, 108.92], [12.60, 108.95],
   [12.35, 108.62], [12.20, 108.20], [12.25, 107.80], [12.50, 107.55],
   [12.90, 107.50], [13.15, 107.62],

@@ -50,6 +50,7 @@ export default function InteractiveMap() {
     if (!el) return undefined;
 
     const map = L.map(el, {
+      // Overwritten by fitBounds below; Leaflet needs a view before layers.
       center: BUON_MA_THUOT,
       zoom: 8,
       minZoom: MIN_ZOOM,
@@ -86,12 +87,19 @@ export default function InteractiveMap() {
     });
     tiles.addTo(map);
 
-    L.polygon(DAK_LAK, {
+    const province = L.polygon(DAK_LAK, {
       color: '#C8302E',
       weight: 2,
       fillColor: '#C8302E',
       fillOpacity: 0.15,
     }).addTo(map);
+
+    // Frame the province rather than trusting a fixed zoom. Post-merger it
+    // is about 200km wide, reaching from Cambodia to the coast, and the
+    // zoom 8 that suited the old landlocked shape now cuts the coast off.
+    // Deriving the view from the polygon means the next boundary change
+    // reframes itself.
+    map.fitBounds(province.getBounds(), { padding: [12, 12] });
 
     // Night stroke rather than a bare saffron dot: the tiles under this are
     // light, and saffron on near-white loses its edge.

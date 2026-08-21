@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   MAINLAND,
-  DAK_LAK,
+  DAK_LAK_PRE_MERGER,
   BUON_MA_THUOT,
   HOANG_SA,
   TRUONG_SA,
@@ -83,9 +83,12 @@ export default function VietnamMap() {
         strokeLinejoin="round"
       />
 
-      {/* Đắk Lắk */}
+      {/* Đắk Lắk, as it was before the 2025 merger with Phú Yên. The
+          zoomable map beside this one draws the current province, which
+          reaches the coast; this one does not, and should be brought into
+          line. See the note in lib/geography. */}
       <path
-        d={shape(DAK_LAK)}
+        d={shape(DAK_LAK_PRE_MERGER)}
         fill="#C8302E"
         stroke="#C8302E"
         strokeWidth="2"
