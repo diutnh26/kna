@@ -169,7 +169,7 @@ export default function Landing() {
                 alt={t('landing.pillars.sdgWheelAlt')}
                 width="256"
                 height="256"
-                className="w-11 h-11 rounded shrink-0"
+                className="w-16 h-16 md:w-20 md:h-20 rounded shrink-0"
               />
               <p className="text-sm text-[#F5EDDD]/55 max-w-xs leading-relaxed">
                 {t('landing.pillars.sdgLine')}
