@@ -235,6 +235,8 @@
       "gettingLabel": "Getting there",
       "gettingValue": "350 km from Ho Chi Minh City by road, 190 km from the coast at Nha Trang, or a 55-minute flight",
       "caption": "A schematic outline drawn for orientation, not a survey map. Hoàng Sa and Trường Sa are shown as part of Vietnam.",
+      "satelliteCaption": "Satellite imagery of the province and the plateau around Buôn Ma Thuột. Drag to pan, and use the controls to look closer.",
+      "satelliteUnavailable": "Satellite imagery could not be loaded. The outline map beside this one needs no connection.",
       "alt": "Map of Vietnam with Đắk Lắk province highlighted in the Central Highlands, Buôn Ma Thuột marked within it, and the Hoàng Sa and Trường Sa archipelagos marked in the East Sea.",
       "dakLak": "Đắk Lắk",
       "buonMaThuot": "Buôn Ma Thuột",

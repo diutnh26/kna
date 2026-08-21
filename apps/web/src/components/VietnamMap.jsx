@@ -1,10 +1,19 @@
 import { useTranslation } from 'react-i18next';
+import {
+  MAINLAND,
+  DAK_LAK,
+  BUON_MA_THUOT,
+  HOANG_SA,
+  TRUONG_SA,
+  PHU_QUOC,
+  CON_DAO,
+} from '../lib/geography';
 
 /**
  * Where Đắk Lắk is, for a reader who has never placed it.
  *
- * A schematic outline, not survey data. The coordinates below are traced
- * by hand at roughly one point per 50–100 km, which is enough to make the
+ * A schematic outline, not survey data. The coordinates in lib/geography
+ * are traced by hand at roughly one point per 50–100 km, enough to make the
  * country recognisable and Đắk Lắk findable, and not enough to settle a
  * boundary question. The caption says so on the page rather than only
  * here, because a map that looks authoritative and is not is worse than
@@ -14,9 +23,9 @@ import { useTranslation } from 'react-i18next';
  * server to reach on venue wifi, no dependency, and the palette is the
  * project's own rather than something overridden after the fact.
  *
- * Replacing this with real geodata later means swapping the arrays for
- * projected GeoJSON; nothing below the projection cares where the points
- * came from.
+ * Shares its coordinates with SatelliteMap through lib/geography, so the
+ * province drawn here and the province drawn over the imagery are the
+ * same trace rather than two that can drift apart.
  */
 
 // Equirectangular. At Vietnam's latitudes a degree of longitude is about
@@ -39,53 +48,6 @@ const shape = (points) =>
   points
     .map(([lat, lon], i) => `${i ? 'L' : 'M'}${x(lon).toFixed(1)},${y(lat).toFixed(1)}`)
     .join(' ') + ' Z';
-
-// Mainland, traced clockwise from the north-west. The northern and western
-// edges are the borders with China, Laos and Cambodia; the rest is coast.
-const MAINLAND = [
-  [22.40, 102.15], [22.79, 102.95], [22.58, 103.32], [22.81, 104.45],
-  [23.35, 105.32], [22.92, 105.90], [22.80, 106.50], [22.47, 106.72],
-  [21.95, 107.90], [21.52, 107.45], [20.95, 106.80], [20.25, 106.55],
-  [19.80, 105.90], [19.05, 105.80], [18.30, 105.72], [17.50, 106.60],
-  [16.90, 107.10], [16.10, 108.28], [15.50, 108.72], [14.80, 109.10],
-  [13.80, 109.22], [13.00, 109.30], [12.65, 109.45], [11.90, 109.20],
-  [11.30, 108.90], [10.90, 108.30], [10.40, 107.40], [10.30, 106.80],
-  [9.80, 106.60], [9.30, 106.20], [8.80, 105.30], [8.57, 104.85],
-  [9.00, 104.85], [9.50, 105.05], [10.00, 104.90], [10.40, 104.48],
-  [10.90, 104.90], [11.50, 105.80], [11.95, 106.15], [12.30, 106.00],
-  [13.00, 107.50], [14.00, 107.40], [14.70, 107.52], [15.30, 107.30],
-  [16.00, 106.60], [16.60, 106.52], [17.30, 105.60], [18.20, 105.10],
-  [19.00, 104.50], [19.70, 104.02], [20.30, 103.90], [20.90, 104.02],
-  [21.30, 103.00], [21.70, 102.80],
-];
-
-// Đắk Lắk. Roughly 12.2°–13.35°N, 107.5°–108.95°E.
-const DAK_LAK = [
-  [13.30, 107.90], [13.22, 108.40], [12.95, 108.92], [12.60, 108.95],
-  [12.35, 108.62], [12.20, 108.20], [12.25, 107.80], [12.50, 107.55],
-  [12.90, 107.50], [13.15, 107.62],
-];
-
-const BUON_MA_THUOT = [12.68, 108.05];
-
-// Named islands rather than a scatter, so the clusters sit where the real
-// ones do. Not every feature in either group, which no map at this scale
-// shows.
-const HOANG_SA = [
-  [16.83, 112.34], [16.53, 111.60], [16.67, 112.73], [16.45, 111.71],
-  [15.78, 111.20], [16.03, 112.51],
-];
-
-const TRUONG_SA = [
-  [11.43, 114.33], [11.05, 114.28], [10.18, 114.37], [9.88, 114.33],
-  [9.55, 112.89], [8.64, 111.92], [7.88, 112.92], [11.40, 116.40],
-  [10.72, 115.82], [9.20, 113.80],
-];
-
-// The two largest offshore islands. Small, but their absence is the kind
-// of gap a reader from here notices.
-const PHU_QUOC = [10.22, 103.96];
-const CON_DAO = [8.69, 106.60];
 
 export default function VietnamMap() {
   const { t } = useTranslation();

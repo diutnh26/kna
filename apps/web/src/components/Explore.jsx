@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Volume2, MapPin, Languages } from 'lucide-react';
 import Navbar from './Navbar';
@@ -6,6 +6,11 @@ import ImageSlot from './ImageSlot';
 import VietnamMap from './VietnamMap';
 import { api } from '../lib/api';
 import ApiErrorNotice from './ApiErrorNotice';
+
+// Leaflet and its stylesheet are about 45KB gzipped and are needed on this
+// screen only. Split out so the landing page, which most visitors see first
+// and some see on mobile data, does not carry them.
+const SatelliteMap = lazy(() => import('./SatelliteMap'));
 
 export default function Explore() {
   const { t } = useTranslation();
@@ -104,8 +109,8 @@ export default function Explore() {
       {/* Between the opening and the pillars because everything after this
           point assumes you know where Đắk Lắk is, and most readers do not. */}
       <section className="border-t border-[#F5EDDD]/10">
-        <div className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-center">
-          <div className="md:col-span-5">
+        <div className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-start">
+          <div className="md:col-span-4">
             <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
               <span className="h-px w-12 bg-[#B87333]" />
               <span>{t('explore.map.eyebrow')}</span>
@@ -131,11 +136,25 @@ export default function Explore() {
             </dl>
           </div>
 
-          <div className="md:col-span-7 flex justify-center md:justify-end">
-            <figure className="w-full max-w-[520px]">
+          <div className="md:col-span-8 grid sm:grid-cols-2 gap-8">
+            {/* Two maps, two questions. The outline says where the province
+                is and needs nothing from the network; the satellite says
+                what it looks like and needs everything from it. Neither
+                answers for the other, which is why both are here. */}
+            <figure>
               <VietnamMap />
               <figcaption className="text-xs text-[#F5EDDD]/40 leading-relaxed mt-4">
                 {t('explore.map.caption')}
+              </figcaption>
+            </figure>
+            <figure>
+              <Suspense
+                fallback={<div className="w-full aspect-square rounded-sm bg-[#241F1C]" />}
+              >
+                <SatelliteMap />
+              </Suspense>
+              <figcaption className="text-xs text-[#F5EDDD]/40 leading-relaxed mt-4">
+                {t('explore.map.satelliteCaption')}
               </figcaption>
             </figure>
           </div>
