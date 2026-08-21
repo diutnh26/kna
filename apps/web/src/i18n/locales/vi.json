@@ -109,7 +109,7 @@
           "label": "số tiền khách trả đến thẳng hộ gia đình hoặc nghệ nhân"
         },
         {
-          "label": "đối tác cộng đồng Ê Đê tham gia giai đoạn thí điểm"
+          "label": "buôn Ê Đê tham gia giai đoạn thí điểm"
         }
       ]
     },
@@ -308,7 +308,7 @@
     "available_one": "Có {{count}} trải nghiệm",
     "available_other": "Có {{count}} trải nghiệm",
     "emptyTitle": "Chưa có gì phù hợp với lựa chọn đó.",
-    "emptyBody": "Mới có bốn buôn tham gia. Hãy thử nới rộng bộ lọc.",
+    "emptyBody": "Mới có ba buôn tham gia. Hãy thử nới rộng bộ lọc.",
     "clearFilters": "Xoá bộ lọc",
     "photoLabel": "{{title}} — {{buon}}",
     "verified": "Đã xác minh",
@@ -457,9 +457,9 @@
       },
       {
         "author": "Một người thợ dệt",
-        "role": "Buôn Kli A",
+        "role": "Buôn Trấp",
         "title": "Nguyên liệu chàm năm nay thiếu",
-        "body": "Ruộng chàm bị ngập hồi tháng Tư. Tôi chỉ còn đủ cho chừng bốn tấm nữa. Ai ở Trấp còn dư lá, tôi xin đổi mây lấy."
+        "body": "Ruộng chàm bị ngập hồi tháng Tư. Tôi chỉ còn đủ cho chừng bốn tấm nữa. Ai ở Akô Dhông còn dư lá, tôi xin đổi mây lấy."
       },
       {
         "author": "Một chủ nhà",
@@ -507,7 +507,7 @@
       },
       {
         "label": "Lên giúp tôi lịch trình ba ngày",
-        "reply": "Đây là một khung phù hợp cho lần đầu ghé thăm, ít di chuyển, mỗi ngày một buôn:\n\nNgày 1 — Đến Buôn Ma Thuột, chiều ghé Buôn Akô Dhông. Đi bộ một quãng ngắn, gặp chủ nhà, ăn cùng gia đình. Nghỉ lại qua đêm.\n\nNgày 2 — Sáng học dệt cùng Amí Lan ở Buôn Kli A. Chiều tự do. Tối xem đội cồng chiêng ở Buôn Đôn nếu lịch mùa vụ còn ngày trống.\n\nNgày 3 — Đi bộ ven rừng cùng Y Wik, chiều ghé hợp tác xã cà phê. Tối khởi hành về.\n\nBạn có muốn tôi kiểm tra xem những ngày nào thực sự còn chỗ không?"
+        "reply": "Đây là một khung phù hợp cho lần đầu ghé thăm, ít di chuyển, mỗi ngày một buôn:\n\nNgày 1 — Đến Buôn Ma Thuột, chiều ghé Buôn Akô Dhông. Đi bộ một quãng ngắn, gặp chủ nhà, ăn cùng gia đình. Nghỉ lại qua đêm.\n\nNgày 2 — Sáng học dệt cùng Amí Lan ở Buôn Trấp. Chiều tự do. Tối xem đội cồng chiêng ở Buôn Đôn nếu lịch mùa vụ còn ngày trống.\n\nNgày 3 — Đi bộ ven rừng cùng Y Wik, chiều ghé hợp tác xã cà phê. Tối khởi hành về.\n\nBạn có muốn tôi kiểm tra xem những ngày nào thực sự còn chỗ không?"
       },
       {
         "label": "Cồng Chiêng là gì?",

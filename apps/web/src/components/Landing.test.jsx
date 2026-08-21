@@ -47,9 +47,14 @@ describe('Landing', () => {
     expect(await screen.findByText(/8 more transactions today/)).toBeInTheDocument();
   });
 
-  it('reports the counted partner figure from the API', async () => {
+  it('counts buôn in the pilot, not providers', async () => {
+    // The business plan commits to 3 buôn in Phase 1, holding some 65
+    // households, guides and makers between them. The stat reported the
+    // providers against a label about buôn, which was off by that factor.
+    // Mocked apart from each other so this fails if it reads the wrong one.
     renderScreen(<Landing />);
-    expect(await screen.findByText('10')).toBeInTheDocument();
+    expect(await screen.findByText('4')).toBeInTheDocument();
+    expect(screen.queryByText('10')).not.toBeInTheDocument();
   });
 
   it('still renders when the API is unreachable — it is a marketing page', async () => {

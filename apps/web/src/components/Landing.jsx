@@ -73,11 +73,17 @@ export default function Landing() {
   // set in apps/api/src/lib/fees.ts. It deliberately excludes the 3% that
   // goes to the Community Fund, which reaches the community too but is not
   // paid to a person, so the claim understates rather than inflates.
-  // Only the third figure is counted.
+  //
+  // The third is counted, and counts buôn rather than providers. It read
+  // verifiedProviders against a label about "community partners", which was
+  // a truthful pair but not the pilot figure the business plan commits to:
+  // that one is 3 buôn, holding some 65 households, guides and makers
+  // between them. Reporting the buôn keeps the landing page and the paper
+  // saying the same thing, and the seed data carries three of them.
   const statsFigures = [
     '100%',
     '90–95%',
-    communityStats ? `${communityStats.verifiedProviders}` : '—',
+    communityStats ? `${communityStats.buonOnboarded}` : '—',
   ];
 
   return (

@@ -63,7 +63,7 @@ export async function populate(prisma: PrismaClient) {
     email: "ami.lan@example.kna",
     fullName: "Amí Lan",
     type: "ARTISAN",
-    buon: "Buôn Kli A",
+    buon: "Buôn Trấp",
   });
   const yBla = await createProvider({
     email: "y.bla@example.kna",
@@ -406,7 +406,7 @@ export async function populate(prisma: PrismaClient) {
     [amiHBia, "Chair · elder", "Buôn Akô Dhông", 0],
     [yWik, "Guides and land use", "Buôn Đôn", 1],
     [aduonSun, "Homestays", "Buôn Trấp", 2],
-    [amiLan, "Craft and archive", "Buôn Kli A", 3],
+    [amiLan, "Craft and archive", "Buôn Trấp", 3],
     [yThamNie, "Fund treasurer", "Buôn Trấp", 4],
     [hNiBya, "Youth representative", "Buôn Akô Dhông", 5],
   ];
@@ -419,13 +419,13 @@ export async function populate(prisma: PrismaClient) {
   // ── Community Fund allocations ───────────────────────────────────────
   await prisma.communityFundEntry.createMany({
     data: [
-      { quarter: "Q2 2026", what: "Recording equipment for the cultural archive", toBuon: "Buôn Kli A", amountVnd: 7400000 },
+      { quarter: "Q2 2026", what: "Recording equipment for the cultural archive", toBuon: "Buôn Trấp", amountVnd: 7400000 },
       { quarter: "Q2 2026", what: "Weaving apprenticeship stipends, three places", toBuon: "Buôn Akô Dhông", amountVnd: 6000000 },
       { quarter: "Q2 2026", what: "Yok Đôn buffer replanting, co-funded", toBuon: "Buôn Đôn", amountVnd: 5200000 },
       { quarter: "Q2 2026", what: "Longhouse roof repair, communal section", toBuon: "Buôn Trấp", amountVnd: 4200000 },
-      { quarter: "Q2 2026", what: "Digital skills training, two sessions", toBuon: "All four buôn", amountVnd: 1800000 },
+      { quarter: "Q2 2026", what: "Digital skills training, two sessions", toBuon: "All three buôn", amountVnd: 1800000 },
       { quarter: "Q1 2026", what: "Gong set restoration, two sets", toBuon: "Buôn Đôn", amountVnd: 8100000 },
-      { quarter: "Q1 2026", what: "Oral history recording, eleven sessions", toBuon: "All four buôn", amountVnd: 5300000 },
+      { quarter: "Q1 2026", what: "Oral history recording, eleven sessions", toBuon: "All three buôn", amountVnd: 5300000 },
       { quarter: "Q1 2026", what: "Shoreline planting, wet season batch", toBuon: "Buôn Trấp", amountVnd: 3500000 },
       { quarter: "Q1 2026", what: "Committee travel and meeting costs", toBuon: "Committee", amountVnd: 2000000 },
     ],
@@ -504,7 +504,7 @@ export async function populate(prisma: PrismaClient) {
         type: "Craft record",
         title: "Backstrap loom, start to finish",
         meta: "Photo essay · 40 frames",
-        keeperBuon: "Buôn Kli A",
+        keeperBuon: "Buôn Trấp",
         pillar: "Weaving",
         moderationStatus: "PUBLISHED",
         moderatedById: chair.id,
@@ -534,7 +534,7 @@ export async function populate(prisma: PrismaClient) {
         type: "Craft record",
         title: "Dyeing indigo, three vats",
         meta: "Photo essay · 26 frames",
-        keeperBuon: "Buôn Kli A",
+        keeperBuon: "Buôn Trấp",
         pillar: "Weaving",
         moderationStatus: "IN_REVIEW",
         contributedById: (await prisma.user.findUniqueOrThrow({ where: { email: "ami.lan@example.kna" } })).id,
@@ -543,7 +543,7 @@ export async function populate(prisma: PrismaClient) {
         type: "Recording",
         title: "Teaching session, players under fifteen",
         meta: "Four players · 31 min",
-        keeperBuon: "Buôn Kli A",
+        keeperBuon: "Buôn Trấp",
         pillar: "Cồng Chiêng",
         moderationStatus: "IN_REVIEW",
         contributedById: (await prisma.user.findUniqueOrThrow({ where: { email: "y.wik@example.kna" } })).id,

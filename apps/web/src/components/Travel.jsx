@@ -18,7 +18,7 @@ import { useDebounced } from '../lib/useDebounced';
 import ApiErrorNotice from './ApiErrorNotice';
 
 const CATEGORIES = ['All', 'Stay', 'Guided walk', 'Craft session', 'Ceremony'];
-const BUON = ['All buôn', 'Buôn Akô Dhông', 'Buôn Đôn', 'Buôn Trấp', 'Buôn Kli A'];
+const BUON = ['All buôn', 'Buôn Akô Dhông', 'Buôn Đôn', 'Buôn Trấp'];
 
 // UI label <-> API enum. The Listing.category column is an enum
 // (STAY / GUIDED_WALK / ...); everything the guest sees is the label.

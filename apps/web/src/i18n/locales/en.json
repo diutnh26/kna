@@ -109,7 +109,7 @@
           "label": "of what a visitor pays reaches the household or artisan directly"
         },
         {
-          "label": "Ê Đê community partners onboarded for the pilot"
+          "label": "Ê Đê buôn onboarded for the pilot"
         }
       ]
     },
@@ -308,7 +308,7 @@
     "available_one": "{{count}} experience available",
     "available_other": "{{count}} experiences available",
     "emptyTitle": "Nothing in that combination yet.",
-    "emptyBody": "Only four buôn have onboarded so far. Try a wider filter.",
+    "emptyBody": "Only three buôn have onboarded so far. Try a wider filter.",
     "clearFilters": "Clear filters",
     "photoLabel": "{{title}} — {{buon}}",
     "verified": "Verified",
@@ -457,9 +457,9 @@
       },
       {
         "author": "A weaver",
-        "role": "Buôn Kli A",
+        "role": "Buôn Trấp",
         "title": "Indigo supply is short this season",
-        "body": "The dye plot flooded in April. I have enough for maybe four more pieces. If anyone in Trấp has surplus leaf I will trade rattan for it."
+        "body": "The dye plot flooded in April. I have enough for maybe four more pieces. If anyone in Akô Dhông has surplus leaf I will trade rattan for it."
       },
       {
         "author": "A host",
@@ -507,7 +507,7 @@
       },
       {
         "label": "Plan me three days",
-        "reply": "Here is a shape that works for a first visit, low travel, one buôn per day:\n\nDay 1 — Arrive Buôn Ma Thuột, afternoon at Buôn Akô Dhông. Short walk, meet your host, eat with the household. Stay the night.\n\nDay 2 — Morning loom session with Amí Lan in Buôn Kli A. Afternoon free. Evening gong ensemble in Buôn Đôn if the harvest calendar has a date open.\n\nDay 3 — Forest edge walk with Y Wik, then the coffee co-op in the afternoon. Depart evening.\n\nWant me to check which dates actually have availability?"
+        "reply": "Here is a shape that works for a first visit, low travel, one buôn per day:\n\nDay 1 — Arrive Buôn Ma Thuột, afternoon at Buôn Akô Dhông. Short walk, meet your host, eat with the household. Stay the night.\n\nDay 2 — Morning loom session with Amí Lan in Buôn Trấp. Afternoon free. Evening gong ensemble in Buôn Đôn if the harvest calendar has a date open.\n\nDay 3 — Forest edge walk with Y Wik, then the coffee co-op in the afternoon. Depart evening.\n\nWant me to check which dates actually have availability?"
       },
       {
         "label": "What is Cồng Chiêng?",
