@@ -8,7 +8,8 @@
  *
  * Hand-traced at roughly one point per 50–100 km. That is enough to make
  * the country recognisable and the province findable, and not enough to
- * settle a boundary question. Both maps say so in their captions.
+ * settle a boundary question. Nothing on the page says so any more, the
+ * captions having been removed, so it is recorded here instead.
  *
  * Real geodata later means replacing the arrays here and nothing else.
  */

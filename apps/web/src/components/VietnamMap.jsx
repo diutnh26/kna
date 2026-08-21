@@ -15,9 +15,9 @@ import {
  * A schematic outline, not survey data. The coordinates in lib/geography
  * are traced by hand at roughly one point per 50–100 km, enough to make the
  * country recognisable and Đắk Lắk findable, and not enough to settle a
- * boundary question. The caption says so on the page rather than only
- * here, because a map that looks authoritative and is not is worse than
- * one that admits its own scale.
+ * boundary question. A caption used to say so on the page; it was removed
+ * on request, so this comment is now the only place it is written down.
+ * Worth restoring if the outline ever starts being read as authoritative.
  *
  * Drawn inline rather than with a mapping library on purpose: no tile
  * server to reach on venue wifi, no dependency, and the palette is the

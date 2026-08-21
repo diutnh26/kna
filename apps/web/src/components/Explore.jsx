@@ -115,9 +115,6 @@ export default function Explore() {
               <span className="h-px w-12 bg-[#B87333]" />
               <span>{t('explore.map.eyebrow')}</span>
             </div>
-            <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight mb-6">
-              {t('explore.map.heading')}
-            </h2>
             <p className="text-[#F5EDDD]/70 leading-relaxed mb-8">{t('explore.map.body')}</p>
 
             <dl className="space-y-3 text-sm">
@@ -141,22 +138,14 @@ export default function Explore() {
                 is, as a shape, and needs nothing from the network; the live
                 map has the roads and towns and zooms out to the country, and
                 needs everything from it. Neither answers for the other. */}
-            <figure>
+            <div>
               <VietnamMap />
-              <figcaption className="text-xs text-[#F5EDDD]/40 leading-relaxed mt-4">
-                {t('explore.map.caption')}
-              </figcaption>
-            </figure>
-            <figure>
-              <Suspense
-                fallback={<div className="w-full aspect-square rounded-sm bg-[#241F1C]" />}
-              >
-                <InteractiveMap />
-              </Suspense>
-              <figcaption className="text-xs text-[#F5EDDD]/40 leading-relaxed mt-4">
-                {t('explore.map.interactiveCaption')}
-              </figcaption>
-            </figure>
+            </div>
+            <Suspense
+              fallback={<div className="w-full aspect-square rounded-sm bg-[#241F1C]" />}
+            >
+              <InteractiveMap />
+            </Suspense>
           </div>
         </div>
       </section>

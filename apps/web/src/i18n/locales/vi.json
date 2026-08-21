@@ -226,7 +226,6 @@
     "statLanguages": "ngôn ngữ được lưu giữ",
     "map": {
       "eyebrow": "Vị trí",
-      "heading": "Không phải miền biển. Là cao nguyên.",
       "body": "Đắk Lắk nằm sâu trong đất liền, thuộc Tây Nguyên ở phía nam Việt Nam, trên vùng cao khoảng 500 mét so với mực nước biển. Đây là vùng đất đỏ bazan, cà phê, rừng và voi chứ không phải bãi biển, và đó là một phần lý do du lịch nơi đây mang hình hài khác hẳn du lịch miền biển.",
       "regionLabel": "Vùng",
       "regionValue": "Tây Nguyên",
@@ -234,8 +233,6 @@
       "capitalValue": "Buôn Ma Thuột, cao khoảng 500 m so với mực nước biển",
       "gettingLabel": "Đường đến",
       "gettingValue": "Cách Thành phố Hồ Chí Minh 350 km đường bộ, cách bờ biển Nha Trang 190 km, hoặc 55 phút bay",
-      "caption": "Bản đồ phác họa để định vị, không phải bản đồ đo đạc. Quần đảo Hoàng Sa và Trường Sa được thể hiện là một phần của Việt Nam.",
-      "interactiveCaption": "Đường sá, thị trấn và địa hình quanh Buôn Ma Thuột. Kéo để di chuyển, và thu nhỏ để xem toàn bộ Việt Nam.",
       "interactiveUnavailable": "Không tải được bản đồ. Bản đồ phác họa bên cạnh không cần kết nối mạng.",
       "alt": "Bản đồ Việt Nam với tỉnh Đắk Lắk được tô sáng ở Tây Nguyên, Buôn Ma Thuột được đánh dấu bên trong, cùng quần đảo Hoàng Sa và Trường Sa trên Biển Đông.",
       "dakLak": "Đắk Lắk",
