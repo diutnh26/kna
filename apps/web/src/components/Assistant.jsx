@@ -223,7 +223,7 @@ export default function Assistant() {
           </p>
         </div>
         <a
-          href="#impact"
+          href="#carbon"
           className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
         >
           {t('assistant.handoffCta')}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowRight, Volume2, MapPin, Languages } from 'lucide-react';
 import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
+import VietnamMap from './VietnamMap';
 import { api } from '../lib/api';
 import ApiErrorNotice from './ApiErrorNotice';
 
@@ -95,6 +96,48 @@ export default function Explore() {
               <div className="font-display text-4xl font-medium text-[#B87333]">VI · EN · Ê Đê</div>
               <p className="text-sm text-[#F5EDDD]/60">{t('explore.statLanguages')}</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHERE ─────────────────────────────────── */}
+      {/* Between the opening and the pillars because everything after this
+          point assumes you know where Đắk Lắk is, and most readers do not. */}
+      <section className="border-t border-[#F5EDDD]/10">
+        <div className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-center">
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
+              <span className="h-px w-12 bg-[#B87333]" />
+              <span>{t('explore.map.eyebrow')}</span>
+            </div>
+            <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight mb-6">
+              {t('explore.map.heading')}
+            </h2>
+            <p className="text-[#F5EDDD]/70 leading-relaxed mb-8">{t('explore.map.body')}</p>
+
+            <dl className="space-y-3 text-sm">
+              <div className="flex gap-4">
+                <dt className="text-[#F5EDDD]/45 w-28 shrink-0">{t('explore.map.regionLabel')}</dt>
+                <dd className="text-[#F5EDDD]/80">{t('explore.map.regionValue')}</dd>
+              </div>
+              <div className="flex gap-4">
+                <dt className="text-[#F5EDDD]/45 w-28 shrink-0">{t('explore.map.capitalLabel')}</dt>
+                <dd className="text-[#F5EDDD]/80">{t('explore.map.capitalValue')}</dd>
+              </div>
+              <div className="flex gap-4">
+                <dt className="text-[#F5EDDD]/45 w-28 shrink-0">{t('explore.map.gettingLabel')}</dt>
+                <dd className="text-[#F5EDDD]/80">{t('explore.map.gettingValue')}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="md:col-span-7 flex justify-center md:justify-end">
+            <figure className="w-full max-w-[520px]">
+              <VietnamMap />
+              <figcaption className="text-xs text-[#F5EDDD]/40 leading-relaxed mt-4">
+                {t('explore.map.caption')}
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>

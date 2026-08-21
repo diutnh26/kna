@@ -5,7 +5,7 @@
     "travel": "Du lịch",
     "marketplace": "Chợ",
     "assistant": "Trợ lý",
-    "impact": "Tác động",
+    "carbon": "Hành trình Carbon",
     "community": "Cộng đồng",
     "dashboard": "Bảng điều khiển",
     "review": "Duyệt",
@@ -98,7 +98,7 @@
           "label": "nội dung văn hóa được các già làng cộng đồng thẩm định"
         },
         {
-          "label": "hoa hồng nền tảng, được giữ ở mức để giá trị luôn thuộc về nơi nó cần thuộc về: cộng đồng"
+          "label": "số tiền khách trả đến thẳng hộ gia đình hoặc nghệ nhân"
         },
         {
           "label": "đối tác cộng đồng Ê Đê tham gia giai đoạn thí điểm"
@@ -216,6 +216,23 @@
     "statEntries": "mục đã công bố",
     "statBuon": "buôn đang đóng góp",
     "statLanguages": "ngôn ngữ được lưu giữ",
+    "map": {
+      "eyebrow": "Vị trí",
+      "heading": "Không phải miền biển. Là cao nguyên.",
+      "body": "Đắk Lắk nằm sâu trong đất liền, thuộc Tây Nguyên ở phía nam Việt Nam, trên vùng cao khoảng 500 mét so với mực nước biển. Đây là vùng đất đỏ bazan, cà phê, rừng và voi chứ không phải bãi biển, và đó là một phần lý do du lịch nơi đây mang hình hài khác hẳn du lịch miền biển.",
+      "regionLabel": "Vùng",
+      "regionValue": "Tây Nguyên",
+      "capitalLabel": "Thủ phủ",
+      "capitalValue": "Buôn Ma Thuột, cao khoảng 500 m so với mực nước biển",
+      "gettingLabel": "Đường đến",
+      "gettingValue": "Cách Thành phố Hồ Chí Minh 350 km đường bộ, cách bờ biển Nha Trang 190 km, hoặc 55 phút bay",
+      "caption": "Bản đồ phác họa để định vị, không phải bản đồ đo đạc. Quần đảo Hoàng Sa và Trường Sa được thể hiện là một phần của Việt Nam.",
+      "alt": "Bản đồ Việt Nam với tỉnh Đắk Lắk được tô sáng ở Tây Nguyên, Buôn Ma Thuột được đánh dấu bên trong, cùng quần đảo Hoàng Sa và Trường Sa trên Biển Đông.",
+      "dakLak": "Đắk Lắk",
+      "buonMaThuot": "Buôn Ma Thuột",
+      "hoangSa": "Hoàng Sa",
+      "truongSa": "Trường Sa"
+    },
     "pillarsEyebrow": "Nơi kho lưu trữ bắt đầu",
     "pillarsHeading": "Ba truyền thống mang phần lớn hiểu biết của người Ê Đê.",
     "pillars": [
@@ -516,7 +533,7 @@
       }
     ],
     "handoffHeading": "Sẵn sàng tính dấu chân carbon của bạn?",
-    "handoffBody": "Trợ lý có thể ước tính giúp bạn, hoặc bạn tự tính trong công cụ theo dõi tác động.",
+    "handoffBody": "Trợ lý có thể ước tính giúp bạn, hoặc bạn tự tính trong Hành trình Carbon.",
     "handoffCta": "Mở công cụ theo dõi",
     "guardrailsBody": "Một mô hình trả lời chắc nịch về phong tục Ê Đê mà không dẫn nguồn chỉ là cách lan truyền một hiểu biết sai nhanh hơn. Bốn nguyên tắc này là ràng buộc thiết kế, không phải tuỳ chọn.",
     "inputLabel": "Hỏi trợ lý"
@@ -714,8 +731,8 @@
     "offsetNotJoining": "Do nhóm bảo tồn duy trì quanh năm",
     "offsetPending": "Sẽ lên sổ cái khi đơn đặt này được xác nhận",
     "offsetsNone": "Chưa có khoản bù đắp nào.",
-    "offsetsNoneBody": "Khoản bù đắp được thêm vào một đơn đặt chỗ từ công cụ theo dõi tác động.",
-    "openTracker": "Mở công cụ theo dõi tác động",
+    "offsetsNoneBody": "Khoản bù đắp được thêm vào một đơn đặt chỗ từ Hành trình Carbon.",
+    "openTracker": "Mở Hành trình Carbon",
     "toOffsets": "cho các dự án bù đắp carbon",
     "offsetKg_one": "{{count}} kg CO₂e đã bù đắp",
     "offsetKg_other": "{{count}} kg CO₂e đã bù đắp",

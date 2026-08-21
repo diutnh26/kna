@@ -21,7 +21,7 @@ import { AuthProvider } from './context/AuthProvider';
  *   /#travel        → Experiences and booking
  *   /#marketplace   → Artisan marketplace
  *   /#assistant     → Travel assistant
- *   /#impact        → Carbon tracker
+ *   /#carbon        → Carbon Trail (footprint estimate and offsets)
  *   /#community     → Community space
  *   /#review        → Committee review queue (gated in the screen itself)
  *   /#dashboard     → Provider earnings + coordinator booking queue
@@ -37,6 +37,11 @@ const ROUTES = {
   '#travel': Travel,
   '#marketplace': Marketplace,
   '#assistant': Assistant,
+  '#carbon': CarbonTracker,
+  // The route was #impact until the screen was renamed Carbon Trail. Kept
+  // as an alias because an unknown hash falls through to Landing, so a
+  // stale link in a slide deck would quietly open the wrong page rather
+  // than fail loudly. Drop it once nothing points here.
   '#impact': CarbonTracker,
   '#community': Community,
   '#review': Review,

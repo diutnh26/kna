@@ -20,7 +20,7 @@ const CULTURE_MARKS = ['①', '②', '③'];
 
 const FOOTER_HREFS = [
   ['#explore', '#travel', '#marketplace', '#community'],
-  ['#community', '#community', '#impact', '#explore'],
+  ['#community', '#community', '#carbon', '#explore'],
 ];
 
 const hhmm = (iso) =>
@@ -57,10 +57,15 @@ export default function Landing() {
   }, []);
 
   // The first two figures are policy, not measurements: 100% is the review
-  // rule, 3–8% is the published commission band. Only the third is counted.
+  // rule, 90–95% is the producer's share of what a visitor pays — 90% to the
+  // household on a booking, 95% to the artisan on a marketplace order, both
+  // set in apps/api/src/lib/fees.ts. It deliberately excludes the 3% that
+  // goes to the Community Fund, which reaches the community too but is not
+  // paid to a person, so the claim understates rather than inflates.
+  // Only the third figure is counted.
   const statsFigures = [
     '100%',
-    '3 to 8%',
+    '90–95%',
     communityStats ? `${communityStats.verifiedProviders}` : '—',
   ];
 

@@ -52,7 +52,7 @@ const KIND_ICON = { booking: CalendarDays, order: ShoppingBag, contribution: Fil
  */
 export default function Account() {
   const { t } = useTranslation();
-  // Project names come from the impact tracker's own locale data rather
+  // Project names come from the Carbon Trail's own locale data rather
   // than a second list here, so the two screens cannot drift into calling
   // the same project different things.
   const offsetProjectName = (id) =>
@@ -390,7 +390,7 @@ export default function Account() {
                 </p>
                 {filter === 'offsets' && (
                   <a
-                    href="#impact"
+                    href="#carbon"
                     className="inline-block mt-4 text-sm text-[#E8A33D] underline underline-offset-4"
                   >
                     {t('account.openTracker')}
