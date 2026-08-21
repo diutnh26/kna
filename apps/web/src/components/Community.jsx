@@ -24,6 +24,21 @@ const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 const dmy = (iso) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
+// The structural half of the SDG section: which icon, and which screen
+// substantiates the claim. The prose half is in the locale files, indexed
+// to match. Split this way because neither the icon nor the destination is
+// a translation, and a Vietnamese reader should not be able to drift them.
+//
+// Every href leaves this page. Hash routing means the hash *is* the route,
+// so an in-page anchor would navigate away instead of scrolling; the public
+// ledger link therefore goes to Landing, which carries a live sample of it.
+const SDG_GOALS = [
+  { icon: '/images/sdg/sdg-09.png', href: '#explore' },
+  { icon: '/images/sdg/sdg-10.png', href: '#travel', core: true },
+  { icon: '/images/sdg/sdg-12.png', href: '#home' },
+  { icon: '/images/sdg/sdg-13.png', href: '#carbon' },
+];
+
 
 export default function Community() {
   const { t } = useTranslation();
@@ -36,6 +51,7 @@ export default function Community() {
   };
   const exampleThreads = t('community.threads', { returnObjects: true });
   const feedbackNotes = t('community.feedbackNotes', { returnObjects: true });
+  const sdgGoals = t('community.sdg.goals', { returnObjects: true });
   const [committee, setCommittee] = useState([]);
   const [quarters, setQuarters] = useState([]);
   const [decisions, setDecisions] = useState([]);
@@ -293,6 +309,80 @@ export default function Community() {
           </section>
         </>
       )}
+
+      {/* ── SDG ALIGNMENT ─────────────────────────── */}
+      {/* After the Committee, the Fund and the decisions rather than before
+          them: the goals are a claim, and the three sections above are what
+          makes the claim checkable. Outside the data-gated fragment, because
+          nothing here depends on the API being reachable. */}
+      <section className="border-t border-[#F5EDDD]/10">
+        <div className="px-8 lg:px-12 xl:px-16 py-24">
+          <div className="flex flex-wrap items-start justify-between gap-10 mb-16">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+                <span className="h-px w-12 bg-[#B87333]" />
+                <span>{t('community.sdg.eyebrow')}</span>
+              </div>
+              <h2 className="font-display text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight mb-6">
+                {t('community.sdg.heading')}
+              </h2>
+              <p className="text-[#F5EDDD]/70 leading-relaxed">{t('community.sdg.body')}</p>
+            </div>
+            <img
+              src="/images/sdg/sdg-wheel.png"
+              alt={t('community.sdg.wheelAlt')}
+              width="256"
+              height="256"
+              className="w-20 h-20 rounded shrink-0"
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-x-12 gap-y-12">
+            {sdgGoals.map((goal, i) => (
+              <article key={goal.number} className="flex gap-6">
+                {/* Reproduced at their published proportions and colours.
+                    The goal name is repeated as text beside each one because
+                    the official icons carry it in English only. */}
+                <img
+                  src={SDG_GOALS[i].icon}
+                  alt={goal.alt}
+                  width="256"
+                  height="256"
+                  loading="lazy"
+                  className="w-20 h-20 md:w-24 md:h-24 shrink-0"
+                />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <span className="text-xs uppercase tracking-[0.2em] text-[#B87333]">
+                      {goal.number}
+                    </span>
+                    {SDG_GOALS[i].core && (
+                      <span className="text-[10px] uppercase tracking-[0.18em] text-[#E8A33D] border border-[#E8A33D]/40 rounded-full px-2 py-0.5">
+                        {t('community.sdg.coreLabel')}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-display text-xl font-medium leading-tight mb-3">
+                    {goal.name}
+                  </h3>
+                  <p className="text-sm text-[#F5EDDD]/70 leading-relaxed mb-4">
+                    {goal.mechanism}
+                  </p>
+                  <a
+                    href={SDG_GOALS[i].href}
+                    className="inline-flex items-center gap-2 text-sm text-[#B87333] hover:text-[#E8A33D] transition-colors"
+                  >
+                    {goal.linkLabel}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <p className="text-xs text-[#F5EDDD]/35 mt-14">{t('community.sdg.note')}</p>
+        </div>
+      </section>
 
       {/* ── PROVIDER BOARD (not built) ────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-24">

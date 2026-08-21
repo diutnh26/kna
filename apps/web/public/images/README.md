@@ -18,6 +18,14 @@ A row with no `imageUrl` renders a labelled placeholder. That is a normal
 state, not a broken one — photographs arrive a few at a time, and every
 screen has to render a mix for a long while.
 
+**Not photographs** — `sdg/` holds the official Global Goals icons for the
+four goals the project claims, plus the wheel logo. They are third-party
+marks rather than anything the community gave, so the provenance rule below
+does not apply to them and neither does the JPEG guidance: they are flat
+colour, so they stay PNG, and they are reproduced unaltered because the
+Global Goals guidelines require it. Sized to 256px, which is about 2.5x the
+largest place they render.
+
 ## Before adding a photograph
 
 This platform's claim is that what it publishes was contributed by the
