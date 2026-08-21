@@ -10,7 +10,7 @@ import ApiErrorNotice from './ApiErrorNotice';
 // Leaflet and its stylesheet are about 45KB gzipped and are needed on this
 // screen only. Split out so the landing page, which most visitors see first
 // and some see on mobile data, does not carry them.
-const SatelliteMap = lazy(() => import('./SatelliteMap'));
+const InteractiveMap = lazy(() => import('./InteractiveMap'));
 
 export default function Explore() {
   const { t } = useTranslation();
@@ -138,9 +138,9 @@ export default function Explore() {
 
           <div className="md:col-span-8 grid sm:grid-cols-2 gap-8">
             {/* Two maps, two questions. The outline says where the province
-                is and needs nothing from the network; the satellite says
-                what it looks like and needs everything from it. Neither
-                answers for the other, which is why both are here. */}
+                is, as a shape, and needs nothing from the network; the live
+                map has the roads and towns and zooms out to the country, and
+                needs everything from it. Neither answers for the other. */}
             <figure>
               <VietnamMap />
               <figcaption className="text-xs text-[#F5EDDD]/40 leading-relaxed mt-4">
@@ -151,10 +151,10 @@ export default function Explore() {
               <Suspense
                 fallback={<div className="w-full aspect-square rounded-sm bg-[#241F1C]" />}
               >
-                <SatelliteMap />
+                <InteractiveMap />
               </Suspense>
               <figcaption className="text-xs text-[#F5EDDD]/40 leading-relaxed mt-4">
-                {t('explore.map.satelliteCaption')}
+                {t('explore.map.interactiveCaption')}
               </figcaption>
             </figure>
           </div>

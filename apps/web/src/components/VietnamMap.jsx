@@ -23,7 +23,7 @@ import {
  * server to reach on venue wifi, no dependency, and the palette is the
  * project's own rather than something overridden after the fact.
  *
- * Shares its coordinates with SatelliteMap through lib/geography, so the
+ * Shares its coordinates with InteractiveMap through lib/geography, so the
  * province drawn here and the province drawn over the imagery are the
  * same trace rather than two that can drift apart.
  */

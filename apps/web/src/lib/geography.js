@@ -2,7 +2,7 @@
  * Where things are, as [latitude, longitude] pairs.
  *
  * One file so the two maps cannot disagree. VietnamMap projects these into
- * an SVG and SatelliteMap hands them to Leaflet, which takes [lat, lng] in
+ * an SVG and InteractiveMap hands them to Leaflet, which takes [lat, lng] in
  * the same order, so the red shape on the schematic and the red shape over
  * the imagery are the same numbers rather than two traces that drifted.
  *
