@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import request from "supertest";
 import { finalPdaFromLedgerId } from "@kna/chain-client";
 import { prisma } from "../src/lib/prisma";
+import * as gatewayModule from "../src/chain/gateway";
 import { app, giveSeat, makeListing, makeUser, resetDb, PASSWORD } from "./helpers";
 
 const REAL_SIG = `${"4".repeat(88)}`;
@@ -24,16 +25,17 @@ const mockGateway = {
   verifyFinalize: vi.fn(),
 };
 
-vi.mock("../src/chain/gateway", () => ({
-  getChainGateway: () => mockGateway,
-}));
-
 describe("chain verifier routes", () => {
   let coordinatorToken: string;
   let committeeToken: string;
   let ledgerId: string;
+  let getChainGatewaySpy: ReturnType<typeof vi.spyOn>;
 
   beforeAll(async () => {
+    getChainGatewaySpy = vi
+      .spyOn(gatewayModule, "getChainGateway")
+      .mockImplementation(() => mockGateway as unknown as gatewayModule.ChainGateway);
+
     process.env.SOLANA_ENABLED = "true";
     process.env.SOLANA_CLUSTER = "devnet";
     process.env.KNA_TRUST_PROGRAM_ID = "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f";
@@ -93,6 +95,8 @@ describe("chain verifier routes", () => {
   });
 
   afterAll(async () => {
+    getChainGatewaySpy.mockRestore();
+    gatewayModule.resetChainGatewayForTests();
     await resetDb();
     await prisma.$disconnect();
   });

@@ -133,7 +133,7 @@ describe("offsets", () => {
 
     // Still one offset and one ledger row for this booking.
     expect(await prisma.offsetContribution.count({ where: { bookingId: bookingA } })).toBe(1);
-    const rows = await prisma.ledgerEntry.findMany({ where: { offsetId: { not: null } } });
+    const rows = await prisma.ledgerEntry.findMany({ where: { offset: { bookingId: bookingA } } });
     expect(rows).toHaveLength(1);
     expect(rows[0].totalVnd).toBe(570_000);
   });
@@ -183,8 +183,9 @@ describe("offsets", () => {
       .expect(200);
 
     expect(await prisma.offsetContribution.count({ where: { bookingId: bookingB } })).toBe(0);
-    const rows = await prisma.ledgerEntry.findMany({ where: { offsetId: { not: null } } });
-    expect(rows).toHaveLength(1); // only bookingA's remains
+    expect(await prisma.ledgerEntry.count({ where: { offset: { bookingId: bookingB } } })).toBe(0);
+    const rows = await prisma.ledgerEntry.findMany({ where: { offset: { bookingId: bookingA } } });
+    expect(rows).toHaveLength(1); // bookingA's offset ledger row
   });
 
   it("shows the offset on its booking in the account timeline", async () => {
