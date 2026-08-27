@@ -22,7 +22,9 @@ patch_registry() {
 }
 
 pin_lock() {
-  cargo generate-lockfile 2>/dev/null || true
+  # Keep the committed Cargo.lock — generate-lockfile pulls edition2024 crates
+  # (e.g. zeroize_derive 1.5.0) that rustc 1.84 cannot parse.
+  cargo update -p zeroize_derive --precise 1.4.3 2>/dev/null || true
   cargo update -p hashbrown --precise 0.14.5 2>/dev/null || true
   cargo update -p indexmap --precise 2.7.1 2>/dev/null || true
   cargo update -p jobserver --precise 0.1.32 2>/dev/null || true
@@ -57,8 +59,9 @@ for i in $(seq 1 10); do
     SUCCESS=1
     break
   fi
-  if echo "$OUT" | grep -Eq 'edition2024|failed to parse manifest|requires rustc 1\.8[5-9]'; then
+  if echo "$OUT" | grep -Eq 'edition2024|zeroize_derive|failed to parse manifest|requires rustc 1\.8[5-9]'; then
     patch_registry
+    cargo update -p zeroize_derive --precise 1.4.3 2>/dev/null || true
     pin_lock
     continue
   fi
