@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import request from "supertest";
 import { finalPdaFromLedgerId } from "@kna/chain-client";
 import { prisma } from "../src/lib/prisma";
-import { app, giveSeat, makeUser, resetDb, PASSWORD } from "./helpers";
+import { app, giveSeat, makeListing, makeUser, resetDb, PASSWORD } from "./helpers";
 
 const REAL_SIG = `${"4".repeat(88)}`;
 const FAKE_SUBMIT = `mock_${"A".repeat(80)}`;
@@ -57,20 +57,7 @@ describe("chain verifier routes", () => {
         verified: true,
       },
     });
-    const listing = await prisma.listing.create({
-      data: {
-        providerId: host.id,
-        category: "STAY",
-        title: "Test stay",
-        blurb: "b",
-        priceVnd: 1_000_000,
-        unit: "per night",
-        duration: "1 night",
-        groupSize: "2",
-        carbonRating: "Low",
-        published: true,
-      },
-    });
+    const listing = await makeListing(host.id, 1_000_000);
     const booking = await prisma.booking.create({
       data: {
         guestId: guest.id,
@@ -111,8 +98,8 @@ describe("chain verifier routes", () => {
   });
 
   beforeEach(() => {
-    mockGateway.verifyPendingSubmission.mockReset();
-    mockGateway.verifyFinalize.mockReset();
+    mockGateway.verifyPendingSubmission.mockClear();
+    mockGateway.verifyFinalize.mockClear();
   });
 
   it("GET /chain/status returns devnet config", async () => {

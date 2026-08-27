@@ -66,8 +66,27 @@ export async function giveSeat(userId: string, role = "Chair · elder", buon = "
   });
 }
 
+/** Midnight UTC today — matches bookings route slot dates. */
+function todayUtc() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+/** Open capacity for integration tests that book via POST /bookings. */
+export async function seedAvailabilitySlots(listingId: string, days = 400, capacity = 24) {
+  const start = todayUtc();
+  await prisma.availabilitySlot.createMany({
+    data: Array.from({ length: days }, (_, i) => ({
+      listingId,
+      date: new Date(start.getTime() + i * 86_400_000),
+      capacity,
+      booked: 0,
+    })),
+  });
+}
+
 export async function makeListing(providerId: string, priceVnd = 500_000) {
-  return prisma.listing.create({
+  const listing = await prisma.listing.create({
     data: {
       providerId,
       category: "STAY",
@@ -81,6 +100,8 @@ export async function makeListing(providerId: string, priceVnd = 500_000) {
       published: true,
     },
   });
+  await seedAvailabilitySlots(listing.id);
+  return listing;
 }
 
 /** Signs in via the real endpoint so tokens are minted the real way. */
