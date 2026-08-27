@@ -76,7 +76,7 @@ jobs:
           docker run --rm \
             -v "${{ github.workspace }}/app:/workspace/app" \
             -v "${{ github.workspace }}/scripts/ci-anchor-build.sh:/ci-anchor-build.sh:ro" \
-            kna-anchor bash /ci-anchor-build.sh
+            kna-anchor bash -lc "sed -i 's/\r$//' /ci-anchor-build.sh && bash /ci-anchor-build.sh"
 
   secret-scan:
     runs-on: ubuntu-latest

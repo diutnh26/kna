@@ -97,13 +97,22 @@ describe("offsets", () => {
   });
 
   it("keeps it off the public ledger until the booking is confirmed", async () => {
+    // Use a throwaway booking so bookingA stays editable for the rest of the suite.
+    const confirmBooking = (
+      await request(app)
+        .post("/bookings")
+        .set("Authorization", `Bearer ${guestToken}`)
+        .send({ listingId, guests: 2, nights: 1, checkIn: soon(50) })
+    ).body.id;
+    await attach({ bookingId: confirmBooking, projectId: "corridor", kgCo2e: 200 });
+
     const before = await request(app).get("/community/ledger");
     expect(before.body.filter((r: { offsetId: string | null }) => r.offsetId)).toHaveLength(0);
 
     const pending = await request(app)
       .get("/bookings/pending")
       .set("Authorization", `Bearer ${coordinatorToken}`);
-    const target = pending.body.find((b: { id: string }) => b.id === bookingA);
+    const target = pending.body.find((b: { id: string }) => b.id === confirmBooking);
 
     await request(app)
       .post(`/bookings/${target.id}/decision`)
@@ -114,7 +123,7 @@ describe("offsets", () => {
     const after = await request(app).get("/community/ledger");
     const offsetRows = after.body.filter((r: { offsetId: string | null }) => r.offsetId);
     expect(offsetRows).toHaveLength(1);
-    expect(offsetRows[0].totalVnd).toBe(660_000);
+    expect(offsetRows[0].totalVnd).toBe(270_000);
   });
 
   it("changes the guest's mind rather than charging them twice", async () => {
@@ -406,6 +415,7 @@ describe("offsets", () => {
         mode: "DONATE",
         origin: "europe",
       });
+      expect(res.status).toBe(201);
       const row = await prisma.ledgerEntry.findFirstOrThrow({ where: { offsetId: res.body.id } });
       expect(row.toLabel).toMatch(/towards running the session/i);
 
@@ -416,6 +426,7 @@ describe("offsets", () => {
         mode: "DONATE",
         origin: "hcmc",
       });
+      expect(domestic.status).toBe(201);
       const plain = await prisma.ledgerEntry.findFirstOrThrow({
         where: { offsetId: domestic.body.id },
       });
