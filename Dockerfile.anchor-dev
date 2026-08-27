@@ -1,7 +1,7 @@
 # Reproducible Anchor build environment (WSL/CI)
 FROM rust:1.84-bookworm
 
-ARG SOLANA_VERSION=2.1.5
+ARG SOLANA_VERSION=2.2.20
 ARG ANCHOR_VERSION=0.30.1
 
 RUN apt-get update && apt-get install -y pkg-config libssl-dev curl git && rm -rf /var/lib/apt/lists/*

@@ -20,42 +20,11 @@ jobs:
     defaults:
       run:
         working-directory: app
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-      - name: Install
-        run: |
-          rm -f package-lock.json
-          npm install
-      - name: Program ID consistency
-        run: npm run check:program-id --workspace @kna/chain-client
-      - name: Build chain-client
-        run: npm run build:chain-client
-      - name: Prisma generate + migrate
-        run: |
-          npm run db:generate
-          npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
-        env:
-          DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/kna_test
-          DIRECT_DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/kna_test
-      - name: API tests
-        run: npm run test:api
-        env:
-          DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/kna_test
-          DIRECT_DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/kna_test
-          TEST_DATABASE_URL: postgresql://postgres:ci-only@localhost:5432/kna_test
-          JWT_SECRET: ci-only-not-a-real-secret-at-least-32-chars
-      - name: Web tests
-        run: npm run test:web
-      - name: Web production build
-        run: npm run build:web
-        env:
-          VITE_API_URL: https://kna-api.onrender.com
-      - name: Chain client tests
-        run: npm run test:chain-client
-
+    env:
+      JWT_SECRET: "ci-only-not-a-real-secret-at-least-32-chars"
+      DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+      DIRECT_DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+      TEST_DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
     services:
       postgres:
         image: postgres:17
@@ -69,6 +38,33 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Install
+        run: rm -f package-lock.json && npm install
+      - name: Program ID consistency
+        run: npm run check:program-id --workspace @kna/chain-client
+      - name: Build chain-client
+        run: npm run build:chain-client
+      - name: Prisma generate + migrate
+        run: |
+          npm run db:generate
+          npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+      - name: API tests
+        run: npm run test:api
+      - name: Web tests
+        run: npm run test:web
+      - name: Web production build
+        run: npm run build:web
+        env:
+          VITE_API_URL: https://kna-api.onrender.com
+      - name: Chain client tests
+        run: npm run test:chain-client
 
   anchor-build:
     runs-on: ubuntu-latest
@@ -77,15 +73,10 @@ jobs:
       - name: Anchor SBF build + Rust unit tests
         run: |
           docker build -f Dockerfile.anchor-dev -t kna-anchor .
-          docker run --rm -v "${{ github.workspace }}/app:/workspace/app" kna-anchor bash -lc "
-            set -e
-            cd /workspace/app
-            # IDL host codegen is brittle on modern rustc; SBF binary + committed IDL are the contract.
-            anchor build --no-idl
-            cargo test -p kna-trust-layer --lib
-            test -f packages/chain-client/idl/kna_trust_layer.json
-            test -f target/deploy/kna_trust_layer.so
-          "
+          docker run --rm \
+            -v "${{ github.workspace }}/app:/workspace/app" \
+            -v "${{ github.workspace }}/scripts/ci-anchor-build.sh:/ci-anchor-build.sh:ro" \
+            kna-anchor bash /ci-anchor-build.sh
 
   secret-scan:
     runs-on: ubuntu-latest
