@@ -16,4 +16,4 @@ RUN cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
   && avm use ${ANCHOR_VERSION}
 
 WORKDIR /workspace/app
-CMD ["bash", "-lc", "anchor build --no-idl && cargo test -p kna-trust-layer"]
+CMD ["bash", "-lc", "anchor build --no-idl && cargo test -p kna-trust-layer --lib"]
