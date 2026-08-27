@@ -22,16 +22,14 @@ patch_registry() {
 }
 
 pin_lock() {
-  # Keep the committed Cargo.lock — generate-lockfile pulls edition2024 crates
-  # (e.g. zeroize_derive 1.5.0) that rustc 1.84 cannot parse.
+  # Keep the committed Cargo.lock — fresh resolution pulls edition2024 crates
+  # (zeroize_derive 1.5, toml_datetime 1.1) that rustc 1.84 cannot parse.
+  cargo update -p proc-macro-crate@3 --precise 3.3.0 2>/dev/null || true
   cargo update -p zeroize_derive --precise 1.4.3 2>/dev/null || true
-  cargo update -p hashbrown --precise 0.14.5 2>/dev/null || true
-  cargo update -p indexmap --precise 2.7.1 2>/dev/null || true
-  cargo update -p jobserver --precise 0.1.32 2>/dev/null || true
-  cargo update -p unicode-segmentation --precise 1.12.0 2>/dev/null || true
-  cargo update -p ahash --precise 0.8.11 2>/dev/null || true
   cargo update -p toml_edit --precise 0.22.22 2>/dev/null || true
   cargo update -p toml_datetime --precise 0.6.8 2>/dev/null || true
+  cargo update -p hashbrown --precise 0.14.5 2>/dev/null || true
+  cargo update -p indexmap --precise 2.7.1 2>/dev/null || true
   cargo update -p winnow --precise 0.6.20 2>/dev/null || true
   cargo update -p bytemuck --precise 1.21.0 2>/dev/null || true
   cargo update -p zerocopy --precise 0.8.24 2>/dev/null || true
@@ -59,9 +57,12 @@ for i in $(seq 1 10); do
     SUCCESS=1
     break
   fi
-  if echo "$OUT" | grep -Eq 'edition2024|zeroize_derive|failed to parse manifest|requires rustc 1\.8[5-9]'; then
+  if echo "$OUT" | grep -Eq 'edition2024|zeroize_derive|toml_datetime|toml_edit|failed to parse manifest|requires rustc 1\.8[5-9]'; then
     patch_registry
+    cargo update -p proc-macro-crate@3 --precise 3.3.0 2>/dev/null || true
     cargo update -p zeroize_derive --precise 1.4.3 2>/dev/null || true
+    cargo update -p toml_edit --precise 0.22.22 2>/dev/null || true
+    cargo update -p toml_datetime --precise 0.6.8 2>/dev/null || true
     pin_lock
     continue
   fi
