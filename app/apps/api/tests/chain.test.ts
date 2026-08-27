@@ -2,40 +2,47 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import request from "supertest";
 import { finalPdaFromLedgerId } from "@kna/chain-client";
 import { prisma } from "../src/lib/prisma";
-import * as gatewayModule from "../src/chain/gateway";
 import { app, giveSeat, makeListing, makeUser, resetDb, PASSWORD } from "./helpers";
 
 const REAL_SIG = `${"4".repeat(88)}`;
 const FAKE_SUBMIT = `mock_${"A".repeat(80)}`;
 const FAKE_FINALIZE = `devnet_${"B".repeat(80)}`;
 
-const mockGateway = {
-  isEnabled: () => true,
-  status: () => ({
-    enabled: true,
-    cluster: "devnet",
-    programId: "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
-    committeeVault: "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42",
-    rpcUrl: "https://api.devnet.solana.com",
-  }),
-  connection: () => ({
-    getAccountInfo: async () => ({ executable: true }),
-  }),
+// vi.hoisted runs before any imports, so these vi.fn() refs are available
+// inside the vi.mock factory below (which is also hoisted).
+const { verifyPendingSubmission, verifyFinalize } = vi.hoisted(() => ({
   verifyPendingSubmission: vi.fn(),
   verifyFinalize: vi.fn(),
-};
+}));
+
+// Module-level mock: Vitest hoists this before any import of the gateway
+// module, so the route's local binding receives the mock from the start.
+vi.mock("../src/chain/gateway", () => ({
+  getChainGateway: () => ({
+    isEnabled: () => true,
+    status: () => ({
+      enabled: true,
+      cluster: "devnet",
+      programId: "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
+      committeeVault: "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42",
+      rpcUrl: "https://api.devnet.solana.com",
+    }),
+    connection: () => ({
+      getAccountInfo: async () => ({ executable: true }),
+    }),
+    verifyPendingSubmission,
+    verifyFinalize,
+  }),
+  resetChainGatewayForTests: vi.fn(),
+  ChainGateway: class {},
+}));
 
 describe("chain verifier routes", () => {
   let coordinatorToken: string;
   let committeeToken: string;
   let ledgerId: string;
-  let getChainGatewaySpy: ReturnType<typeof vi.spyOn>;
 
   beforeAll(async () => {
-    getChainGatewaySpy = vi
-      .spyOn(gatewayModule, "getChainGateway")
-      .mockImplementation(() => mockGateway as unknown as gatewayModule.ChainGateway);
-
     process.env.SOLANA_ENABLED = "true";
     process.env.SOLANA_CLUSTER = "devnet";
     process.env.KNA_TRUST_PROGRAM_ID = "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f";
@@ -95,15 +102,13 @@ describe("chain verifier routes", () => {
   });
 
   afterAll(async () => {
-    getChainGatewaySpy.mockRestore();
-    gatewayModule.resetChainGatewayForTests();
     await resetDb();
     await prisma.$disconnect();
   });
 
   beforeEach(() => {
-    mockGateway.verifyPendingSubmission.mockClear();
-    mockGateway.verifyFinalize.mockClear();
+    verifyPendingSubmission.mockClear();
+    verifyFinalize.mockClear();
   });
 
   it("GET /chain/status returns devnet config", async () => {
@@ -120,7 +125,7 @@ describe("chain verifier routes", () => {
       .send({ pendingTxSig: FAKE_SUBMIT });
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/Fake\/mock signatures/i);
-    expect(mockGateway.verifyPendingSubmission).not.toHaveBeenCalled();
+    expect(verifyPendingSubmission).not.toHaveBeenCalled();
   });
 
   it("POST finalize rejects fake signatures before verifier work", async () => {
@@ -130,12 +135,12 @@ describe("chain verifier routes", () => {
       .send({ finalizeTxSig: FAKE_FINALIZE });
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/Fake\/mock signatures/i);
-    expect(mockGateway.verifyFinalize).not.toHaveBeenCalled();
+    expect(verifyFinalize).not.toHaveBeenCalled();
   });
 
   it("POST finalize updates DB only after verified final PDA matches", async () => {
     const expectedPda = finalPdaFromLedgerId(ledgerId).toBase58();
-    mockGateway.verifyFinalize.mockResolvedValue({
+    verifyFinalize.mockResolvedValue({
       finalPda: expectedPda,
       finalizeTxSig: REAL_SIG,
       slot: 123,
@@ -157,7 +162,7 @@ describe("chain verifier routes", () => {
       where: { ledgerEntryId: ledgerId },
       data: { state: "AWAITING_COMMITTEE", finalPda: null, finalizeTxSig: null },
     });
-    mockGateway.verifyFinalize.mockResolvedValue({
+    verifyFinalize.mockResolvedValue({
       finalPda: "WrongFinalPda11111111111111111111111111111111",
       finalizeTxSig: REAL_SIG,
       slot: 123,
