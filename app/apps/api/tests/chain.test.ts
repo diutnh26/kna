@@ -1,8 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import request from "supertest";
+import type { Express } from "express";
 import { finalPdaFromLedgerId } from "@kna/chain-client";
 import { prisma } from "../src/lib/prisma";
-import { app, giveSeat, makeListing, makeUser, resetDb, PASSWORD } from "./helpers";
+import { giveSeat, makeListing, makeUser, resetAppForTests, resetDb, PASSWORD } from "./helpers";
 
 const REAL_SIG = `${"4".repeat(88)}`;
 const FAKE_SUBMIT = `mock_${"A".repeat(80)}`;
@@ -38,11 +39,17 @@ vi.mock("../src/chain/gateway", () => ({
 }));
 
 describe("chain verifier routes", () => {
+  let app: Express;
   let coordinatorToken: string;
   let committeeToken: string;
   let ledgerId: string;
 
   beforeAll(async () => {
+    vi.resetModules();
+    resetAppForTests();
+    const { createApp } = await import("../src/app");
+    app = createApp();
+
     process.env.SOLANA_ENABLED = "true";
     process.env.SOLANA_CLUSTER = "devnet";
     process.env.KNA_TRUST_PROGRAM_ID = "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f";

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export PATH="/root/.local/share/solana/install/active_release/bin:/root/.cargo/bin:${PATH}"
+export PATH="/root/.avm/bin:/root/.local/share/solana/install/active_release/bin:/usr/local/cargo/bin:${PATH}"
 export RUSTUP_TOOLCHAIN=1.84.0
 export CARGO_BUILD_JOBS=1
 
