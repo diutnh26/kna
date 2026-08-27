@@ -3,7 +3,7 @@ import request from "supertest";
 import type { Express } from "express";
 import { finalPdaFromLedgerId } from "@kna/chain-client";
 import { prisma } from "../src/lib/prisma";
-import { giveSeat, makeListing, makeUser, resetAppForTests, resetDb, PASSWORD } from "./helpers";
+import { giveSeat, makeListing, makeUser, resetDb, PASSWORD } from "./helpers";
 
 const REAL_SIG = `${"4".repeat(88)}`;
 const FAKE_SUBMIT = `mock_${"A".repeat(80)}`;
@@ -46,7 +46,6 @@ describe("chain verifier routes", () => {
 
   beforeAll(async () => {
     vi.resetModules();
-    resetAppForTests();
     const { createApp } = await import("../src/app");
     app = createApp();
 

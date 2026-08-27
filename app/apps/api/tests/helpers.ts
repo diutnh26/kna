@@ -1,28 +1,8 @@
 import bcrypt from "bcryptjs";
-import type { Express } from "express";
 import { prisma } from "../src/lib/prisma";
 import { createApp } from "../src/app";
 
-let _app: ReturnType<typeof createApp> | undefined;
-
-/** Lazily created so vi.mock in chain.test.ts can register before first use. */
-export function getApp() {
-  if (!_app) _app = createApp();
-  return _app;
-}
-
-export function resetAppForTests() {
-  _app = undefined;
-}
-
-export const app = new Proxy({} as Express, {
-  get(_target, prop) {
-    const real = getApp();
-    const value = Reflect.get(real, prop, real);
-    return typeof value === "function" ? value.bind(real) : value;
-  },
-});
-
+export const app = createApp();
 export const PASSWORD = "test-password";
 
 /** Wipes every table, in foreign-key-safe order. */

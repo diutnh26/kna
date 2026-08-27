@@ -21,6 +21,10 @@ import { recomputeAndVerifySettled } from "../chain/outbox";
 
 export const chainRouter = Router();
 
+function jsonAttestation<T extends { slot: bigint | null }>(row: T) {
+  return { ...row, slot: row.slot?.toString() ?? null };
+}
+
 function verifiedExplorer(cluster: "devnet" | "localnet", sig: string | null | undefined) {
   if (!sig || isLikelyFakeSignature(sig)) return null;
   return explorerTxUrl(cluster, sig);
@@ -202,7 +206,7 @@ chainRouter.post(
         where: { idempotencyKey: `ledger:${req.params.id}:settled` },
         data: { status: "AWAITING_COMMITTEE", lastError: null },
       });
-      res.json(updated);
+      res.json(jsonAttestation(updated));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Submit verification failed";
       await prisma.ledgerAttestation.updateMany({
@@ -263,7 +267,7 @@ chainRouter.post(
         where: { idempotencyKey: `ledger:${req.params.id}:settled` },
         data: { status: "FINALIZED", lastError: null },
       });
-      res.json(updated);
+      res.json(jsonAttestation(updated));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Finalize verification failed";
       return res.status(400).json({ error: message });
