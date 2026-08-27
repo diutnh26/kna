@@ -1,0 +1,19 @@
+# Reproducible Anchor build environment (WSL/CI)
+FROM rust:1.84-bookworm
+
+ARG SOLANA_VERSION=2.1.5
+ARG ANCHOR_VERSION=0.30.1
+
+RUN apt-get update && apt-get install -y pkg-config libssl-dev curl git && rm -rf /var/lib/apt/lists/*
+
+RUN sh -c "$(curl -sSfL https://release.anza.xyz/v${SOLANA_VERSION}/install)" \
+  && echo 'export PATH="/root/.local/share/solana/install/active_release/bin:$PATH"' >> /root/.bashrc
+
+ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
+
+RUN cargo install --git https://github.com/coral-xyz/anchor avm --locked --force \
+  && avm install ${ANCHOR_VERSION} \
+  && avm use ${ANCHOR_VERSION}
+
+WORKDIR /workspace/app
+CMD ["bash", "-lc", "anchor build --no-idl && cargo test -p kna-trust-layer"]

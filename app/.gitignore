@@ -1,0 +1,46 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# apps/api
+apps/api/dist
+# Environment files — anything but the committed examples. Neon's `env pull`
+# writes a real connection string (with a password) into one of these.
+.env
+.env.*
+!.env.example
+!**/.env.example
+apps/api/.env
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+apps/api/generated
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+apps/api/prisma/test.db
+
+# Local Claude Code settings — per-machine, not project config
+.claude/settings.local.json
+
+# An empty stray directory at the repo root. Anchored with a leading slash:
+# a bare `src/` matches a directory of that name at ANY depth, which
+# silently excluded apps/web/src files from two commits.
+/src/

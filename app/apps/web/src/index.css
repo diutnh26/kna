@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────
+   KNĂ design system
+   Shared by every screen. Do not scope these to
+   a single component — Explore, Travel, and the
+   rest all depend on them.
+   ───────────────────────────────────────────── */
+
+@layer base {
+  body {
+    margin: 0;
+    background-color: #1a1614;
+    color: #f5eddd;
+  }
+}
+
+@layer components {
+  /* Typography roles */
+  .font-display {
+    font-family: 'Fraunces', 'Times New Roman', serif;
+    font-optical-sizing: auto;
+  }
+
+  /* Fraunces carries an optical-size axis (9–144), and .font-display leaves
+     it on `auto`. The browser therefore draws a different master at 16px
+     than at 31px — chunkier, wider, far less stroke contrast. That is
+     normally exactly what you want, and it is why optical sizing exists,
+     but it made the culture list titles read as a different typeface from
+     the heading above them.
+
+     Pinning opsz to the display end of the axis matches the heading. wght
+     is pinned alongside because font-variation-settings takes over from the
+     font-weight mapping rather than merging with it — set one axis and the
+     other silently reverts to its default. */
+  .font-display-optical {
+    font-variation-settings: 'opsz' 40, 'wght' 500;
+  }
+
+  .font-body {
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  }
+
+  /* Page titles.
+
+     Every h1 on the platform used `text-4xl md:text-6xl`. These are those
+     two sizes at 85%. Named, like the price scale, so the next tune is one
+     edit rather than ten files — and so the two h1 sizes cannot drift
+     apart from each other. */
+  .page-title {
+    font-size: 1.9125rem;
+  } /* was text-4xl, 2.25rem */
+  @media (min-width: 768px) {
+    .page-title {
+      font-size: 3.1875rem;
+    } /* was md:text-6xl, 3.75rem */
+  }
+
+  /* An inner page's title: 20% below the landing hero, which stays the
+     largest thing on the platform. */
+  .page-title-sm {
+    font-size: 1.53rem;
+  }
+  @media (min-width: 768px) {
+    .page-title-sm {
+      font-size: 2.55rem;
+    }
+  }
+
+  /* Section headings inside a page: 20% below the text-4xl/md:text-5xl
+     they used to be. */
+  .section-title {
+    font-size: 1.8rem;
+  } /* was text-4xl, 2.25rem */
+  @media (min-width: 768px) {
+    .section-title {
+      font-size: 2.4rem;
+    } /* was md:text-5xl, 3rem */
+  }
+
+  /* Price figures.
+
+     Back at the Tailwind sizes they started from. They spent a spell at
+     80% of these; on the booking cards that read as underweight next to
+     the listing title, so the reduction is reverted.
+
+     Kept as named classes rather than reverting to text-2xl and friends
+     at each call site: eleven figures across six screens, and the next
+     time this is re-tuned it should be one edit here rather than another
+     hunt. The names also say what the number is, which `text-4xl` does
+     not.
+
+     Pair with font-display as before — these set size only. */
+
+  /* The one price that scales with the viewport (the offset total). The
+     breakpoint lives here rather than as `md:price-xl` in the markup:
+     Tailwind does not emit a responsive variant for a components-layer
+     class that never appears bare, so that silently rendered at the small
+     size on every screen. */
+  .price-hero {
+    font-size: 2.25rem;
+  } /* text-4xl */
+  @media (min-width: 768px) {
+    .price-hero {
+      font-size: 3rem;
+    } /* md:text-5xl */
+  }
+
+  .price-lg {
+    font-size: 2.25rem;
+  } /* text-4xl */
+  .price-md {
+    font-size: 1.875rem;
+  } /* text-3xl */
+  .price-sm {
+    font-size: 1.5rem;
+  } /* text-2xl */
+  .price-xs {
+    font-size: 0.875rem;
+  } /* text-sm */
+
+  /* Signature woven band, used as a section divider.
+     Diagonals in Kteh red and Gong copper. */
+  .textile {
+    background-image:
+      linear-gradient(
+        135deg,
+        transparent 45%,
+        rgba(200, 48, 46, 0.35) 45%,
+        rgba(200, 48, 46, 0.35) 55%,
+        transparent 55%
+      ),
+      linear-gradient(
+        45deg,
+        transparent 45%,
+        rgba(184, 115, 51, 0.35) 45%,
+        rgba(184, 115, 51, 0.35) 55%,
+        transparent 55%
+      );
+    background-size: 28px 28px;
+  }
+}
+
+/* Accessibility floor */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

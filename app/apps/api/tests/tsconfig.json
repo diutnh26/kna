@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Tests import from ../src, so rootDir has to span both.
+    "rootDir": "..",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": [".", "../src"]
+}

@@ -1,0 +1,180 @@
+{
+  "address": "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
+  "metadata": {
+    "name": "kna_trust_layer",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "KNĂ trust layer — immutable ledger attestations (devnet). Discriminators from sha256(global:<name>)[0..8]; instruction builders in instructions.ts are runtime source of truth."
+  },
+  "instructions": [
+    {
+      "name": "initialize_config",
+      "discriminator": [208, 127, 21, 1, 194, 190, 196, 70],
+      "accounts": [
+        { "name": "authority", "writable": true, "signer": true },
+        { "name": "config", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": [{ "name": "committee_vault", "type": "pubkey" }]
+    },
+    {
+      "name": "set_paused",
+      "discriminator": [91, 60, 125, 192, 176, 225, 166, 218],
+      "accounts": [
+        { "name": "authority", "signer": true },
+        { "name": "config", "writable": true }
+      ],
+      "args": [{ "name": "paused", "type": "bool" }]
+    },
+    {
+      "name": "set_committee_vault",
+      "discriminator": [242, 69, 40, 140, 211, 16, 41, 7],
+      "accounts": [
+        { "name": "authority", "signer": true },
+        { "name": "config", "writable": true }
+      ],
+      "args": [{ "name": "committee_vault", "type": "pubkey" }]
+    },
+    {
+      "name": "grant_role",
+      "discriminator": [218, 234, 128, 15, 82, 33, 236, 253],
+      "accounts": [
+        { "name": "authority", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "wallet" },
+        { "name": "role_grant", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": [{ "name": "role", "type": "u8" }]
+    },
+    {
+      "name": "revoke_role",
+      "discriminator": [179, 232, 2, 180, 48, 227, 82, 7],
+      "accounts": [
+        { "name": "authority", "signer": true },
+        { "name": "config" },
+        { "name": "role_grant", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "submit_attestation",
+      "discriminator": [238, 220, 255, 105, 183, 211, 40, 83],
+      "accounts": [
+        { "name": "coordinator", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "role_grant" },
+        { "name": "pending_attestation", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": [
+        { "name": "ledger_id_hash", "type": { "array": ["u8", 32] } },
+        { "name": "content_hash", "type": { "array": ["u8", 32] } },
+        { "name": "provider_hash", "type": { "array": ["u8", 32] } },
+        { "name": "total_amount", "type": "u64" },
+        { "name": "platform_fee", "type": "u64" },
+        { "name": "community_fee", "type": "u64" },
+        { "name": "provider_amount", "type": "u64" },
+        { "name": "recorded_at", "type": "i64" }
+      ]
+    },
+    {
+      "name": "finalize_attestation",
+      "discriminator": [210, 209, 107, 178, 177, 42, 68, 98],
+      "accounts": [
+        { "name": "authority", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "committee_role", "optional": true },
+        { "name": "pending_attestation", "writable": true },
+        { "name": "final_attestation", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_pending",
+      "discriminator": [74, 87, 109, 242, 64, 192, 151, 71],
+      "accounts": [
+        { "name": "coordinator", "signer": true },
+        { "name": "config" },
+        { "name": "role_grant" },
+        { "name": "pending_attestation", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "acknowledge_receipt",
+      "discriminator": [13, 225, 228, 81, 23, 138, 201, 177],
+      "accounts": [
+        { "name": "guest", "writable": true, "signer": true },
+        { "name": "final_attestation" },
+        { "name": "guest_receipt", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": [{ "name": "ledger_id_hash", "type": { "array": ["u8", 32] } }]
+    },
+    {
+      "name": "publish_archive_proof",
+      "discriminator": [102, 66, 82, 189, 227, 187, 41, 63],
+      "accounts": [
+        { "name": "authority", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "committee_role", "optional": true },
+        { "name": "archive_proof", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": [
+        { "name": "archive_id_hash", "type": { "array": ["u8", 32] } },
+        { "name": "content_hash", "type": { "array": ["u8", 32] } }
+      ]
+    },
+    {
+      "name": "revoke_archive_proof",
+      "discriminator": [251, 133, 113, 53, 217, 30, 174, 23],
+      "accounts": [
+        { "name": "authority", "signer": true },
+        { "name": "config" },
+        { "name": "committee_role", "optional": true },
+        { "name": "archive_proof", "writable": true }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    { "name": "Config", "discriminator": [155, 12, 170, 224, 30, 250, 204, 130] },
+    { "name": "RoleGrant", "discriminator": [126, 213, 123, 128, 172, 2, 104, 242] },
+    { "name": "PendingAttestation", "discriminator": [94, 7, 185, 147, 23, 85, 211, 159] },
+    { "name": "FinalAttestation", "discriminator": [204, 58, 26, 243, 72, 12, 252, 142] },
+    { "name": "GuestReceipt", "discriminator": [166, 38, 66, 81, 251, 214, 110, 213] },
+    { "name": "ArchiveProof", "discriminator": [178, 137, 163, 94, 105, 76, 224, 241] }
+  ],
+  "events": [
+    { "name": "ConfigInitialized" },
+    { "name": "PauseUpdated" },
+    { "name": "CommitteeVaultUpdated" },
+    { "name": "RoleGranted" },
+    { "name": "RoleRevoked" },
+    { "name": "AttestationSubmitted" },
+    { "name": "AttestationFinalized" },
+    { "name": "AttestationCancelled" },
+    { "name": "ReceiptAcknowledged" },
+    { "name": "ArchiveProofPublished" },
+    { "name": "ArchiveProofRevoked" }
+  ],
+  "errors": [
+    { "code": 6000, "name": "Unauthorized", "msg": "Unauthorized" },
+    { "code": 6001, "name": "Paused", "msg": "Program is paused" },
+    { "code": 6002, "name": "InvalidRole", "msg": "Invalid role" },
+    { "code": 6003, "name": "RoleRevoked", "msg": "Role has been revoked" },
+    { "code": 6004, "name": "SplitMismatch", "msg": "Fee split does not match invariant" },
+    { "code": 6005, "name": "InvalidState", "msg": "Invalid state transition" },
+    { "code": 6006, "name": "AlreadyExists", "msg": "Attestation already exists" },
+    { "code": 6007, "name": "Overflow", "msg": "Arithmetic overflow" }
+  ],
+  "types": [],
+  "deployed": {
+    "cluster": "devnet",
+    "deploySignature": "2zu5VkBki6q9hmYUyiVDepS5KqjrZUsRRJydtDKd1s5AX5mSCu5RUuZngR9tYYRTUaM9CmkCkmS4GkTLJ1z8vCMa",
+    "explorer": "https://explorer.solana.com/address/2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f?cluster=devnet"
+  }
+}

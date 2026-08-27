@@ -1,0 +1,481 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ArrowRight,
+  MapPin,
+  Users,
+  Clock,
+  Leaf,
+  BadgeCheck,
+  Search,
+  SlidersHorizontal,
+} from 'lucide-react';
+import Navbar from './Navbar';
+import ImageSlot from './ImageSlot';
+import { api, ApiError } from '../lib/api';
+import { useAuth } from '../context/useAuth';
+import { useDebounced } from '../lib/useDebounced';
+import ApiErrorNotice from './ApiErrorNotice';
+
+const CATEGORIES = ['All', 'Stay', 'Guided walk', 'Craft session', 'Ceremony'];
+const BUON = ['All buôn', 'Buôn Akô Dhông', 'Buôn Đôn', 'Buôn Trấp', 'Buôn Kli A'];
+
+// UI label <-> API enum. The Listing.category column is an enum
+// (STAY / GUIDED_WALK / ...); everything the guest sees is the label.
+const CATEGORY_TO_API = {
+  Stay: 'STAY',
+  'Guided walk': 'GUIDED_WALK',
+  'Craft session': 'CRAFT_SESSION',
+  Ceremony: 'CEREMONY',
+};
+// API enum -> the i18n key whose value the guest reads. The filter values
+// themselves stay in English: they are state, and they are what gets sent
+// to the API. Translating those would break the query.
+const CATEGORY_KEYS = {
+  STAY: 'travel.categoryStay',
+  GUIDED_WALK: 'travel.categoryGuidedWalk',
+  CRAFT_SESSION: 'travel.categoryCraftSession',
+  CEREMONY: 'travel.categoryCeremony',
+};
+const FILTER_KEYS = {
+  All: 'travel.filterAll',
+  Stay: 'travel.categoryStay',
+  'Guided walk': 'travel.categoryGuidedWalk',
+  'Craft session': 'travel.categoryCraftSession',
+  Ceremony: 'travel.categoryCeremony',
+  'All buôn': 'travel.filterAllBuon',
+};
+
+const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
+
+export default function Travel() {
+  const { t } = useTranslation();
+  const split = t('travel.split', { returnObjects: true });
+  const [category, setCategory] = useState('All');
+  const [buon, setBuon] = useState('All buôn');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounced(search);
+  const [listings, setListings] = useState([]);
+  const [loadState, setLoadState] = useState('loading'); // 'loading' | 'ready' | 'error'
+
+  // bookings[listingId] = { qty, checkIn, status: 'idle'|'submitting'|'done'|'error', error }
+  const [bookings, setBookings] = useState({});
+  const { isAuthenticated, token, openAuthModal } = useAuth();
+
+  // Floor for the date picker. Local date, not toISOString() — that converts
+  // to UTC first, so anywhere east of Greenwich (Vietnam is UTC+7) would
+  // offer yesterday as a valid arrival for the first seven hours of the day.
+  const today = useMemo(() => {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }, []);
+
+  // Deliberately doesn't flip back to 'loading' on every filter change —
+  // the previous results stay on screen (stale-while-revalidate) until the
+  // new ones are in, so picking a filter doesn't flash an empty state.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .listings({
+        category: category === 'All' ? undefined : CATEGORY_TO_API[category],
+        buon: buon === 'All buôn' ? undefined : buon,
+        q: debouncedSearch || undefined,
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setListings(data);
+          setLoadState('ready');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoadState('error');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [category, buon, debouncedSearch]);
+
+  function qtyFor(listing) {
+    return bookings[listing.id]?.qty ?? 1;
+  }
+
+  function setQty(listing, qty) {
+    setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty: Math.max(1, qty) } }));
+  }
+
+  function checkInFor(listing) {
+    return bookings[listing.id]?.checkIn ?? '';
+  }
+
+  function setCheckIn(listing, checkIn) {
+    setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], checkIn } }));
+  }
+
+  async function handleBook(listing) {
+    if (!isAuthenticated) {
+      openAuthModal();
+      return;
+    }
+    const qty = qtyFor(listing);
+    const checkIn = checkInFor(listing);
+    const perNight = listing.unit === 'per night';
+
+    // The household has to hold a specific day. Asking here beats a
+    // coordinator chasing the guest by phone afterwards.
+    if (!checkIn) {
+      setBookings((b) => ({
+        ...b,
+        [listing.id]: { ...b[listing.id], qty, status: 'error', error: t('travel.needDate') },
+      }));
+      return;
+    }
+
+    setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'submitting', error: null } }));
+    try {
+      const created = await api.createBooking(
+        {
+          listingId: listing.id,
+          guests: perNight ? 1 : qty,
+          nights: perNight ? qty : 1,
+          checkIn,
+        },
+        token
+      );
+      setBookings((b) => ({
+        ...b,
+        [listing.id]: {
+          ...b[listing.id],
+          qty,
+          status: 'done',
+          error: null,
+          payment: created.payment,
+        },
+      }));
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : t('travel.bookingError');
+      setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'error', error: message } }));
+    }
+  }
+
+  const shown = listings;
+
+  return (
+    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+      <Navbar active="travel" theme="dark" />
+
+      {/* ── OPENING ───────────────────────────────── */}
+      <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">
+        <div className="md:col-span-7">
+          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
+            <span className="h-px w-12 bg-[#B87333]" />
+            <span>{t('travel.eyebrow')}</span>
+          </div>
+          <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
+            {t('travel.title')}
+          </h1>
+          <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
+            {t('travel.intro')}
+          </p>
+        </div>
+
+        <div className="md:col-span-5">
+          <div className="border border-[#F5EDDD]/15 p-6 space-y-5">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[#B87333]">
+              <BadgeCheck className="w-4 h-4" />
+              {t('travel.verifiedTitle')}
+            </div>
+            <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
+              {t('travel.verifiedBody')}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SEARCH & FILTER ───────────────────────── */}
+      <section className="px-8 lg:px-12 xl:px-16 pb-12">
+        <div className="border-y border-[#F5EDDD]/10 py-6 flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-3 flex-1 min-w-[240px]">
+            <Search className="w-4 h-4 text-[#F5EDDD]/40 shrink-0" />
+            <label htmlFor="q" className="sr-only">{t('travel.searchLabel')}</label>
+            <input
+              id="q"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('travel.searchPlaceholder')}
+              className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-[#F5EDDD]/35 border-b border-transparent focus:border-[#F5EDDD]/30 transition"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={`px-4 py-2 text-xs uppercase tracking-wider border transition ${
+                  category === c
+                    ? 'bg-[#F5EDDD] text-[#1A1614] border-[#F5EDDD]'
+                    : 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
+                }`}
+              >
+                {FILTER_KEYS[c] ? t(FILTER_KEYS[c]) : c}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <SlidersHorizontal className="w-4 h-4 text-[#F5EDDD]/40" />
+            <label htmlFor="buon" className="sr-only">{t('travel.filterByBuon')}</label>
+            <select
+              id="buon"
+              value={buon}
+              onChange={(e) => setBuon(e.target.value)}
+              className="bg-[#1A1614] border border-[#F5EDDD]/25 text-xs uppercase tracking-wider px-3 py-2 focus:outline-none focus:border-[#F5EDDD]/60"
+            >
+              {BUON.map((b) => (
+                // Buôn names are proper nouns; only "All buôn" is translated.
+                <option key={b} value={b}>{FILTER_KEYS[b] ? t(FILTER_KEYS[b]) : b}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* ── LISTINGS ──────────────────────────────── */}
+      <section className="px-8 lg:px-12 xl:px-16 pb-24">
+        {loadState === 'loading' && (
+          <div className="text-sm text-[#F5EDDD]/50 py-20 text-center">{t('travel.loading')}</div>
+        )}
+
+        {loadState === 'error' && (
+          <ApiErrorNotice />
+        )}
+
+        {loadState === 'ready' && (
+          <>
+            <div className="text-sm text-[#F5EDDD]/50 mb-8">
+              {t('travel.available', { count: shown.length })}
+            </div>
+
+            {shown.length === 0 ? (
+              <div className="border border-dashed border-[#F5EDDD]/20 py-20 text-center">
+                <p className="font-display text-2xl mb-3">{t('travel.emptyTitle')}</p>
+                <p className="text-sm text-[#F5EDDD]/60 mb-6">
+                  {t('travel.emptyBody')}
+                </p>
+                <button
+                  onClick={() => { setCategory('All'); setBuon('All buôn'); setSearch(''); }}
+                  className="text-sm text-[#E8A33D] underline underline-offset-4"
+                >
+                  {t('travel.clearFilters')}
+                </button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {shown.map((l) => {
+                  const booking = bookings[l.id];
+                  const perNight = l.unit === 'per night';
+                  return (
+                    <article
+                      key={l.id}
+                      className="group border border-[#F5EDDD]/10 hover:border-[#F5EDDD]/30 transition flex flex-col"
+                    >
+                      <ImageSlot
+                        src={l.imageUrl}
+                        ratio="aspect-[4/3]"
+                        label={t('travel.photoLabel', { title: l.title, buon: l.provider.buon })}
+                        className="border-0 border-b border-dashed"
+                      />
+
+                      <div className="p-6 flex flex-col flex-1">
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
+                            {CATEGORY_KEYS[l.category] ? t(CATEGORY_KEYS[l.category]) : l.category}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#E8A33D]">
+                            <BadgeCheck className="w-3 h-3" />
+                            {t('travel.verified')}
+                          </span>
+                        </div>
+
+                        <h3 className="font-display text-xl font-medium leading-tight mb-3">
+                          {l.title}
+                        </h3>
+
+                        <p className="text-sm text-[#F5EDDD]/60 leading-relaxed mb-5 flex-1">
+                          {l.blurb}
+                        </p>
+
+                        <dl className="text-xs text-[#F5EDDD]/50 space-y-2 mb-5">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-3 h-3 shrink-0" />
+                            <dd>{t('travel.hostedBy', { name: l.provider.displayName, buon: l.provider.buon })}</dd>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-3 h-3 shrink-0" />
+                            <dd>{l.duration}</dd>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-3 h-3 shrink-0" />
+                            <dd>{l.groupSize}</dd>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Leaf className="w-3 h-3 shrink-0 text-[#B87333]" />
+                            <dd>{t('travel.carbonEstimate', { rating: l.carbonRating })}</dd>
+                          </div>
+                        </dl>
+
+                        {l.customs && (
+                          <div className="border-t border-[#F5EDDD]/10 pt-4 mb-4">
+                            <p className="text-[11px] text-[#F5EDDD]/45 leading-relaxed">
+                              <span className="text-[#B87333]">House rule · </span>
+                              {l.customs}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="mt-auto space-y-4">
+                          {/* The price gets its own row. It used to share one
+                              with the booking controls, which was fine while
+                              those were a number box and a button — adding the
+                              date picker pushed the row past the card width, and
+                              the flex parent took the space out of the price,
+                              wrapping it mid-figure. */}
+                          <div className="flex items-baseline justify-between gap-3">
+                            <div className="font-display price-sm text-[#E8A33D] leading-none whitespace-nowrap">
+                              {vnd(l.priceVnd)}
+                            </div>
+                            <div className="text-[11px] text-[#F5EDDD]/40 whitespace-nowrap">{l.unit}</div>
+                          </div>
+
+                          <div>
+                            {booking?.status === 'done' ? (
+                              <span className="text-xs text-[#E8A33D] uppercase tracking-wider">
+                                {t('travel.requested')}
+                              </span>
+                            ) : (
+                              <div className="space-y-3">
+                                <label className="sr-only" htmlFor={`checkin-${l.id}`}>
+                                  {t('travel.arrivalDate')}
+                                </label>
+                                <input
+                                  id={`checkin-${l.id}`}
+                                  type="date"
+                                  min={today}
+                                  value={checkInFor(l)}
+                                  onChange={(e) => setCheckIn(l, e.target.value)}
+                                  className="w-full bg-transparent border border-[#F5EDDD]/25 text-sm py-2 px-3 focus:outline-none focus:border-[#F5EDDD]/60 [color-scheme:dark]"
+                                />
+                                <div className="flex items-stretch gap-3">
+                                  <label className="sr-only" htmlFor={`qty-${l.id}`}>
+                                    {perNight ? t('travel.nights') : t('travel.guests')}
+                                  </label>
+                                  <input
+                                    id={`qty-${l.id}`}
+                                    type="number"
+                                    min={1}
+                                    max={perNight ? 30 : 20}
+                                    value={qtyFor(l)}
+                                    onChange={(e) => setQty(l, Number(e.target.value))}
+                                    className="w-16 shrink-0 bg-transparent border border-[#F5EDDD]/25 text-sm text-center py-2 focus:outline-none focus:border-[#F5EDDD]/60"
+                                  />
+                                  <button
+                                    onClick={() => handleBook(l)}
+                                    disabled={booking?.status === 'submitting'}
+                                    className="group/btn flex-1 inline-flex items-center justify-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-5 py-3 text-sm transition"
+                                  >
+                                    {booking?.status === 'submitting' ? t('travel.sending') : t('travel.book')}
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {booking?.status === 'done' && booking.payment && (
+                            <p className="text-xs text-[#F5EDDD]/50 leading-relaxed">
+                              {booking.payment.instructions}
+                            </p>
+                          )}
+                          {booking?.status === 'error' && (
+                            <p className="text-xs text-[#E8A33D]">{booking.error}</p>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* ── WHERE THE MONEY GOES ──────────────────── */}
+      <section className="bg-[#F5EDDD] text-[#1A1614]">
+        <div className="px-8 lg:px-12 xl:px-16 py-24 grid md:grid-cols-12 gap-12 items-center">
+          <div className="md:col-span-5">
+            <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+              {t('travel.splitEyebrow')}
+            </div>
+            <h2 className="font-display page-title-sm font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
+              {t('travel.splitHeading')}
+            </h2>
+            <p className="text-lg text-[#1A1614]/70 leading-relaxed">
+              {t('travel.splitBody')}
+            </p>
+          </div>
+
+          <div className="md:col-span-7">
+            {/* Proportional bar */}
+            <div className="flex h-3 mb-10 overflow-hidden">
+              <div className="bg-[#6B1A1A]" style={{ width: '90%' }} />
+              <div className="bg-[#B87333]" style={{ width: '3%' }} />
+              <div className="bg-[#C8302E]" style={{ width: '7%' }} />
+            </div>
+
+            <div className="space-y-8">
+              {split.map((s) => (
+                <div key={s.who} className="flex items-baseline gap-6 border-b border-[#1A1614]/10 pb-6">
+                  <div className="font-display text-4xl font-medium text-[#6B1A1A] w-24 shrink-0">
+                    {s.pct}
+                  </div>
+                  <div>
+                    <div className="font-display text-lg font-medium mb-1">{s.who}</div>
+                    <p className="text-sm text-[#1A1614]/60 leading-relaxed">{s.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-xs text-[#1A1614]/45 mt-6 leading-relaxed">
+              {t('travel.splitNote')}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="h-3 textile" />
+
+      {/* ── HANDOFF ───────────────────────────────── */}
+      <section className="px-8 lg:px-12 xl:px-16 py-20 flex flex-wrap items-center justify-between gap-8">
+        <div className="max-w-xl">
+          <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
+            {t('travel.handoffHeading')}
+          </h2>
+          <p className="text-[#F5EDDD]/70">
+            {t('travel.handoffBody')}
+          </p>
+        </div>
+        <a
+          href="#marketplace"
+          className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
+        >
+          {t('travel.handoffCta')}
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+        </a>
+      </section>
+    </div>
+  );
+}

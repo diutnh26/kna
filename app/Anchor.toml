@@ -1,0 +1,28 @@
+[toolchain]
+channel = "1.84.0"
+
+[features]
+seeds = false
+skip-lint = false
+
+[programs.devnet]
+kna_trust_layer = "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f"
+
+[programs.localnet]
+kna_trust_layer = "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "../secrets/deploy-keypair.json"
+
+[scripts]
+test = "cargo test-sbf -p kna-trust-layer"
+
+[test]
+startup_wait = 10000
+
+[test.validator]
+url = "https://api.devnet.solana.com"

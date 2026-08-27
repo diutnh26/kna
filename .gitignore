@@ -1,0 +1,49 @@
+# Dependencies & builds
+node_modules/
+dist/
+coverage/
+target/
+.anchor/
+*.tsbuildinfo
+
+# Secrets — never commit keypairs or env files with real credentials
+secrets/*.json
+secrets/*-keypair.json
+secrets/.env*
+!.gitkeep
+.env
+.env.local
+.env.*.local
+.env.solana
+
+# Solana / Anchor artifacts
+app/programs/**/target/
+app/test-ledger/
+app/.anchor/
+**/id.json
+**/*-keypair.json
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs & temp
+*.log
+npm-debug.log*
+.tmp/
+
+# Docker volumes (local only)
+kna_pgdata/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
+# Keep example env files
+!.env.solana.example
+!.env.example

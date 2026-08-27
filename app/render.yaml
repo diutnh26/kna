@@ -1,0 +1,134 @@
+# Render Blueprint — staging for KNĂ.
+#
+# Deploys the frontend and the API. It does NOT define a database, on
+# purpose: Render's own free Postgres expires 30 days after creation, which
+# is shorter than a pilot. Provision Neon instead (free permanently, no
+# card) and set DATABASE_URL in the Render dashboard.
+#
+# Full walkthrough: docs/deployment.md
+
+services:
+  # ── API ────────────────────────────────────────────────────────────
+  - type: web
+    name: kna-api
+    runtime: node
+    plan: free
+    region: singapore # closest Render region to Đắk Lắk
+    rootDir: .
+    # Migrations run here rather than in preDeployCommand, which Render does
+    # not support on the free plan. `migrate deploy` only applies pending
+    # migrations and is a no-op once they are in, so re-running it on every
+    # deploy is safe. It resolves DIRECT_DATABASE_URL via the schema's
+    # directUrl, because Neon's pooled endpoint cannot run migrations.
+    #
+    # The trade-off versus pre-deploy: if the build fails *after* this step,
+    # the database is briefly ahead of the running code. Harmless for
+    # additive migrations; for a destructive one, apply it by hand first and
+    # deploy afterwards.
+    #
+    # ── and ──
+    #
+    # `rm -f package-lock.json` before installing, deliberately.
+    #
+    # The committed lockfile is generated on Windows and records only
+    # @rolldown/binding-win32-x64-msvc — npm writes just the optional
+    # dependency it actually installed (npm/cli#4828). On a Linux builder
+    # npm then honours the lockfile, skips the linux binding, and `vite
+    # build` fails with "Cannot find native binding".
+    #
+    # node_modules must go too, not just the lockfile. Render runs its own
+    # `npm install` before this command, so node_modules already exists;
+    # npm would then report "up to date" and install nothing, leaving the
+    # missing binding missing. This is exactly what rolldown's own error
+    # message tells you to do.
+    #
+    # This costs install reproducibility. The proper fix is to maintain the
+    # lockfile from Linux (matching this host) or move to a package manager
+    # that records every platform. CI does the same thing for the same
+    # reason — see .github/workflows/ci.yml.
+    # --include=dev is required, not optional. NODE_ENV=production (set
+    # below, correctly, for the running service) also makes npm omit
+    # devDependencies — and typescript plus every @types/* package lives
+    # there, so `tsc` fails with a hundred "Cannot find name 'process'"
+    # errors. The runtime image does not need them; the build does.
+    buildCommand: rm -rf node_modules package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+    startCommand: node apps/api/dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        # Pinned, not a range. `engines: ">=22"` let Render resolve to Node
+        # 26, which broke the build — local and CI both run 24. A runtime
+        # nobody develops or tests against is not a runtime to deploy on.
+        value: "24"
+      - key: PAYMENT_PROVIDER
+        value: manual
+      # Set in the dashboard — never committed.
+      #   DATABASE_URL:        Neon POOLED string (…-pooler.…), ?sslmode=require
+      #   DIRECT_DATABASE_URL: Neon DIRECT string (no -pooler), for migrations —
+      #                        the pooler is PgBouncer and cannot run them
+      #   JWT_SECRET:          32+ chars. `openssl rand -base64 48` in Git
+      #                        Bash; PowerShell has no openssl — see
+      #                        docs/deployment.md for the .NET equivalent.
+      # The API refuses to start if either is missing or weak
+      # (apps/api/src/lib/config.ts).
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      # Full origin, written out rather than wired with fromService.
+      #
+      # `fromService … property: host` looked tidier but resolved to the bare
+      # service name, so the API answered
+      # `access-control-allow-origin: https://kna-web` and every browser call
+      # from the real origin was blocked. Renaming a service now means editing
+      # two lines here; that beats a header that is wrong in a way only a
+      # browser console shows.
+      - key: CORS_ORIGIN
+        value: https://kna-web.onrender.com
+
+  # ── Frontend ───────────────────────────────────────────────────────
+  # No `plan` or `region` here: static sites take neither. They are always
+  # free and served from Render's CDN rather than a single region.
+  - type: web
+    name: kna-web
+    runtime: static
+    rootDir: .
+    # Same lockfile workaround as the API above — this is the build that
+    # actually needs the linux rolldown binding.
+    # --include=dev for the same reason as the API: vite, tailwindcss,
+    # postcss and autoprefixer are devDependencies and the build needs them.
+    buildCommand: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
+    staticPublishPath: apps/web/dist
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Baked in at build time by Vite, so a change here needs a rebuild,
+      # not just a restart.
+      #
+      # Written out for the same reason as CORS_ORIGIN above. Here the
+      # fromService wiring did not merely resolve to a bare name — it did not
+      # reach the build at all, and the first deployed bundle shipped calling
+      # http://localhost:4000. apps/web/vite.config.js now fails the build
+      # rather than let that happen again.
+      - key: VITE_API_URL
+        value: https://kna-api.onrender.com
+    routes:
+      # The app uses a hash router today, so every path serves index.html.
+      # Harmless now, and correct already if it moves to real URLs.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

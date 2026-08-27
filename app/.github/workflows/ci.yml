@@ -1,0 +1,198 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  web:
+    name: web — lint & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the version developers run. Node 20 is end-of-life, and
+          # the jsdom/undici combination the frontend tests pull in needs
+          # newer internals than it provides — CI failing on a runtime
+          # nobody develops against is wasted signal.
+          node-version: 24
+          cache: npm
+      # package-lock.json is generated on Windows, and npm has a
+      # long-standing bug (npm/cli#4828) where a lockfile only records the
+      # optionalDependency binding for the platform it was generated on —
+      # neither `npm ci` nor a plain `npm install` will then fetch e.g.
+      # @rolldown/binding-linux-x64-gnu on this Ubuntu runner, because npm
+      # still trusts the lockfile's (wrong-platform) optional-deps entries.
+      # Dropping the lockfile before installing forces npm to re-resolve
+      # optional deps for the runner it's actually on. Loses install caching
+      # and cross-platform reproducibility; worth revisiting once the
+      # lockfile is maintained from Linux (e.g. matching prod hosting).
+      - run: rm -f package-lock.json && npm install
+      - run: npm run lint:web
+      - run: npm run test:web
+      # `vite build` implies production mode, so the VITE_API_URL guard in
+      # apps/web/vite.config.js applies here as much as on Render. This job
+      # only asks "does it compile", but there is no build that legitimately
+      # has no API to point at — so give it the real one rather than
+      # weakening the guard.
+      - run: npm run build:web
+        env:
+          VITE_API_URL: https://kna-api.onrender.com
+
+  api:
+    name: api — typecheck, migrate & test
+    runs-on: ubuntu-latest
+
+    # Real Postgres, matching development and Neon. The suite ran on
+    # SQLite once; that hid provider-specific failures, and running it on
+    # the engine actually deployed is what caught them.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          # Literal, not ${{ env.* }}: the env context is not available
+          # inside a services block. CI-only throwaway credential.
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: kna_test
+        ports:
+          - 5432:5432
+        # Postgres accepts TCP before it is ready; pg_isready is the check.
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      JWT_SECRET: "ci-only"
+      DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+      DIRECT_DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+      TEST_DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the version developers run. Node 20 is end-of-life, and
+          # the jsdom/undici combination the frontend tests pull in needs
+          # newer internals than it provides — CI failing on a runtime
+          # nobody develops against is wasted signal.
+          node-version: 24
+          cache: npm
+      - run: rm -f package-lock.json && npm install
+      - run: npm run db:generate
+
+      - run: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+      - run: npm run build:api
+      - run: npm run test:api
+
+      # The demonstration dataset is the only code path no test covers, and
+      # it broke the moment `checkIn` became a required column — silently,
+      # because nothing loads it. It runs last, against the database the
+      # suite has just emptied, so a schema change that the dataset has not
+      # kept up with fails here rather than in front of a BKI panel.
+      - name: Demonstration dataset still loads against the current schema
+        run: npm run db:demo
+
+  # Mirrors the Render builds, one job per service.
+  #
+  # Two jobs, not one, because Render gives each service its own checkout
+  # and its own node_modules. A single job sharing a workspace is not a
+  # mirror: the web build's `rm -rf node_modules` deleted the Prisma client
+  # the API build had generated, failing for a reason the real deploy could
+  # never hit.
+  #
+  # These exist because every deploy failure so far has been an environment
+  # difference rather than a defect: Node 20 vs 24, a Windows-generated
+  # lockfile missing the linux rolldown binding, NODE_ENV=production
+  # pruning the build's own toolchain, and Render's automatic pre-install
+  # leaving a populated node_modules that made a later install a no-op.
+  #
+  # Keep the run: lines in step with buildCommand in render.yaml.
+
+  production-build-api:
+    name: production build — api (mirrors Render)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: kna_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      # The setting that caused one of the failures this job exists to catch.
+      NODE_ENV: production
+      JWT_SECRET: "ci-only-not-a-real-secret-at-least-32-chars"
+      DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+      DIRECT_DATABASE_URL: "postgresql://postgres:ci-only@localhost:5432/kna_test"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Render installs before running buildCommand. Reproducing that
+      # matters: it leaves a populated node_modules, which is what made
+      # deleting only the lockfile a no-op.
+      - name: Pre-install, as Render does automatically
+        run: npm install
+
+      - name: Build exactly as render.yaml does
+        run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run db:generate && node apps/api/scripts/check-db-env.mjs && npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && npm run build:api
+
+      - name: Start the compiled server and wait for /health
+        env:
+          PORT: "4000"
+          CORS_ORIGIN: "https://example.invalid"
+        run: |
+          node apps/api/dist/index.js &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4000/health > /dev/null; then
+              echo "healthy after ${i}s"; curl -s http://localhost:4000/health; exit 0
+            fi
+            sleep 1
+          done
+          echo "API did not become healthy in 30s"; exit 1
+
+  production-build-web:
+    name: production build — web (mirrors Render)
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      # Must match the kna-web service in render.yaml. The build now refuses
+      # to run without it — the first deploy shipped a bundle calling
+      # http://localhost:4000 because nothing checked.
+      VITE_API_URL: https://kna-api.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Pre-install, as Render does automatically
+        run: npm install
+
+      - name: Build exactly as render.yaml does
+        run: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
+
+      - name: Confirm the bundle is real and points at the deployed API
+        run: |
+          test -f apps/web/dist/index.html || { echo "no index.html in apps/web/dist"; exit 1; }
+          if grep -rq "localhost:4000" apps/web/dist/assets; then
+            echo "the bundle calls localhost:4000 — VITE_API_URL did not reach the build"; exit 1
+          fi
+          grep -rq "kna-api.onrender.com" apps/web/dist/assets \
+            || { echo "the bundle does not reference the API host at all"; exit 1; }
+          echo "built, and pointed at the deployed API:"; ls apps/web/dist

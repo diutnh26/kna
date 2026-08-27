@@ -1,0 +1,17 @@
+{
+  "cluster": "devnet",
+  "programId": "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
+  "multisigPda": "3MAhssMeXQrgzLgxVbvFDBiQbsNKNPBAaATLkyHdhodv",
+  "vaultPda": "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42",
+  "threshold": 2,
+  "members": [
+    "4cH4Dma4jxNvnXe4BoTe7e3WrRGUJFRKfDQZxQ18mbUB",
+    "FBhVxwuKMordWy6AmcEnsX5e9VaVJCyxvq45N1AhFs2Z",
+    "4thHnga7dMRTenNBpha1UJ4gZrHELaqc73fK8G3HnDGJ"
+  ],
+  "createKeyPubkey": "47iPPnVsojKUdhXgNvEDzomz5sN26UBjbs3cS5LHC6fH",
+  "fundingTxs": [],
+  "createSig": "5BuhGC2F8nkCSokbSRDCHYvsRFAWLmcp9ivhZLbWkW6AdjKM5DXXa84ZMpPucGhDk4h6bm4Ezo9nmcLU7o3AFUHN",
+  "setVaultSig": "ZQ64hAPKK93xdDCR7m58rmPJbDqutyQz5JevSvfEDwMqcv6vzt25uvW6yjfz3uwmumGjv8EmCepSLat3YurJRaq",
+  "at": "2026-08-24T07:37:20.774Z"
+}

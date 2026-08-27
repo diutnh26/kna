@@ -1,0 +1,185 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import request from "supertest";
+import { finalPdaFromLedgerId } from "@kna/chain-client";
+import { prisma } from "../src/lib/prisma";
+import { app, giveSeat, makeUser, resetDb, PASSWORD } from "./helpers";
+
+const REAL_SIG = `${"4".repeat(88)}`;
+const FAKE_SUBMIT = `mock_${"A".repeat(80)}`;
+const FAKE_FINALIZE = `devnet_${"B".repeat(80)}`;
+
+const mockGateway = {
+  isEnabled: () => true,
+  status: () => ({
+    enabled: true,
+    cluster: "devnet",
+    programId: "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
+    committeeVault: "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42",
+    rpcUrl: "https://api.devnet.solana.com",
+  }),
+  connection: () => ({
+    getAccountInfo: async () => ({ executable: true }),
+  }),
+  verifyPendingSubmission: vi.fn(),
+  verifyFinalize: vi.fn(),
+};
+
+vi.mock("../src/chain/gateway", () => ({
+  getChainGateway: () => mockGateway,
+}));
+
+describe("chain verifier routes", () => {
+  let coordinatorToken: string;
+  let committeeToken: string;
+  let ledgerId: string;
+
+  beforeAll(async () => {
+    process.env.SOLANA_ENABLED = "true";
+    process.env.SOLANA_CLUSTER = "devnet";
+    process.env.KNA_TRUST_PROGRAM_ID = "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f";
+    process.env.KNA_COMMITTEE_VAULT = "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42";
+    await resetDb();
+    const guest = await makeUser("guest@chain.kna", "GUEST");
+    await makeUser("coord@chain.kna", "COORDINATOR");
+    const hostUser = await makeUser("host@chain.kna", "PROVIDER");
+    await giveSeat(hostUser.id);
+    const login = async (email: string) =>
+      (await request(app).post("/auth/login").send({ email, password: PASSWORD })).body.token;
+    coordinatorToken = await login("coord@chain.kna");
+    committeeToken = await login("host@chain.kna");
+
+    const host = await prisma.provider.create({
+      data: {
+        userId: hostUser.id,
+        type: "HOMESTAY",
+        displayName: "Ho Gia Demo",
+        buon: "Buôn Test",
+        verified: true,
+      },
+    });
+    const listing = await prisma.listing.create({
+      data: {
+        providerId: host.id,
+        category: "STAY",
+        title: "Test stay",
+        blurb: "b",
+        priceVnd: 1_000_000,
+        unit: "per night",
+        duration: "1 night",
+        groupSize: "2",
+        carbonRating: "Low",
+        published: true,
+      },
+    });
+    const booking = await prisma.booking.create({
+      data: {
+        guestId: guest.id,
+        listingId: listing.id,
+        guests: 2,
+        nights: 1,
+        checkIn: new Date("2026-10-01"),
+        status: "CONFIRMED",
+        totalVnd: 1_000_000,
+        platformFeeVnd: 70_000,
+        communityFundVnd: 30_000,
+        providerPayoutVnd: 900_000,
+      },
+    });
+    const entry = await prisma.ledgerEntry.create({
+      data: {
+        bookingId: booking.id,
+        fromLabel: "Guest",
+        toLabel: "Ho Gia Demo",
+        totalVnd: 1_000_000,
+        platformFeeVnd: 70_000,
+        communityFundVnd: 30_000,
+      },
+    });
+    ledgerId = entry.id;
+    await prisma.ledgerAttestation.create({
+      data: {
+        ledgerEntryId: ledgerId,
+        payloadHash: "payload-hash-1",
+        state: "AWAITING_COMMITTEE",
+      },
+    });
+  });
+
+  afterAll(async () => {
+    await resetDb();
+    await prisma.$disconnect();
+  });
+
+  beforeEach(() => {
+    mockGateway.verifyPendingSubmission.mockReset();
+    mockGateway.verifyFinalize.mockReset();
+  });
+
+  it("GET /chain/status returns devnet config", async () => {
+    const res = await request(app).get("/chain/status");
+    expect(res.status).toBe(200);
+    expect(res.body.cluster).toBe("devnet");
+    expect(res.body.programId).toContain("2Ft67fV4");
+  });
+
+  it("POST submit rejects fake signatures before verifier work", async () => {
+    const res = await request(app)
+      .post(`/chain/ledger/${ledgerId}/submit`)
+      .set("Authorization", `Bearer ${coordinatorToken}`)
+      .send({ pendingTxSig: FAKE_SUBMIT });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Fake\/mock signatures/i);
+    expect(mockGateway.verifyPendingSubmission).not.toHaveBeenCalled();
+  });
+
+  it("POST finalize rejects fake signatures before verifier work", async () => {
+    const res = await request(app)
+      .post(`/chain/ledger/${ledgerId}/finalize`)
+      .set("Authorization", `Bearer ${committeeToken}`)
+      .send({ finalizeTxSig: FAKE_FINALIZE });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Fake\/mock signatures/i);
+    expect(mockGateway.verifyFinalize).not.toHaveBeenCalled();
+  });
+
+  it("POST finalize updates DB only after verified final PDA matches", async () => {
+    const expectedPda = finalPdaFromLedgerId(ledgerId).toBase58();
+    mockGateway.verifyFinalize.mockResolvedValue({
+      finalPda: expectedPda,
+      finalizeTxSig: REAL_SIG,
+      slot: 123,
+      verifiedAt: "2026-08-24T00:00:00.000Z",
+    });
+    const res = await request(app)
+      .post(`/chain/ledger/${ledgerId}/finalize`)
+      .set("Authorization", `Bearer ${committeeToken}`)
+      .send({ finalizeTxSig: REAL_SIG });
+    expect(res.status).toBe(200);
+    expect(res.body.state).toBe("FINALIZED");
+    const row = await prisma.ledgerAttestation.findUnique({ where: { ledgerEntryId: ledgerId } });
+    expect(row?.finalPda).toBe(expectedPda);
+    expect(row?.finalizeTxSig).toBe(REAL_SIG);
+  });
+
+  it("POST finalize rejects derived final PDA mismatch and does not keep a bad PDA", async () => {
+    await prisma.ledgerAttestation.update({
+      where: { ledgerEntryId: ledgerId },
+      data: { state: "AWAITING_COMMITTEE", finalPda: null, finalizeTxSig: null },
+    });
+    mockGateway.verifyFinalize.mockResolvedValue({
+      finalPda: "WrongFinalPda11111111111111111111111111111111",
+      finalizeTxSig: REAL_SIG,
+      slot: 123,
+      verifiedAt: "2026-08-24T00:00:00.000Z",
+    });
+    const res = await request(app)
+      .post(`/chain/ledger/${ledgerId}/finalize`)
+      .set("Authorization", `Bearer ${committeeToken}`)
+      .send({ finalizeTxSig: REAL_SIG });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Derived final PDA mismatch/i);
+    const row = await prisma.ledgerAttestation.findUnique({ where: { ledgerEntryId: ledgerId } });
+    expect(row?.state).not.toBe("FINALIZED");
+    expect(row?.finalPda).toBeNull();
+  });
+});

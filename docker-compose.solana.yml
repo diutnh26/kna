@@ -1,0 +1,62 @@
+# Solana profile — optional; base stack runs without this file.
+# Devnet: set SOLANA_RPC_URL=https://api.devnet.solana.com and real program ID.
+# Local: keep Surfpool RPC for resilience demos (program must be deployed there too).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.solana.yml --profile solana up
+
+services:
+  surfpool:
+    image: txtx/surfpool:latest
+    profiles: ["solana"]
+    ports:
+      - "8899:8899"
+      - "8900:8900"
+    restart: unless-stopped
+
+  api:
+    environment:
+      SOLANA_ENABLED: ${SOLANA_ENABLED:-true}
+      CHAIN_WORKER_ENABLED: ${CHAIN_WORKER_ENABLED:-true}
+      SOLANA_CLUSTER: ${SOLANA_CLUSTER:-devnet}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      KNA_TRUST_PROGRAM_ID: ${KNA_TRUST_PROGRAM_ID:-2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f}
+      KNA_COMMITTEE_VAULT: ${KNA_COMMITTEE_VAULT:-3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42}
+      WALLET_LINK_DOMAIN: ${WALLET_LINK_DOMAIN:-kna.local}
+
+  chain-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    profiles: ["solana"]
+    working_dir: /app/apps/api
+    environment:
+      NODE_ENV: production
+      PORT: "4001"
+      DATABASE_URL: postgresql://kna:kna@postgres:5432/kna_dev
+      DIRECT_DATABASE_URL: postgresql://kna:kna@postgres:5432/kna_dev
+      JWT_SECRET: docker-local-not-a-secret-at-least-32-chars
+      CORS_ORIGIN: http://localhost:8080
+      PAYMENT_PROVIDER: manual
+      SOLANA_ENABLED: "true"
+      CHAIN_WORKER_ENABLED: "true"
+      SOLANA_CLUSTER: ${SOLANA_CLUSTER:-devnet}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      KNA_TRUST_PROGRAM_ID: ${KNA_TRUST_PROGRAM_ID:-2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f}
+      KNA_COMMITTEE_VAULT: ${KNA_COMMITTEE_VAULT:-3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    command: ["node", "dist/chain/worker-cli.js"]
+    restart: unless-stopped
+
+  anchor-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.anchor-dev
+    profiles: ["solana"]
+    volumes:
+      - ./app:/workspace/app
+      - ./secrets:/workspace/secrets:ro
+    working_dir: /workspace/app

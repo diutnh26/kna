@@ -1,0 +1,776 @@
+{
+  "nav": {
+    "wordmarkSub": "The Long House",
+    "explore": "Explore",
+    "travel": "Travel",
+    "marketplace": "Marketplace",
+    "assistant": "Assistant",
+    "impact": "Impact",
+    "community": "Community",
+    "dashboard": "Dashboard",
+    "review": "Review",
+    "signIn": "Sign in",
+    "langToggle": "EN · VI",
+    "account": "Account"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "fullName": "Full name",
+    "email": "Email",
+    "password": "Password",
+    "submitSignIn": "Sign in",
+    "submitCreateAccount": "Create account",
+    "pleaseWait": "Please wait…",
+    "signOut": "Sign out",
+    "greeting": "Hi, {{name}}",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Knă · The Long House",
+      "titleLine1": "Travel that reaches",
+      "titleEm": "the people",
+      "titleRest": "you came to meet.",
+      "body": "A community-owned tourism ecosystem built with the Ê Đê people of Đắk Lắk, where every experience is authentic, every benefit is local, and every journey leaves something behind worth keeping.",
+      "ctaPrimary": "Begin the journey",
+      "ctaSecondary": "How it works"
+    },
+    "pillars": {
+      "eyebrow": "What KNĂ stands on",
+      "headingLine1": "Four foundations.",
+      "headingEm": "One long house.",
+      "items": [
+        {
+          "title": "Direct Economic Empowerment",
+          "body": "A peer-to-peer marketplace that lets travelers book and buy directly from Ê Đê providers, so the value of an experience stays with the household that created it."
+        },
+        {
+          "title": "Cultural Preservation",
+          "body": "An interactive digital archive of Ê Đê history, traditions, and language, developed in collaboration with community members and reviewed by elders."
+        },
+        {
+          "title": "Environmental Stewardship",
+          "body": "A carbon footprint tracker that channels offset contributions into conservation projects run and measured by communities in the Central Highlands."
+        },
+        {
+          "title": "Community Engagement",
+          "body": "Governance structures that give the Ê Đê community a direct voice in how the platform evolves and how revenue is distributed."
+        }
+      ]
+    },
+    "culture": {
+      "eyebrow": "The Ê Đê people",
+      "headingLine1": "A living culture.",
+      "body": "The Ê Đê are one of the largest ethnic minority groups in the Central Highlands of Vietnam, with a matrilineal social structure that has governed community life for generations. Their culture is preserved in the rhythm of the Cồng Chiêng, the craft of their weavers, and the enduring architecture of the longhouse.",
+      "items": [
+        {
+          "title": "Cồng Chiêng — UNESCO Intangible Heritage",
+          "body": "Recognised by UNESCO in 2005, the Cồng Chiêng tradition is not merely music. It is a language that connects the living with their ancestors, performed around the fire at every gathering of significance."
+        },
+        {
+          "title": "The Longhouse — Architecture of Community",
+          "body": "The Knă is the architectural heart of Ê Đê life. Extended families live together under one roof, governed by a matriarch. It is the gathering place, the memory keeper, and the source of this platform's name."
+        },
+        {
+          "title": "Weaving and Craft — Stories in Thread",
+          "body": "Ê Đê textile traditions encode identity and story in every pattern. Each piece is woven by hand using techniques passed down through generations, carrying a meaning that no reproduction can replicate."
+        }
+      ],
+      "cta": "Explore Ê Đê culture"
+    },
+    "transparency": {
+      "eyebrow": "Financial transparency",
+      "heading": "Tracked, not promised.",
+      "body": "Every transaction on KNĂ is recorded on a public ledger. Travelers see where their money goes. Communities see what they earned. Partners verify what they claim.",
+      "ledgerLabel": "Public ledger · live sample",
+      "ledgerMore": "+ {{count}} more transactions today",
+      "ledgerEmpty": "No transactions recorded yet."
+    },
+    "community": {
+      "eyebrow": "By the community",
+      "headingLine1": "Not about the Ê Đê.",
+      "headingEm": "By",
+      "headingRest": "the Ê Đê.",
+      "body": "Cultural content is reviewed by community elders. Service providers are verified by community representatives. Revenue distribution decisions sit with a council of Ê Đê stakeholders, not a corporate board. KNĂ exists in service of the longhouse it is named after.",
+      "stats": [
+        {
+          "label": "of cultural content reviewed by community elders"
+        },
+        {
+          "label": "platform commission, set to keep the value where it belongs: with the community"
+        },
+        {
+          "label": "Ê Đê community partners onboarded for the pilot"
+        }
+      ]
+    },
+    "invitation": {
+      "eyebrow": "The invitation",
+      "headingLine1": "Where will you",
+      "headingEm": "stay tonight?",
+      "body": "The longhouse is wide. There is room for travelers who arrive in good faith.",
+      "cta": "Begin the journey"
+    },
+    "footer": {
+      "tagline": "A responsible tourism platform for the Ê Đê people of Đắk Lắk. Built for the BKI 2026 competition by students of Ho Chi Minh City University of Economics and Finance.",
+      "columns": [
+        {
+          "heading": "Explore",
+          "items": [
+            "Culture",
+            "Travel",
+            "Marketplace",
+            "Community"
+          ]
+        },
+        {
+          "heading": "Platform",
+          "items": [
+            "How it works",
+            "Transparency",
+            "Carbon tracker",
+            "Archive"
+          ]
+        }
+      ],
+      "stayInTouch": "Stay in touch",
+      "newsletterBody": "Decisions and allocations are published on the community page as they happen.",
+      "copyright": "© 2026 KNĂ · Bach Khoa Innovation 2026",
+      "stayInTouchCta": "Read the minutes"
+    }
+  },
+  "review": {
+    "eyebrow": "Committee review",
+    "title": "Nothing is published until someone here says so.",
+    "intro": "Submissions from households wait in this queue. Publishing puts an entry into the public archive; refusing keeps it with the household. Either way the reason is recorded, and a refusal cannot be filed without one.",
+    "signInPrompt": "Sign in to continue.",
+    "signIn": "Sign in",
+    "notCommitteeTitle": "This queue belongs to the Committee.",
+    "notCommitteeBody": "Only members of the Community Governance Committee can review submissions. Seats are nominated by each buôn — they are not something the platform grants.",
+    "signedInAs": "Signed in as {{name}}",
+    "platformStaff": "platform staff",
+    "waiting": "Waiting for review",
+    "oldestFirst": "Oldest first, so nothing waits forever.",
+    "loading": "Loading the queue…",
+    "emptyTitle": "The queue is empty.",
+    "emptyBody": "Every submission has been decided.",
+    "submitted": "Submitted {{date}}",
+    "submittedBy": "Submitted by {{name}}",
+    "reasonLabel": "Reason — required to refuse, optional to publish",
+    "publish": "Publish to the archive",
+    "refuse": "Refuse",
+    "deciding": "Recording…",
+    "decidedTitle": "Already decided",
+    "decidedBody": "The full record, refusals included. This is what makes the archive auditable after the fact rather than only at the moment of publishing.",
+    "published": "Published",
+    "refused": "Refused",
+    "decisionError": "Could not record that decision. Try again."
+  },
+  "dashboard": {
+    "eyebrow": "Your account",
+    "fallbackTitle": "Dashboard",
+    "verified": "Verified",
+    "signInPrompt": "Sign in to see your account.",
+    "signIn": "Sign in",
+    "noProviderTitle": "Nothing to manage here yet.",
+    "noProviderBody": "This page is for hosts, guides, and makers listing on KNĂ. Becoming a provider means being verified by a community representative in your buôn.",
+    "queueTitle": "Bookings to confirm",
+    "queueIntro": "Check the dates with the household, then confirm here. Declining releases the booking and removes it from the public ledger.",
+    "queueEmpty": "Nothing waiting. Every booking has been decided.",
+    "arriving": "Arriving {{date}} · {{count}} night",
+    "arriving_other": "Arriving {{date}} · {{count}} nights",
+    "requested": "requested {{date}}",
+    "guest_one": "{{count}} guest",
+    "guest_other": "{{count}} guests",
+    "confirm": "Confirm",
+    "decline": "Decline",
+    "deciding": "Recording…",
+    "earningsEyebrow": "What has reached you",
+    "yours": "yours, from confirmed business",
+    "toFund": "to the Community Fund from your bookings",
+    "platformCut": "platform commission on your bookings",
+    "awaiting_one": "booking awaiting confirmation",
+    "awaiting_other": "bookings awaiting confirmation",
+    "earningsNote": "Bookings still awaiting confirmation are not counted as earnings — nobody has agreed the dates yet. Every figure here also appears on the public ledger.",
+    "yourBookings": "Your bookings",
+    "noBookings": "No bookings yet.",
+    "statusPending": "Awaiting confirmation",
+    "statusConfirmed": "Confirmed",
+    "statusCompleted": "Completed",
+    "statusCancelled": "Declined",
+    "decisionError": "Could not record that. Try again."
+  },
+  "demo": {
+    "label": "Demonstration data.",
+    "body": "These households, bookings and ledger figures are examples showing how the platform presents information. They are not real records — actual data arrives with the field pilot."
+  },
+  "apiError": {
+    "unreachable": "Couldn’t reach the KNĂ API.",
+    "waking": "The service may be waking up — that can take a minute. Please try again shortly."
+  },
+  "explore": {
+    "eyebrow": "Digital Cultural Heritage Archive",
+    "title": "A record kept by the people it belongs to.",
+    "intro": "Every recording, story, and photograph here was contributed by an Ê Đê household and reviewed by the Community Governance Committee before publication. Nothing is uploaded about the community without the community.",
+    "statEntries": "entries published",
+    "statBuon": "buôn contributing",
+    "statLanguages": "languages carried",
+    "pillarsEyebrow": "Where the archive begins",
+    "pillarsHeading": "Three traditions carry most of what the Ê Đê know.",
+    "pillars": [
+      {
+        "ede": "Ching Kram",
+        "en": "Cồng Chiêng",
+        "line": "Recognised by UNESCO in 2005",
+        "body": "A gong is not an instrument here. It is a voice. Each set is tuned to a family, played at births, harvests, and funerals, and read by listeners the way a letter is read.",
+        "image": "/images/pillars/ching-kram.jpg",
+        "alt": "Two gong players in Ê Đê dress, silhouetted mid-step against a dust-lit sunset, each carrying a large flat gong."
+      },
+      {
+        "ede": "Knă",
+        "en": "The Long House",
+        "line": "Architecture of the matrilineal family",
+        "body": "A house grows with its family. New sections are added as daughters marry, so the length of a longhouse records how many generations have lived under it.",
+        "image": "/images/pillars/kna-longhouse.jpg",
+        "alt": "A carved wooden ladder leaning against the raised platform of an Ê Đê longhouse, with carved storage vessels on the boards, a thatched gable and an open doorway behind."
+      },
+      {
+        "ede": "Mnga",
+        "en": "Weaving",
+        "line": "Pattern as written record",
+        "body": "Motifs are not ornament. They mark clan, region, and the occasion a cloth was made for. A weaver reading another weaver’s work can name the village it came from.",
+        "image": "/images/pillars/mnga-weaving.jpg",
+        "alt": "An Ê Đê woman weaving at a backstrap loom in an indigo tunic with red and white motifs at the collar and sleeves, a second weaver working behind her."
+      }
+    ],
+    "entriesPublished_one": "{{count}} entry published",
+    "entriesPublished_other": "{{count}} entries published",
+    "photoLabel": "{{name}} — documentary photograph, vertical crop",
+    "browseEyebrow": "Browse the archive",
+    "browseHeading": "Everything, indexed by the household that shared it.",
+    "filterAll": "All",
+    "loading": "Loading the archive…",
+    "emptyCategory": "Nothing published in that category yet.",
+    "seeEverything": "See everything",
+    "contributedBy": "Contributed by {{buon}}",
+    "mediaPendingLabel": "Media pending · ",
+    "mediaPendingBody": "Entry records are live and moderated. The audio, 360° tours, and photo essays themselves are not hosted yet — media storage is the next piece of this screen.",
+    "phrasesEyebrow": "Before you go",
+    "phrasesHeading": "{{count}} phrases change how you are received.",
+    "phrasesBody": "The Ê Đê language is spoken daily in the buôn but rarely by visitors. Learning even a greeting signals that you came to meet people rather than to look at them.",
+    "phrasesScope": "Everyday speech is published by decision of the Committee, April 2026. Ceremonial and clan-specific speech is not, and will not appear here.",
+    "phrasesAudio": "Pronunciation audio is recorded but not yet hosted.",
+    "handoffHeading": "Read enough. Ready to visit?",
+    "handoffBody": "Every household in this archive also hosts, guides, or sells through KNĂ.",
+    "handoffCta": "See experiences"
+  },
+  "travel": {
+    "eyebrow": "Experiences in Đắk Lắk",
+    "title": "Every listing is somebody’s home, work, or calendar.",
+    "intro": "Ê Đê households set their own prices, their own dates, and their own house rules. KNĂ verifies them, carries the booking, and shows you what reaches them.",
+    "verifiedTitle": "What verified means here",
+    "verifiedBody": "A community representative has visited the household, confirmed the person listing is the person hosting, and checked that the cultural content described is theirs to share. Verification is renewed each season.",
+    "searchLabel": "Search experiences",
+    "searchPlaceholder": "Search a host, a buôn, or a craft",
+    "filterAll": "All",
+    "filterAllBuon": "All buôn",
+    "categoryStay": "Stay",
+    "categoryGuidedWalk": "Guided walk",
+    "categoryCraftSession": "Craft session",
+    "categoryCeremony": "Ceremony",
+    "loading": "Loading experiences…",
+    "available_one": "{{count}} experience available",
+    "available_other": "{{count}} experiences available",
+    "emptyTitle": "Nothing in that combination yet.",
+    "emptyBody": "Only four buôn have onboarded so far. Try a wider filter.",
+    "clearFilters": "Clear filters",
+    "photoLabel": "{{title}} — {{buon}}",
+    "verified": "Verified",
+    "hostedBy": "Hosted by {{name}} · {{buon}}",
+    "carbonEstimate": "{{rating}} carbon estimate",
+    "requested": "Requested ✓",
+    "arrivalDate": "Arrival date",
+    "nights": "Nights",
+    "guests": "Guests",
+    "book": "Book",
+    "sending": "Sending…",
+    "needDate": "Choose an arrival date first.",
+    "bookingError": "Could not send that booking. Try again.",
+    "splitEyebrow": "On every booking",
+    "splitHeading": "The split is written into the contract, not the marketing.",
+    "splitBody": "Every booking is computed the same way on the server and written to the public ledger the moment you book — see it on the Community page.",
+    "split": [
+      {
+        "pct": "90%",
+        "who": "To the provider",
+        "note": "Paid directly to the household or co-op that hosts you."
+      },
+      {
+        "pct": "3%",
+        "who": "To the Community Fund",
+        "note": "Heritage work and conservation, allocated by the Community Governance Committee."
+      },
+      {
+        "pct": "7%",
+        "who": "To KNĂ",
+        "note": "Runs the platform, verification, and provider training."
+      }
+    ],
+    "splitNote": "Marketplace purchases use a different split: artisans keep 95%.",
+    "handoffHeading": "Taking something home?",
+    "handoffBody": "The same households sell their work through the marketplace, with the same verification.",
+    "handoffCta": "Visit the marketplace",
+    "filterByBuon": "Filter by buôn"
+  },
+  "marketplace": {
+    "eyebrow": "Community Marketplace",
+    "title": "Made slowly, by one person, on purpose.",
+    "intro": "Artisans set their own prices and keep 95% of what you pay — verified by the same community representatives who verify hosts and guides.",
+    "statArtisanShare": "stays with the artisan",
+    "statMakers": "makers listing in the pilot",
+    "statBuon": "buôn represented",
+    "certEyebrow": "Coming to the marketplace",
+    "certHeading": "Authenticity you’ll be able to check, not a label you have to trust.",
+    "certBody": "The plan: register each piece when the maker finishes it, so scanning a tag opens the same record — who made it, where, how long it took — alongside the payment that reached the household. Every order today is still verified by the Community Governance Committee; the scannable certificate itself is on the roadmap.",
+    "certNote": "Certificates will be issued by the Community Governance Committee, not by KNĂ. Only work made by a registered Ê Đê household will be able to carry one.",
+    "certLabel": "Certificate of origin · mock-up",
+    "certReference": "Reference",
+    "certMaker": "Maker",
+    "certMakerValue": "Amí Lan · registered 2026",
+    "certBuon": "Buôn",
+    "certTechnique": "Technique",
+    "certTechniqueValue": "Backstrap loom, natural dye",
+    "certTime": "Time to make",
+    "certTimeValue": "11 weeks",
+    "certReviewedBy": "Reviewed by",
+    "certReviewedByValue": "Community Governance Committee",
+    "certToMaker": "To the maker",
+    "searchLabel": "Search the marketplace",
+    "searchPlaceholder": "Search a maker, a material, or a piece",
+    "filterAll": "All",
+    "categoryTextile": "Textile",
+    "categoryWoodwork": "Woodwork",
+    "categoryBasketry": "Basketry",
+    "categoryJewellery": "Jewellery",
+    "categoryCoffee": "Coffee",
+    "loading": "Loading pieces…",
+    "listed_one": "{{count}} piece listed",
+    "listed_other": "{{count}} pieces listed",
+    "emptyTitle": "No pieces in that category yet.",
+    "emptyBody": "Makers list when a piece is finished, so stock moves slowly by design.",
+    "seeEverything": "See everything",
+    "photoLabel": "{{title}} — {{maker}}",
+    "oneOfAKind": "One of a kind",
+    "verifiedMaker": "Verified maker",
+    "soldOut": "Sold out",
+    "lastOne": "Last one",
+    "available": "{{count}} available",
+    "ordered": "Ordered ✓",
+    "quantity": "Quantity",
+    "buy": "Buy",
+    "placing": "Placing…",
+    "orderError": "Could not place that order. Try again.",
+    "notesEyebrow": "Before you order",
+    "notesHeading": "Handmade means slow, and sometimes means no.",
+    "notes": [
+      {
+        "h": "Stock is literal",
+        "b": "If a listing says one, there is one. Nothing here is reproduced to meet demand, and a maker may decline a repeat commission."
+      },
+      {
+        "h": "Dispatch takes time",
+        "b": "Pieces ship from Đắk Lắk once a week. Allow two to three weeks within Vietnam, longer internationally."
+      },
+      {
+        "h": "Some work is not for sale",
+        "b": "Certain ceremonial pieces are recorded in the cultural archive but never listed. The Committee decides what stays in the buôn."
+      },
+      {
+        "h": "Prices are the maker’s",
+        "b": "KNĂ does not discount, run sales, or negotiate on a maker’s behalf. What you see is what they asked for."
+      }
+    ],
+    "handoffHeading": "Not sure what you are looking at?",
+    "handoffBody": "The assistant can explain a motif, a technique, or what a piece is traditionally for.",
+    "handoffCta": "Ask the assistant"
+  },
+  "community": {
+    "eyebrow": "Community space",
+    "title": "Governed in public, not in private.",
+    "intro": "Representatives from the onboarded buôn govern what is published, what the Community Fund pays for, and who may list on the platform. Minutes and allocations are public, including the decisions that went against the platform.",
+    "statMembers": "committee members, all Ê Đê",
+    "statMonthly": "Monthly",
+    "statMeetings": "meetings, minutes published within a week",
+    "statNoVote": "KNĂ staff with a vote",
+    "committeeEyebrow": "Community Governance Committee",
+    "committeeHeading": "People from the buôn, not consultants from outside.",
+    "committeeBody": "Members are nominated by their own buôn and serve one-year terms. KNĂ attends meetings to answer questions and has no vote.",
+    "portrait": "Portrait",
+    "servingSince": "Serving since {{date}}",
+    "fundEyebrow": "Community Fund",
+    "fundHeading": "Three percent of every booking, spent line by line.",
+    "fundBody": "The Fund is a pass-through, not platform revenue. The Committee decides what it pays for and publishes the allocation each quarter.",
+    "fundAllocated": "Allocated in {{quarter}}",
+    "minutesEyebrow": "Minutes",
+    "minutesHeading": "Including the ones that said no.",
+    "minutesBody": "A governance record that only contains approvals is not a governance record. Refusals are published with the same detail as decisions that passed.",
+    "statusPassed": "Passed",
+    "statusDeclined": "Declined",
+    "statusOpen": "Open",
+    "boardEyebrow": "Provider board",
+    "boardHeading": "Hosts talking to hosts.",
+    "boardBody": "Two spaces are planned: one where verified providers and Committee members talk to each other, and one where visitors can ask questions and compare notes. Both readable by anyone.",
+    "boardNotBuiltLabel": "Not yet built · ",
+    "boardNotBuiltBody": "Neither space is built and nobody has posted to either. The cards below are examples of what hosts told us they would use the provider board for; the visitor side will work the same way.",
+    "threads": [
+      {
+        "author": "A guide",
+        "role": "Buôn Đôn",
+        "title": "Forest walk moving to earlier starts from June",
+        "body": "The heat after ten is too much for guests and for me. Walks will start at six thirty from 1 June until the rains. Please update your listings if you run the same route."
+      },
+      {
+        "author": "A weaver",
+        "role": "Buôn Kli A",
+        "title": "Indigo supply is short this season",
+        "body": "The dye plot flooded in April. I have enough for maybe four more pieces. If anyone in Trấp has surplus leaf I will trade rattan for it."
+      },
+      {
+        "author": "A host",
+        "role": "Buôn Trấp",
+        "title": "Guests keep asking to help with cooking",
+        "body": "Is anyone else finding this? I do not mind but the kitchen is small. Wondering whether we should add it as a listed activity rather than let it happen by accident."
+      }
+    ],
+    "feedbackEyebrow": "After your stay",
+    "feedbackHeading": "Your feedback goes to the Committee, not to a ratings algorithm.",
+    "feedbackBody": "There are no star ratings on KNĂ. Comments are read at the monthly meeting and, where they concern a host, shared with that household first.",
+    "feedbackNotes": [
+      {
+        "h": "Why no stars",
+        "b": "A four out of five on a family home is a judgement on a household, published permanently. Written comments carry the same information without that cost."
+      },
+      {
+        "h": "What happens to a complaint",
+        "b": "It goes to the host and to the Committee together. Serious or repeated issues can suspend a listing, and that decision appears in the minutes."
+      }
+    ],
+    "closingHeading": "That is the whole of it.",
+    "closingBody": "The archive, the experiences, the marketplace, the ledger, and the people who decide.",
+    "closingCta": "Back to the beginning",
+    "portraitOf": "Portrait of {{name}}"
+  },
+  "assistant": {
+    "eyebrow": "Travel assistant",
+    "title": "Ask the awkward questions here, not at the door.",
+    "intro": "Most visitors cause offence by accident, because nobody told them. The assistant is trained on the community archive and will tell you plainly what is expected.",
+    "prototypeNote": "This is a prototype. Answers come from a fixed script for now, and the four suggested questions are the ones wired up.",
+    "opening": [
+      "I'm the KNĂ assistant. I can help you plan a route, explain what you'll see, or tell you how to behave somewhere so you don't cause offence without meaning to.",
+      "What I say about Ê Đê custom comes from the community archive, reviewed by elders. If I have not been told something, I will say so rather than guess."
+    ],
+    "tryOne": "Try one of these",
+    "prompts": [
+      {
+        "label": "How do I greet an elder?",
+        "reply": "Let the elder speak first. A short reply and a slight bow of the head is enough — Ê Đê greeting is not effusive, and a long enthusiastic introduction can read as pushy.\n\nIf you want a phrase, “Hê drei” works at any hour. “Bơni” is thank you.\n\nOne thing visitors often get wrong: in a matrilineal household the eldest woman is usually the person to address, even when a man greets you at the ladder."
+      },
+      {
+        "label": "What can I photograph?",
+        "reply": "Most of daily life is fine to photograph if you ask first. Three things to avoid:\n\n• The ancestor shelf inside a longhouse. Not photographed, generally not discussed with visitors either.\n• Funeral gongs or a funeral in progress.\n• Children, without a parent present.\n\nCeremonies vary by household. If you booked through KNĂ, the house rule on your booking card tells you what that particular family has agreed to."
+      },
+      {
+        "label": "Plan me three days",
+        "reply": "Here is a shape that works for a first visit, low travel, one buôn per day:\n\nDay 1 — Arrive Buôn Ma Thuột, afternoon at Buôn Akô Dhông. Short walk, meet your host, eat with the household. Stay the night.\n\nDay 2 — Morning loom session with Amí Lan in Buôn Kli A. Afternoon free. Evening gong ensemble in Buôn Đôn if the harvest calendar has a date open.\n\nDay 3 — Forest edge walk with Y Wik, then the coffee co-op in the afternoon. Depart evening.\n\nWant me to check which dates actually have availability?"
+      },
+      {
+        "label": "What is Cồng Chiêng?",
+        "reply": "A set of tuned gongs, and the practice around them. UNESCO recognised the Space of Gong Culture in the Central Highlands in 2005.\n\nWhat matters more than the recognition: the gongs are not performed for an audience in the ordinary sense. A set is tuned to a family and played at births, harvests, and funerals. Listeners in the buôn can hear which occasion is being marked.\n\nThat is why KNĂ lists ceremony evenings only when the village is holding one anyway, rather than scheduling them for visitors."
+      }
+    ],
+    "fallback": "I don't have that in the community archive yet, so I'd rather not guess.\n\nYour host is the better person to ask, and asking is usually welcome. If it's something the community thinks visitors should know, it can be submitted to the Governance Committee for the archive.",
+    "fallbackNote": "Anything else you type will get the assistant’s “I don’t know” answer, which is deliberate. Try it.",
+    "assistantName": "KNĂ assistant",
+    "archiveBacked": "Archive-backed",
+    "inputPlaceholder": "Ask about custom, a place, or your trip",
+    "send": "Send",
+    "guardrailsEyebrow": "How it is bounded",
+    "guardrailsHeading": "An assistant that speaks about a culture needs limits.",
+    "guardrails": [
+      {
+        "h": "It cites, or it declines",
+        "b": "Cultural answers come from the reviewed archive. Outside it, the assistant says so rather than filling the gap."
+      },
+      {
+        "h": "It never speaks for a household",
+        "b": "House rules differ. The assistant points you to your host or your booking card instead of generalising."
+      },
+      {
+        "h": "It does not sell",
+        "b": "Recommendations follow what you asked for and what is available, not what earns the platform more."
+      },
+      {
+        "h": "The community can correct it",
+        "b": "Elders and the Governance Committee can flag an answer. Corrections go into the archive, not into a private model."
+      }
+    ],
+    "handoffHeading": "Ready to work out your footprint?",
+    "handoffBody": "The assistant can estimate it, or you can do it yourself in the impact tracker.",
+    "handoffCta": "Open the tracker"
+  },
+  "carbon": {
+    "eyebrow": "Carbon tracker",
+    "title": "A number the airline doesn't show you.",
+    "intro": "Most of a trip’s footprint is the journey, not the stay. The tracker shows the whole of it, then routes an offset to a project the community actually runs.",
+    "communityLedTitle": "Community-led, not algorithm-led",
+    "communityLedBody": "Projects are identified by the buôn, approved by the Community Governance Committee, and reported on by the households doing the work.",
+    "travellingFrom": "Travelling from",
+    "originHcmc": "Ho Chi Minh City",
+    "originHanoi": "Hanoi",
+    "originDanang": "Đà Nẵng",
+    "originAsia": "Elsewhere in Asia",
+    "originEurope": "Europe",
+    "howYouArrive": "How you arrive",
+    "modeFlight": "Flight",
+    "modeCoach": "Coach",
+    "modeCar": "Car",
+    "noOverland": "Overland options are not offered for this origin.",
+    "nightsLabel": "Nights in the buôn",
+    "estimatedFootprint": "Estimated footprint",
+    "rowTravel": "Getting to Đắk Lắk",
+    "rowStay_one": "Staying {{count}} night",
+    "rowStay_other": "Staying {{count}} nights",
+    "rowLocal": "Moving between buôn",
+    "estimateNote": "An estimate, not a measurement. Figures are indicative and will be replaced with a verified dataset before the platform goes live.",
+    "projectsEyebrow": "Where an offset goes",
+    "projectsHeading": "Three projects, all within an hour of where you will be staying.",
+    "projectsBody": "Choose one and the contribution is routed to that project’s account, not to a general fund. On two of the three you can join the work yourself at the end of your stay.",
+    "projects": [
+      {
+        "id": "yokdon",
+        "name": "Yok Đôn buffer replanting",
+        "led": "Buôn Đôn households",
+        "unit": "native saplings, tended for three years",
+        "body": "Degraded buffer land on the park edge, replanted with dipterocarp and tended by the households that farm beside it. Survival is counted annually, not at planting.",
+        "image": "/images/projects/yokdon.jpg",
+        "alt": "Three men in forestry uniforms crouched among potted saplings under a nursery shade frame, one holding a seedling in a planting bag while another writes on a clipboard."
+      },
+      {
+        "id": "lak",
+        "name": "Lắk Lake watershed planting",
+        "led": "Buôn Trấp households",
+        "unit": "bamboo and hardwood along the shoreline",
+        "body": "Shoreline planting to slow erosion into the lake. Run in the wet season, when saplings take without irrigation.",
+        "image": "/images/projects/lak.jpg",
+        "alt": "A person in a conical palm-leaf hat and a woven jacket with red and blue motifs, seen from behind, looking out over Lắk Lake towards low hills, reeds standing in the shallows."
+      },
+      {
+        "id": "corridor",
+        "name": "Elephant corridor upkeep",
+        "led": "Buôn Đôn conservation group",
+        "unit": "habitat clearing and fodder planting",
+        "body": "Supports the shift away from elephant riding by funding habitat and fodder for observation-based tourism instead.",
+        "image": "/images/projects/corridor.jpg",
+        "alt": "An elder in Ê Đê ceremonial dress with a red headwrap holds a bowl to a domesticated elephant, reaching up to touch its head; the elephant carries no saddle."
+      }
+    ],
+    "joinIn": "Join in",
+    "yourContribution": "Your contribution",
+    "offsetting": "Offsetting {{kg}} kg through",
+    "ledBy": ", led by {{led}}.",
+    "joinableYes": " You are invited to plant on the final day of your stay.",
+    "joinableNo": " This project is maintained year-round by the conservation group.",
+    "perPerson": "one contribution, per person",
+    "addToBooking": "Add to my booking",
+    "afterwardsEyebrow": "Afterwards",
+    "afterwardsHeading": "An offset you can follow, the same as any other payment.",
+    "afterwardsBody": "Offset contributions sit on the same public ledger as bookings and purchases. You can see what was received and by whom.",
+    "afterwardsNote": "Survival counts are published each year by the households running the site. A planting that fails is recorded as a failure.",
+    "ledgerSample": "Ledger entry · sample",
+    "ledgerReference": "Reference",
+    "ledgerContribution": "Contribution",
+    "ledgerProject": "Project",
+    "ledgerReceivedBy": "Received by",
+    "ledgerPlanted": "Planted",
+    "ledgerPlantedValue": "18 Mar 2026 · 41 saplings",
+    "ledgerSurvival": "Year 1 survival",
+    "ledgerSurvivalValue": "38 of 41",
+    "handoffHeading": "Who decides which projects get funded?",
+    "handoffBody": "The Community Governance Committee. Their minutes, decisions, and fund allocations are published in the community space.",
+    "handoffCta": "See the community space",
+    "attachEyebrow": "Add this to a stay",
+    "signedOut": "Sign in to add an offset to one of your bookings.",
+    "signIn": "Sign in",
+    "noBookings": "You have no bookings yet.",
+    "noBookingsBody": "An offset is paid with a stay, so there has to be a stay to attach it to. Book an experience and it will appear here.",
+    "seeExperiences": "See experiences",
+    "chooseBooking": "Which booking?",
+    "bookingOption": "{{title}} · arriving {{date}}",
+    "onlyBooking": "Adding to your stay at {{title}}, arriving {{date}}.",
+    "joinLabel": "I would like to join the planting on my last day",
+    "joinUnavailable": "This project is maintained year-round and does not take visiting help.",
+    "attach": "Add to my booking",
+    "attaching": "Adding…",
+    "attached": "Added to your booking.",
+    "attachError": "Could not add that. Try again.",
+    "replaceNote": "This booking already carries an offset to {{project}}. Adding again replaces it rather than charging twice.",
+    "remove": "Remove",
+    "removed": "Offset removed.",
+    "pendingNote": "It reaches the public ledger when a coordinator confirms your booking — the same rule the stay itself follows.",
+    "howToTakePart": "How would you like to take part?",
+    "optionInPerson": "Join the planting",
+    "optionInPersonBody": "A session runs {{range}}, while you are here. Come and work it — there is nothing to pay.",
+    "optionDonate": "Contribute",
+    "optionDonateBody": "{{amount}} to the project, on the public ledger once your booking is confirmed.",
+    "free": "No charge",
+    "internationalRateNote": "Adjusted for a long journey. The Community Fund has already paid for the saplings, so this covers the cost of running the session rather than buying the trees again.",
+    "communityFundAlreadyCovers": "Every booking already sends 3% to the Community Fund, and that is what buys and tends the saplings. Anything here is on top of it, not instead of it.",
+    "noSessions": "Maintained year-round, so there is no session to attend.",
+    "ledgerInPersonContribution": "a day's work",
+    "ledgerDonateContribution": "towards running the session",
+    "ledgerWorkNoMoney": "No money moved, so there is no ledger row — the ledger records what was paid.",
+    "optionInPersonUnavailable": "No session runs during your stay. The nearest is {{range}}.",
+    "optionInPersonNoSessions": "This project is maintained year-round, so there is no session to join.",
+    "sessionRange": "{{start}} – {{end}}",
+    "optionNextSession": "Register for the next session",
+    "optionNextSessionBody": "{{range}}, after you leave. You will be counted for it and told once it is confirmed. Nothing to pay.",
+    "optionNextSessionAlt": "Or come back for the following one, {{range}}.",
+    "nextSessionShort": "Next session {{range}}"
+  },
+  "imageSlot": {
+    "fallback": "Image"
+  },
+  "account": {
+    "eyebrow": "Your account",
+    "title": "Everything you have done here.",
+    "intro": "Your details, and a record of every booking, purchase and contribution — including what reached the household on the other side of it.",
+    "signInPrompt": "Sign in to see your account.",
+    "signIn": "Sign in",
+    "loading": "Loading your account…",
+    "memberSince": "With KNĂ since {{date}}",
+    "summaryEyebrow": "What you have sent to Đắk Lắk",
+    "spent": "paid in total",
+    "toProviders": "reached the households directly",
+    "toFund": "went to the Community Fund",
+    "settledOnly": "Confirmed bookings and settled orders only. Anything still awaiting a coordinator is counted below but not here — it is not money until someone has agreed the dates.",
+    "detailsTitle": "Your details",
+    "fullName": "Name",
+    "email": "Email",
+    "emailFixed": "Sign-in address. Changing it needs a confirmation email, which KNĂ cannot send yet.",
+    "language": "Language",
+    "english": "English",
+    "vietnamese": "Tiếng Việt",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "saveError": "Could not save that. Try again.",
+    "passwordTitle": "Change password",
+    "passwordNote": "Changing your password signs out every other device. That is the point of changing it.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "changePassword": "Change password",
+    "changing": "Changing…",
+    "passwordChanged": "Password changed. Other devices have been signed out.",
+    "passwordError": "Could not change your password. Try again.",
+    "activityTitle": "Your activity",
+    "activityEmpty": "Nothing yet.",
+    "activityEmptyBody": "Bookings, marketplace orders and archive contributions all appear here.",
+    "filterAll": "Everything",
+    "filterBookings": "Bookings",
+    "filterOrders": "Purchases",
+    "filterContributions": "Contributions",
+    "kindBooking": "Booking",
+    "kindOrder": "Purchase",
+    "kindContribution": "Archive contribution",
+    "arriving": "Arriving {{date}} · {{count}} night",
+    "arriving_other": "Arriving {{date}} · {{count}} nights",
+    "guests_one": "{{count}} guest",
+    "guests_other": "{{count}} guests",
+    "items_one": "{{count}} piece",
+    "items_other": "{{count}} pieces",
+    "from": "from {{name}}",
+    "ofWhich": "of which {{provider}} reached the household",
+    "andFund": " · {{fund}} to the Fund",
+    "placedOn": "Placed {{date}}",
+    "submittedOn": "Submitted {{date}}",
+    "committeeNote": "Committee note: {{note}}",
+    "statusPENDING": "Awaiting confirmation",
+    "statusCONFIRMED": "Confirmed",
+    "statusCOMPLETED": "Completed",
+    "statusCANCELLED": "Cancelled",
+    "statusPAID": "Paid",
+    "statusFULFILLED": "Sent",
+    "statusIN_REVIEW": "With the Committee",
+    "statusPUBLISHED": "Published",
+    "statusREJECTED": "Not published",
+    "statusDRAFT": "Draft",
+    "filterOffsets": "Offsets",
+    "offsetTitle": "Carbon offset",
+    "offsetLine": "{{kg}} kg through {{project}}",
+    "offsetJoining": "You are joining the planting on your last day",
+    "offsetNotJoining": "Maintained year-round by the conservation group",
+    "offsetPending": "Reaches the ledger when this booking is confirmed",
+    "offsetsNone": "No offsets yet.",
+    "offsetsNoneBody": "An offset is added to a booking from the impact tracker.",
+    "openTracker": "Open the impact tracker",
+    "toOffsets": "to carbon offset projects",
+    "offsetKg_one": "{{count}} kg of CO₂e offset",
+    "offsetKg_other": "{{count}} kg of CO₂e offset",
+    "joiningCount_one": "{{count}} planting day you have signed up for",
+    "joiningCount_other": "{{count}} planting days you have signed up for",
+    "offsetDonated": "A contribution to the project",
+    "offsetNextSession": "You are registered for the session on {{range}}",
+    "offsetSessionRange": "{{start}} – {{end}}"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Nothing yet.",
+    "markAllRead": "Mark all read",
+    "type": {
+      "BOOKING_CONFIRMED": "Your booking for {{listing}} on {{date}} is confirmed.",
+      "BOOKING_DECLINED": "Your booking for {{listing}} on {{date}} could not be taken.",
+      "BOOKING_RECEIVED": "A guest has asked for {{listing}} on {{date}}, {{nights}} night(s).",
+      "BOOKING_AWAITING_DECISION": "{{listing}} on {{date}} is waiting for a decision.",
+      "ORDER_SETTLED": "Your order of {{count}} piece(s) is settled.",
+      "ORDER_CANCELLED": "Your order of {{count}} piece(s) was cancelled.",
+      "ORDER_AWAITING_SETTLEMENT": "An order for {{piece}} by {{maker}} is waiting to be settled.",
+      "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) is waiting for the Committee.",
+      "ARCHIVE_PUBLISHED": "{{title}} has been published to the archive.",
+      "ARCHIVE_REJECTED": "{{title}} was not published. {{note}}"
+    }
+  },
+  "wallet": {
+    "connect": "Connect wallet",
+    "connecting": "Connecting…",
+    "connectedShort": "{{short}}…",
+    "operatorHint": "Devnet wallet for attestations — not payment",
+    "attestation": "On-chain proof",
+    "attestationState": "Status: {{state}}",
+    "noAttestation": "Not yet attested on Solana devnet",
+    "submitAttestation": "Sign & submit on Phantom",
+    "submitting": "Submitting…",
+    "attestError": "Could not submit attestation",
+    "viewExplorer": "View on Explorer",
+    "proofState": "Proof {{state}}",
+    "proofPending": "Explorer link appears after RPC verifies the transaction",
+    "proofExplainer": "Proof is verified by RPC confirmation plus PDA decode of the 7/3/90 split — not guest identity or payment method. Guests book in VND without a wallet. Coordinators submit with Phantom; committee finalizes through Squads 2-of-3.",
+    "committeeVault": "Squads vault",
+    "connectRequired": "Connect Phantom (devnet) to submit",
+    "guestReceiptHint": "Optional: link a wallet to acknowledge a stay on-chain. This is not a crypto payment.",
+    "linkOptional": "Link wallet (optional)",
+    "linkedOk": "Wallet linked",
+    "committeeFinalize": "Finalize pending attestations via Squads (2-of-3) on devnet",
+    "committeeQueue": "Awaiting committee finalize",
+    "squadsHint": "Export the Squads proposal payload, create a vault transaction, collect 2-of-3 approvals, then paste the executed signature here. API verifies the final PDA by RPC decode before marking FINALIZED.",
+    "noAwaiting": "No attestations awaiting committee",
+    "exportFinalizeIx": "Export finalize ix",
+    "exportSquadsProposal": "Export Squads proposal",
+    "recordFinalize": "Record finalize sig",
+    "pasteFinalizeSig": "Paste the finalized Solana transaction signature",
+    "pasteMultisigPdaOptional": "Optional: paste the Squads multisig PDA to verify this vault matches it",
+    "squadsPasteback": "After Squads executes the vault transaction, paste the executed transaction signature back into KNĂ so the API can verify the final PDA and update the public ledger.",
+    "publicLedger": "Public ledger",
+    "verifyOnChain": "Verify on-chain"
+  }
+}

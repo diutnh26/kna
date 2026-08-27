@@ -1,0 +1,57 @@
+{
+  "cluster": "devnet",
+  "programId": "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
+  "configPda": "AXKpJh38a52BWnnw97ovN3zYcFdhq7f4UHKBkXCsmrtg",
+  "coordinator": "7bX1dSyzUfxGTr4KshrPYZy3vzKZJNh6aUn7Gt2yg37g",
+  "committeeVault": "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42",
+  "deployAuthority": "FfNVnqMmVPHYBQCaZdHbteBMpc7TReNsTpocHBRz1u6J",
+  "deployTx": "2zu5VkBki6q9hmYUyiVDepS5KqjrZUsRRJydtDKd1s5AX5mSCu5RUuZngR9tYYRTUaM9CmkCkmS4GkTLJ1z8vCMa",
+  "explorerProgram": "https://explorer.solana.com/address/2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f?cluster=devnet",
+  "txs": {
+    "initialize": "PecFU386bH2bcVPW6sAZXfMxQQu6kTPcVKTsvUpfsKNx9pb5LUZrAAzMjamoPZKCv3MaWx7sy9nmLPDcMo1vGe3",
+    "grantCoordinator": "3zh8Hsw1r5biHTpZkoTdg3y9dAP7Ydrpz9gTW9JTvLCkTf1kLbHiXDoZLBYs9Vy9UV3ohbitL9GyvMTRYUiL6YkT",
+    "setCommitteeVault": "ZQ64hAPKK93xdDCR7m58rmPJbDqutyQz5JevSvfEDwMqcv6vzt25uvW6yjfz3uwmumGjv8EmCepSLat3YurJRaq",
+    "squadsCreate": "5BuhGC2F8nkCSokbSRDCHYvsRFAWLmcp9ivhZLbWkW6AdjKM5DXXa84ZMpPucGhDk4h6bm4Ezo9nmcLU7o3AFUHN"
+  },
+  "at": "2026-08-24T05:47:33.764Z",
+  "demoSubmit": {
+    "ledgerId": "demo-ledger-1787557057099",
+    "pendingPda": "4FiuZEavPqCnPtntS4oYTfSdsYgbA7irZ5YdzNrqVXpd",
+    "payloadHash": "3c19ec2f158737451432af327e5e338eee37b3e450c9ecb1d8c6982c98317757",
+    "txSignature": "dsxVtsErhpREWSpcNa3KAaA5N3P8iXxFe1VRGwt7sBKeMF6tV2twbMAxin36zBkQpdMA7eyNKtY1gQ6q4MsafEy",
+    "explorerTx": "https://explorer.solana.com/tx/dsxVtsErhpREWSpcNa3KAaA5N3P8iXxFe1VRGwt7sBKeMF6tV2twbMAxin36zBkQpdMA7eyNKtY1gQ6q4MsafEy?cluster=devnet",
+    "explorerPda": "https://explorer.solana.com/address/4FiuZEavPqCnPtntS4oYTfSdsYgbA7irZ5YdzNrqVXpd?cluster=devnet",
+    "programId": "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
+    "at": "2026-08-24T07:37:37.814Z"
+  },
+  "demoFinalize": {
+    "ledgerId": "demo-ledger-1787557057099",
+    "finalPda": "7jKscYQw2yNnSRhydtRqH1uV65jDPZSv7bAt2q3rvMYp",
+    "txSignature": "47PaCdXN1AHPS3xDjWRyWXDxEcSVWTEKEVtamTAMbqMKmGB9748EeWZQeNZozkMQrFdW7w473ZHfKY3h5s2YTo7F",
+    "explorerTx": "https://explorer.solana.com/tx/47PaCdXN1AHPS3xDjWRyWXDxEcSVWTEKEVtamTAMbqMKmGB9748EeWZQeNZozkMQrFdW7w473ZHfKY3h5s2YTo7F?cluster=devnet",
+    "explorerPda": "https://explorer.solana.com/address/7jKscYQw2yNnSRhydtRqH1uV65jDPZSv7bAt2q3rvMYp?cluster=devnet",
+    "explorerVault": "https://explorer.solana.com/address/3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42?cluster=devnet",
+    "programId": "2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f",
+    "note": "Executed by Squads v4 vault after 2-of-3 committee approvals; API should record this signature via /chain/ledger/:id/finalize.",
+    "finalizedBy": "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42",
+    "at": "2026-08-24T07:43:39.391Z",
+    "finalAccountVerified": "7jKscYQw2yNnSRhydtRqH1uV65jDPZSv7bAt2q3rvMYp"
+  },
+  "squads": {
+    "multisigPda": "3MAhssMeXQrgzLgxVbvFDBiQbsNKNPBAaATLkyHdhodv",
+    "vaultPda": "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42",
+    "transactionIndex": "3",
+    "vaultCreateSig": "5LxrJtqrW8w3NDYsJmMMD2REvJpScnASQakdrrp9E2gbrih9SECR8YwZYMkvP3ACnRsfA26RXVFTKqQQFpj2x2hk",
+    "proposalCreateSig": "DDBAZmJncHUVTNCXBspCiMSK4jTyDeAS2x8YiYinUSkF4sGPmEZFek4hscQy7TfC8efUrPdBzQfWiQMT4sMs1kx",
+    "approvalSigs": [
+      "2bugpzVWm5sZURHNLg1TqfNvFWpDJXu9EBQc9mdStPwgRVKThLy96ENQXAMdwWNCcmZpC5DMX6HS6mkY4ePLnPrS",
+      "2aHSLPJjtmmvowCcuWnKaSowuGJFHDEd6XHmiEKCGy8GyCdVjBD58qk4bagpRBEUEwAg9n6Cr1SRNv13TnsvcfG1"
+    ],
+    "fundVaultSig": "4XJ8Q5SH9ZysMBZCe8Q3rafpryjg91ExujuKRyrUrHKrQhbMzLpEnPUNY7txMqVMu6UcpS6RcKwN119pFksccYTb",
+    "executeSig": "47PaCdXN1AHPS3xDjWRyWXDxEcSVWTEKEVtamTAMbqMKmGB9748EeWZQeNZozkMQrFdW7w473ZHfKY3h5s2YTo7F",
+    "explorerMultisig": "https://explorer.solana.com/address/3MAhssMeXQrgzLgxVbvFDBiQbsNKNPBAaATLkyHdhodv?cluster=devnet",
+    "explorerVault": "https://explorer.solana.com/address/3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42?cluster=devnet",
+    "explorerExecuteTx": "https://explorer.solana.com/tx/47PaCdXN1AHPS3xDjWRyWXDxEcSVWTEKEVtamTAMbqMKmGB9748EeWZQeNZozkMQrFdW7w473ZHfKY3h5s2YTo7F?cluster=devnet",
+    "at": "2026-08-24T07:43:39.389Z"
+  }
+}

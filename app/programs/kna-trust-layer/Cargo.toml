@@ -1,0 +1,24 @@
+[package]
+name = "kna-trust-layer"
+version = "0.1.0"
+description = "KNĂ trust layer — immutable ledger attestations on Solana devnet"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "kna_trust_layer"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = "0.30.1"
+# blake3 only — BPF-safe pin so Solana's transitive tree does not float to
+# edition2024-only releases. Do NOT pin cpufeatures/sha2 here: direct deps
+# force host-only crates onto bpfel-unknown-unknown.
+blake3 = { version = "=1.5.5", default-features = false }

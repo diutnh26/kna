@@ -1,0 +1,776 @@
+{
+  "nav": {
+    "wordmarkSub": "Nhà Dài",
+    "explore": "Khám phá",
+    "travel": "Du lịch",
+    "marketplace": "Chợ",
+    "assistant": "Trợ lý",
+    "impact": "Tác động",
+    "community": "Cộng đồng",
+    "dashboard": "Bảng điều khiển",
+    "review": "Duyệt",
+    "signIn": "Đăng nhập",
+    "langToggle": "EN · VI",
+    "account": "Tài khoản"
+  },
+  "auth": {
+    "signIn": "Đăng nhập",
+    "createAccount": "Tạo tài khoản",
+    "fullName": "Họ và tên",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "submitSignIn": "Đăng nhập",
+    "submitCreateAccount": "Tạo tài khoản",
+    "pleaseWait": "Đang xử lý…",
+    "signOut": "Đăng xuất",
+    "greeting": "Xin chào, {{name}}",
+    "genericError": "Đã có lỗi xảy ra. Vui lòng thử lại."
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Knă · Nhà Dài",
+      "titleLine1": "Hành trình chạm đến",
+      "titleEm": "những con người",
+      "titleRest": "bạn đã đến để gặp.",
+      "body": "Một hệ sinh thái du lịch do cộng đồng sở hữu, được xây dựng cùng người Ê Đê tại Đắk Lắk, nơi mọi trải nghiệm đều chân thực, mọi lợi ích đều ở lại địa phương, và mọi hành trình đều để lại điều gì đó đáng giữ.",
+      "ctaPrimary": "Bắt đầu hành trình",
+      "ctaSecondary": "Cách thức hoạt động"
+    },
+    "pillars": {
+      "eyebrow": "Nền tảng của KNĂ",
+      "headingLine1": "Bốn nền tảng.",
+      "headingEm": "Một ngôi nhà dài.",
+      "items": [
+        {
+          "title": "Trao Quyền Kinh Tế Trực Tiếp",
+          "body": "Một chợ giao dịch ngang hàng cho phép du khách đặt chỗ và mua trực tiếp từ nhà cung cấp Ê Đê, để giá trị của trải nghiệm ở lại với chính hộ gia đình đã tạo ra nó."
+        },
+        {
+          "title": "Bảo Tồn Văn Hóa",
+          "body": "Một kho lưu trữ số tương tác về lịch sử, truyền thống và ngôn ngữ Ê Đê, được phát triển cùng các thành viên cộng đồng và được các già làng thẩm định."
+        },
+        {
+          "title": "Gìn Giữ Môi Trường",
+          "body": "Một công cụ theo dõi dấu chân carbon, chuyển các khoản đóng góp bù đắp vào các dự án bảo tồn do chính cộng đồng Tây Nguyên vận hành và đo lường."
+        },
+        {
+          "title": "Gắn Kết Cộng Đồng",
+          "body": "Cơ chế quản trị trao cho cộng đồng Ê Đê tiếng nói trực tiếp trong cách nền tảng phát triển và cách doanh thu được phân phối."
+        }
+      ]
+    },
+    "culture": {
+      "eyebrow": "Người Ê Đê",
+      "headingLine1": "Một nền văn hoá sống.",
+      "body": "Người Ê Đê là một trong những dân tộc thiểu số lớn nhất ở Tây Nguyên Việt Nam, với cấu trúc xã hội mẫu hệ đã điều hành đời sống cộng đồng qua nhiều thế hệ. Văn hóa của họ được gìn giữ trong nhịp điệu của Cồng Chiêng, trong nghề dệt của những người thợ, và trong kiến trúc trường tồn của ngôi nhà dài.",
+      "items": [
+        {
+          "title": "Cồng Chiêng — Di sản Văn hóa Phi vật thể UNESCO",
+          "body": "Được UNESCO công nhận năm 2005, truyền thống Cồng Chiêng không chỉ là âm nhạc. Đó là một ngôn ngữ kết nối người sống với tổ tiên, được cử hành quanh bếp lửa trong mọi dịp trọng đại."
+        },
+        {
+          "title": "Nhà Dài — Kiến Trúc Của Cộng Đồng",
+          "body": "Knă là trái tim kiến trúc của đời sống Ê Đê. Các đại gia đình sống chung dưới một mái nhà, do người mẹ lớn tuổi nhất đứng đầu. Đó là nơi hội họp, nơi lưu giữ ký ức, và là nguồn gốc của tên gọi nền tảng này."
+        },
+        {
+          "title": "Dệt Thổ Cẩm — Câu Chuyện Trong Từng Sợi Chỉ",
+          "body": "Truyền thống dệt thổ cẩm Ê Đê mã hóa bản sắc và câu chuyện trong từng hoa văn. Mỗi tấm vải được dệt tay theo kỹ thuật truyền qua nhiều thế hệ, mang một ý nghĩa mà không bản sao nào có thể tái hiện."
+        }
+      ],
+      "cta": "Khám phá văn hóa Ê Đê"
+    },
+    "transparency": {
+      "eyebrow": "Minh bạch tài chính",
+      "heading": "Được theo dõi, không chỉ hứa hẹn.",
+      "body": "Mọi giao dịch trên KNĂ đều được ghi lại trên một sổ cái công khai. Du khách thấy tiền của mình đi về đâu. Cộng đồng thấy mình đã kiếm được gì. Đối tác xác minh những gì họ công bố.",
+      "ledgerLabel": "Sổ cái công khai · mẫu trực tiếp",
+      "ledgerMore": "+ còn {{count}} giao dịch khác hôm nay",
+      "ledgerEmpty": "Chưa có giao dịch nào được ghi nhận."
+    },
+    "community": {
+      "eyebrow": "Bởi cộng đồng",
+      "headingLine1": "Không chỉ là vì người Ê Đê.",
+      "headingEm": "Mà là",
+      "headingRest": "do chính người Ê Đê.",
+      "body": "Nội dung văn hóa được các già làng thẩm định. Nhà cung cấp dịch vụ được đại diện cộng đồng xác minh. Quyết định phân phối doanh thu thuộc về hội đồng các bên liên quan người Ê Đê, không phải một hội đồng quản trị doanh nghiệp. KNĂ tồn tại để phục vụ chính ngôi nhà dài mang tên nó.",
+      "stats": [
+        {
+          "label": "nội dung văn hóa được các già làng cộng đồng thẩm định"
+        },
+        {
+          "label": "hoa hồng nền tảng, được giữ ở mức để giá trị luôn thuộc về nơi nó cần thuộc về: cộng đồng"
+        },
+        {
+          "label": "đối tác cộng đồng Ê Đê tham gia giai đoạn thí điểm"
+        }
+      ]
+    },
+    "invitation": {
+      "eyebrow": "Lời mời",
+      "headingLine1": "Tối nay bạn sẽ",
+      "headingEm": "nghỉ lại nơi đâu?",
+      "body": "Ngôi nhà dài rất rộng. Luôn có chỗ cho những du khách đến với thiện chí.",
+      "cta": "Bắt đầu hành trình"
+    },
+    "footer": {
+      "tagline": "Một nền tảng du lịch có trách nhiệm dành cho người Ê Đê tại Đắk Lắk. Được xây dựng cho cuộc thi BKI 2026 bởi sinh viên Trường Đại học Kinh tế Tài chính TP.HCM.",
+      "columns": [
+        {
+          "heading": "Khám phá",
+          "items": [
+            "Văn hóa",
+            "Du lịch",
+            "Chợ",
+            "Cộng đồng"
+          ]
+        },
+        {
+          "heading": "Nền tảng",
+          "items": [
+            "Cách hoạt động",
+            "Minh bạch",
+            "Theo dõi carbon",
+            "Kho lưu trữ"
+          ]
+        }
+      ],
+      "stayInTouch": "Giữ liên lạc",
+      "newsletterBody": "Các quyết định và phân bổ được công bố trên trang cộng đồng ngay khi phát sinh.",
+      "copyright": "© 2026 KNĂ · Bach Khoa Innovation 2026",
+      "stayInTouchCta": "Đọc biên bản"
+    }
+  },
+  "review": {
+    "eyebrow": "Hội đồng duyệt",
+    "title": "Không có gì được đăng cho đến khi có người ở đây đồng ý.",
+    "intro": "Các bài gửi từ các hộ gia đình chờ trong hàng đợi này. Đăng sẽ đưa mục đó vào kho lưu trữ công khai; từ chối thì giữ lại cho hộ gia đình. Dù theo cách nào, lý do đều được ghi lại, và không thể từ chối mà không nêu lý do.",
+    "signInPrompt": "Đăng nhập để tiếp tục.",
+    "signIn": "Đăng nhập",
+    "notCommitteeTitle": "Hàng đợi này thuộc về Hội đồng.",
+    "notCommitteeBody": "Chỉ thành viên Hội đồng Quản trị Cộng đồng mới được duyệt bài gửi. Ghế trong hội đồng do từng buôn đề cử — nền tảng không có quyền trao.",
+    "signedInAs": "Đang đăng nhập với tên {{name}}",
+    "platformStaff": "nhân sự nền tảng",
+    "waiting": "Đang chờ duyệt",
+    "oldestFirst": "Cũ nhất trước, để không có gì phải chờ mãi.",
+    "loading": "Đang tải hàng đợi…",
+    "emptyTitle": "Hàng đợi trống.",
+    "emptyBody": "Mọi bài gửi đều đã được quyết định.",
+    "submitted": "Đã gửi ngày {{date}}",
+    "submittedBy": "Người gửi: {{name}}",
+    "reasonLabel": "Lý do — bắt buộc khi từ chối, không bắt buộc khi đăng",
+    "publish": "Đăng vào kho lưu trữ",
+    "refuse": "Từ chối",
+    "deciding": "Đang ghi nhận…",
+    "decidedTitle": "Đã quyết định",
+    "decidedBody": "Hồ sơ đầy đủ, bao gồm cả các trường hợp từ chối. Đây là điều khiến kho lưu trữ có thể kiểm chứng về sau, chứ không chỉ tại thời điểm đăng.",
+    "published": "Đã đăng",
+    "refused": "Đã từ chối",
+    "decisionError": "Không ghi nhận được quyết định đó. Vui lòng thử lại."
+  },
+  "dashboard": {
+    "eyebrow": "Tài khoản của bạn",
+    "fallbackTitle": "Bảng điều khiển",
+    "verified": "Đã xác minh",
+    "signInPrompt": "Đăng nhập để xem tài khoản của bạn.",
+    "signIn": "Đăng nhập",
+    "noProviderTitle": "Chưa có gì để quản lý ở đây.",
+    "noProviderBody": "Trang này dành cho các hộ lưu trú, hướng dẫn viên và nghệ nhân đăng dịch vụ trên KNĂ. Để trở thành nhà cung cấp, bạn cần được một đại diện cộng đồng trong buôn xác minh.",
+    "queueTitle": "Đơn đặt chờ xác nhận",
+    "queueIntro": "Hãy kiểm tra ngày với hộ gia đình, rồi xác nhận tại đây. Từ chối sẽ giải phóng đơn đặt và gỡ khỏi sổ cái công khai.",
+    "queueEmpty": "Không có gì đang chờ. Mọi đơn đặt đều đã được quyết định.",
+    "arriving": "Đến ngày {{date}} · {{count}} đêm",
+    "arriving_other": "Đến ngày {{date}} · {{count}} đêm",
+    "requested": "đặt ngày {{date}}",
+    "guest_one": "{{count}} khách",
+    "guest_other": "{{count}} khách",
+    "confirm": "Xác nhận",
+    "decline": "Từ chối",
+    "deciding": "Đang ghi nhận…",
+    "earningsEyebrow": "Số tiền đã đến tay bạn",
+    "yours": "của bạn, từ các giao dịch đã xác nhận",
+    "toFund": "vào Quỹ Cộng đồng từ các đơn đặt của bạn",
+    "platformCut": "hoa hồng nền tảng trên các đơn đặt của bạn",
+    "awaiting_one": "đơn đặt đang chờ xác nhận",
+    "awaiting_other": "đơn đặt đang chờ xác nhận",
+    "earningsNote": "Các đơn đặt còn chờ xác nhận không được tính là thu nhập — chưa ai thống nhất ngày. Mọi con số ở đây cũng xuất hiện trên sổ cái công khai.",
+    "yourBookings": "Đơn đặt của bạn",
+    "noBookings": "Chưa có đơn đặt nào.",
+    "statusPending": "Đang chờ xác nhận",
+    "statusConfirmed": "Đã xác nhận",
+    "statusCompleted": "Đã hoàn thành",
+    "statusCancelled": "Đã từ chối",
+    "decisionError": "Không ghi nhận được. Vui lòng thử lại."
+  },
+  "demo": {
+    "label": "Dữ liệu minh hoạ.",
+    "body": "Các hộ gia đình, đơn đặt và số liệu sổ cái ở đây là ví dụ minh hoạ cách nền tảng trình bày thông tin. Đây không phải dữ liệu thật — dữ liệu thực tế sẽ có khi triển khai thí điểm tại thực địa."
+  },
+  "apiError": {
+    "unreachable": "Không kết nối được với API của KNĂ.",
+    "waking": "Dịch vụ có thể đang khởi động lại — quá trình này mất khoảng một phút. Vui lòng thử lại sau giây lát."
+  },
+  "explore": {
+    "eyebrow": "Kho lưu trữ di sản văn hoá số",
+    "title": "Một hồ sơ do chính những người sở hữu nó gìn giữ.",
+    "intro": "Mọi bản ghi âm, câu chuyện và bức ảnh ở đây đều do một hộ gia đình Ê Đê đóng góp và được Hội đồng Quản trị Cộng đồng thẩm định trước khi công bố. Không có gì về cộng đồng được đăng tải mà thiếu tiếng nói của cộng đồng.",
+    "statEntries": "mục đã công bố",
+    "statBuon": "buôn đang đóng góp",
+    "statLanguages": "ngôn ngữ được lưu giữ",
+    "pillarsEyebrow": "Nơi kho lưu trữ bắt đầu",
+    "pillarsHeading": "Ba truyền thống mang phần lớn hiểu biết của người Ê Đê.",
+    "pillars": [
+      {
+        "ede": "Ching Kram",
+        "en": "Cồng Chiêng",
+        "line": "Được UNESCO công nhận năm 2005",
+        "body": "Ở đây, cồng chiêng không phải một nhạc cụ. Đó là một tiếng nói. Mỗi bộ được chỉnh riêng cho một gia đình, được tấu lên trong lễ sinh, mùa gặt và tang lễ, và người nghe đọc nó như đọc một lá thư.",
+        "image": "/images/pillars/ching-kram.jpg",
+        "alt": "Hai người đánh chiêng trong trang phục Ê Đê, in bóng giữa bước chân trên nền hoàng hôn mờ bụi, mỗi người mang một chiếc chiêng bằng lớn."
+      },
+      {
+        "ede": "Knă",
+        "en": "Nhà Dài",
+        "line": "Kiến trúc của gia đình mẫu hệ",
+        "body": "Ngôi nhà lớn lên cùng gia đình. Mỗi khi một người con gái lấy chồng, nhà lại được nối thêm một gian — nên chiều dài của ngôi nhà dài ghi lại bao nhiêu thế hệ đã sống dưới mái ấy.",
+        "image": "/images/pillars/kna-longhouse.jpg",
+        "alt": "Một chiếc cầu thang gỗ chạm khắc dựa vào sàn nhà dài Ê Đê, trên sàn là những chiếc vại gỗ, phía sau là mái tranh hình đầu hồi và khung cửa mở."
+      },
+      {
+        "ede": "Mnga",
+        "en": "Dệt thổ cẩm",
+        "line": "Hoa văn như một dạng chữ viết",
+        "body": "Hoa văn không phải để trang trí. Chúng ghi dấu dòng họ, vùng đất và dịp mà tấm vải được dệt. Một người thợ dệt nhìn tác phẩm của người khác có thể gọi tên ngôi làng nó đến từ đó.",
+        "image": "/images/pillars/mnga-weaving.jpg",
+        "alt": "Một phụ nữ Ê Đê đang dệt trên khung dệt lưng, mặc áo chàm với hoa văn đỏ trắng ở cổ và tay áo, phía sau là một người thợ dệt khác đang làm việc."
+      }
+    ],
+    "entriesPublished_one": "{{count}} mục đã công bố",
+    "entriesPublished_other": "{{count}} mục đã công bố",
+    "photoLabel": "{{name}} — ảnh tư liệu, khung dọc",
+    "browseEyebrow": "Duyệt kho lưu trữ",
+    "browseHeading": "Toàn bộ, được sắp theo hộ gia đình đã chia sẻ.",
+    "filterAll": "Tất cả",
+    "loading": "Đang tải kho lưu trữ…",
+    "emptyCategory": "Chưa có nội dung nào được công bố trong mục này.",
+    "seeEverything": "Xem tất cả",
+    "contributedBy": "Đóng góp bởi {{buon}}",
+    "mediaPendingLabel": "Chưa có phương tiện · ",
+    "mediaPendingBody": "Các bản ghi mục là dữ liệu thật và đã qua kiểm duyệt. Phần âm thanh, tour 360° và phóng sự ảnh thì chưa được lưu trữ — hạ tầng lưu trữ phương tiện là phần tiếp theo của màn hình này.",
+    "phrasesEyebrow": "Trước khi bạn lên đường",
+    "phrasesHeading": "{{count}} câu nói thay đổi cách bạn được đón tiếp.",
+    "phrasesBody": "Tiếng Ê Đê được nói hằng ngày trong buôn nhưng hiếm khi được du khách dùng. Học dù chỉ một câu chào cũng cho thấy bạn đến để gặp gỡ con người, chứ không phải để ngắm nhìn họ.",
+    "phrasesScope": "Lời ăn tiếng nói thường ngày được công bố theo quyết định của Hội đồng, tháng 4 năm 2026. Ngôn ngữ nghi lễ và ngôn ngữ riêng của dòng họ thì không, và sẽ không xuất hiện ở đây.",
+    "phrasesAudio": "Âm thanh phát âm đã được thu nhưng chưa được lưu trữ trực tuyến.",
+    "handoffHeading": "Đọc đã đủ. Sẵn sàng ghé thăm?",
+    "handoffBody": "Mọi hộ gia đình trong kho lưu trữ này đều đón khách, dẫn tour hoặc bán hàng qua KNĂ.",
+    "handoffCta": "Xem các trải nghiệm"
+  },
+  "travel": {
+    "eyebrow": "Trải nghiệm tại Đắk Lắk",
+    "title": "Mỗi dịch vụ ở đây là mái nhà, công việc hoặc lịch sinh hoạt của một ai đó.",
+    "intro": "Các hộ gia đình Ê Đê tự đặt giá, tự chọn ngày và tự quy định nếp nhà. KNĂ xác minh họ, tiếp nhận đơn đặt, và cho bạn thấy phần nào đến được tay họ.",
+    "verifiedTitle": "“Đã xác minh” ở đây nghĩa là gì",
+    "verifiedBody": "Một đại diện cộng đồng đã đến tận nhà, xác nhận người đăng dịch vụ chính là người đón khách, và kiểm chứng rằng nội dung văn hoá được mô tả thuộc quyền chia sẻ của họ. Việc xác minh được làm mới mỗi mùa.",
+    "searchLabel": "Tìm trải nghiệm",
+    "searchPlaceholder": "Tìm theo chủ nhà, buôn hoặc nghề thủ công",
+    "filterAll": "Tất cả",
+    "filterAllBuon": "Tất cả các buôn",
+    "categoryStay": "Lưu trú",
+    "categoryGuidedWalk": "Đi bộ có hướng dẫn",
+    "categoryCraftSession": "Buổi học nghề",
+    "categoryCeremony": "Nghi lễ",
+    "loading": "Đang tải các trải nghiệm…",
+    "available_one": "Có {{count}} trải nghiệm",
+    "available_other": "Có {{count}} trải nghiệm",
+    "emptyTitle": "Chưa có gì phù hợp với lựa chọn đó.",
+    "emptyBody": "Mới có bốn buôn tham gia. Hãy thử nới rộng bộ lọc.",
+    "clearFilters": "Xoá bộ lọc",
+    "photoLabel": "{{title}} — {{buon}}",
+    "verified": "Đã xác minh",
+    "hostedBy": "Chủ nhà: {{name}} · {{buon}}",
+    "carbonEstimate": "Ước tính carbon: {{rating}}",
+    "requested": "Đã gửi yêu cầu ✓",
+    "arrivalDate": "Ngày đến",
+    "nights": "Số đêm",
+    "guests": "Số khách",
+    "book": "Đặt chỗ",
+    "sending": "Đang gửi…",
+    "needDate": "Vui lòng chọn ngày đến trước.",
+    "bookingError": "Không gửi được yêu cầu đặt chỗ. Vui lòng thử lại.",
+    "splitEyebrow": "Với mỗi đơn đặt",
+    "splitHeading": "Tỷ lệ phân chia nằm trong hợp đồng, không phải trong lời quảng cáo.",
+    "splitBody": "Mọi đơn đặt đều được tính theo cùng một cách trên máy chủ và ghi vào sổ cái công khai ngay khi bạn đặt — bạn có thể xem tại trang Cộng đồng.",
+    "split": [
+      {
+        "pct": "90%",
+        "who": "Cho nhà cung cấp",
+        "note": "Trả thẳng cho hộ gia đình hoặc hợp tác xã đón tiếp bạn."
+      },
+      {
+        "pct": "3%",
+        "who": "Cho Quỹ Cộng đồng",
+        "note": "Dành cho công tác di sản và bảo tồn, do Hội đồng Quản trị Cộng đồng phân bổ."
+      },
+      {
+        "pct": "7%",
+        "who": "Cho KNĂ",
+        "note": "Vận hành nền tảng, công tác xác minh và đào tạo nhà cung cấp."
+      }
+    ],
+    "splitNote": "Mua hàng trên chợ áp dụng tỷ lệ khác: nghệ nhân giữ lại 95%.",
+    "handoffHeading": "Muốn mang một món về nhà?",
+    "handoffBody": "Chính những hộ gia đình này cũng bán sản phẩm qua chợ, với cùng quy trình xác minh.",
+    "handoffCta": "Ghé thăm chợ",
+    "filterByBuon": "Lọc theo buôn"
+  },
+  "marketplace": {
+    "eyebrow": "Chợ cộng đồng",
+    "title": "Làm chậm, bởi một người, một cách có chủ ý.",
+    "intro": "Nghệ nhân tự đặt giá và giữ lại 95% số tiền bạn trả — được xác minh bởi chính những đại diện cộng đồng đã xác minh các chủ nhà và hướng dẫn viên.",
+    "statArtisanShare": "ở lại với nghệ nhân",
+    "statMakers": "nghệ nhân đang bán trong giai đoạn thí điểm",
+    "statBuon": "buôn có mặt",
+    "certEyebrow": "Sắp có trên chợ",
+    "certHeading": "Tính xác thực mà bạn có thể tự kiểm chứng, không phải một cái nhãn buộc bạn phải tin.",
+    "certBody": "Dự kiến: mỗi sản phẩm sẽ được đăng ký ngay khi nghệ nhân hoàn thành, để khi quét mã, bạn mở ra đúng hồ sơ đó — ai làm, làm ở đâu, mất bao lâu — cùng với khoản tiền đã đến tay hộ gia đình. Mọi đơn hàng hiện nay vẫn được Hội đồng Quản trị Cộng đồng xác minh; riêng giấy chứng nhận quét được thì còn nằm trong lộ trình.",
+    "certNote": "Giấy chứng nhận sẽ do Hội đồng Quản trị Cộng đồng cấp, không phải KNĂ. Chỉ sản phẩm do hộ gia đình Ê Đê đã đăng ký làm ra mới được cấp.",
+    "certLabel": "Giấy chứng nhận nguồn gốc · bản mẫu",
+    "certReference": "Mã tham chiếu",
+    "certMaker": "Nghệ nhân",
+    "certMakerValue": "Amí Lan · đăng ký năm 2026",
+    "certBuon": "Buôn",
+    "certTechnique": "Kỹ thuật",
+    "certTechniqueValue": "Dệt khung lưng, nhuộm tự nhiên",
+    "certTime": "Thời gian hoàn thành",
+    "certTimeValue": "11 tuần",
+    "certReviewedBy": "Đơn vị thẩm định",
+    "certReviewedByValue": "Hội đồng Quản trị Cộng đồng",
+    "certToMaker": "Đến tay nghệ nhân",
+    "searchLabel": "Tìm trong chợ",
+    "searchPlaceholder": "Tìm theo nghệ nhân, chất liệu hoặc sản phẩm",
+    "filterAll": "Tất cả",
+    "categoryTextile": "Thổ cẩm",
+    "categoryWoodwork": "Đồ gỗ",
+    "categoryBasketry": "Đan lát",
+    "categoryJewellery": "Trang sức",
+    "categoryCoffee": "Cà phê",
+    "loading": "Đang tải sản phẩm…",
+    "listed_one": "Có {{count}} sản phẩm",
+    "listed_other": "Có {{count}} sản phẩm",
+    "emptyTitle": "Chưa có sản phẩm nào trong mục này.",
+    "emptyBody": "Nghệ nhân chỉ đăng bán khi sản phẩm hoàn thành, nên hàng về chậm là điều có chủ ý.",
+    "seeEverything": "Xem tất cả",
+    "photoLabel": "{{title}} — {{maker}}",
+    "oneOfAKind": "Độc bản",
+    "verifiedMaker": "Nghệ nhân đã xác minh",
+    "soldOut": "Đã bán hết",
+    "lastOne": "Còn một chiếc cuối",
+    "available": "Còn {{count}}",
+    "ordered": "Đã đặt ✓",
+    "quantity": "Số lượng",
+    "buy": "Mua",
+    "placing": "Đang đặt…",
+    "orderError": "Không đặt được đơn hàng. Vui lòng thử lại.",
+    "notesEyebrow": "Trước khi bạn đặt hàng",
+    "notesHeading": "Làm thủ công nghĩa là chậm, và đôi khi nghĩa là không.",
+    "notes": [
+      {
+        "h": "Số lượng là thật",
+        "b": "Nếu sản phẩm ghi còn một, thì đúng là chỉ còn một. Không món nào ở đây được làm nhân bản để chạy theo nhu cầu, và nghệ nhân có quyền từ chối làm lại."
+      },
+      {
+        "h": "Giao hàng cần thời gian",
+        "b": "Hàng được gửi từ Đắk Lắk mỗi tuần một lần. Trong nước xin chờ hai đến ba tuần, quốc tế lâu hơn."
+      },
+      {
+        "h": "Có những sản phẩm không bán",
+        "b": "Một số hiện vật nghi lễ được ghi lại trong kho lưu trữ văn hoá nhưng không bao giờ được rao bán. Hội đồng quyết định điều gì ở lại trong buôn."
+      },
+      {
+        "h": "Giá là của nghệ nhân",
+        "b": "KNĂ không giảm giá, không chạy khuyến mãi và không mặc cả thay nghệ nhân. Bạn thấy đúng con số họ đưa ra."
+      }
+    ],
+    "handoffHeading": "Chưa rõ mình đang xem gì?",
+    "handoffBody": "Trợ lý có thể giải thích một hoa văn, một kỹ thuật, hoặc công dụng truyền thống của một món đồ.",
+    "handoffCta": "Hỏi trợ lý"
+  },
+  "community": {
+    "eyebrow": "Không gian cộng đồng",
+    "title": "Được quản trị công khai, không phải sau cánh cửa đóng.",
+    "intro": "Đại diện của các buôn đã tham gia quyết định điều gì được công bố, Quỹ Cộng đồng chi cho việc gì, và ai được phép đăng dịch vụ trên nền tảng. Biên bản và các khoản phân bổ đều công khai, kể cả những quyết định đi ngược lại lợi ích của nền tảng.",
+    "statMembers": "thành viên hội đồng, tất cả đều là người Ê Đê",
+    "statMonthly": "Hằng tháng",
+    "statMeetings": "cuộc họp, biên bản công bố trong vòng một tuần",
+    "statNoVote": "nhân sự KNĂ có quyền biểu quyết",
+    "committeeEyebrow": "Hội đồng Quản trị Cộng đồng",
+    "committeeHeading": "Người của buôn, không phải chuyên gia từ nơi khác.",
+    "committeeBody": "Thành viên do chính buôn của mình đề cử và giữ nhiệm kỳ một năm. KNĂ dự họp để trả lời câu hỏi và không có quyền biểu quyết.",
+    "portrait": "Chân dung",
+    "servingSince": "Tham gia từ {{date}}",
+    "fundEyebrow": "Quỹ Cộng đồng",
+    "fundHeading": "Ba phần trăm của mỗi đơn đặt, chi tiêu từng khoản một.",
+    "fundBody": "Quỹ là khoản chuyển tiếp, không phải doanh thu của nền tảng. Hội đồng quyết định Quỹ chi cho việc gì và công bố phân bổ mỗi quý.",
+    "fundAllocated": "Đã phân bổ trong {{quarter}}",
+    "minutesEyebrow": "Biên bản",
+    "minutesHeading": "Bao gồm cả những quyết định nói không.",
+    "minutesBody": "Một hồ sơ quản trị chỉ chứa các quyết định chấp thuận thì không phải là hồ sơ quản trị. Các trường hợp từ chối được công bố chi tiết ngang với những quyết định được thông qua.",
+    "statusPassed": "Đã thông qua",
+    "statusDeclined": "Đã từ chối",
+    "statusOpen": "Đang mở",
+    "boardEyebrow": "Diễn đàn nhà cung cấp",
+    "boardHeading": "Nơi các chủ nhà trò chuyện với nhau.",
+    "boardBody": "Dự kiến sẽ có hai không gian: một nơi để các nhà cung cấp đã xác minh và thành viên Hội đồng trao đổi với nhau, và một nơi để du khách đặt câu hỏi và chia sẻ trải nghiệm. Cả hai đều ai cũng đọc được.",
+    "boardNotBuiltLabel": "Chưa xây dựng · ",
+    "boardNotBuiltBody": "Cả hai không gian đều chưa được xây dựng và chưa ai đăng bài. Các thẻ bên dưới là ví dụ về những gì các chủ nhà nói rằng họ sẽ dùng diễn đàn nhà cung cấp để làm; phía du khách cũng sẽ hoạt động tương tự.",
+    "threads": [
+      {
+        "author": "Một hướng dẫn viên",
+        "role": "Buôn Đôn",
+        "title": "Chuyến đi bộ rừng chuyển sang khởi hành sớm hơn từ tháng Sáu",
+        "body": "Cái nắng sau mười giờ là quá sức với khách và với cả tôi. Từ ngày 1 tháng Sáu đến mùa mưa, các chuyến sẽ khởi hành lúc sáu giờ rưỡi. Nếu bà con đi cùng tuyến, xin cập nhật lại dịch vụ của mình."
+      },
+      {
+        "author": "Một người thợ dệt",
+        "role": "Buôn Kli A",
+        "title": "Nguyên liệu chàm năm nay thiếu",
+        "body": "Ruộng chàm bị ngập hồi tháng Tư. Tôi chỉ còn đủ cho chừng bốn tấm nữa. Ai ở Trấp còn dư lá, tôi xin đổi mây lấy."
+      },
+      {
+        "author": "Một chủ nhà",
+        "role": "Buôn Trấp",
+        "title": "Khách cứ ngỏ ý muốn phụ nấu ăn",
+        "body": "Bà con có gặp chuyện này không? Tôi không ngại, nhưng bếp nhà tôi chật. Tôi đang nghĩ hay là mình đưa hẳn việc đó thành một hoạt động có đăng ký, thay vì để nó xảy ra ngẫu nhiên."
+      }
+    ],
+    "feedbackEyebrow": "Sau chuyến đi của bạn",
+    "feedbackHeading": "Phản hồi của bạn đến với Hội đồng, không đến một thuật toán chấm sao.",
+    "feedbackBody": "KNĂ không có hệ thống chấm sao. Các ý kiến được đọc tại cuộc họp hằng tháng, và nếu liên quan đến một chủ nhà thì được chia sẻ với hộ gia đình đó trước tiên.",
+    "feedbackNotes": [
+      {
+        "h": "Vì sao không chấm sao",
+        "b": "Chấm bốn trên năm cho một mái nhà là phán xét cả một gia đình, và lời phán xét ấy nằm lại mãi mãi. Nhận xét bằng lời chuyển tải cùng lượng thông tin mà không phải trả cái giá đó."
+      },
+      {
+        "h": "Một khiếu nại sẽ đi về đâu",
+        "b": "Nó được gửi đồng thời tới chủ nhà và Hội đồng. Những vấn đề nghiêm trọng hoặc lặp lại có thể khiến dịch vụ bị tạm ngưng, và quyết định đó sẽ xuất hiện trong biên bản."
+      }
+    ],
+    "closingHeading": "Toàn bộ là như vậy.",
+    "closingBody": "Kho lưu trữ, các trải nghiệm, chợ, sổ cái, và những con người đưa ra quyết định.",
+    "closingCta": "Trở về từ đầu",
+    "portraitOf": "Chân dung {{name}}"
+  },
+  "assistant": {
+    "eyebrow": "Trợ lý du lịch",
+    "title": "Hãy hỏi những câu khó xử ở đây, đừng để đến trước cửa nhà.",
+    "intro": "Phần lớn du khách gây mất lòng một cách vô tình, chỉ vì không ai nói cho họ biết. Trợ lý được xây dựng trên kho lưu trữ của cộng đồng và sẽ nói thẳng với bạn điều gì là phù hợp.",
+    "prototypeNote": "Đây là bản thử nghiệm. Hiện tại câu trả lời lấy từ một kịch bản cố định, và chỉ bốn câu hỏi gợi ý bên dưới là đã được kết nối.",
+    "opening": [
+      "Tôi là trợ lý của KNĂ. Tôi có thể giúp bạn lên lộ trình, giải thích những gì bạn sắp thấy, hoặc chỉ cho bạn cách ứng xử ở một nơi để bạn không vô tình làm mất lòng ai.",
+      "Những điều tôi nói về phong tục Ê Đê đều lấy từ kho lưu trữ của cộng đồng, đã được các già làng thẩm định. Nếu tôi chưa được cho biết điều gì, tôi sẽ nói vậy thay vì đoán."
+    ],
+    "tryOne": "Thử một trong những câu này",
+    "prompts": [
+      {
+        "label": "Tôi nên chào người lớn tuổi thế nào?",
+        "reply": "Hãy để người lớn tuổi lên tiếng trước. Một câu đáp ngắn và hơi cúi đầu là đủ — cách chào của người Ê Đê không ồn ào, và một màn tự giới thiệu dài dòng, hào hứng có thể bị xem là suồng sã.\n\nNếu bạn muốn một câu cụ thể, “Hê drei” dùng được vào bất cứ giờ nào. “Bơni” là cảm ơn.\n\nMột điều du khách hay nhầm: trong gia đình mẫu hệ, người cần chào thường là người phụ nữ lớn tuổi nhất, kể cả khi ra đón bạn ở cầu thang là một người đàn ông."
+      },
+      {
+        "label": "Tôi được chụp ảnh những gì?",
+        "reply": "Phần lớn sinh hoạt thường ngày đều có thể chụp, miễn là bạn xin phép trước. Có ba điều nên tránh:\n\n• Bàn thờ tổ tiên bên trong nhà dài. Không chụp, và thường cũng không bàn tới với khách.\n• Cồng chiêng tang lễ hoặc một đám tang đang diễn ra.\n• Trẻ em, khi không có cha mẹ ở đó.\n\nNghi lễ mỗi nhà mỗi khác. Nếu bạn đặt qua KNĂ, phần nếp nhà ghi trên phiếu đặt chỗ sẽ cho biết gia đình đó đã đồng ý những gì."
+      },
+      {
+        "label": "Lên giúp tôi lịch trình ba ngày",
+        "reply": "Đây là một khung phù hợp cho lần đầu ghé thăm, ít di chuyển, mỗi ngày một buôn:\n\nNgày 1 — Đến Buôn Ma Thuột, chiều ghé Buôn Akô Dhông. Đi bộ một quãng ngắn, gặp chủ nhà, ăn cùng gia đình. Nghỉ lại qua đêm.\n\nNgày 2 — Sáng học dệt cùng Amí Lan ở Buôn Kli A. Chiều tự do. Tối xem đội cồng chiêng ở Buôn Đôn nếu lịch mùa vụ còn ngày trống.\n\nNgày 3 — Đi bộ ven rừng cùng Y Wik, chiều ghé hợp tác xã cà phê. Tối khởi hành về.\n\nBạn có muốn tôi kiểm tra xem những ngày nào thực sự còn chỗ không?"
+      },
+      {
+        "label": "Cồng Chiêng là gì?",
+        "reply": "Là một bộ cồng chiêng đã được chỉnh âm, và toàn bộ tập tục xoay quanh nó. UNESCO đã công nhận Không gian Văn hoá Cồng chiêng Tây Nguyên vào năm 2005.\n\nĐiều quan trọng hơn cả sự công nhận ấy: cồng chiêng không được tấu lên để biểu diễn cho khán giả theo nghĩa thông thường. Mỗi bộ được chỉnh riêng cho một gia đình và được đánh trong lễ sinh, mùa gặt và tang lễ. Người trong buôn nghe là biết đang đánh cho dịp nào.\n\nĐó là lý do KNĂ chỉ đăng các buổi lễ khi làng vốn đã tổ chức, chứ không sắp lịch riêng cho du khách."
+      }
+    ],
+    "fallback": "Điều đó chưa có trong kho lưu trữ của cộng đồng, nên tôi không muốn đoán bừa.\n\nChủ nhà của bạn là người phù hợp hơn để hỏi, và việc hỏi thường được đón nhận. Nếu đó là điều cộng đồng cho rằng du khách nên biết, nó có thể được gửi lên Hội đồng Quản trị để đưa vào kho lưu trữ.",
+    "fallbackNote": "Mọi câu khác bạn gõ vào sẽ nhận được câu trả lời “tôi không biết” của trợ lý, và điều đó là có chủ ý. Bạn cứ thử xem.",
+    "assistantName": "Trợ lý KNĂ",
+    "archiveBacked": "Dựa trên kho lưu trữ",
+    "inputPlaceholder": "Hỏi về phong tục, một địa điểm, hoặc chuyến đi của bạn",
+    "send": "Gửi",
+    "guardrailsEyebrow": "Giới hạn của trợ lý",
+    "guardrailsHeading": "Một trợ lý nói về một nền văn hoá thì cần có giới hạn.",
+    "guardrails": [
+      {
+        "h": "Trợ lý dẫn nguồn, hoặc từ chối trả lời",
+        "b": "Các câu trả lời về văn hoá đều lấy từ kho lưu trữ đã thẩm định. Ngoài phạm vi đó, trợ lý sẽ nói thẳng thay vì lấp đầy chỗ trống."
+      },
+      {
+        "h": "Trợ lý không bao giờ nói thay một hộ gia đình",
+        "b": "Nếp nhà mỗi nơi mỗi khác. Trợ lý sẽ chỉ bạn hỏi chủ nhà hoặc xem phiếu đặt chỗ, thay vì khái quát hoá."
+      },
+      {
+        "h": "Trợ lý không bán hàng",
+        "b": "Gợi ý dựa trên điều bạn hỏi và những gì đang có, không dựa trên thứ mang lại nhiều tiền hơn cho nền tảng."
+      },
+      {
+        "h": "Cộng đồng có quyền đính chính",
+        "b": "Các già làng và Hội đồng Quản trị có thể báo lỗi một câu trả lời. Phần đính chính được đưa vào kho lưu trữ, không phải vào một mô hình riêng tư nào."
+      }
+    ],
+    "handoffHeading": "Sẵn sàng tính dấu chân carbon của bạn?",
+    "handoffBody": "Trợ lý có thể ước tính giúp bạn, hoặc bạn tự tính trong công cụ theo dõi tác động.",
+    "handoffCta": "Mở công cụ theo dõi"
+  },
+  "carbon": {
+    "eyebrow": "Theo dõi carbon",
+    "title": "Con số mà hãng bay không cho bạn thấy.",
+    "intro": "Phần lớn dấu chân carbon của một chuyến đi nằm ở hành trình, không phải ở kỳ lưu trú. Công cụ này cho bạn thấy toàn bộ, rồi chuyển khoản bù đắp đến một dự án do chính cộng đồng vận hành.",
+    "communityLedTitle": "Do cộng đồng dẫn dắt, không phải do thuật toán",
+    "communityLedBody": "Các dự án do chính buôn đề xuất, được Hội đồng Quản trị Cộng đồng phê duyệt, và do các hộ gia đình trực tiếp làm việc báo cáo kết quả.",
+    "travellingFrom": "Khởi hành từ",
+    "originHcmc": "Thành phố Hồ Chí Minh",
+    "originHanoi": "Hà Nội",
+    "originDanang": "Đà Nẵng",
+    "originAsia": "Nơi khác tại châu Á",
+    "originEurope": "Châu Âu",
+    "howYouArrive": "Bạn đến bằng cách nào",
+    "modeFlight": "Máy bay",
+    "modeCoach": "Xe khách",
+    "modeCar": "Ô tô",
+    "noOverland": "Không có phương án đường bộ cho điểm khởi hành này.",
+    "nightsLabel": "Số đêm ở buôn",
+    "estimatedFootprint": "Dấu chân carbon ước tính",
+    "rowTravel": "Di chuyển đến Đắk Lắk",
+    "rowStay_one": "Ở lại {{count}} đêm",
+    "rowStay_other": "Ở lại {{count}} đêm",
+    "rowLocal": "Đi lại giữa các buôn",
+    "estimateNote": "Đây là ước tính, không phải kết quả đo đạc. Các con số mang tính tham khảo và sẽ được thay bằng bộ dữ liệu đã kiểm chứng trước khi nền tảng vận hành chính thức.",
+    "projectsEyebrow": "Khoản bù đắp đi về đâu",
+    "projectsHeading": "Ba dự án, đều nằm trong vòng một giờ đi từ nơi bạn lưu trú.",
+    "projectsBody": "Chọn một dự án và khoản đóng góp sẽ được chuyển thẳng vào tài khoản của dự án đó, không vào một quỹ chung. Với hai trong ba dự án, bạn có thể trực tiếp tham gia công việc vào cuối kỳ lưu trú.",
+    "projects": [
+      {
+        "id": "yokdon",
+        "name": "Trồng lại vùng đệm Yok Đôn",
+        "led": "Các hộ gia đình Buôn Đôn",
+        "unit": "cây bản địa, được chăm sóc trong ba năm",
+        "body": "Vùng đệm bị suy thoái ở rìa vườn quốc gia, được trồng lại bằng cây họ dầu và do chính các hộ canh tác bên cạnh chăm sóc. Tỷ lệ sống được đếm hằng năm, không phải tại thời điểm trồng.",
+        "image": "/images/projects/yokdon.jpg",
+        "alt": "Ba người mặc đồng phục kiểm lâm ngồi giữa những bầu cây con dưới giàn che vườn ươm, một người cầm cây giống trong bầu đất, một người khác ghi chép trên bảng kẹp hồ sơ."
+      },
+      {
+        "id": "lak",
+        "name": "Trồng rừng đầu nguồn hồ Lắk",
+        "led": "Các hộ gia đình Buôn Trấp",
+        "unit": "tre và cây gỗ dọc bờ hồ",
+        "body": "Trồng cây ven bờ để làm chậm xói mòn xuống lòng hồ. Thực hiện vào mùa mưa, khi cây con bén rễ mà không cần tưới.",
+        "image": "/images/projects/lak.jpg",
+        "alt": "Một người đội nón lá và mặc áo dệt hoa văn đỏ xanh, nhìn từ phía sau, đang ngắm hồ Lắk về phía dãy đồi thấp, lau sậy mọc lên từ vùng nước nông."
+      },
+      {
+        "id": "corridor",
+        "name": "Duy trì hành lang voi",
+        "led": "Nhóm bảo tồn Buôn Đôn",
+        "unit": "phát quang sinh cảnh và trồng cây thức ăn",
+        "body": "Hỗ trợ việc chuyển đổi khỏi hình thức cưỡi voi, bằng cách tài trợ sinh cảnh và nguồn thức ăn cho mô hình du lịch quan sát voi.",
+        "image": "/images/projects/corridor.jpg",
+        "alt": "Một già làng trong trang phục nghi lễ Ê Đê, đầu quấn khăn đỏ, đưa bát thức ăn cho một con voi nhà và với tay chạm lên đầu voi; con voi không mang bành."
+      }
+    ],
+    "joinIn": "Cùng tham gia",
+    "yourContribution": "Khoản đóng góp của bạn",
+    "offsetting": "Bù đắp {{kg}} kg thông qua",
+    "ledBy": ", do {{led}} thực hiện.",
+    "joinableYes": " Bạn được mời cùng trồng cây vào ngày cuối của kỳ lưu trú.",
+    "joinableNo": " Dự án này được nhóm bảo tồn duy trì quanh năm.",
+    "perPerson": "một khoản đóng góp, cho mỗi người",
+    "addToBooking": "Thêm vào đơn đặt của tôi",
+    "afterwardsEyebrow": "Sau đó thì sao",
+    "afterwardsHeading": "Một khoản bù đắp bạn có thể theo dõi, như mọi khoản thanh toán khác.",
+    "afterwardsBody": "Các khoản bù đắp nằm trên cùng sổ cái công khai với đơn đặt chỗ và đơn mua hàng. Bạn có thể thấy khoản nào đã được nhận và ai nhận.",
+    "afterwardsNote": "Tỷ lệ cây sống được các hộ gia đình vận hành dự án công bố hằng năm. Một đợt trồng thất bại sẽ được ghi nhận đúng là thất bại.",
+    "ledgerSample": "Bút toán sổ cái · mẫu",
+    "ledgerReference": "Mã tham chiếu",
+    "ledgerContribution": "Khoản đóng góp",
+    "ledgerProject": "Dự án",
+    "ledgerReceivedBy": "Đơn vị nhận",
+    "ledgerPlanted": "Đã trồng",
+    "ledgerPlantedValue": "18 Th3 2026 · 41 cây con",
+    "ledgerSurvival": "Tỷ lệ sống năm 1",
+    "ledgerSurvivalValue": "38 trên 41",
+    "handoffHeading": "Ai quyết định dự án nào được tài trợ?",
+    "handoffBody": "Hội đồng Quản trị Cộng đồng. Biên bản, quyết định và các khoản phân bổ quỹ của họ đều được công bố tại không gian cộng đồng.",
+    "handoffCta": "Xem không gian cộng đồng",
+    "attachEyebrow": "Thêm khoản này vào một chuyến đi",
+    "signedOut": "Đăng nhập để thêm khoản bù đắp vào một đơn đặt chỗ của bạn.",
+    "signIn": "Đăng nhập",
+    "noBookings": "Bạn chưa có đơn đặt chỗ nào.",
+    "noBookingsBody": "Khoản bù đắp được thanh toán cùng chuyến đi, nên cần có một chuyến đi để gắn vào. Hãy đặt một trải nghiệm và nó sẽ xuất hiện ở đây.",
+    "seeExperiences": "Xem các trải nghiệm",
+    "chooseBooking": "Chọn đơn đặt chỗ",
+    "bookingOption": "{{title}} · đến ngày {{date}}",
+    "onlyBooking": "Sẽ thêm vào chuyến đi của bạn tại {{title}}, đến ngày {{date}}.",
+    "joinLabel": "Tôi muốn cùng trồng cây vào ngày cuối của chuyến đi",
+    "joinUnavailable": "Dự án này được duy trì quanh năm và không nhận người đến phụ giúp.",
+    "attach": "Thêm vào đơn đặt của tôi",
+    "attaching": "Đang thêm…",
+    "attached": "Đã thêm vào đơn đặt chỗ của bạn.",
+    "attachError": "Không thêm được. Vui lòng thử lại.",
+    "replaceNote": "Đơn đặt này đã có khoản bù đắp cho {{project}}. Thêm lần nữa sẽ thay thế khoản cũ chứ không tính tiền hai lần.",
+    "remove": "Gỡ bỏ",
+    "removed": "Đã gỡ khoản bù đắp.",
+    "pendingNote": "Khoản này sẽ lên sổ cái công khai khi điều phối viên xác nhận đơn đặt của bạn — đúng theo quy tắc mà chính chuyến đi tuân theo.",
+    "howToTakePart": "Bạn muốn tham gia theo cách nào?",
+    "optionInPerson": "Cùng trồng cây",
+    "optionInPersonBody": "Có một buổi diễn ra {{range}}, khi bạn đang ở đây. Hãy đến cùng làm — không mất phí.",
+    "optionDonate": "Đóng góp",
+    "optionDonateBody": "{{amount}} cho dự án, sẽ lên sổ cái công khai khi đơn đặt của bạn được xác nhận.",
+    "free": "Miễn phí",
+    "internationalRateNote": "Đã điều chỉnh cho hành trình dài. Quỹ Cộng đồng đã chi trả cho cây giống, nên khoản này dành cho chi phí tổ chức buổi trồng chứ không phải mua lại cây lần nữa.",
+    "communityFundAlreadyCovers": "Mỗi đơn đặt chỗ đã trích 3% cho Quỹ Cộng đồng, và chính khoản đó mua và chăm sóc cây giống. Phần ở đây là cộng thêm, không phải thay thế.",
+    "noSessions": "Được duy trì quanh năm, nên không có buổi nào để tham dự.",
+    "ledgerInPersonContribution": "một ngày công",
+    "ledgerDonateContribution": "cho chi phí tổ chức buổi trồng",
+    "ledgerWorkNoMoney": "Không có tiền chuyển đi, nên không có dòng nào trên sổ cái — sổ cái ghi lại những khoản đã trả.",
+    "optionInPersonUnavailable": "Không có buổi nào diễn ra trong thời gian bạn lưu trú. Gần nhất là {{range}}.",
+    "optionInPersonNoSessions": "Dự án này được duy trì quanh năm, nên không có buổi nào để tham gia.",
+    "sessionRange": "{{start}} – {{end}}",
+    "optionNextSession": "Đăng ký buổi kế tiếp",
+    "optionNextSessionBody": "{{range}}, sau khi bạn rời đi. Bạn sẽ được ghi danh và được báo khi buổi đó được xác nhận. Không mất phí.",
+    "optionNextSessionAlt": "Hoặc quay lại vào buổi sau đó, {{range}}.",
+    "nextSessionShort": "Buổi kế tiếp {{range}}"
+  },
+  "imageSlot": {
+    "fallback": "Hình ảnh"
+  },
+  "account": {
+    "eyebrow": "Tài khoản của bạn",
+    "title": "Tất cả những gì bạn đã làm ở đây.",
+    "intro": "Thông tin của bạn, cùng hồ sơ mọi đơn đặt chỗ, đơn mua và đóng góp — kể cả phần đã đến tay hộ gia đình ở đầu bên kia.",
+    "signInPrompt": "Đăng nhập để xem tài khoản của bạn.",
+    "signIn": "Đăng nhập",
+    "loading": "Đang tải tài khoản của bạn…",
+    "memberSince": "Đồng hành cùng KNĂ từ {{date}}",
+    "summaryEyebrow": "Những gì bạn đã gửi đến Đắk Lắk",
+    "spent": "tổng số tiền đã trả",
+    "toProviders": "đến thẳng các hộ gia đình",
+    "toFund": "vào Quỹ Cộng đồng",
+    "settledOnly": "Chỉ tính các đơn đặt đã xác nhận và đơn mua đã thanh toán. Những đơn còn chờ điều phối viên được liệt kê bên dưới nhưng không tính ở đây — chưa ai thống nhất ngày thì chưa thành tiền.",
+    "detailsTitle": "Thông tin của bạn",
+    "fullName": "Họ và tên",
+    "email": "Email",
+    "emailFixed": "Địa chỉ đăng nhập. Việc thay đổi cần một email xác nhận, mà KNĂ hiện chưa gửi được.",
+    "language": "Ngôn ngữ",
+    "english": "English",
+    "vietnamese": "Tiếng Việt",
+    "save": "Lưu",
+    "saving": "Đang lưu…",
+    "saved": "Đã lưu.",
+    "saveError": "Không lưu được. Vui lòng thử lại.",
+    "passwordTitle": "Đổi mật khẩu",
+    "passwordNote": "Đổi mật khẩu sẽ đăng xuất khỏi mọi thiết bị khác. Đó chính là mục đích của việc đổi.",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "changePassword": "Đổi mật khẩu",
+    "changing": "Đang đổi…",
+    "passwordChanged": "Đã đổi mật khẩu. Các thiết bị khác đã được đăng xuất.",
+    "passwordError": "Không đổi được mật khẩu. Vui lòng thử lại.",
+    "activityTitle": "Hoạt động của bạn",
+    "activityEmpty": "Chưa có gì.",
+    "activityEmptyBody": "Đơn đặt chỗ, đơn mua trên chợ và các đóng góp cho kho lưu trữ đều hiện ở đây.",
+    "filterAll": "Tất cả",
+    "filterBookings": "Đơn đặt chỗ",
+    "filterOrders": "Đơn mua",
+    "filterContributions": "Đóng góp",
+    "kindBooking": "Đơn đặt chỗ",
+    "kindOrder": "Đơn mua",
+    "kindContribution": "Đóng góp kho lưu trữ",
+    "arriving": "Đến ngày {{date}} · {{count}} đêm",
+    "arriving_other": "Đến ngày {{date}} · {{count}} đêm",
+    "guests_one": "{{count}} khách",
+    "guests_other": "{{count}} khách",
+    "items_one": "{{count}} sản phẩm",
+    "items_other": "{{count}} sản phẩm",
+    "from": "từ {{name}}",
+    "ofWhich": "trong đó {{provider}} đã đến tay hộ gia đình",
+    "andFund": " · {{fund}} vào Quỹ",
+    "placedOn": "Đặt ngày {{date}}",
+    "submittedOn": "Gửi ngày {{date}}",
+    "committeeNote": "Ghi chú của Hội đồng: {{note}}",
+    "statusPENDING": "Đang chờ xác nhận",
+    "statusCONFIRMED": "Đã xác nhận",
+    "statusCOMPLETED": "Đã hoàn thành",
+    "statusCANCELLED": "Đã huỷ",
+    "statusPAID": "Đã thanh toán",
+    "statusFULFILLED": "Đã gửi",
+    "statusIN_REVIEW": "Đang chờ Hội đồng",
+    "statusPUBLISHED": "Đã đăng",
+    "statusREJECTED": "Không được đăng",
+    "statusDRAFT": "Bản nháp",
+    "filterOffsets": "Bù đắp carbon",
+    "offsetTitle": "Khoản bù đắp carbon",
+    "offsetLine": "{{kg}} kg thông qua {{project}}",
+    "offsetJoining": "Bạn sẽ cùng trồng cây vào ngày cuối của chuyến đi",
+    "offsetNotJoining": "Do nhóm bảo tồn duy trì quanh năm",
+    "offsetPending": "Sẽ lên sổ cái khi đơn đặt này được xác nhận",
+    "offsetsNone": "Chưa có khoản bù đắp nào.",
+    "offsetsNoneBody": "Khoản bù đắp được thêm vào một đơn đặt chỗ từ công cụ theo dõi tác động.",
+    "openTracker": "Mở công cụ theo dõi tác động",
+    "toOffsets": "cho các dự án bù đắp carbon",
+    "offsetKg_one": "{{count}} kg CO₂e đã bù đắp",
+    "offsetKg_other": "{{count}} kg CO₂e đã bù đắp",
+    "joiningCount_one": "{{count}} ngày trồng cây bạn đã đăng ký",
+    "joiningCount_other": "{{count}} ngày trồng cây bạn đã đăng ký",
+    "offsetDonated": "Một khoản đóng góp cho dự án",
+    "offsetNextSession": "Bạn đã đăng ký buổi trồng ngày {{range}}",
+    "offsetSessionRange": "{{start}} – {{end}}"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Chưa có gì.",
+    "markAllRead": "Đánh dấu đã đọc tất cả",
+    "type": {
+      "BOOKING_CONFIRMED": "Đơn đặt {{listing}} ngày {{date}} của bạn đã được xác nhận.",
+      "BOOKING_DECLINED": "Đơn đặt {{listing}} ngày {{date}} của bạn không thể được nhận.",
+      "BOOKING_RECEIVED": "Một khách đã hỏi đặt {{listing}} ngày {{date}}, {{nights}} đêm.",
+      "BOOKING_AWAITING_DECISION": "{{listing}} ngày {{date}} đang chờ được quyết định.",
+      "ORDER_SETTLED": "Đơn mua {{count}} sản phẩm của bạn đã được thanh toán.",
+      "ORDER_CANCELLED": "Đơn mua {{count}} sản phẩm của bạn đã bị huỷ.",
+      "ORDER_AWAITING_SETTLEMENT": "Đơn mua {{piece}} của {{maker}} đang chờ ghi nhận thanh toán.",
+      "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) đang chờ Hội đồng duyệt.",
+      "ARCHIVE_PUBLISHED": "{{title}} đã được đăng vào kho lưu trữ.",
+      "ARCHIVE_REJECTED": "{{title}} không được đăng. {{note}}"
+    }
+  },
+  "wallet": {
+    "connect": "Kết nối ví",
+    "connecting": "Đang kết nối…",
+    "connectedShort": "{{short}}…",
+    "operatorHint": "Ví devnet cho chứng thực — không phải thanh toán",
+    "attestation": "Bằng chứng on-chain",
+    "attestationState": "Trạng thái: {{state}}",
+    "noAttestation": "Chưa chứng thực trên Solana devnet",
+    "submitAttestation": "Ký & gửi bằng Phantom",
+    "submitting": "Đang gửi…",
+    "attestError": "Không thể gửi chứng thực",
+    "viewExplorer": "Xem trên Explorer",
+    "proofState": "Proof {{state}}",
+    "proofPending": "Link Explorer hiện sau khi RPC xác minh giao dịch",
+    "proofExplainer": "Proof được xác minh bằng RPC confirmation và decode PDA của split 7/3/90 — không phải danh tính khách hay phương thức thanh toán. Khách đặt tour bằng VND, không cần ví. Coordinator gửi bằng Phantom; committee finalize qua Squads 2/3.",
+    "committeeVault": "Squads vault",
+    "connectRequired": "Kết nối Phantom (devnet) để gửi chứng thực",
+    "guestReceiptHint": "Tuỳ chọn: liên kết ví để xác nhận trên chuỗi. Đây không phải thanh toán crypto.",
+    "linkOptional": "Liên kết ví (tuỳ chọn)",
+    "linkedOk": "Đã liên kết ví",
+    "committeeFinalize": "Hoàn tất chứng thực qua Squads (2/3) trên devnet",
+    "committeeQueue": "Chờ committee finalize",
+    "squadsHint": "Export payload proposal Squads, tạo vault transaction, lấy 2/3 approvals, rồi dán chữ ký execute vào đây. API chỉ đánh FINALIZED sau khi RPC decode và xác minh final PDA.",
+    "noAwaiting": "Không có attestation đang chờ committee",
+    "exportFinalizeIx": "Export finalize ix",
+    "exportSquadsProposal": "Export Squads proposal",
+    "recordFinalize": "Ghi finalize sig",
+    "pasteFinalizeSig": "Dán chữ ký giao dịch finalize trên Solana",
+    "pasteMultisigPdaOptional": "Tuỳ chọn: dán Squads multisig PDA để kiểm tra vault này khớp multisig thật",
+    "squadsPasteback": "Sau khi Squads execute vault transaction, dán lại chữ ký giao dịch vào KNĂ để API xác minh final PDA và cập nhật sổ công khai.",
+    "publicLedger": "Sổ công khai",
+    "verifyOnChain": "Xác minh on-chain"
+  }
+}

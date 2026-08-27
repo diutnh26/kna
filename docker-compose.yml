@@ -1,0 +1,71 @@
+# Local Docker package for KNĂ. Source is a snapshot under ./app —
+# the original d:\Travel\kna tree is never modified.
+#
+# Usage (from this folder):
+#   docker compose up --build
+# Then open http://localhost:8080
+
+name: kna-local
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: kna
+      POSTGRES_PASSWORD: kna
+      POSTGRES_DB: kna_dev
+    volumes:
+      - kna_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kna -d kna_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      DATABASE_URL: postgresql://kna:kna@postgres:5432/kna_dev
+      DIRECT_DATABASE_URL: postgresql://kna:kna@postgres:5432/kna_dev
+      JWT_SECRET: docker-local-not-a-secret-at-least-32-chars
+      CORS_ORIGIN: http://localhost:8080
+      PAYMENT_PROVIDER: manual
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  kna_pgdata:
