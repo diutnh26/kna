@@ -16,11 +16,21 @@ const PILLAR_ICONS = [
   { icon: Users, vn: 'Cộng đồng' },
 ];
 
+// The four goals the project claims, in the order they are shown. Paths
+// rather than locale strings: an icon is not a translation, and the marks
+// are reproduced unaltered as the Global Goals guidelines require.
+const SDG_ICONS = [
+  '/images/sdg/sdg-09.png',
+  '/images/sdg/sdg-10.png',
+  '/images/sdg/sdg-12.png',
+  '/images/sdg/sdg-13.png',
+];
+
 const CULTURE_MARKS = ['①', '②', '③'];
 
 const FOOTER_HREFS = [
   ['#explore', '#travel', '#marketplace', '#community'],
-  ['#community', '#community', '#impact', '#explore'],
+  ['#community', '#community', '#carbon', '#explore'],
 ];
 
 const hhmm = (iso) =>
@@ -33,6 +43,7 @@ export default function Landing() {
   const pillars = t('landing.pillars.items', { returnObjects: true });
   const culture = t('landing.culture.items', { returnObjects: true });
   const statLabels = t('landing.community.stats', { returnObjects: true });
+  const sdgAlts = t('landing.pillars.sdgAlts', { returnObjects: true });
   const footerColumns = t('landing.footer.columns', { returnObjects: true });
 
   const [ledger, setLedger] = useState([]);
@@ -57,11 +68,22 @@ export default function Landing() {
   }, []);
 
   // The first two figures are policy, not measurements: 100% is the review
-  // rule, 3–8% is the published commission band. Only the third is counted.
+  // rule, 90–95% is the producer's share of what a visitor pays — 90% to the
+  // household on a booking, 95% to the artisan on a marketplace order, both
+  // set in apps/api/src/lib/fees.ts. It deliberately excludes the 3% that
+  // goes to the Community Fund, which reaches the community too but is not
+  // paid to a person, so the claim understates rather than inflates.
+  //
+  // The third is counted, and counts buôn rather than providers. It read
+  // verifiedProviders against a label about "community partners", which was
+  // a truthful pair but not the pilot figure the business plan commits to:
+  // that one is 3 buôn, holding some 65 households, guides and makers
+  // between them. Reporting the buôn keeps the landing page and the paper
+  // saying the same thing, and the seed data carries three of them.
   const statsFigures = [
     '100%',
-    '3 to 8%',
-    communityStats ? `${communityStats.verifiedProviders}` : '—',
+    '90–95%',
+    communityStats ? `${communityStats.buonOnboarded}` : '—',
   ];
 
   return (
@@ -131,7 +153,7 @@ export default function Landing() {
             {PILLAR_ICONS.map((p, i) => (
               <div
                 key={p.vn}
-                className="bg-[#1A1614] p-8 flex flex-col min-h-[320px] items-start text-left"
+                className="bg-[#1A1614] p-6 flex flex-col min-h-[320px] items-start text-left"
               >
                 <p.icon className="w-5 h-5 text-[#B87333] mb-10" />
                 <div className="font-display text-lg text-[#B87333] mb-2">{p.vn}</div>
@@ -141,6 +163,38 @@ export default function Landing() {
                 <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">{pillars[i]?.body}</p>
               </div>
             ))}
+          </div>
+
+          {/* The same four foundations, named in a vocabulary a partner or
+              an assessor already reads. Marks only: the goals are evidence
+              for the pillars above, not a fifth thing to read. */}
+          <div className="mt-16 pt-10 border-t border-[#F5EDDD]/10 flex flex-wrap items-center justify-between gap-x-12 gap-y-8">
+            <div className="flex items-center gap-4">
+              <img
+                src="/images/sdg/sdg-wheel.png"
+                alt={t('landing.pillars.sdgWheelAlt')}
+                width="256"
+                height="256"
+                className="w-24 h-24 md:w-28 md:h-28 rounded shrink-0"
+              />
+              <p className="text-sm text-[#F5EDDD]/55 max-w-xs leading-relaxed">
+                {t('landing.pillars.sdgLine')}
+              </p>
+            </div>
+            <ul className="flex flex-wrap items-center gap-3">
+              {SDG_ICONS.map((src, i) => (
+                <li key={src}>
+                  <img
+                    src={src}
+                    alt={sdgAlts[i]}
+                    width="256"
+                    height="256"
+                    loading="lazy"
+                    className="w-20 h-20 md:w-24 md:h-24"
+                  />
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>

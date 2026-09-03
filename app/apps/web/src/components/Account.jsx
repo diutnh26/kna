@@ -53,7 +53,7 @@ const KIND_ICON = { booking: CalendarDays, order: ShoppingBag, contribution: Fil
  */
 export default function Account() {
   const { t } = useTranslation();
-  // Project names come from the impact tracker's own locale data rather
+  // Project names come from the Carbon Journey's own locale data rather
   // than a second list here, so the two screens cannot drift into calling
   // the same project different things.
   const offsetProjectName = (id) =>
@@ -361,7 +361,12 @@ export default function Account() {
           </section>
 
           {/* ── ACTIVITY ──────────────────────────────── */}
-          <section className="px-8 lg:px-12 xl:px-16 pb-24 max-w-6xl">
+          {/* Full width, unlike the two sections above it. The header row
+              puts a title and five filter buttons on one line, and each row
+              below carries a thumbnail, a title, a status pill and three
+              money figures — both want the whole measure. Padding is the
+              only margin, matching Review and Dashboard. */}
+          <section className="px-8 lg:px-12 xl:px-16 pb-24">
             <div className="flex flex-wrap items-end justify-between gap-6 mb-8">
               <h2 className="font-display text-3xl font-medium">{t('account.activityTitle')}</h2>
               <div className="flex flex-wrap gap-2">
@@ -397,7 +402,7 @@ export default function Account() {
                 </p>
                 {filter === 'offsets' && (
                   <a
-                    href="#impact"
+                    href="#carbon"
                     className="inline-block mt-4 text-sm text-[#E8A33D] underline underline-offset-4"
                   >
                     {t('account.openTracker')}

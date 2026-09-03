@@ -10,7 +10,7 @@ const pending = (over = {}) => ({
   type: 'Craft record',
   title: 'Dyeing indigo, three vats',
   meta: 'Photo essay · 26 frames',
-  keeperBuon: 'Buôn Kli A',
+  keeperBuon: 'Buôn Trấp',
   pillar: 'Weaving',
   createdAt: '2026-08-01T00:00:00.000Z',
   contributedBy: { fullName: 'Amí Lan' },

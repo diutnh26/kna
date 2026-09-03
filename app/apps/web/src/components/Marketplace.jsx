@@ -184,7 +184,7 @@ export default function Marketplace() {
                 {[
                   [t('marketplace.certReference'), 'KNA-TX-0114'],
                   [t('marketplace.certMaker'), t('marketplace.certMakerValue')],
-                  [t('marketplace.certBuon'), 'Buôn Kli A, Đắk Lắk'],
+                  [t('marketplace.certBuon'), 'Buôn Trấp, Đắk Lắk'],
                   [t('marketplace.certTechnique'), t('marketplace.certTechniqueValue')],
                   [t('marketplace.certTime'), t('marketplace.certTimeValue')],
                   [t('marketplace.certReviewedBy'), t('marketplace.certReviewedByValue')],

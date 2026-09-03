@@ -5,7 +5,7 @@
     "travel": "Travel",
     "marketplace": "Marketplace",
     "assistant": "Assistant",
-    "impact": "Impact",
+    "carbon": "Carbon Journey",
     "community": "Community",
     "dashboard": "Dashboard",
     "review": "Review",
@@ -57,6 +57,14 @@
           "title": "Community Engagement",
           "body": "Governance structures that give the Ê Đê community a direct voice in how the platform evolves and how revenue is distributed."
         }
+      ],
+      "sdgLine": "Aligned to four of the United Nations Sustainable Development Goals.",
+      "sdgWheelAlt": "The Global Goals for Sustainable Development logo.",
+      "sdgAlts": [
+        "Sustainable Development Goal 9: Industry, Innovation and Infrastructure.",
+        "Sustainable Development Goal 10: Reduced Inequalities.",
+        "Sustainable Development Goal 12: Responsible Consumption and Production.",
+        "Sustainable Development Goal 13: Climate Action."
       ]
     },
     "culture": {
@@ -98,10 +106,10 @@
           "label": "of cultural content reviewed by community elders"
         },
         {
-          "label": "platform commission, set to keep the value where it belongs: with the community"
+          "label": "of what a visitor pays reaches the household or artisan directly"
         },
         {
-          "label": "Ê Đê community partners onboarded for the pilot"
+          "label": "Ê Đê buôn onboarded for the pilot"
         }
       ]
     },
@@ -216,6 +224,23 @@
     "statEntries": "entries published",
     "statBuon": "buôn contributing",
     "statLanguages": "languages carried",
+    "map": {
+      "eyebrow": "Where this is",
+      "body": "Đắk Lắk sits inland on the Tây Nguyên plateau, around 500 metres above sea level, a landscape of red basalt soil, coffee, forest and elephants, with its capital Buôn Ma Thuột home to people from 43 of Vietnam’s 54 ethnic minority groups. Travel here is cultural and ecological rather than scenic, centred on coffee heritage, Yok Đôn National Park, and above all the Ê Đê longhouse traditions and the UNESCO-recognised Space of Gong Culture.",
+      "regionLabel": "Region",
+      "regionValue": "Tây Nguyên, the Central Highlands",
+      "capitalLabel": "Capital",
+      "capitalValue": "Buôn Ma Thuột, around 500 m above sea level",
+      "gettingLabel": "Getting there",
+      "gettingValue": "350 km from Ho Chi Minh City by road, 190 km from the coast at Nha Trang, or a 55-minute flight",
+      "interactiveUnavailable": "The map could not be loaded. The outline beside this one needs no connection.",
+      "workArea": ["KNĂ works here:","Đắk Lắk as it was before","the 2025 merger"],
+      "alt": "Map of Vietnam with the former Đắk Lắk province highlighted in the Central Highlands, the area KNĂ works in, Buôn Ma Thuột marked within it, and the Hoàng Sa and Trường Sa archipelagos marked in the East Sea.",
+      "dakLak": "Đắk Lắk",
+      "buonMaThuot": "Buôn Ma Thuột",
+      "hoangSa": "Hoàng Sa",
+      "truongSa": "Trường Sa"
+    },
     "pillarsEyebrow": "Where the archive begins",
     "pillarsHeading": "Three traditions carry most of what the Ê Đê know.",
     "pillars": [
@@ -283,7 +308,7 @@
     "available_one": "{{count}} experience available",
     "available_other": "{{count}} experiences available",
     "emptyTitle": "Nothing in that combination yet.",
-    "emptyBody": "Only four buôn have onboarded so far. Try a wider filter.",
+    "emptyBody": "Only three buôn have onboarded so far. Try a wider filter.",
     "clearFilters": "Clear filters",
     "photoLabel": "{{title}} — {{buon}}",
     "verified": "Verified",
@@ -432,9 +457,9 @@
       },
       {
         "author": "A weaver",
-        "role": "Buôn Kli A",
+        "role": "Buôn Trấp",
         "title": "Indigo supply is short this season",
-        "body": "The dye plot flooded in April. I have enough for maybe four more pieces. If anyone in Trấp has surplus leaf I will trade rattan for it."
+        "body": "The dye plot flooded in April. I have enough for maybe four more pieces. If anyone in Akô Dhông has surplus leaf I will trade rattan for it."
       },
       {
         "author": "A host",
@@ -482,7 +507,7 @@
       },
       {
         "label": "Plan me three days",
-        "reply": "Here is a shape that works for a first visit, low travel, one buôn per day:\n\nDay 1 — Arrive Buôn Ma Thuột, afternoon at Buôn Akô Dhông. Short walk, meet your host, eat with the household. Stay the night.\n\nDay 2 — Morning loom session with Amí Lan in Buôn Kli A. Afternoon free. Evening gong ensemble in Buôn Đôn if the harvest calendar has a date open.\n\nDay 3 — Forest edge walk with Y Wik, then the coffee co-op in the afternoon. Depart evening.\n\nWant me to check which dates actually have availability?"
+        "reply": "Here is a shape that works for a first visit, low travel, one buôn per day:\n\nDay 1 — Arrive Buôn Ma Thuột, afternoon at Buôn Akô Dhông. Short walk, meet your host, eat with the household. Stay the night.\n\nDay 2 — Morning loom session with Amí Lan in Buôn Trấp. Afternoon free. Evening gong ensemble in Buôn Đôn if the harvest calendar has a date open.\n\nDay 3 — Forest edge walk with Y Wik, then the coffee co-op in the afternoon. Depart evening.\n\nWant me to check which dates actually have availability?"
       },
       {
         "label": "What is Cồng Chiêng?",
@@ -516,8 +541,10 @@
       }
     ],
     "handoffHeading": "Ready to work out your footprint?",
-    "handoffBody": "The assistant can estimate it, or you can do it yourself in the impact tracker.",
-    "handoffCta": "Open the tracker"
+    "handoffBody": "The assistant can estimate it, or you can do it yourself in the Carbon Journey.",
+    "handoffCta": "Open the tracker",
+    "guardrailsBody": "A model that answers confidently about Ê Đê custom without a source is just a faster way to spread a wrong idea. These four rules are design constraints, not settings.",
+    "inputLabel": "Ask the assistant"
   },
   "carbon": {
     "eyebrow": "Carbon tracker",
@@ -712,8 +739,8 @@
     "offsetNotJoining": "Maintained year-round by the conservation group",
     "offsetPending": "Reaches the ledger when this booking is confirmed",
     "offsetsNone": "No offsets yet.",
-    "offsetsNoneBody": "An offset is added to a booking from the impact tracker.",
-    "openTracker": "Open the impact tracker",
+    "offsetsNoneBody": "An offset is added to a booking from the Carbon Journey.",
+    "openTracker": "Open the Carbon Journey",
     "toOffsets": "to carbon offset projects",
     "offsetKg_one": "{{count}} kg of CO₂e offset",
     "offsetKg_other": "{{count}} kg of CO₂e offset",

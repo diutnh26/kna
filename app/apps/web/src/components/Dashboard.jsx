@@ -97,7 +97,10 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
       <Navbar active="dashboard" theme="dark" />
 
-      <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 max-w-6xl">
+      {/* Full-bleed, matching Review and the earnings panel below, which
+          was already unclamped — so the header and the queue were reading
+          narrower than the panel they sit above. Padding is the only margin. */}
+      <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24">
         <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
           <span className="h-px w-12 bg-[#B87333]" />
           <span>{t('dashboard.eyebrow')}</span>
@@ -106,7 +109,7 @@ export default function Dashboard() {
           {data ? data.provider.displayName : t('dashboard.fallbackTitle')}
         </h1>
         {data && (
-          <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed flex items-center gap-3">
+          <p className="text-lg text-[#F5EDDD]/70 leading-relaxed flex items-center gap-3">
             <MapPin className="w-4 h-4 shrink-0" />
             {data.provider.buon}
             {data.provider.verified && (
@@ -163,12 +166,12 @@ export default function Dashboard() {
 
       {/* ── COORDINATION QUEUE ────────────────────── */}
       {isAuthenticated && loadState === 'ready' && mayCoordinate && (
-        <section className="px-8 lg:px-12 xl:px-16 pb-20 max-w-6xl">
+        <section className="px-8 lg:px-12 xl:px-16 pb-20">
           <h2 className="font-display text-3xl font-medium mb-2">
             {t('dashboard.queueTitle')}
             <span className="text-[#B87333] ml-3 text-2xl">{pending?.length ?? 0}</span>
           </h2>
-          <p className="text-sm text-[#F5EDDD]/50 mb-8 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[#F5EDDD]/50 mb-8 leading-relaxed">
             {t('dashboard.queueIntro')}
           </p>
 
@@ -278,14 +281,14 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <p className="text-xs text-[#1A1614]/50 leading-relaxed max-w-2xl">
+              <p className="text-xs text-[#1A1614]/50 leading-relaxed">
                 {t('dashboard.earningsNote')}
               </p>
             </div>
           </section>
 
           {/* ── BOOKINGS ─────────────────────────────── */}
-          <section className="px-8 lg:px-12 xl:px-16 py-20 max-w-6xl">
+          <section className="px-8 lg:px-12 xl:px-16 py-20">
             <h2 className="font-display text-3xl font-medium mb-8">{t('dashboard.yourBookings')}</h2>
 
             {data.bookings.length === 0 ? (
@@ -331,7 +334,7 @@ export default function Dashboard() {
 
           {/* ── MARKETPLACE SALES ────────────────────── */}
           {data.orders.length > 0 && (
-            <section className="px-8 lg:px-12 xl:px-16 pb-24 max-w-6xl">
+            <section className="px-8 lg:px-12 xl:px-16 pb-24">
               <h2 className="font-display text-3xl font-medium mb-8">Your sales</h2>
               <div className="space-y-3">
                 {data.orders.map((o) => (

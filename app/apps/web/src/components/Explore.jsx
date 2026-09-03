@@ -1,10 +1,16 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Volume2, MapPin, Languages } from 'lucide-react';
 import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
+import VietnamMap from './VietnamMap';
 import { api } from '../lib/api';
 import ApiErrorNotice from './ApiErrorNotice';
+
+// Leaflet and its stylesheet are about 45KB gzipped and are needed on this
+// screen only. Split out so the landing page, which most visitors see first
+// and some see on mobile data, does not carry them.
+const InteractiveMap = lazy(() => import('./InteractiveMap'));
 
 export default function Explore() {
   const { t } = useTranslation();
@@ -95,6 +101,51 @@ export default function Explore() {
               <div className="font-display text-4xl font-medium text-[#B87333]">VI · EN · Ê Đê</div>
               <p className="text-sm text-[#F5EDDD]/60">{t('explore.statLanguages')}</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHERE ─────────────────────────────────── */}
+      {/* Between the opening and the pillars because everything after this
+          point assumes you know where Đắk Lắk is, and most readers do not. */}
+      <section className="border-t border-[#F5EDDD]/10">
+        <div className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-start">
+          <div className="md:col-span-4">
+            <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
+              <span className="h-px w-12 bg-[#B87333]" />
+              <span>{t('explore.map.eyebrow')}</span>
+            </div>
+            <p className="text-[#F5EDDD]/70 leading-relaxed mb-8">{t('explore.map.body')}</p>
+
+            <dl className="space-y-3 text-sm">
+              <div className="flex gap-4">
+                <dt className="text-[#F5EDDD]/45 w-28 shrink-0">{t('explore.map.regionLabel')}</dt>
+                <dd className="text-[#F5EDDD]/80">{t('explore.map.regionValue')}</dd>
+              </div>
+              <div className="flex gap-4">
+                <dt className="text-[#F5EDDD]/45 w-28 shrink-0">{t('explore.map.capitalLabel')}</dt>
+                <dd className="text-[#F5EDDD]/80">{t('explore.map.capitalValue')}</dd>
+              </div>
+              <div className="flex gap-4">
+                <dt className="text-[#F5EDDD]/45 w-28 shrink-0">{t('explore.map.gettingLabel')}</dt>
+                <dd className="text-[#F5EDDD]/80">{t('explore.map.gettingValue')}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="md:col-span-8 grid sm:grid-cols-2 gap-8">
+            {/* Two maps, two questions. The outline says where the province
+                is, as a shape, and needs nothing from the network; the live
+                map has the roads and towns and zooms out to the country, and
+                needs everything from it. Neither answers for the other. */}
+            <div>
+              <VietnamMap />
+            </div>
+            <Suspense
+              fallback={<div className="w-full aspect-square rounded-sm bg-[#241F1C]" />}
+            >
+              <InteractiveMap />
+            </Suspense>
           </div>
         </div>
       </section>

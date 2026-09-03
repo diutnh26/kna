@@ -24,7 +24,7 @@ export default function Navbar({ active = '', theme = 'dark' }) {
     { key: 'travel', label: t('nav.travel'), href: '#travel' },
     { key: 'marketplace', label: t('nav.marketplace'), href: '#marketplace' },
     { key: 'assistant', label: t('nav.assistant'), href: '#assistant' },
-    { key: 'impact', label: t('nav.impact'), href: '#impact' },
+    { key: 'carbon', label: t('nav.carbon'), href: '#carbon' },
     { key: 'community', label: t('nav.community'), href: '#community' },
   ];
 

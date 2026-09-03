@@ -71,12 +71,25 @@ archiveRouter.get("/phrases", async (_req, res) => {
   res.json(phrases);
 });
 
+// Not every record is kept by a village. The phrasebook belongs to the
+// Committee, so its keeperBuon reads "Community Council", and counting that
+// as a buôn left this screen reporting one more than the buôn figure on
+// Landing and Marketplace, which count providers instead.
+//
+// A buôn is named "Buôn X" and an institution is not, which is the whole
+// distinction. Stringly-typed, and the honest fix is a keeper type on the
+// column; that is a migration, and this is one screen disagreeing with two
+// others a fortnight before it is shown.
+const KEEPER_IS_A_BUON = { keeperBuon: { startsWith: "Buôn " } };
+
 archiveRouter.get("/stats", async (_req, res) => {
   const [published, buonGroups] = await Promise.all([
+    // Every published entry counts here, the Committee's included: this is
+    // how much the archive holds, not how many villages filled it.
     prisma.archiveEntry.count({ where: { moderationStatus: "PUBLISHED" } }),
     prisma.archiveEntry.groupBy({
       by: ["keeperBuon"],
-      where: { moderationStatus: "PUBLISHED" },
+      where: { moderationStatus: "PUBLISHED", ...KEEPER_IS_A_BUON },
     }),
   ]);
   res.json({ publishedEntries: published, contributingBuon: buonGroups.length });

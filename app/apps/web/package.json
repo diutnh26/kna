@@ -15,6 +15,7 @@
     "@solana/web3.js": "^1.98.4",
     "i18next": "^24.2.0",
     "i18next-browser-languagedetector": "^8.0.2",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

@@ -214,7 +214,7 @@ export default function CarbonTracker() {
 
   return (
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
-      <Navbar active="impact" theme="dark" />
+      <Navbar active="carbon" theme="dark" />
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">
@@ -228,7 +228,6 @@ export default function CarbonTracker() {
           </h1>
           <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
             {t('carbon.intro')}
-            run, and measure themselves.
           </p>
         </div>
 
@@ -240,7 +239,6 @@ export default function CarbonTracker() {
             </div>
             <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
               {t('carbon.communityLedBody')}
-              credits on your behalf.
             </p>
           </div>
         </div>

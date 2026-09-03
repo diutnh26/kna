@@ -158,7 +158,11 @@ export default function Assistant() {
             </div>
 
             <div className="border-t border-[#F5EDDD]/10 p-4 flex gap-3">
-              <label htmlFor="ask" className="sr-only">Ask the assistant</label>
+              {/* Only a screen reader ever reaches this, which is exactly why
+                  it was missed — it has to be translated like anything else. */}
+              <label htmlFor="ask" className="sr-only">
+                {t('assistant.inputLabel')}
+              </label>
               <input
                 id="ask"
                 value={input}
@@ -191,8 +195,7 @@ export default function Assistant() {
               {t('assistant.guardrailsHeading')}
             </h2>
             <p className="text-lg text-[#1A1614]/70 leading-relaxed">
-              A model that answers confidently about Ê Đê custom without a source is just a faster
-              way to spread a wrong idea. These four rules are design constraints, not settings.
+              {t('assistant.guardrailsBody')}
             </p>
           </div>
 
@@ -220,7 +223,7 @@ export default function Assistant() {
           </p>
         </div>
         <a
-          href="#impact"
+          href="#carbon"
           className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
         >
           {t('assistant.handoffCta')}
