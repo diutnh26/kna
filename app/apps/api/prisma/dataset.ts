@@ -123,6 +123,7 @@ export async function populate(prisma: PrismaClient) {
         groupSize: "Up to 4 guests",
         carbonRating: "Low",
         customs: "Remove shoes at the ladder. Ask before photographing the ancestor shelf.",
+        imageUrl: "/images/listings/hbia-longhouse.jpg",
         published: true,
       },
       {
@@ -137,6 +138,7 @@ export async function populate(prisma: PrismaClient) {
         groupSize: "Up to 6 guests",
         carbonRating: "Low",
         customs: "Stay on the path near the spirit trees. Y Wik will point them out.",
+        imageUrl: "/images/listings/forest-edge-walk.jpg",
         published: true,
       },
       {
@@ -151,6 +153,7 @@ export async function populate(prisma: PrismaClient) {
         groupSize: "Up to 3 guests",
         carbonRating: "Very low",
         customs: "Bring nothing. Amí Lan supplies thread and loom.",
+        imageUrl: "/images/listings/backstrap-loom.jpg",
         published: true,
       },
       {
@@ -165,6 +168,7 @@ export async function populate(prisma: PrismaClient) {
         groupSize: "Up to 12 guests",
         carbonRating: "Low",
         customs: "Guests are seated, not standing. Do not join the circle unless invited.",
+        imageUrl: "/images/listings/harvest-gong-evening.jpg",
         published: true,
       },
       {
@@ -179,6 +183,7 @@ export async function populate(prisma: PrismaClient) {
         groupSize: "Up to 6 guests",
         carbonRating: "Low",
         customs: "The elder greets guests first. A short reply is enough.",
+        imageUrl: "/images/listings/lakeside-longhouse.jpg",
         published: true,
       },
       {
@@ -193,6 +198,7 @@ export async function populate(prisma: PrismaClient) {
         groupSize: "Up to 8 guests",
         carbonRating: "Low",
         customs: "Long sleeves recommended. The drying yard has no shade.",
+        imageUrl: "/images/listings/coffee-cherry-to-cup.jpg",
         published: true,
       },
     ].map((data) => prisma.listing.create({ data }))
@@ -209,6 +215,7 @@ export async function populate(prisma: PrismaClient) {
         note: "Woven on a backstrap loom in the pattern of her mother's clan. The border motif marks it as a piece for ceremony rather than daily wear.",
         priceVnd: 4200000,
         stock: 1,
+        imageUrl: "/images/products/ceremonial-skirt-panel.jpg",
         published: true,
       },
       {
@@ -218,6 +225,7 @@ export async function populate(prisma: PrismaClient) {
         note: "The everyday shape, still made the everyday way. Rattan cut at the end of the dry season, when the fibre holds its tension longest.",
         priceVnd: 950000,
         stock: 6,
+        imageUrl: "/images/products/gui-carrying-basket.jpg",
         published: true,
       },
       {
@@ -227,6 +235,7 @@ export async function populate(prisma: PrismaClient) {
         note: "Cut from a jackfruit tree that came down in a storm. Y Thăm works only fallen wood and will tell you which tree each piece came from.",
         priceVnd: 2800000,
         stock: 2,
+        imageUrl: "/images/products/carved-stool-jackfruit.jpg",
         published: true,
       },
       {
@@ -236,6 +245,7 @@ export async function populate(prisma: PrismaClient) {
         note: "H'Ni is twenty-three and one of six weavers under thirty still working in the buôn. Buying her work is the argument for the seventh.",
         priceVnd: 1650000,
         stock: 4,
+        imageUrl: "/images/products/shoulder-cloth.jpg",
         published: true,
       },
       {
@@ -245,6 +255,7 @@ export async function populate(prisma: PrismaClient) {
         note: "Worn in pairs, traditionally given at a wedding. Y Sun forges them over charcoal in the same yard his father used.",
         priceVnd: 780000,
         stock: 9,
+        imageUrl: "/images/products/brass-wrist-ring.jpg",
         published: true,
       },
       {
@@ -254,6 +265,7 @@ export async function populate(prisma: PrismaClient) {
         note: "Grown, picked, and roasted by the twelve households of the co-op. Dark, low acid, and roasted over wood rather than gas.",
         priceVnd: 320000,
         stock: 40,
+        imageUrl: "/images/products/robusta-wood-fired.jpg",
         published: true,
       },
     ].map((data) => prisma.product.create({ data }))
@@ -476,6 +488,7 @@ export async function populate(prisma: PrismaClient) {
         meta: "Narrated by Amí H'Bia · 14 min",
         keeperBuon: "Buôn Akô Dhông",
         pillar: "The Long House",
+        imageUrl: "/images/archive/origins.jpg",
         moderationStatus: "PUBLISHED",
         moderatedById: chair.id,
         moderatedAt: new Date("2026-03-02"),
@@ -486,6 +499,7 @@ export async function populate(prisma: PrismaClient) {
         meta: "Six rooms · walkthrough",
         keeperBuon: "Buôn Trấp",
         pillar: "The Long House",
+        imageUrl: "/images/archive/longhouse-interior.jpg",
         moderationStatus: "PUBLISHED",
         moderatedById: chair.id,
         moderatedAt: new Date("2026-03-11"),
@@ -496,6 +510,7 @@ export async function populate(prisma: PrismaClient) {
         meta: "Six players · 22 min",
         keeperBuon: "Buôn Đôn",
         pillar: "Cồng Chiêng",
+        imageUrl: "/images/archive/harvest-gong-set.jpg",
         moderationStatus: "PUBLISHED",
         moderatedById: chair.id,
         moderatedAt: new Date("2026-03-18"),
@@ -506,6 +521,7 @@ export async function populate(prisma: PrismaClient) {
         meta: "Photo essay · 40 frames",
         keeperBuon: "Buôn Trấp",
         pillar: "Weaving",
+        imageUrl: "/images/archive/backstrap-loom-record.jpg",
         moderationStatus: "PUBLISHED",
         moderatedById: chair.id,
         moderatedAt: new Date("2026-04-04"),
@@ -516,6 +532,7 @@ export async function populate(prisma: PrismaClient) {
         meta: "Narrated by Aduôn Sun · 19 min",
         keeperBuon: "Buôn Akô Dhông",
         pillar: "The Long House",
+        imageUrl: "/images/archive/mothers-line.jpg",
         moderationStatus: "PUBLISHED",
         moderatedById: chair.id,
         moderatedAt: new Date("2026-04-15"),
@@ -525,6 +542,7 @@ export async function populate(prisma: PrismaClient) {
         title: "Greetings and forms of address",
         meta: "Audio · 12 phrases",
         keeperBuon: "Community Council",
+        imageUrl: "/images/archive/greetings.jpg",
         moderationStatus: "PUBLISHED",
         moderatedById: chair.id,
         moderatedAt: new Date("2026-04-19"),
@@ -536,6 +554,7 @@ export async function populate(prisma: PrismaClient) {
         meta: "Photo essay · 26 frames",
         keeperBuon: "Buôn Trấp",
         pillar: "Weaving",
+        imageUrl: "/images/archive/indigo-dyeing.jpg",
         moderationStatus: "IN_REVIEW",
         contributedById: (await prisma.user.findUniqueOrThrow({ where: { email: "ami.lan@example.kna" } })).id,
       },
@@ -545,6 +564,7 @@ export async function populate(prisma: PrismaClient) {
         meta: "Four players · 31 min",
         keeperBuon: "Buôn Trấp",
         pillar: "Cồng Chiêng",
+        imageUrl: "/images/archive/teaching-session.jpg",
         moderationStatus: "IN_REVIEW",
         contributedById: (await prisma.user.findUniqueOrThrow({ where: { email: "y.wik@example.kna" } })).id,
       },
