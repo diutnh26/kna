@@ -17,6 +17,8 @@ import ApiErrorNotice from './ApiErrorNotice';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import { GuestReceiptPanel } from '../wallet/AttestationPanel';
+import DemoWalletPanel from './DemoWalletPanel';
+import DemoTxHistory from './DemoTxHistory';
 
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 const dmy = (iso) =>
@@ -58,7 +60,7 @@ export default function Account() {
   // the same project different things.
   const offsetProjectName = (id) =>
     t('carbon.projects', { returnObjects: true }).find((p) => p.id === id)?.name ?? id;
-  const { token, isAuthenticated, openAuthModal, refreshUser, setToken } = useAuth();
+  const { isAuthenticated, openAuthModal, refreshUser, setToken } = useAuth();
 
   const [data, setData] = useState(null);
   const [activity, setActivity] = useState([]);
@@ -71,9 +73,9 @@ export default function Account() {
   const [pwState, setPwState] = useState({ busy: false, message: '', error: '' });
 
   const load = useCallback(async () => {
-    const [account, timeline] = await Promise.all([api.account(token), api.accountActivity(token)]);
+    const [account, timeline] = await Promise.all([api.account(), api.accountActivity()]);
     return { account, timeline };
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -98,7 +100,7 @@ export default function Account() {
     e.preventDefault();
     setProfileState({ busy: true, message: '', error: '' });
     try {
-      const updated = await api.updateAccount(form, token);
+      const updated = await api.updateAccount(form);
       setData(updated);
       setProfileState({ busy: false, message: t('account.saved'), error: '' });
       // The navbar greeting and the language both come from this record.
@@ -116,11 +118,9 @@ export default function Account() {
     e.preventDefault();
     setPwState({ busy: true, message: '', error: '' });
     try {
-      const { token: fresh } = await api.changePassword(pw, token);
-      // Every token was just invalidated, including this tab's. Swapping in
-      // the replacement is what stops a password change logging you out of
-      // the page you changed it on.
-      setToken(fresh);
+      await api.changePassword(pw);
+      // Cookies are rotated server-side; refresh in-memory user.
+      setToken();
       setPw({ currentPassword: '', newPassword: '' });
       setPwState({ busy: false, message: t('account.passwordChanged'), error: '' });
     } catch (err) {
@@ -181,8 +181,10 @@ export default function Account() {
       )}
 
       {isAuthenticated && loadState === 'ready' && (
-        <section className="px-8 lg:px-12 xl:px-16 pb-12 max-w-6xl">
+        <section className="px-8 lg:px-12 xl:px-16 pb-12 max-w-6xl space-y-5">
           <GuestReceiptPanel />
+          <DemoWalletPanel />
+          <DemoTxHistory />
         </section>
       )}
 
@@ -200,54 +202,135 @@ export default function Account() {
 
       {isAuthenticated && loadState === 'ready' && data && (
         <>
-          {/* ── WHAT REACHED DĂK LĂK ──────────────────── */}
+          {/* ── MONEY SUMMARY (role-aware) ──────────────────── */}
           <section className="bg-[#F5EDDD] text-[#1A1614]">
             <div className="px-8 lg:px-12 xl:px-16 py-20">
               <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-8">
                 <Wallet className="w-4 h-4" />
-                {t('account.summaryEyebrow')}
+                {data.moneyView === 'staff'
+                  ? t('account.staffEyebrow')
+                  : data.moneyView === 'provider'
+                    ? t('account.providerEyebrow')
+                    : t('account.summaryEyebrow')}
               </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
-                <div>
-                  <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
-                    {vnd(data.totals.spentVnd)}
+              {data.moneyView === 'staff' && data.staffMoney ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
+                      {vnd(data.staffMoney.settledBookingsVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.staffSettled')}</p>
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">{t('account.spent')}</p>
-                </div>
-                <div>
-                  <div className="font-display price-lg font-medium text-[#B87333] mb-1">
-                    {vnd(data.totals.toProvidersVnd)}
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#B87333] mb-1">
+                      {vnd(data.staffMoney.toProvidersVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.staffToProviders')}</p>
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">{t('account.toProviders')}</p>
-                </div>
-                <div>
-                  <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
-                    {vnd(data.totals.toCommunityFundVnd)}
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
+                      {vnd(data.staffMoney.toFundVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.staffToFund')}</p>
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">{t('account.toFund')}</p>
-                </div>
-                <div>
-                  <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
-                    {vnd(data.totals.toOffsetProjectsVnd)}
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
+                      {data.staffMoney.paidWithDemo}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.staffDemoPaid')}</p>
+                    {data.staffMoney.awaitingPayment > 0 && (
+                      <p className="text-xs text-[#1A1614]/45 mt-1">
+                        {t('account.staffAwaiting', { count: data.staffMoney.awaitingPayment })}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">{t('account.toOffsets')}</p>
-                  {data.totals.offsetKgCo2e > 0 && (
-                    <p className="text-xs text-[#1A1614]/45 mt-1">
-                      {t('account.offsetKg', { count: data.totals.offsetKgCo2e })}
-                    </p>
-                  )}
-                  {data.totals.offsetsJoining > 0 && (
-                    <p className="text-xs text-[#4F5D3A] mt-1">
-                      {t('account.joiningCount', { count: data.totals.offsetsJoining })}
-                    </p>
-                  )}
                 </div>
-              </div>
+              ) : data.moneyView === 'provider' && data.providerMoney ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
+                      {vnd(data.providerMoney.earnedVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.providerEarned')}</p>
+                  </div>
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#B87333] mb-1">
+                      {vnd(data.providerMoney.fundVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.providerFund')}</p>
+                  </div>
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
+                      {vnd(data.providerMoney.platformVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.providerPlatform')}</p>
+                  </div>
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
+                      {data.providerMoney.bookings}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.providerBookings')}</p>
+                    {data.providerMoney.pending > 0 && (
+                      <p className="text-xs text-[#1A1614]/45 mt-1">
+                        {t('account.providerPending', { count: data.providerMoney.pending })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
+                      {vnd(data.totals.spentVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.spent')}</p>
+                  </div>
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#B87333] mb-1">
+                      {vnd(data.totals.toProvidersVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.toProviders')}</p>
+                  </div>
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
+                      {vnd(data.totals.toCommunityFundVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.toFund')}</p>
+                  </div>
+                  <div>
+                    <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
+                      {vnd(data.totals.toOffsetProjectsVnd)}
+                    </div>
+                    <p className="text-sm text-[#1A1614]/60">{t('account.toOffsets')}</p>
+                    {data.totals.offsetKgCo2e > 0 && (
+                      <p className="text-xs text-[#1A1614]/45 mt-1">
+                        {t('account.offsetKg', { count: data.totals.offsetKgCo2e })}
+                      </p>
+                    )}
+                    {data.totals.offsetsJoining > 0 && (
+                      <p className="text-xs text-[#4F5D3A] mt-1">
+                        {t('account.joiningCount', { count: data.totals.offsetsJoining })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <p className="text-xs text-[#1A1614]/50 leading-relaxed max-w-2xl">
-                {t('account.settledOnly')}
+                {data.moneyView === 'staff'
+                  ? t('account.staffSettledOnly')
+                  : data.moneyView === 'provider'
+                    ? t('account.providerSettledOnly')
+                    : t('account.settledOnly')}
               </p>
+              {/* Guest spend still shown under provider/staff so personal trips are visible */}
+              {(data.moneyView === 'provider' || data.moneyView === 'staff') &&
+              data.totals.spentVnd > 0 ? (
+                <p className="text-xs text-[#1A1614]/45 mt-3">
+                  {t('account.alsoAsGuest', { amount: vnd(data.totals.spentVnd) })}
+                </p>
+              ) : null}
             </div>
           </section>
 
@@ -505,6 +588,36 @@ export default function Account() {
                             )}
                           </div>
                         )}
+
+                        {row.kind === 'booking' && row.demoTxSigs?.length ? (
+                          <div className="mt-3 border border-[#8FA37B]/40 p-2 space-y-1 text-xs text-[#8FA37B]">
+                            <p>{t('travel.demoTokensSent')}</p>
+                            <p className="text-[10px] text-[#F5EDDD]/45">
+                              {t('account.demoSplitHint', {
+                                provider: vnd(row.toProviderVnd),
+                                fund: vnd(row.toCommunityFundVnd),
+                              })}
+                            </p>
+                            {row.demoTxSigs.slice(0, 3).map((sig) => (
+                              <a
+                                key={sig}
+                                href={`https://explorer.solana.com/tx/${sig}?cluster=devnet`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block underline font-mono text-[10px] break-all text-[#E8A33D]"
+                              >
+                                {t('travel.viewDemoTx')} · {String(sig).slice(0, 8)}…
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
+                        {row.kind === 'booking' &&
+                        row.paymentStatus === 'PAID' &&
+                        !(row.demoTxSigs?.length) ? (
+                          <p className="mt-2 text-[10px] text-[#F5EDDD]/40">
+                            {t('travel.demoTokensSkipped')}
+                          </p>
+                        ) : null}
 
                         {row.kind === 'contribution' && (
                           <>

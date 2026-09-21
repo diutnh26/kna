@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KNĂ — Từ Blockchain Tech Stack tới Business</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1614;
+      --paper: #f3efe6;
+      --panel: #fffefb;
+      --muted: #5c564e;
+      --line: #d4cdc0;
+      --accent: #8b1e1c;
+      --accent-soft: #f3e4e2;
+      --forest: #2f6b3a;
+      --forest-soft: #e8f3ea;
+      --clay: #9a5b2e;
+      --clay-soft: #f5ebe0;
+      --sky: #2a4a5c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: #1a1614;
+      color: var(--ink);
+      overflow: hidden;
+    }
+    .deck {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .slide {
+      display: none;
+      position: absolute;
+      inset: 0;
+      padding: clamp(28px, 4vw, 56px) clamp(28px, 5vw, 72px) 72px;
+      background:
+        radial-gradient(1200px 600px at 100% -10%, rgba(139, 30, 28, 0.08), transparent 55%),
+        radial-gradient(900px 500px at -10% 110%, rgba(47, 107, 58, 0.07), transparent 50%),
+        linear-gradient(165deg, #f7f3ea 0%, #ebe4d6 100%);
+      flex-direction: column;
+      justify-content: center;
+    }
+    .slide.active { display: flex; }
+    .slide.cover {
+      background:
+        linear-gradient(135deg, rgba(26, 22, 20, 0.92), rgba(42, 74, 92, 0.85)),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23ffffff08' stroke-width='1'/%3E%3C/svg%3E");
+      color: #f7f3ea;
+      justify-content: flex-end;
+      padding-bottom: 10vh;
+    }
+    .slide.cover .eyebrow { color: #d4b4b0; }
+    .slide.cover h1 { color: #fff; max-width: 16ch; }
+    .slide.cover .lede { color: #d8d0c4; max-width: 42ch; }
+    .eyebrow {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-size: clamp(1.55rem, 3vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .lede {
+      font-size: clamp(1rem, 1.6vw, 1.2rem);
+      color: var(--muted);
+      max-width: 52ch;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      width: 100%;
+      max-width: 1100px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      width: 100%;
+      max-width: 1100px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 1100px;
+    }
+    @media (max-width: 900px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      body { overflow: auto; }
+      .slide { position: relative; display: none; min-height: 100vh; }
+      .slide.active { display: flex; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 18px 20px;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 650;
+      margin-bottom: 8px;
+    }
+    .card p, .card li {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .card ul { padding-left: 1.1rem; }
+    .card li { margin: 4px 0; }
+    .card.accent { border-color: var(--accent); background: var(--accent-soft); }
+    .card.forest { border-color: #a8c9ae; background: var(--forest-soft); }
+    .card.clay { border-color: #e0c8b0; background: var(--clay-soft); }
+    .tag {
+      display: inline-block;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      margin-bottom: 10px;
+      background: var(--ink);
+      color: #f7f3ea;
+    }
+    .tag.ok { background: var(--forest); }
+    .tag.no { background: var(--accent); }
+    .tag.warn { background: var(--clay); }
+    table {
+      width: 100%;
+      max-width: 1100px;
+      border-collapse: collapse;
+      background: var(--panel);
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 11px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #efeae1;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+    td.mono, .mono {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.82em;
+      word-break: break-all;
+    }
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: stretch;
+      max-width: 1100px;
+    }
+    .flow-step {
+      flex: 1 1 140px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 14px 12px;
+      min-width: 120px;
+    }
+    .flow-step .n {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .flow-step strong {
+      display: block;
+      font-size: 0.88rem;
+      margin-bottom: 4px;
+    }
+    .flow-step span {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--muted);
+      font-size: 1.2rem;
+      flex: 0 0 auto;
+    }
+    .big-num {
+      font-size: clamp(2.4rem, 5vw, 3.6rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .big-num.accent { color: var(--accent); }
+    .big-num.forest { color: var(--forest); }
+    .big-num.clay { color: var(--clay); }
+    .split-viz {
+      display: grid;
+      grid-template-columns: 7fr 3fr 90fr;
+      gap: 6px;
+      width: 100%;
+      max-width: 900px;
+      height: 56px;
+      margin: 8px 0 20px;
+    }
+    .split-viz > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .split-platform { background: var(--accent); }
+    .split-fund { background: var(--clay); }
+    .split-home { background: var(--forest); }
+    .quote {
+      font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+      font-weight: 500;
+      line-height: 1.4;
+      max-width: 36ch;
+      margin-bottom: 18px;
+    }
+    .quote cite {
+      display: block;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--muted);
+      font-family: "IBM Plex Mono", monospace;
+    }
+    .agenda {
+      list-style: none;
+      max-width: 640px;
+      width: 100%;
+    }
+    .agenda li {
+      display: flex;
+      gap: 16px;
+      align-items: baseline;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 1.05rem;
+    }
+    .agenda .n {
+      font-family: "IBM Plex Mono", monospace;
+      color: var(--accent);
+      font-size: 0.85rem;
+      min-width: 2ch;
+    }
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: rgba(26, 22, 20, 0.92);
+      color: #d8d0c4;
+      font-size: 0.8rem;
+      font-family: "IBM Plex Mono", monospace;
+      z-index: 20;
+    }
+    .nav button {
+      background: transparent;
+      border: 1px solid #5c564e;
+      color: #f7f3ea;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .nav button:hover { border-color: #f7f3ea; }
+    .nav .hint { opacity: 0.7; }
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 1100px;
+    }
+    @media (max-width: 900px) {
+      .pillars { grid-template-columns: 1fr 1fr; }
+      .split-viz { grid-template-columns: 1fr; height: auto; }
+      .split-viz > div { min-height: 40px; }
+    }
+    .pillar {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 14px 12px;
+      border-top: 3px solid var(--accent);
+    }
+    .pillar strong { display: block; font-size: 0.88rem; margin-bottom: 4px; }
+    .pillar span { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
+    .arch {
+      display: grid;
+      grid-template-rows: auto auto auto;
+      gap: 10px;
+      max-width: 900px;
+      width: 100%;
+    }
+    .arch-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .arch-row.two { grid-template-columns: 1.2fr 0.8fr; }
+    .arch-box {
+      border: 1.5px solid var(--ink);
+      background: var(--panel);
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .arch-box.chain {
+      background: #1a1614;
+      color: #f7f3ea;
+      border-color: #1a1614;
+    }
+    .arch-box strong { display: block; font-size: 0.95rem; }
+    .arch-box span { font-size: 0.8rem; opacity: 0.75; }
+    .arch-label {
+      text-align: center;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: start;
+      width: 100%;
+      max-width: 1100px;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .checklist li {
+      list-style: none;
+      padding: 8px 0 8px 28px;
+      position: relative;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.95rem;
+    }
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--forest);
+      font-weight: 700;
+    }
+    .checklist.no li::before { content: "✕"; color: var(--accent); }
+    .score {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--forest);
+    }
+    .footer-note {
+      margin-top: auto;
+      padding-top: 20px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: "IBM Plex Mono", monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <!-- 0 -->
+    <section class="slide cover active" data-title="Cover">
+      <p class="eyebrow">NEXUS · UEF · BKI 2026 · UniHackfest Track 2</p>
+      <h1>KNĂ — từ Trust Layer tới Business</h1>
+      <p class="lede">Giới thiệu chi tiết: tích hợp Solana tech stack, kiến trúc vận hành, và mô hình kinh doanh CBT Ê Đê tại Đắk Lắk.</p>
+    </section>
+
+    <!-- 1 -->
+    <section class="slide" data-title="Agenda">
+      <p class="eyebrow">Nội dung</p>
+      <h2>Hành trình trình bày</h2>
+      <p class="lede">Hai lớp, một sản phẩm: hệ điều hành CBT (Business) + sổ công chứng trên Solana (Trust).</p>
+      <ol class="agenda">
+        <li><span class="n">01</span> Vấn đề thị trường & định vị sản phẩm</li>
+        <li><span class="n">02</span> Kiến trúc tổng thể & tech stack</li>
+        <li><span class="n">03</span> Blockchain: Solana Anchor + Squads + luồng tích hợp</li>
+        <li><span class="n">04</span> Business model, giá trị, thị trường, lộ trình</li>
+      </ol>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-title="Problem">
+      <p class="eyebrow">01 · Vấn đề</p>
+      <h2>OTA giữ biên; cộng đồng không thấy tiền đi đâu</h2>
+      <p class="lede">Khi khách hỏi “tiền có tới hộ và quỹ buôn không?”, Facebook không trả lời được; Booking.com không hiện phần chia.</p>
+      <div class="grid-3">
+        <div class="card accent">
+          <span class="tag no">Rò rỉ</span>
+          <h3>Biên OTA / lữ hành</h3>
+          <p>Kênh bán nằm ngoài cộng đồng; hộ mất kiểm soát giá và quan hệ khách.</p>
+        </div>
+        <div class="card clay">
+          <span class="tag warn">Mờ</span>
+          <h3>Chia lợi ích không đọc được</h3>
+          <p>Không có sổ công khai: bao nhiêu cho hộ, bao nhiêu cho quỹ cộng đồng.</p>
+        </div>
+        <div class="card">
+          <span class="tag">Loại trừ</span>
+          <h3>Nội dung & quản trị</h3>
+          <p>Cộng đồng bị loại khỏi quyết định nội dung văn hóa và vận hành điểm đến.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" data-title="Product">
+      <p class="eyebrow">01 · Sản phẩm</p>
+      <h2>KNĂ = hệ điều hành CBT do cộng đồng sở hữu</h2>
+      <p class="lede">Tên lấy từ nhà dài Ê Đê — trung tâm kiến trúc và quyền mẫu hệ. Không phải bản clone OTA.</p>
+      <div class="pillars">
+        <div class="pillar"><strong>Đặt chỗ P2P</strong><span>Hộ tự giá, ngày, nội quy; coordinator xác nhận</span></div>
+        <div class="pillar"><strong>Chợ thủ công</strong><span>Tồn kho + checkout; hộ giữ 95%</span></div>
+        <div class="pillar"><strong>Sổ cái</strong><span>Chỉ hiện giao dịch đã tất toán</span></div>
+        <div class="pillar"><strong>Quỹ cộng đồng</strong><span>3% từ mỗi booking</span></div>
+        <div class="pillar"><strong>Archive + Hội đồng</strong><span>Duyệt trước publish; KNĂ = 0 phiếu</span></div>
+      </div>
+      <p class="footer-note">Đối tượng: khách · hộ cung cấp · coordinator · hội đồng buôn · sau này DMC / lữ hành B2B</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-title="Two layers">
+      <p class="eyebrow">02 · Định vị kỹ thuật</p>
+      <h2>Hai lớp, một sản phẩm</h2>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="card forest">
+          <span class="tag ok">Phase 1 · Business OS</span>
+          <h3>Postgres = nguồn sự thật vận hành</h3>
+          <ul>
+            <li>Khách đặt bằng <strong>VND</strong> — không cần ví crypto</li>
+            <li>Thanh toán thủ công / chuyển khoản (MoMo seam sẵn)</li>
+            <li>Booking, marketplace, ledger, archive, committee</li>
+            <li>Phí tính server-side trong <span class="mono">fees.ts</span></li>
+          </ul>
+        </div>
+        <div class="card accent">
+          <span class="tag no">Track 2 · Trust notary</span>
+          <h3>Solana = công chứng phần chia đã settle</h3>
+          <ul>
+            <li>Không thanh toán crypto, không token, không NFT</li>
+            <li>Attestation hash + số VND trên Devnet</li>
+            <li>Phantom (operator) + Squads 2-of-3 (committee)</li>
+            <li>Ai cũng verify qua Explorer / PDA / API</li>
+          </ul>
+        </div>
+      </div>
+      <p class="footer-note">“We are not tokenizing the buôn. We are giving the buôn a receipt the province can audit.”</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-title="Architecture">
+      <p class="eyebrow">02 · Kiến trúc</p>
+      <h2>Luồng hệ thống end-to-end</h2>
+      <div class="arch" style="margin-top:8px">
+        <div class="arch-row">
+          <div class="arch-box">
+            <strong>Web · React 19 + Vite 8 + Tailwind</strong>
+            <span>:8080 · i18n EN/VI · Leaflet · Phantom UX</span>
+          </div>
+        </div>
+        <div class="arch-label">↓ REST / JWT</div>
+        <div class="arch-row two">
+          <div class="arch-box">
+            <strong>API · Express + Prisma + Zod</strong>
+            <span>:4000 · bookings · orders · community · /chain · /wallet</span>
+          </div>
+          <div class="arch-box">
+            <strong>Postgres 17</strong>
+            <span>Source of truth · LedgerEntry · Outbox</span>
+          </div>
+        </div>
+        <div class="arch-label">↓ outbox · verify · không rollback booking</div>
+        <div class="arch-row two">
+          <div class="arch-box">
+            <strong>chain-worker (optional)</strong>
+            <span>Reconcile RPC · retry khi mạng lỗi</span>
+          </div>
+          <div class="arch-box chain">
+            <strong>Solana Devnet</strong>
+            <span>Anchor program · Squads vault · Explorer</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-title="Tech stack">
+      <p class="eyebrow">02 · Tech stack</p>
+      <h2>Stack đầy đủ</h2>
+      <table>
+        <thead>
+          <tr><th>Lớp</th><th>Công nghệ</th><th>Vai trò</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Frontend</td><td>React 19, Vite 8, Tailwind, i18next, Leaflet</td><td>Guest & operator UX</td></tr>
+          <tr><td>Backend</td><td>Node 24, Express, Prisma 6, Zod, JWT</td><td>API nghiệp vụ + auth</td></tr>
+          <tr><td>Database</td><td>PostgreSQL 17 (Docker / Neon)</td><td>SoT vận hành</td></tr>
+          <tr><td>Chain</td><td>Solana Devnet, Anchor 0.30, @solana/web3.js</td><td>Attestation on-chain</td></tr>
+          <tr><td>Multisig</td><td>Squads v4 (@sqds/multisig)</td><td>2-of-3 finalize</td></tr>
+          <tr><td>Wallet</td><td>Phantom</td><td>Coordinator sign; guest link tùy chọn</td></tr>
+          <tr><td>Client lib</td><td>@kna/chain-client, blake3, noble/hashes</td><td>PDA, hash, IX, verify</td></tr>
+          <tr><td>Infra</td><td>Docker Compose (+ solana profile), Vitest, GHA</td><td>Dev / CI / demo</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" data-title="Blockchain scope">
+      <p class="eyebrow">03 · Blockchain</p>
+      <h2>Phạm vi Solana — làm gì / không làm gì</h2>
+      <div class="grid-2" style="margin-top:8px">
+        <div>
+          <ul class="checklist">
+            <li>Notarize phần chia 7 / 3 / 90 đã settle</li>
+            <li>Hash payload — không lưu PII khách on-chain</li>
+            <li>submit_attestation (coordinator Phantom)</li>
+            <li>finalize_attestation (Squads vault 2-of-3)</li>
+            <li>Verify: Explorer + PDA decode + API</li>
+            <li>Devnet only — mainnet hard-fail</li>
+          </ul>
+        </div>
+        <div>
+          <ul class="checklist no">
+            <li>Không crypto payments / token thanh toán</li>
+            <li>Không community token / loyalty coin</li>
+            <li>Không NFT homestay / RWA</li>
+            <li>Không Ethereum / Solidity</li>
+            <li>Không oracle giá / DeFi</li>
+            <li>Không “Web3 hóa Tây Nguyên”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" data-title="On-chain program">
+      <p class="eyebrow">03 · Smart program</p>
+      <h2>Anchor program <span class="mono">kna_trust_layer</span></h2>
+      <p class="lede">Program ID (devnet): <span class="mono">2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f</span></p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Hằng số phí on-chain</h3>
+          <p>700 bps platform + 300 bps community = <strong>7% / 3%</strong>; hộ nhận phần còn lại <strong>90%</strong>. Khớp <span class="mono">fees.ts</span> off-chain.</p>
+        </div>
+        <div class="card">
+          <h3>Instructions chính</h3>
+          <p class="mono" style="color:var(--ink);line-height:1.7">
+            initialize_config · grant_role / revoke_role<br />
+            set_paused · set_committee_vault<br />
+            <strong>submit_attestation</strong> · <strong>finalize_attestation</strong>
+          </p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;max-width:1100px">
+        <h3>On-chain payload</h3>
+        <p>Hashes + số tiền VND + timestamps. Không guest PII. Ai cũng đối chiếu với ledger Postgres qua API verify.</p>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" data-title="Integration flow">
+      <p class="eyebrow">03 · Tích hợp</p>
+      <h2>Business app ↔ chain (outbox pattern)</h2>
+      <div class="flow" style="margin-top:8px">
+        <div class="flow-step">
+          <div class="n">01</div>
+          <strong>Booking settle</strong>
+          <span>VND · Postgres LedgerEntry 7/3/90</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">02</div>
+          <strong>Outbox</strong>
+          <span>LEDGER_SETTLED + Attestation PENDING</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">03</div>
+          <strong>Submit</strong>
+          <span>Coordinator Phantom → pending PDA</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">04</div>
+          <strong>Finalize</strong>
+          <span>Squads 2-of-3 vault execute</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">05</div>
+          <strong>Verify</strong>
+          <span>#community · Explorer · /chain/verify</span>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:18px">
+        <div class="card forest">
+          <h3>Resilience</h3>
+          <p>RPC down → booking/ledger vẫn chạy. Worker retry sau. Chain không rollback nghiệp vụ.</p>
+        </div>
+        <div class="card">
+          <h3>Không dùng webhook chain→app</h3>
+          <p>Pattern: outbox + reconciler + browser-signed tx + paste-back finalize signature.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" data-title="Squads">
+      <p class="eyebrow">03 · Governance on-chain</p>
+      <h2>Squads 2-of-3 = quyền hội đồng, không phải 1 ví</h2>
+      <div class="two-col" style="margin-top:8px">
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <h3>Vì sao cần multisig?</h3>
+            <p>Finalize attestation là hành động ủy ban — không để một coordinator tự “đóng sổ” công chứng.</p>
+          </div>
+          <div class="card clay">
+            <h3>Luồng committee</h3>
+            <ul>
+              <li>Export Squads proposal từ KNĂ (#review)</li>
+              <li>2-of-3 approve trên Squads</li>
+              <li>Vault execute <span class="mono">finalize_attestation</span></li>
+              <li>Dán signature → API RPC confirm + decode</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card accent">
+          <span class="tag no">Bằng chứng live</span>
+          <h3>Judge verify (60s)</h3>
+          <ul>
+            <li>Explorer: finalize tx + final PDA</li>
+            <li>Vault ≠ coordinator pubkey</li>
+            <li><span class="mono">GET /chain/verify/:ledgerId</span></li>
+            <li><span class="mono">node scripts/verify-ledger.mjs</span></li>
+          </ul>
+          <p style="margin-top:10px">Evidence: <span class="mono">DEVNET-EVIDENCE.json</span> · <span class="mono">SQUADS-DEVNET.json</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" data-title="Key files">
+      <p class="eyebrow">03 · Bản đồ code</p>
+      <h2>Điểm tích hợp chính trong monorepo</h2>
+      <table>
+        <thead>
+          <tr><th>Thành phần</th><th>Đường dẫn</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Anchor program</td><td class="mono">app/programs/kna-trust-layer/</td></tr>
+          <tr><td>Chain client + IDL</td><td class="mono">app/packages/chain-client/</td></tr>
+          <tr><td>API gateway / outbox / worker</td><td class="mono">app/apps/api/src/chain/</td></tr>
+          <tr><td>REST /chain · /wallet</td><td class="mono">routes/chain.ts · wallet.ts</td></tr>
+          <tr><td>Phantom + Squads UI</td><td class="mono">apps/web/src/wallet/</td></tr>
+          <tr><td>Fee split business</td><td class="mono">fees.ts · LedgerEntry</td></tr>
+          <tr><td>Docker Solana profile</td><td class="mono">docker-compose.solana.yml</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" data-title="Business model">
+      <p class="eyebrow">04 · Business</p>
+      <h2>Mô hình doanh thu — tiền không đi qua crypto</h2>
+      <p class="lede">Khách / lữ hành trả VND. Solana chỉ chứng minh phần chia đã settle.</p>
+      <div class="split-viz" aria-hidden="true">
+        <div class="split-platform">7%</div>
+        <div class="split-fund">3%</div>
+        <div class="split-home">90%</div>
+      </div>
+      <div class="grid-3">
+        <div class="card accent">
+          <div class="big-num accent">7%</div>
+          <h3>Platform fee</h3>
+          <p>Doanh thu KNĂ từ booking — take rate vận hành OS.</p>
+        </div>
+        <div class="card clay">
+          <div class="big-num clay">3%</div>
+          <h3>Community Fund</h3>
+          <p>Quỹ buôn — minh bạch trên sổ cái + có thể notarize.</p>
+        </div>
+        <div class="card forest">
+          <div class="big-num forest">90%</div>
+          <h3>Household</h3>
+          <p>Hộ nhận phần lớn — đúng giả thuyết CBT công bằng.</p>
+        </div>
+      </div>
+      <p class="footer-note">Marketplace: 5% nền tảng · 95% nghệ nhân — tách biệt với booking split</p>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" data-title="Value prop">
+      <p class="eyebrow">04 · Giá trị</p>
+      <h2 class="quote">“Did my money reach the household and the community fund?”
+        <cite>— Câu hỏi mà OTA không trả lời được; KNĂ trả lời trên web + Solana verify</cite>
+      </h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Khách / tour op</h3>
+          <p>Đặt VND quen thuộc; thấy sổ công khai; không cần học ví.</p>
+        </div>
+        <div class="card">
+          <h3>Hộ & buôn</h3>
+          <p>Giữ biên lợi nhuận; quỹ 3% có dấu vết; hội đồng giữ quyền nội dung.</p>
+        </div>
+        <div class="card">
+          <h3>Tỉnh / kiểm toán</h3>
+          <p>Biên lai verify được — không phụ thuộc lời UI của startup.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" data-title="Market">
+      <p class="eyebrow">04 · Thị trường</p>
+      <h2>Nhu cầu thể chế — không phải “thêm một app”</h2>
+      <div class="two-col">
+        <div>
+          <div class="score">4.1<span style="font-size:1.2rem;color:var(--muted)">/5</span></div>
+          <p style="color:var(--muted);margin:8px 0 16px;font-size:0.95rem">Mức cần thiết có điều kiện (need-assessment)</p>
+          <ul class="checklist">
+            <li>Đắk Lắk ~1,5 triệu lượt / ~1.200 tỷ (2024)</li>
+            <li>NQ 08 mua hạ tầng — chưa mua OS vận hành</li>
+            <li>USSH: động cơ văn hóa dẫn CBT Tây Nguyên</li>
+            <li>Beachhead: Tuôr, Kli A, Kuốp, Lak (không Akŏ Dhông bão hòa)</li>
+          </ul>
+        </div>
+        <div class="grid-2" style="grid-template-columns:1fr">
+          <div class="card forest">
+            <h3>Nhu cầu ngành 4.6</h3>
+            <p>Rò rỉ, mờ chia sẻ, cộng đồng thiếu quyền.</p>
+          </div>
+          <div class="card clay">
+            <h3>Sẵn sàng hiện trường 2.8</h3>
+            <p>Cần đào tạo + thanh toán khớp ví hộ + DMC trước khi scale Phase 2.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" data-title="Competitive">
+      <p class="eyebrow">04 · Khác biệt</p>
+      <h2>KNĂ vs kênh hiện có</h2>
+      <table>
+        <thead>
+          <tr><th></th><th>Facebook / OTA</th><th>KNĂ</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Ai giữ quan hệ khách</td><td>Nền tảng / agent</td><td>Hộ + buôn qua OS</td></tr>
+          <tr><td>Phần chia doanh thu</td><td>Ẩn / không chuẩn</td><td>7/3/90 công khai + optional on-chain</td></tr>
+          <tr><td>Nội dung văn hóa</td><td>Ai đăng cũng được</td><td>Hội đồng duyệt archive</td></tr>
+          <tr><td>Thanh toán</td><td>OTA / COD hỗn loạn</td><td>VND thủ công → MoMo/VNPay</td></tr>
+          <tr><td>Bằng chứng audit</td><td>Không</td><td>Ledger + Solana PDA / Explorer</td></tr>
+          <tr><td>Token / NFT</td><td>—</td><td><strong>Không</strong> — ngoài phạm vi có chủ ý</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide" data-title="Roadmap">
+      <p class="eyebrow">04 · Lộ trình</p>
+      <h2>Phase có cổng ra hiện trường</h2>
+      <div class="grid-3">
+        <div class="card forest">
+          <span class="tag ok">Phase 1</span>
+          <h3>MVP vận hành</h3>
+          <ul>
+            <li>Booking + marketplace + ledger</li>
+            <li>Archive + committee</li>
+            <li>Thanh toán thủ công</li>
+            <li>Đào tạo coordinator</li>
+          </ul>
+        </div>
+        <div class="card accent">
+          <span class="tag no">Track 2 / Phase 2 preview</span>
+          <h3>Trust layer</h3>
+          <ul>
+            <li>Solana attestation live (devnet)</li>
+            <li>Squads 2-of-3</li>
+            <li>Song song sổ DB 1 tháng trước mainnet</li>
+          </ul>
+        </div>
+        <div class="card clay">
+          <span class="tag warn">Cổng ra (chưa đạt)</span>
+          <h3>Pilot gates</h3>
+          <ul>
+            <li>100+ booking / 3 tháng</li>
+            <li>≥80% provider còn active</li>
+            <li>Minh bạch ảnh hưởng đặt chỗ</li>
+            <li>1 đoàn B2B qua nền tảng</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide" data-title="Demo">
+      <p class="eyebrow">Demo path</p>
+      <h2>4 bước chứng minh end-to-end</h2>
+      <div class="flow" style="margin-top:12px">
+        <div class="flow-step">
+          <div class="n">01</div>
+          <strong>Guest book</strong>
+          <span>VND · không ví crypto</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">02</div>
+          <strong>#dashboard</strong>
+          <span>Coordinator Phantom submit</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">03</div>
+          <strong>#review</strong>
+          <span>Committee Squads 2-of-3</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="n">04</div>
+          <strong>#community</strong>
+          <span>Explorer proof badge</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px;max-width:1100px">
+        <h3>Ask (không phải gọi vốn token)</h3>
+        <p>Mentorship vận hành Squads + intro DMC (Lua Viet / Intermèdes / DMC Đắk Lắk). Pilot trước khi claim traction.</p>
+      </div>
+    </section>
+
+    <!-- 18 -->
+    <section class="slide cover" data-title="Close">
+      <p class="eyebrow">Kết</p>
+      <h1>Không tokenize buôn.<br />Cho buôn một biên lai tỉnh kiểm được.</h1>
+      <p class="lede">KNĂ: CBT operating system (VND) + Solana trust notary (7/3/90). Business lấy phí nền tảng; chain lấy niềm tin có thể audit.</p>
+      <p class="lede" style="margin-top:24px;opacity:0.85">NEXUS · UEF · BKI 2026 · docs/PITCH-TRACK2.md</p>
+    </section>
+
+  </div>
+
+  <nav class="nav" aria-label="Điều hướng slide">
+    <button type="button" id="prev" aria-label="Slide trước">← Prev</button>
+    <span class="hint"><span id="counter">1 / 1</span> · ← → · Space · F fullscreen</span>
+    <button type="button" id="next" aria-label="Slide sau">Next →</button>
+  </nav>
+
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      let i = 0;
+      const counter = document.getElementById("counter");
+      function show(n) {
+        i = Math.max(0, Math.min(slides.length - 1, n));
+        slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+        counter.textContent = (i + 1) + " / " + slides.length + " · " + (slides[i].dataset.title || "");
+      }
+      document.getElementById("prev").onclick = () => show(i - 1);
+      document.getElementById("next").onclick = () => show(i + 1);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+          e.preventDefault();
+          show(i + 1);
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          show(i - 1);
+        } else if (e.key === "Home") show(0);
+        else if (e.key === "End") show(slides.length - 1);
+        else if (e.key === "f" || e.key === "F") {
+          if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+          else document.exitFullscreen?.();
+        }
+      });
+      let touchX = null;
+      document.addEventListener("touchstart", (e) => { touchX = e.changedTouches[0].screenX; }, { passive: true });
+      document.addEventListener("touchend", (e) => {
+        if (touchX == null) return;
+        const dx = e.changedTouches[0].screenX - touchX;
+        if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1));
+        touchX = null;
+      }, { passive: true });
+      show(0);
+    })();
+  </script>
+</body>
+</html>

@@ -81,7 +81,7 @@ export default function Review() {
         <section className="px-8 lg:px-12 xl:px-16 pt-6 max-w-5xl space-y-4">
           <OperatorWalletBar />
           <p className="text-xs text-[#F5EDDD]/50">{t('wallet.committeeFinalize')}</p>
-          <CommitteeFinalizePanel token={token} />
+          <CommitteeFinalizePanel />
         </section>
       )}
 

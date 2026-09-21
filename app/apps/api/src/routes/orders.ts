@@ -5,6 +5,7 @@ import { splitOrder } from "../lib/fees";
 import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
 import { coordinatorIds, notify, notifyAll } from "../lib/notify";
 import { enqueueLedgerSettledOutbox } from "../chain/outbox";
+import { getPaymentGateway } from "../payments/gateway";
 
 export const ordersRouter = Router();
 
@@ -147,8 +148,26 @@ ordersRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     href: "#dashboard",
   });
 
-  const { ledgerEntries, ...rest } = order;
-  res.status(201).json({ ...rest, ledgerEntry: ledgerEntries[0] ?? null });
+  const payment = await getPaymentGateway().createIntent({
+    reference: order.id,
+    amountVnd: order.totalVnd,
+    description: `KNĂ marketplace · ${products[0].title}`,
+  });
+
+  let orderOut = order;
+  if (payment.paymentRef) {
+    orderOut = await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        paymentRef: payment.paymentRef,
+        paymentStatus: payment.status,
+      },
+      include: { items: true, ledgerEntries: true },
+    });
+  }
+
+  const { ledgerEntries, ...rest } = orderOut;
+  res.status(201).json({ ...rest, ledgerEntry: ledgerEntries[0] ?? null, payment });
 });
 
 // ── Settlement ───────────────────────────────────────────────────────

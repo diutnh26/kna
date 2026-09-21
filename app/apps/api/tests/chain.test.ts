@@ -11,9 +11,10 @@ const FAKE_FINALIZE = `devnet_${"B".repeat(80)}`;
 
 // vi.hoisted runs before any imports, so these vi.fn() refs are available
 // inside the vi.mock factory below (which is also hoisted).
-const { verifyPendingSubmission, verifyFinalize } = vi.hoisted(() => ({
+const { verifyPendingSubmission, verifyFinalize, fetchDemoTokenBalances } = vi.hoisted(() => ({
   verifyPendingSubmission: vi.fn(),
   verifyFinalize: vi.fn(),
+  fetchDemoTokenBalances: vi.fn(),
 }));
 
 // Module-level mock: Vitest hoists this before any import of the gateway
@@ -36,6 +37,11 @@ vi.mock("../src/chain/gateway", () => ({
   }),
   resetChainGatewayForTests: vi.fn(),
   ChainGateway: class {},
+}));
+
+vi.mock("../src/chain/demo-token", () => ({
+  demoDisburse: vi.fn(),
+  fetchDemoTokenBalances,
 }));
 
 describe("chain verifier routes", () => {
@@ -115,6 +121,7 @@ describe("chain verifier routes", () => {
   beforeEach(() => {
     verifyPendingSubmission.mockClear();
     verifyFinalize.mockClear();
+    fetchDemoTokenBalances.mockReset();
   });
 
   it("GET /chain/status returns devnet config", async () => {
@@ -183,5 +190,32 @@ describe("chain verifier routes", () => {
     const row = await prisma.ledgerAttestation.findUnique({ where: { ledgerEntryId: ledgerId } });
     expect(row?.state).not.toBe("FINALIZED");
     expect(row?.finalPda).toBeNull();
+  });
+
+  it("GET /chain/status includes demo token balances from the chain helper", async () => {
+    process.env.DEMO_MINT = "6yASZNZd9qTwfBv5Ay61RsGvcTzftZkPxZCHgJ97bf7N";
+    fetchDemoTokenBalances.mockResolvedValue({
+      mint: process.env.DEMO_MINT,
+      symbol: "dKNA",
+      decimals: 6,
+      vndPerToken: 1000,
+      guest: { uiAmount: 2, symbol: "dKNA", approxVnd: 2000 },
+      provider: { uiAmount: 450, symbol: "dKNA", approxVnd: 450_000 },
+      community: { uiAmount: 15, symbol: "dKNA", approxVnd: 15_000 },
+    });
+
+    const res = await request(app).get("/chain/status");
+    expect(res.status).toBe(200);
+    expect(res.body.demoToken.balances.guest.uiAmount).toBe(2);
+    expect(fetchDemoTokenBalances).toHaveBeenCalled();
+  });
+
+  it("GET /chain/status still succeeds when demo balance lookup throws", async () => {
+    process.env.DEMO_MINT = "6yASZNZd9qTwfBv5Ay61RsGvcTzftZkPxZCHgJ97bf7N";
+    fetchDemoTokenBalances.mockRejectedValue(new Error("rpc down"));
+
+    const res = await request(app).get("/chain/status");
+    expect(res.status).toBe(200);
+    expect(res.body.demoToken.balances).toBeNull();
   });
 });

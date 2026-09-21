@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KNĂ — Ví dụ dữ liệu ↔ Solana Devnet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1614;
+      --paper: #f7f4ee;
+      --panel: #fffefb;
+      --muted: #5c564e;
+      --line: #d9d2c6;
+      --pg: #2f5f8a;
+      --sol: #8a5a12;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 28px 18px 56px; }
+    h1 { font-size: 1.35rem; margin: 0 0 6px; letter-spacing: -0.02em; }
+    .meta { color: var(--muted); font-size: 0.9rem; margin: 0 0 22px; }
+    .one-liner {
+      border: 2px solid var(--ink);
+      background: var(--panel);
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      font-size: 0.98rem;
+    }
+    h2 {
+      font-size: 0.95rem;
+      margin: 22px 0 10px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+    .flow {
+      display: grid;
+      gap: 8px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 10px;
+      align-items: start;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+    }
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 6px;
+      text-align: center;
+    }
+    .badge.pg { background: #e4eef7; color: var(--pg); }
+    .badge.sol { background: #f8efd9; color: var(--sol); }
+    .badge.both { background: #eee; color: var(--ink); }
+    .row strong { display: block; font-size: 0.92rem; margin-bottom: 2px; }
+    .row p { margin: 0; font-size: 0.88rem; color: var(--muted); }
+    .mono { font-family: "IBM Plex Mono", monospace; font-size: 0.82em; word-break: break-all; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: var(--panel);
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #efeae1; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ex {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #efeae1;
+      font-size: 0.86rem;
+    }
+    a { color: #8b1e1c; }
+    footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Ví dụ ngắn: dữ liệu KNĂ ↔ Solana Devnet</h1>
+    <p class="meta">Một booking → sổ cái Postgres → chứng thực trên Devnet. Solana không giữ tiền, không giữ PII.</p>
+
+    <div class="one-liner">
+      <strong>Một câu:</strong> Postgres lưu giao dịch vận hành (ai đặt, bao nhiêu VND, split 7/3/90).
+      Devnet chỉ lưu <em>bằng chứng hash</em> của split đã settle — ai cũng mở Explorer để đối soát.
+    </div>
+
+    <h2>Luồng 1 lần (ví dụ)</h2>
+    <div class="flow">
+      <div class="row">
+        <span class="badge pg">Postgres</span>
+        <div>
+          <strong>1. Khách đặt homestay — 1.000.000 ₫</strong>
+          <p>Booking + ledger row: platform 70.000 · quỹ 30.000 · hộ 900.000. Chưa lên chain.</p>
+        </div>
+      </div>
+      <div class="row">
+        <span class="badge pg">Postgres</span>
+        <div>
+          <strong>2. Coordinator confirm</strong>
+          <p>Booking → CONFIRMED. Sổ cái công khai được phép hiện. Outbox đánh dấu “cần attest”.</p>
+        </div>
+      </div>
+      <div class="row">
+        <span class="badge sol">Devnet</span>
+        <div>
+          <strong>3. Phantom ký <span class="mono">submit_attestation</span></strong>
+          <p>Tạo <strong>pending PDA</strong>. On-chain có hash split + ledgerId (không có tên khách).</p>
+          <p class="ex">Demo thật: pending
+            <a href="https://explorer.solana.com/address/4FiuZEavPqCnPtntS4oYTfSdsYgbA7irZ5YdzNrqVXpd?cluster=devnet" target="_blank" rel="noreferrer">4FiuZE…VXpd</a>
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <span class="badge sol">Devnet</span>
+        <div>
+          <strong>4. Committee Squads 2-of-3 → <span class="mono">finalize_attestation</span></strong>
+          <p>Vault execute → <strong>final PDA</strong>. API chỉ chấp nhận sau khi RPC + decode khớp Postgres.</p>
+          <p class="ex">Demo thật: final
+            <a href="https://explorer.solana.com/address/7jKscYQw2yNnSRhydtRqH1uV65jDPZSv7bAt2q3rvMYp?cluster=devnet" target="_blank" rel="noreferrer">7jKscY…vMYp</a>
+            ·
+            <a href="https://explorer.solana.com/tx/47PaCdXN1AHPS3xDjWRyWXDxEcSVWTEKEVtamTAMbqMKmGB9748EeWZQeNZozkMQrFdW7w473ZHfKY3h5s2YTo7F?cluster=devnet" target="_blank" rel="noreferrer">tx execute</a>
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <span class="badge both">Cả hai</span>
+        <div>
+          <strong>5. Công chúng đọc</strong>
+          <p>Web <span class="mono">#community</span> hiện số VND + link Explorer. Judge có thể gọi
+            <span class="mono">GET /chain/verify/:ledgerId</span> hoặc
+            <span class="mono">node scripts/verify-ledger.mjs</span>.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>Cái gì nằm đâu?</h2>
+    <table>
+      <thead>
+        <tr><th>Dữ liệu</th><th>Postgres</th><th>Devnet</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tên khách / email</td>
+          <td>Có (nội bộ)</td>
+          <td><strong>Không</strong></td>
+        </tr>
+        <tr>
+          <td>Số tiền + split 7/3/90</td>
+          <td>Có (nguồn sự thật)</td>
+          <td>Có (trong PDA / hash)</td>
+        </tr>
+        <tr>
+          <td>Thanh toán VND</td>
+          <td>Trạng thái booking/order</td>
+          <td><strong>Không</strong> — không chuyển SOL/token</td>
+        </tr>
+        <tr>
+          <td>Chữ ký coordinator / committee</td>
+          <td>Lưu tx signature sau khi verify</td>
+          <td>Tx thật trên Explorer</td>
+        </tr>
+        <tr>
+          <td>RPC Devnet chết</td>
+          <td>App + sổ cái web vẫn chạy</td>
+          <td>Attest sau (outbox retry)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Ví dụ số (demo evidence)</h2>
+    <table>
+      <thead>
+        <tr><th>Field</th><th>Giá trị minh họa</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Ledger id (demo)</td><td class="mono">demo-ledger-1787557057099</td></tr>
+        <tr><td>Payload hash</td><td class="mono">3c19ec2f…17757</td></tr>
+        <tr><td>Program</td><td class="mono">2Ft67fV4…JK6f</td></tr>
+        <tr><td>Cluster</td><td>devnet only</td></tr>
+      </tbody>
+    </table>
+
+    <footer>
+      Chi tiết đủ điều kiện Track 2: <span class="mono">PITCH-TRACK2-VISUAL.html</span> ·
+      evidence: <span class="mono">DEVNET-EVIDENCE.json</span>.
+    </footer>
+  </div>
+</body>
+</html>

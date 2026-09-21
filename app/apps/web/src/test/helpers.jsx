@@ -5,16 +5,24 @@ import { WalletProvider } from '../wallet/WalletProvider';
 import { api, ApiError } from '../lib/api';
 import '../i18n';
 
+/** In-memory session for tests (replaces the old localStorage kna-auth key). */
+let testSessionUser = null;
+
 /**
  * Renders a screen inside the providers App.jsx would give it.
  */
 export function renderScreen(ui) {
   if (!vi.isMockFunction(api.me)) {
     vi.spyOn(api, 'me').mockImplementation(async () => {
-      const stored = localStorage.getItem('kna-auth');
-      if (!stored) throw new ApiError('Sign in required.', 401);
-      return { user: JSON.parse(stored).user };
+      if (!testSessionUser) throw new ApiError('Sign in required.', 401);
+      return { user: testSessionUser };
     });
+  }
+  if (!vi.isMockFunction(api.refresh)) {
+    vi.spyOn(api, 'refresh').mockRejectedValue(new ApiError('Sign in required.', 401));
+  }
+  if (!vi.isMockFunction(api.logout)) {
+    vi.spyOn(api, 'logout').mockResolvedValue({ ok: true });
   }
   if (!vi.isMockFunction(api.walletMe)) {
     vi.spyOn(api, 'walletMe').mockResolvedValue(null);
@@ -26,25 +34,24 @@ export function renderScreen(ui) {
   );
 }
 
-/** Puts a signed-in session in localStorage before AuthProvider reads it. */
+/** Puts a signed-in session in place before AuthProvider bootstraps via api.me. */
 export function signIn(user = {}) {
-  localStorage.setItem(
-    'kna-auth',
-    JSON.stringify({
-      token: 'test-token',
-      user: {
-        id: 'u1',
-        email: 'demo@example.kna',
-        fullName: 'Demo Traveler',
-        role: 'GUEST',
-        locale: 'en',
-        isCommitteeMember: false,
-        committeeRole: null,
-        provider: null,
-        ...user,
-      },
-    })
-  );
+  testSessionUser = {
+    id: 'u1',
+    email: 'demo@example.kna',
+    fullName: 'Demo Traveler',
+    role: 'GUEST',
+    locale: 'en',
+    emailVerified: true,
+    isCommitteeMember: false,
+    committeeRole: null,
+    provider: null,
+    ...user,
+  };
+}
+
+export function signOut() {
+  testSessionUser = null;
 }
 
 export const aListing = (over = {}) => ({

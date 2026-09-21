@@ -3,7 +3,7 @@ import { prisma } from "../src/lib/prisma";
 import { createApp } from "../src/app";
 
 export const app = createApp();
-export const PASSWORD = "test-password";
+export const PASSWORD = "test-password1";
 
 /** Wipes every table, in foreign-key-safe order. */
 export async function resetDb() {
@@ -29,6 +29,7 @@ export async function resetDb() {
   await prisma.archiveEntry.deleteMany();
   await prisma.phrase.deleteMany();
   await prisma.provider.deleteMany();
+  await prisma.refreshToken.deleteMany();
   await prisma.user.deleteMany();
 }
 
@@ -42,6 +43,7 @@ export async function makeUser(
       passwordHash: await bcrypt.hash(PASSWORD, 4),
       fullName: email.split("@")[0],
       role,
+      emailVerified: true,
     },
   });
 }

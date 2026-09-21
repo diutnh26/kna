@@ -136,7 +136,19 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     description: `KNĂ booking · ${listing.title}`,
   });
 
-  const { ledgerEntries, ...rest } = booking;
+  let bookingOut = booking;
+  if (payment.paymentRef) {
+    bookingOut = await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        paymentRef: payment.paymentRef,
+        paymentStatus: payment.status,
+      },
+      include: { ledgerEntries: true },
+    });
+  }
+
+  const { ledgerEntries, ...rest } = bookingOut;
   res.status(201).json({ ...rest, ledgerEntry: ledgerEntries[0] ?? null, payment });
 });
 

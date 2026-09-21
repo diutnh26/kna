@@ -18,6 +18,7 @@ import {
 import { getChainGateway } from "../chain/gateway";
 import { loadChainConfig } from "../chain/config";
 import { recomputeAndVerifySettled } from "../chain/outbox";
+import { fetchDemoTokenBalances } from "../chain/demo-token";
 
 export const chainRouter = Router();
 
@@ -33,6 +34,7 @@ function verifiedExplorer(cluster: "devnet" | "localnet", sig: string | null | u
 chainRouter.get("/status", async (_req, res) => {
   const gateway = getChainGateway();
   const status = gateway.status();
+  const config = loadChainConfig();
   let programDeployed: boolean | null = null;
   if (status.enabled) {
     try {
@@ -42,7 +44,46 @@ chainRouter.get("/status", async (_req, res) => {
       programDeployed = false;
     }
   }
-  res.json({ ...status, programDeployed });
+
+  const demoMint = process.env.DEMO_MINT?.trim() || null;
+  const guestWallet = process.env.DEMO_GUEST_WALLET?.trim() || null;
+  const providerWallet = process.env.DEMO_PROVIDER_WALLET?.trim() || null;
+  const communityVault = config.committeeVault || process.env.KNA_COMMITTEE_VAULT?.trim() || null;
+
+  let balances = null;
+  if (demoMint) {
+    try {
+      balances = await fetchDemoTokenBalances({
+        guest: guestWallet,
+        provider: providerWallet,
+        community: communityVault,
+      });
+    } catch (err) {
+      console.warn("[chain/status] demo token balances unavailable:", err);
+    }
+  }
+
+  res.json({
+    ...status,
+    programDeployed,
+    demoToken: {
+      enabled: Boolean(demoMint && process.env.DEMO_FUNDER_KEYPAIR_B58?.trim()),
+      disclaimer: "Demo token — không phải thanh toán thật. Devnet only.",
+      mint: demoMint,
+      explorer: {
+        mint: demoMint ? explorerAccountUrl(config.cluster, demoMint) : null,
+        guest: guestWallet ? explorerAccountUrl(config.cluster, guestWallet) : null,
+        provider: providerWallet ? explorerAccountUrl(config.cluster, providerWallet) : null,
+        community: communityVault ? explorerAccountUrl(config.cluster, communityVault) : null,
+      },
+      wallets: {
+        guest: guestWallet,
+        provider: providerWallet,
+        community: communityVault,
+      },
+      balances,
+    },
+  });
 });
 
 chainRouter.get("/ledger/:id", async (req, res) => {

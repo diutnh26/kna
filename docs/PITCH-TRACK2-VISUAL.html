@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KNĂ — Đối chiếu điều kiện UniHackfest Track 2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1614;
+      --paper: #f7f4ee;
+      --panel: #fffefb;
+      --muted: #5c564e;
+      --line: #d9d2c6;
+      --ok: #2f6b3a;
+      --ok-bg: #e8f3ea;
+      --partial: #8a5a12;
+      --partial-bg: #f8efd9;
+      --no: #a11f1c;
+      --no-bg: #f8e8e7;
+      --accent: #1a1614;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 64px; }
+    h1 {
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 700;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .meta { color: var(--muted); font-size: 0.92rem; margin: 0 0 20px; }
+    .verdict {
+      border: 2px solid var(--ink);
+      background: var(--panel);
+      padding: 18px 20px;
+      margin-bottom: 28px;
+    }
+    .verdict strong { display: block; font-size: 1.15rem; margin-bottom: 8px; }
+    .verdict p { margin: 0; color: var(--muted); }
+    h2 {
+      font-size: 1.05rem;
+      margin: 28px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line);
+      letter-spacing: 0.02em;
+    }
+    p.note { font-size: 0.88rem; color: var(--muted); margin: 0 0 12px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #efeae1;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+    .status {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .ok { background: var(--ok-bg); color: var(--ok); }
+    .partial { background: var(--partial-bg); color: var(--partial); }
+    .no { background: var(--no-bg); color: var(--no); }
+    .mono { font-family: "IBM Plex Mono", monospace; font-size: 0.84em; word-break: break-all; }
+    a { color: #8b1e1c; }
+    ul.done { margin: 8px 0 0; padding-left: 1.2rem; }
+    ul.done li { margin: 4px 0; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 20px; font-size: 0.85rem; }
+    footer {
+      margin-top: 36px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    @media print {
+      body { background: white; }
+      .verdict { break-inside: avoid; }
+      table { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>KNĂ — Đối chiếu điều kiện UniHackfest Track 2</h1>
+    <p class="meta">
+      Tài liệu nội bộ team · cập nhật theo trạng thái repo <span class="mono">kna-docker</span> /
+      nhánh <span class="mono">track2/full-package</span> · nguồn tiêu chí:
+      <a href="https://unihackfest.vn/" target="_blank" rel="noreferrer">unihackfest.vn</a>
+      (Track 2 · Solana / Technical Build) + gói nộp vòng loại (repo public, pitch deck, video, demo/devnet).
+    </p>
+
+    <div class="verdict">
+      <strong>Kết luận ngắn: điều kiện kỹ thuật Track 2 — ĐẠT; điều kiện nộp bài đầy đủ — CHƯA ĐẠT.</strong>
+      <p>
+        Phần Solana (program devnet, wallet frontend, Explorer proof, kiến trúc on/off-chain, chất lượng code)
+        đã có bằng chứng sống. Phần hành chính/nộp bài còn thiếu: xác nhận đăng ký Track 2 + Consumer dApps,
+        email BTC eligibility, video 60–90s, pitch deck file, repo public (nếu chưa mở), dry-run demo live.
+      </p>
+    </div>
+
+    <div class="legend">
+      <span class="status ok">Đạt</span>
+      <span class="status partial">Một phần / cần xác nhận</span>
+      <span class="status no">Chưa</span>
+    </div>
+
+    <h2>1. Track 2 · Solana — tiêu chí kỹ thuật (unihackfest.vn)</h2>
+    <p class="note">Đây là các bullet công bố cho TRACK 2 · SOLANA (Technical Build).</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:28%">Yêu cầu</th>
+          <th style="width:12%">Trạng thái</th>
+          <th>KNĂ đã làm gì (bằng chứng)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Functional Solana program on <strong>devnet</strong></td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Program Anchor <span class="mono">kna-trust-layer</span> đã deploy:
+            <a class="mono" href="https://explorer.solana.com/address/2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f?cluster=devnet" target="_blank" rel="noreferrer">2Ft67fV4…JK6f</a>.
+            Instruction: <span class="mono">submit_attestation</span> / <span class="mono">finalize_attestation</span>,
+            split invariant 7/3/90, PDA pending/final. Evidence: <span class="mono">docs/DEVNET-EVIDENCE.json</span>.
+          </td>
+        </tr>
+        <tr>
+          <td>Wallet connect + frontend setup</td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Phantom (devnet) cho <strong>coordinator</strong> submit trên <span class="mono">#dashboard</span>;
+            committee finalize UX trên <span class="mono">#review</span> (Squads proposal export + paste signature).
+            Khách <strong>không</strong> bắt buộc ví — đúng Consumer UX. Code: <span class="mono">apps/web/src/wallet/</span>.
+          </td>
+        </tr>
+        <tr>
+          <td>Explorer proof — verifiable transactions</td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Tx submit + finalize (Squads execute) + PDA trên Explorer.
+            Ví dụ finalize:
+            <a href="https://explorer.solana.com/tx/47PaCdXN1AHPS3xDjWRyWXDxEcSVWTEKEVtamTAMbqMKmGB9748EeWZQeNZozkMQrFdW7w473ZHfKY3h5s2YTo7F?cluster=devnet" target="_blank" rel="noreferrer">execute tx</a>,
+            final PDA
+            <a href="https://explorer.solana.com/address/7jKscYQw2yNnSRhydtRqH1uV65jDPZSv7bAt2q3rvMYp?cluster=devnet" target="_blank" rel="noreferrer">7jKscY…</a>.
+            UI <span class="mono">#community</span> + API <span class="mono">GET /chain/verify/:id</span> +
+            <span class="mono">scripts/verify-ledger.mjs</span>.
+          </td>
+        </tr>
+        <tr>
+          <td>Structure / code quality</td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Monorepo Docker: Anchor program, <span class="mono">@kna/chain-client</span>, API gateway/outbox,
+            reject mock sig, threat model, CI <span class="mono">track2-ci.yml</span>, pre-demo checks.
+            Committee vault = Squads 2-of-3 thật (<span class="mono">vault ≠ coordinator</span>).
+          </td>
+        </tr>
+        <tr>
+          <td>Top Solana dApp / on-chain product (hướng sản phẩm)</td>
+          <td><span class="status partial">Một phần</span></td>
+          <td>
+            Có dApp consumer thật (booking VND + trust layer). Không phải DeFi/token.
+            Điểm “top” phụ thuộc chấm giải — không tự claim đã thắng tiêu chí này.
+          </td>
+        </tr>
+        <tr>
+          <td>Education / creativity (use case)</td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Use case CBT Ê Đê / sổ cái minh bạch / notary — rõ ràng, có need-assessment; không ICO.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2. Rubric Technical Build (cách chấm — Luma / training)</h2>
+    <p class="note">Trọng số công bố cho Best Technical Build Track.</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32%">Tiêu chí (trọng số)</th>
+          <th style="width:12%">Trạng thái</th>
+          <th>Đối chiếu KNĂ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Technical complexity &amp; depth (30%)</td>
+          <td><span class="status ok">Đạt nền</span></td>
+          <td>
+            Anchor program + PDA state machine + Squads v4 2-of-3 finalize + hash canonical + RPC verify trước khi flip state.
+            Không chỉ “ghi 1 log giả”.
+          </td>
+        </tr>
+        <tr>
+          <td>On-chain / off-chain architecture &amp; contract quality (25%)</td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Postgres = source of truth vận hành; Solana = notary; outbox/reconciler; chain fail không rollback booking.
+            Docs: README architecture, <span class="mono">THREAT-MODEL.md</span>.
+          </td>
+        </tr>
+        <tr>
+          <td>Stack / composability / performance (25%)</td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Compose với Squads (multisig vault), Phantom, Explorer; IDL + chain-client dùng chung API/web.
+            Cluster khóa <strong>devnet</strong> (mainnet hard-fail trong CI).
+          </td>
+        </tr>
+        <tr>
+          <td>Demo completeness &amp; presentation (20%)</td>
+          <td><span class="status partial">Chưa đủ</span></td>
+          <td>
+            Demo path code sẵn; thiếu video backup + pitch deck file + rehearsal live (Phantom/Squads).
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Gói nộp vòng loại (eligibility submission)</h2>
+    <p class="note">Thiếu mục này → có thể không được schedule thi dù code đã xong.</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32%">Yêu cầu nộp</th>
+          <th style="width:12%">Trạng thái</th>
+          <th>Chi tiết</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Working product / deployment trên <strong>devnet</strong></td>
+          <td><span class="status ok">Đạt</span></td>
+          <td>
+            Devnet program + evidence txs live. App chạy Docker:
+            <span class="mono">docker compose … --profile solana</span> hoặc stack thường + Solana profile.
+          </td>
+        </tr>
+        <tr>
+          <td>Public GitHub repo + commit history</td>
+          <td><span class="status partial">Cần xác nhận</span></td>
+          <td>
+            Remote <span class="mono">https://github.com/diutnh26/kna</span>, nhánh
+            <span class="mono">track2/full-package</span>. Phải chắc repo <strong>public</strong>
+            và có history delta hackathon (không force-push che). API GitHub từng trả 404 → có thể đang private.
+          </td>
+        </tr>
+        <tr>
+          <td>Pitch deck</td>
+          <td><span class="status no">Chưa</span></td>
+          <td>
+            Có notes <span class="mono">PITCH-TRACK2.md</span> — chưa có file deck (PPT/PDF) nộp chính thức.
+          </td>
+        </tr>
+        <tr>
+          <td>Backup demo video 60–90 giây</td>
+          <td><span class="status no">Chưa</span></td>
+          <td>
+            Đã có outline trong <span class="mono">TRACK2-SUBMISSION.md</span>; team chưa quay/upload.
+          </td>
+        </tr>
+        <tr>
+          <td>Đăng ký đúng track + chủ đề</td>
+          <td><span class="status partial">Cần xác nhận</span></td>
+          <td>
+            Hướng đúng: <strong>Track 2 (Technical Build / Solana)</strong> + chủ đề
+            <strong>Consumer dApps</strong>. Phải check portal đã đăng ký đúng (1 track).
+          </td>
+        </tr>
+        <tr>
+          <td>BTC eligibility (code có sẵn trước hackathon)</td>
+          <td><span class="status no">Chưa</span></td>
+          <td>
+            Cần email BTC: KNĂ Phase 1 sẵn có; delta hackathon = Solana trust layer trong
+            <span class="mono">kna-docker</span>. Lưu reply vào folder nộp.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Đã làm gì (delta Track 2) — tóm tắt bằng chứng</h2>
+    <table>
+      <thead>
+        <tr><th>Hạng mục</th><th>Deliverable trong repo</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>On-chain</td>
+          <td>
+            <ul class="done">
+              <li>Deploy program + initialize/grant/set vault</li>
+              <li>Demo submit → pending PDA</li>
+              <li>Squads 2-of-3 create / approve / execute → final PDA</li>
+              <li><span class="mono">docs/DEVNET-EVIDENCE.json</span>, <span class="mono">SQUADS-DEVNET.json</span></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>Off-chain app</td>
+          <td>
+            <ul class="done">
+              <li>Guest book VND, ledger công khai</li>
+              <li>API prepare/submit/finalize + verify PDA</li>
+              <li>Reject <span class="mono">mock_*</span> / fake sig</li>
+              <li>Judge path: verify endpoint + CLI</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>Governance</td>
+          <td>
+            <ul class="done">
+              <li>Committee vault = Squads PDA (không bootstrap coordinator)</li>
+              <li><span class="mono">docs/SQUADS-SETUP.md</span>, threat model</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>Engineering</td>
+          <td>
+            <ul class="done">
+              <li>CI Track 2, pre-demo checks, server-authoritative carbon kg</li>
+              <li>Map sync từ main (không đè Solana paths)</li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Việc còn lại trước khi “đủ điều kiện nộp”</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Việc</th><th>Owner</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Xác nhận portal: Track 2 + Consumer dApps</td><td>Team</td></tr>
+        <tr><td>2</td><td>Mở GitHub public + push commit harden mới nhất</td><td>Dev</td></tr>
+        <tr><td>3</td><td>Gửi/lưu BTC eligibility email</td><td>Lead</td></tr>
+        <tr><td>4</td><td>Pitch deck PDF/PPT (10 slide từ notes)</td><td>Pitch</td></tr>
+        <tr><td>5</td><td>Quay video 60–90s theo outline</td><td>Demo</td></tr>
+        <tr><td>6</td><td>Dry-run live Phantom + Squads 1 lần</td><td>Full team</td></tr>
+      </tbody>
+    </table>
+
+    <h2>6. Ranh giới trung thực (không vi phạm thể lệ)</h2>
+    <table>
+      <thead>
+        <tr><th>Quy tắc</th><th>KNĂ tuân thủ thế nào</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Devnet/testnet cho Web3</td>
+          <td><span class="status ok">Đạt</span> — chỉ devnet; CI chặn mainnet.</td>
+        </tr>
+        <tr>
+          <td>Không QR sàn / kêu gọi đầu tư token</td>
+          <td><span class="status ok">Đạt</span> — pitch notes MUST NOT; Solana không thanh toán.</td>
+        </tr>
+        <tr>
+          <td>Trung thực về code sẵn</td>
+          <td><span class="status partial">Cần BTC email</span> — Phase 1 ở <span class="mono">kna</span>; delta Solana ở <span class="mono">kna-docker</span>.</td>
+        </tr>
+        <tr>
+          <td>1 track / 1 giải</td>
+          <td><span class="status partial">Cần check portal</span> — không đăng ký đồng thời Track 1 nếu đã chọn Track 2.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer>
+      File này thay thế bản “pitch visual” trước đó theo đúng nhu cầu: đối chiếu yêu cầu Track 2.
+      Chi tiết kỹ thuật: <span class="mono">docs/TRACK2-SUBMISSION.md</span> ·
+      checklist đăng ký: <span class="mono">docs/UNIHACKFEST-ELIGIBILITY.md</span>.
+      In / Export PDF từ browser nếu cần nộp kèm.
+    </footer>
+  </div>
+</body>
+</html>

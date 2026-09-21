@@ -4,6 +4,9 @@
 # Usage (from this folder):
 #   docker compose up --build
 # Then open http://localhost:8080
+#
+# Demo token + Solana: fill secrets/.env.demo-token (from setup-demo-mint-from-deploy.ts)
+# and secrets/.env.solana — both are gitignored.
 
 name: kna-local
 
@@ -30,6 +33,11 @@ services:
       target: api
     ports:
       - "4000:4000"
+    env_file:
+      - path: secrets/.env.solana
+        required: false
+      - path: secrets/.env.demo-token
+        required: false
     environment:
       NODE_ENV: production
       PORT: "4000"
@@ -37,7 +45,36 @@ services:
       DIRECT_DATABASE_URL: postgresql://kna:kna@postgres:5432/kna_dev
       JWT_SECRET: docker-local-not-a-secret-at-least-32-chars
       CORS_ORIGIN: http://localhost:8080
-      PAYMENT_PROVIDER: manual
+      PUBLIC_BASE_URL: http://localhost:8080
+      ACCESS_TOKEN_TTL: 15m
+      REFRESH_TOKEN_TTL_DAYS: "30"
+      COOKIE_SECURE: "false"
+      GOOGLE_CLIENT_ID: 840514969559-4i7tgpbjpmppmaj7kfe9af3h71j162tk.apps.googleusercontent.com
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "587"
+      SMTP_USERNAME: thinhdowarks@gmail.com
+      SMTP_PASSWORD: "vtot rftw nvoj xzib"
+      SMTP_FROM: thinhdowarks@gmail.com
+      PAYMENT_PROVIDER: vietqr
+      PAYMENT_BANK_ACCOUNT: "8798311204"
+      PAYMENT_BANK_ID: TCB
+      ORDER_ID_PREFIX: TWRTCK
+      BOOKING_HOLD_MINUTES: "10"
+      PAYMENT_WEBHOOK_TOKEN: dev-webhook-bearer-token
+      PAYMENT_WEBHOOK_SECRET: dev-webhook-hmac-secret
+      VIETQR_ENABLED: "true"
+      VIETQR_USERNAME: vietqr-thinhdoworks
+      VIETQR_PASSWORD: change-this-vietqr-password
+      VIETQR_BASE_URL: https://chat.thinhdoworks.com/api/v1
+      VIETQR_TOKEN_SECRET: dev-vietqr-token-secret
+      VIETQR_TOKEN_EXPIRES_SECONDS: "300"
+      # Overridden by secrets/.env.solana + .env.demo-token when present
+      SOLANA_CLUSTER: devnet
+      SOLANA_RPC_URL: https://api.devnet.solana.com
+      SOLANA_ENABLED: "true"
+      KNA_COMMITTEE_VAULT: 3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42
+      DEMO_GUEST_WALLET: 5J9ixFxaUBe1bNDxPec67shUjRce831GgAyoE1Ygyu8V
+      DEMO_PROVIDER_WALLET: ACP16wSVq6au2wjdyQJLren8HY1bKa5Xfiq4majUfuf7
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,7 +89,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 90s
+      start_period: 120s
     restart: unless-stopped
 
   web:
@@ -60,6 +97,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: web
+      args:
+        VITE_GOOGLE_CLIENT_ID: 840514969559-4i7tgpbjpmppmaj7kfe9af3h71j162tk.apps.googleusercontent.com
+        VITE_DEMO_MODE: "true"
     ports:
       - "8080:80"
     depends_on:

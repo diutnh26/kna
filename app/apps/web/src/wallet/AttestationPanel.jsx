@@ -5,8 +5,9 @@ import { useAuth } from '../context/useAuth';
 import { useWallet } from './WalletProvider';
 
 /** Coordinator submits a real Phantom-signed submit_attestation tx on devnet. */
-export default function AttestationPanel({ ledgerEntryId, token }) {
+export default function AttestationPanel({ ledgerEntryId }) {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const { connected, pubkey, signAndSendTransaction, connect } = useWallet();
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -20,7 +21,7 @@ export default function AttestationPanel({ ledgerEntryId, token }) {
   }, [ledgerEntryId]);
 
   async function prepareAndSubmit() {
-    if (!token) return;
+    if (!isAuthenticated) return;
     setBusy(true);
     setError('');
     try {
@@ -31,17 +32,9 @@ export default function AttestationPanel({ ledgerEntryId, token }) {
       if (!coordinatorPubkey) {
         throw new Error(t('wallet.connectRequired'));
       }
-      const prepared = await api.chainPrepare(
-        ledgerEntryId,
-        { coordinatorPubkey },
-        token
-      );
+      const prepared = await api.chainPrepare(ledgerEntryId, { coordinatorPubkey });
       const pendingTxSig = await signAndSendTransaction(prepared.transactionBase64);
-      await api.chainSubmit(
-        ledgerEntryId,
-        { pendingTxSig, coordinatorPubkey },
-        token
-      );
+      await api.chainSubmit(ledgerEntryId, { pendingTxSig, coordinatorPubkey });
       setStatus(await api.chainLedger(ledgerEntryId));
     } catch (err) {
       setError(err.message ?? t('wallet.attestError'));
@@ -122,6 +115,7 @@ export function ProofExplainer() {
   return (
     <div className="mb-4 max-w-2xl space-y-2">
       <p className="text-xs text-[#F5EDDD]/55">{t('wallet.proofExplainer')}</p>
+      <p className="text-xs text-[#E8A33D]/80">{t('wallet.ledgerVsDemo')}</p>
       {chain?.committeeVault ? (
         <p className="text-[10px] font-mono text-[#F5EDDD]/45 break-all">
           {t('wallet.committeeVault')}: {chain.committeeVault}
@@ -133,34 +127,31 @@ export function ProofExplainer() {
 
 export function GuestReceiptPanel() {
   const { t } = useTranslation();
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { connected, connect, signMessage } = useWallet();
   const [linked, setLinked] = useState(null);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!token) return;
-    api.walletMe(token).then(setLinked).catch(() => setLinked(null));
-  }, [token]);
+    if (!isAuthenticated) return;
+    api.walletMe().then(setLinked).catch(() => setLinked(null));
+  }, [isAuthenticated]);
 
   async function linkWallet() {
-    if (!token) return;
+    if (!isAuthenticated) return;
     setError('');
     try {
       if (!connected) {
         await connect();
       }
-      const challenge = await api.walletChallenge(token);
+      const challenge = await api.walletChallenge();
       const signature = await signMessage(challenge.message);
-      const res = await api.walletLink(
-        {
-          pubkey: window.solana.publicKey.toString(),
-          signature,
-          nonce: challenge.nonce,
-        },
-        token
-      );
+      const res = await api.walletLink({
+        pubkey: window.solana.publicKey.toString(),
+        signature,
+        nonce: challenge.nonce,
+      });
       setLinked(res);
       setMsg(t('wallet.linkedOk'));
     } catch (err) {
@@ -168,42 +159,61 @@ export function GuestReceiptPanel() {
     }
   }
 
+  const explorerHref = linked?.pubkey
+    ? `https://explorer.solana.com/address/${linked.pubkey}?cluster=devnet`
+    : null;
+
   return (
-    <div className="border border-[#F5EDDD]/10 p-4 space-y-2 text-sm">
-      <p className="text-[#F5EDDD]/70">{t('wallet.guestReceiptHint')}</p>
+    <div className="border border-[#F5EDDD]/15 px-5 py-4 flex flex-wrap items-center justify-between gap-4 text-sm">
+      <p className="text-[#F5EDDD]/65 text-xs leading-relaxed max-w-xl">{t('wallet.guestReceiptHint')}</p>
       {linked?.pubkey ? (
-        <p className="text-xs font-mono">{linked.pubkey}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-xs font-mono text-[#F5EDDD]/70" title={linked.pubkey}>
+            {linked.pubkey.slice(0, 4)}…{linked.pubkey.slice(-4)}
+          </p>
+          {explorerHref ? (
+            <a
+              href={explorerHref}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs underline text-[#E8A33D]"
+            >
+              {t('wallet.viewExplorer')}
+            </a>
+          ) : null}
+        </div>
       ) : (
         <button
           type="button"
           onClick={linkWallet}
-          className="text-xs uppercase tracking-wider border px-3 py-1.5"
+          className="text-xs uppercase tracking-wider border border-[#F5EDDD]/25 hover:border-[#F5EDDD]/50 px-4 py-2 transition"
         >
           {t('wallet.linkOptional')}
         </button>
       )}
-      {msg ? <p className="text-[#8FA37B] text-xs">{msg}</p> : null}
-      {error ? <p className="text-[#C8302E] text-xs">{error}</p> : null}
+      {msg ? <p className="text-[#8FA37B] text-xs w-full">{msg}</p> : null}
+      {error ? <p className="text-[#C8302E] text-xs w-full">{error}</p> : null}
     </div>
   );
 }
 
-export function CommitteeFinalizePanel({ token }) {
+export function CommitteeFinalizePanel() {
   const { t } = useTranslation();
-  const { connected, pubkey, connect } = useWallet();
+  const { isAuthenticated } = useAuth();
+  const { connected, connect } = useWallet();
   const [rows, setRows] = useState([]);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState('');
   const [note, setNote] = useState('');
 
   async function refresh() {
-    if (!token) return;
-    setRows(await api.chainAwaitingCommittee(token));
+    if (!isAuthenticated) return;
+    setRows(await api.chainAwaitingCommittee());
   }
 
   useEffect(() => {
     refresh().catch(() => setRows([]));
-  }, [token]);
+  }, [isAuthenticated]);
 
   async function loadSquadsProposal(ledgerEntryId) {
     setBusyId(ledgerEntryId);
@@ -211,7 +221,7 @@ export function CommitteeFinalizePanel({ token }) {
     try {
       if (!connected) await connect();
       const multisigPda = window.prompt(t('wallet.pasteMultisigPdaOptional'))?.trim() || undefined;
-      const ix = await api.chainSquadsProposal(ledgerEntryId, { multisigPda }, token);
+      const ix = await api.chainSquadsProposal(ledgerEntryId, { multisigPda });
       setNote(
         [
           t('wallet.squadsHint'),
@@ -236,7 +246,7 @@ export function CommitteeFinalizePanel({ token }) {
     setBusyId(ledgerEntryId);
     setError('');
     try {
-      await api.chainFinalize(ledgerEntryId, { finalizeTxSig }, token);
+      await api.chainFinalize(ledgerEntryId, { finalizeTxSig });
       await refresh();
     } catch (err) {
       setError(err.message ?? t('wallet.attestError'));
@@ -245,7 +255,7 @@ export function CommitteeFinalizePanel({ token }) {
     }
   }
 
-  if (!token) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <div className="border border-[#8FA37B]/30 p-4 space-y-3 text-xs">

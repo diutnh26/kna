@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KNĂ — Cơ chế lý thuyết Blockchain (chi tiết)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1614;
+      --muted: #5c564e;
+      --line: #d4cdc0;
+      --panel: #fffefb;
+      --accent: #8b1e1c;
+      --forest: #2f6b3a;
+      --clay: #9a5b2e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(165deg, #f7f3ea, #ebe4d6);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 18px 40px;
+    }
+    .slide {
+      width: min(1080px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: clamp(22px, 3.5vw, 40px);
+    }
+    .eyebrow {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: clamp(1.4rem, 2.8vw, 1.9rem);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    .lead {
+      font-size: 0.98rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 20px;
+      max-width: 78ch;
+    }
+    .lead strong { color: var(--ink); }
+    h2 {
+      font-size: 0.72rem;
+      font-family: "IBM Plex Mono", monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line);
+    }
+    .section { margin-bottom: 20px; }
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 800px) {
+      .principles { grid-template-columns: 1fr; }
+    }
+    .p {
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--ink);
+      padding: 14px 14px 16px;
+      background: #faf8f4;
+    }
+    .p.a { border-top-color: var(--forest); }
+    .p.b { border-top-color: var(--accent); }
+    .p.c { border-top-color: var(--clay); }
+    .p h3 {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    .p p {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .p p + p { margin-top: 8px; }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 800px) {
+      .grid2 { grid-template-columns: 1fr; }
+    }
+    .box {
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      background: #faf8f4;
+    }
+    .box h3 {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+    .role {
+      display: grid;
+      grid-template-columns: 8rem 1fr;
+      gap: 6px 12px;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .role:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+    .role dt {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding-top: 2px;
+    }
+    .role dd { color: var(--muted); margin: 0; }
+    .role dd em { color: var(--ink); font-style: normal; font-weight: 600; }
+    .mech {
+      list-style: none;
+      counter-reset: step;
+    }
+    .mech li {
+      counter-increment: step;
+      position: relative;
+      padding: 10px 0 10px 2.2rem;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .mech li:last-child { border-bottom: 0; padding-bottom: 0; }
+    .mech li:first-child { padding-top: 0; }
+    .mech li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mech li:first-child::before { top: 0; }
+    .mech strong { color: var(--ink); }
+    .analogy {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 800px) {
+      .analogy { grid-template-columns: 1fr; }
+    }
+    .analogy .cell {
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+      background: #fff;
+    }
+    .analogy .label {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .analogy strong {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    .analogy span {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .flow {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 12px 14px;
+      background: #f3efe6;
+      border: 1px solid var(--line);
+      line-height: 1.65;
+      margin-bottom: 12px;
+    }
+    .note {
+      font-size: 0.88rem;
+      color: var(--forest);
+      font-weight: 600;
+      line-height: 1.45;
+    }
+    .why {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <article class="slide">
+    <p class="eyebrow">KNĂ · Cơ chế lý thuyết Blockchain</p>
+    <h1>Solana = công chứng (notary), không phải đường ống thanh toán</h1>
+    <p class="lead">
+      Khi booking đã tất toán bằng <strong>VND</strong>, hệ thống tạo một <em>attestation</em>
+      (lời chứng) về phần chia <strong>7% nền tảng / 3% quỹ buôn / 90% hộ</strong>.
+      Lời chứng đó được đưa lên <strong>Solana</strong> để ai cũng kiểm được sau này —
+      khách, hội đồng, hay tỉnh — mà <strong>không cần tin</strong> giao diện của KNĂ.
+      Tiền không đi qua chain; chain chỉ giữ bằng chứng.
+    </p>
+
+    <div class="section">
+      <h2>Ba nguyên tắc lý thuyết</h2>
+      <div class="principles">
+        <div class="p a">
+          <h3>1. Source of truth ≠ Notary</h3>
+          <p>
+            <strong>Postgres</strong> là sổ vận hành: booking, số tiền, trạng thái settle.
+            Đây là nơi hệ thống “tin” để chạy nghiệp vụ.
+          </p>
+          <p>
+            <strong>Solana</strong> là sổ công chứng: ghi lại rằng bản ghi đã settle
+            tồn tại với hash + số VND cố định. RPC chết → app vẫn chạy; outbox retry sau.
+          </p>
+        </div>
+        <div class="p b">
+          <h3>2. Attestation hai pha</h3>
+          <p>
+            <strong>Submit</strong> = coordinator đề xuất: “tôi xác nhận ledger này”
+            (một chữ ký cá nhân qua Phantom).
+          </p>
+          <p>
+            <strong>Finalize</strong> = hội đồng khóa bằng chứng qua ngưỡng
+            <strong>2-of-3</strong> (Squads). Một người không thể tự đóng sổ công chứng.
+          </p>
+        </div>
+        <div class="p c">
+          <h3>3. Hash commitment</h3>
+          <p>
+            On-chain chỉ lưu <strong>hash nội dung</strong> + số tiền VND + timestamp.
+            Không có tên khách, SĐT, địa chỉ — không PII.
+          </p>
+          <p>
+            Nếu ai sửa ledger trong DB sau khi đã finalize, hash tính lại sẽ
+            <strong>lệch</strong> so với PDA trên chain → phát hiện được khi verify.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Ẩn dụ dễ nhớ — như công chứng giấy tờ</h2>
+      <div class="analogy">
+        <div class="cell">
+          <div class="label">Đời thực</div>
+          <strong>Sổ kế toán quán</strong>
+          <span>Ghi doanh thu, chia tiền nhân viên — vận hành hàng ngày</span>
+        </div>
+        <div class="cell">
+          <div class="label">Đời thực</div>
+          <strong>Công chứng viên</strong>
+          <span>Đóng dấu bản sao: “đúng với bản gốc lúc này” — không giữ tiền</span>
+        </div>
+        <div class="cell">
+          <div class="label">Đời thực</div>
+          <strong>Hai người cùng ký</strong>
+          <span>Tránh một kế toán tự đóng dấu một mình</span>
+        </div>
+      </div>
+      <p class="why">
+        → Trong KNĂ: sổ quán = <strong>Postgres</strong> · công chứng = <strong>Solana/Anchor</strong> ·
+        hai người ký = <strong>Phantom (đề xuất) + Squads 2/3 (khóa)</strong>.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Ánh xạ lý thuyết → từng công nghệ</h2>
+      <div class="grid2">
+        <div class="box">
+          <h3>Vai trò trong cơ chế</h3>
+          <dl>
+            <div class="role">
+              <dt>Solana (devnet)</dt>
+              <dd>
+                Mạng blockchain thử nghiệm — sổ <em>append-only</em> công khai.
+                Ai cũng đọc được qua Explorer; khó sửa lén sau khi đã ghi.
+                Devnet = môi trường demo/hackathon, chưa mainnet.
+              </dd>
+            </div>
+            <div class="role">
+              <dt>Anchor (Rust)</dt>
+              <dd>
+                Framework viết <em>program</em> (luật on-chain) <code>kna_trust_layer</code>.
+                Quy định: ai được submit/finalize, phí BPS 7/3 cố định trên chain,
+                cấu trúc PDA (pending → final).
+              </dd>
+            </div>
+            <div class="role">
+              <dt>@solana/web3.js</dt>
+              <dd>
+                Thư viện JavaScript — cầu nối off-chain ↔ on-chain.
+                API/web dùng để <em>build transaction</em>, gửi RPC, đọc/decode PDA,
+                đối chiếu hash khi verify.
+              </dd>
+            </div>
+            <div class="role">
+              <dt>Phantom</dt>
+              <dd>
+                Ví của <em>coordinator</em>. Chỉ dùng để ký
+                <em>submit_attestation</em> — nghĩa là “tôi xác nhận bản ghi này”.
+                Không phải ví khách trả tiền phòng.
+              </dd>
+            </div>
+            <div class="role">
+              <dt>Squads v4</dt>
+              <dd>
+                Multisig hội đồng <em>2-of-3</em>. Vault mới được quyền
+                <em>finalize_attestation</em>. Tách quyền đề xuất và quyền khóa bằng chứng.
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <div class="box">
+          <h3>Diễn biến theo thời gian</h3>
+          <ol class="mech">
+            <li>
+              <strong>Settle off-chain.</strong>
+              Booking/order tất toán bằng VND. API ghi
+              <em>LedgerEntry</em> với split 7/3/90 vào Postgres — đây mới là sự thật vận hành.
+            </li>
+            <li>
+              <strong>Commit (hash).</strong>
+              Hệ thống băm nội dung ledger (số tiền, split, id…) → tạo hàng
+              <em>outbox</em> “cần công chứng”. Chưa lên chain cũng không mất booking.
+            </li>
+            <li>
+              <strong>Propose.</strong>
+              <em>web3.js</em> dựng transaction → coordinator mở
+              <em>Phantom</em> ký <code>submit_attestation</code> → tạo
+              <em>pending PDA</em> trên Solana.
+            </li>
+            <li>
+              <strong>Quorum.</strong>
+              Hội đồng xuất proposal Squads, đủ <em>2-of-3</em> duyệt,
+              vault execute <code>finalize_attestation</code> →
+              <em>final PDA</em> (bằng chứng đã khóa).
+            </li>
+            <li>
+              <strong>Public verify.</strong>
+              API xác nhận qua RPC + decode PDA khớp hash.
+              Trang #community hiện link Explorer.
+              Ai cũng tái tính hash / gọi <code>/chain/verify</code> — không phụ thuộc UI.
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <p class="flow">
+      Lý thuyết:&nbsp;&nbsp; Commit (DB) → Propose (1 chữ ký) → Quorum (2/3) → Public verify<br />
+      Triển khai:&nbsp; Postgres → hash/outbox → web3.js → Phantom submit → Squads finalize → Solana PDA → Explorer
+    </p>
+    <p class="note">
+      Không chuyển tiền trên chain · không token / NFT · không crypto payment · khách đặt VND, không cần ví.
+    </p>
+  </article>
+</body>
+</html>

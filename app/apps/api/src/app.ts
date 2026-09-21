@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { healthRouter } from "./routes/health";
 import { authRouter } from "./routes/auth";
 import { listingsRouter } from "./routes/listings";
@@ -14,6 +15,7 @@ import { offsetsRouter } from "./routes/offsets";
 import { notificationsRouter } from "./routes/notifications";
 import { chainRouter } from "./routes/chain";
 import { walletRouter } from "./routes/wallet";
+import { paymentsRouter } from "./routes/payments";
 
 /**
  * Accepts an origin with or without a scheme.
@@ -33,8 +35,11 @@ export function createApp() {
   const app = express();
 
   const corsOrigin = normalizeOrigin(process.env.CORS_ORIGIN ?? "http://localhost:5173");
-  app.use(cors({ origin: corsOrigin }));
+  // credentials:true is required for HttpOnly auth cookies to cross origins
+  // (Vite :5173 / Docker web :8080 → API :4000).
+  app.use(cors({ origin: corsOrigin, credentials: true }));
   app.use(express.json());
+  app.use(cookieParser());
 
   app.use("/health", healthRouter);
   app.use("/auth", authRouter);
@@ -50,6 +55,7 @@ export function createApp() {
   app.use("/notifications", notificationsRouter);
   app.use("/chain", chainRouter);
   app.use("/wallet", walletRouter);
+  app.use("/payments", paymentsRouter);
 
   app.use((req, res) => {
     res.status(404).json({ error: `No route for ${req.method} ${req.path}` });

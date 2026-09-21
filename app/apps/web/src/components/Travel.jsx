@@ -16,6 +16,7 @@ import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import { useDebounced } from '../lib/useDebounced';
 import ApiErrorNotice from './ApiErrorNotice';
+import DemoWalletPanel from './DemoWalletPanel';
 
 const CATEGORIES = ['All', 'Stay', 'Guided walk', 'Craft session', 'Ceremony'];
 const BUON = ['All buôn', 'Buôn Akô Dhông', 'Buôn Đôn', 'Buôn Trấp'];
@@ -60,7 +61,7 @@ export default function Travel() {
 
   // bookings[listingId] = { qty, checkIn, status: 'idle'|'submitting'|'done'|'error', error }
   const [bookings, setBookings] = useState({});
-  const { isAuthenticated, token, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   // Floor for the date picker. Local date, not toISOString() — that converts
   // to UTC first, so anywhere east of Greenwich (Vietnam is UTC+7) would
@@ -95,6 +96,54 @@ export default function Travel() {
       cancelled = true;
     };
   }, [category, buon, debouncedSearch]);
+
+  // Poll payment + demo mint status after booking when we have a paymentRef.
+  useEffect(() => {
+    const pending = Object.entries(bookings).filter(
+      ([, b]) =>
+        b?.status === 'done' &&
+        b.paymentRef &&
+        b.paymentStatus !== 'PAID' &&
+        !(b.demoTxSigs?.length)
+    );
+    if (pending.length === 0) return undefined;
+
+    let cancelled = false;
+    const tick = async () => {
+      for (const [listingId, b] of pending) {
+        try {
+          const st = await api.paymentStatus(b.paymentRef);
+          if (cancelled) return;
+          if (st.paymentStatus === 'PAID' || (st.demoTxSigs && st.demoTxSigs.length)) {
+            setBookings((prev) => ({
+              ...prev,
+              [listingId]: {
+                ...prev[listingId],
+                paymentStatus: st.paymentStatus,
+                demoTxSigs: st.demoTxSigs ?? [],
+              },
+            }));
+          }
+        } catch {
+          /* ignore transient poll errors */
+        }
+      }
+    };
+
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+    // Re-subscribe when the set of refs awaiting payment changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    Object.entries(bookings)
+      .filter(([, b]) => b?.status === 'done' && b.paymentRef && b.paymentStatus !== 'PAID')
+      .map(([, b]) => b.paymentRef)
+      .join(','),
+  ]);
 
   function qtyFor(listing) {
     return bookings[listing.id]?.qty ?? 1;
@@ -133,15 +182,12 @@ export default function Travel() {
 
     setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'submitting', error: null } }));
     try {
-      const created = await api.createBooking(
-        {
-          listingId: listing.id,
-          guests: perNight ? 1 : qty,
-          nights: perNight ? qty : 1,
-          checkIn,
-        },
-        token
-      );
+      const created = await api.createBooking({
+        listingId: listing.id,
+        guests: perNight ? 1 : qty,
+        nights: perNight ? qty : 1,
+        checkIn,
+      });
       setBookings((b) => ({
         ...b,
         [listing.id]: {
@@ -149,7 +195,18 @@ export default function Travel() {
           qty,
           status: 'done',
           error: null,
+          bookingId: created.id,
+          paymentRef: created.paymentRef ?? created.payment?.paymentRef,
           payment: created.payment,
+          demoTxSigs: (() => {
+            if (!created.demoTxSigs) return [];
+            if (Array.isArray(created.demoTxSigs)) return created.demoTxSigs;
+            try {
+              return JSON.parse(created.demoTxSigs);
+            } catch {
+              return [];
+            }
+          })(),
         },
       }));
     } catch (err) {
@@ -394,9 +451,77 @@ export default function Travel() {
                           </div>
 
                           {booking?.status === 'done' && booking.payment && (
-                            <p className="text-xs text-[#F5EDDD]/50 leading-relaxed">
-                              {booking.payment.instructions}
-                            </p>
+                            <div className="space-y-3 text-xs text-[#F5EDDD]/70">
+                              {booking.payment.qrUrl ? (
+                                <div className="space-y-2">
+                                  <p className="uppercase tracking-wider text-[#E8A33D]">
+                                    {t('travel.payQrTitle')}
+                                  </p>
+                                  <img
+                                    src={booking.payment.qrUrl}
+                                    alt={t('travel.payQrTitle')}
+                                    className="w-40 h-40 bg-white p-1"
+                                  />
+                                  <dl className="space-y-1 text-[#F5EDDD]/60">
+                                    <div className="flex justify-between gap-2">
+                                      <dt>{t('travel.payBankName')}</dt>
+                                      <dd className="font-mono">
+                                        {booking.payment.bankId ?? 'TCB'}
+                                      </dd>
+                                    </div>
+                                    {booking.payment.bankAccount ? (
+                                      <div className="flex justify-between gap-2">
+                                        <dt>{t('travel.payAccount')}</dt>
+                                        <dd className="font-mono">{booking.payment.bankAccount}</dd>
+                                      </div>
+                                    ) : null}
+                                    {booking.paymentRef || booking.payment.paymentRef ? (
+                                      <div className="flex justify-between gap-2">
+                                        <dt>{t('travel.payRef')}</dt>
+                                        <dd className="font-mono">
+                                          {booking.paymentRef ?? booking.payment.paymentRef}
+                                        </dd>
+                                      </div>
+                                    ) : null}
+                                    {booking.payment.amountVnd ? (
+                                      <div className="flex justify-between gap-2">
+                                        <dt>{t('travel.payAmount')}</dt>
+                                        <dd className="font-mono text-[#E8A33D]">
+                                          {vnd(booking.payment.amountVnd)}
+                                        </dd>
+                                      </div>
+                                    ) : null}
+                                  </dl>
+                                  <p className="text-[#F5EDDD]/45 leading-relaxed">
+                                    {t('travel.payInstructions')}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-[#F5EDDD]/50 leading-relaxed">
+                                  {booking.payment.instructions}
+                                </p>
+                              )}
+                              {booking.demoTxSigs?.length ? (
+                                <div className="border border-[#8FA37B]/40 p-2 space-y-1 text-[#8FA37B]">
+                                  <p>{t('travel.demoTokensSent')}</p>
+                                  {booking.demoTxSigs.slice(0, 3).map((sig) => (
+                                    <a
+                                      key={sig}
+                                      href={`https://explorer.solana.com/tx/${sig}?cluster=devnet`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="block underline font-mono text-[10px] break-all"
+                                    >
+                                      {t('travel.viewDemoTx')} · {String(sig).slice(0, 8)}…
+                                    </a>
+                                  ))}
+                                </div>
+                              ) : booking.paymentStatus === 'PAID' ? (
+                                <p className="text-[#F5EDDD]/45">{t('travel.demoTokensSkipped')}</p>
+                              ) : booking.payment.qrUrl ? (
+                                <p className="text-[#F5EDDD]/40">{t('travel.demoTokensPending')}</p>
+                              ) : null}
+                            </div>
                           )}
                           {booking?.status === 'error' && (
                             <p className="text-xs text-[#E8A33D]">{booking.error}</p>
@@ -425,6 +550,9 @@ export default function Travel() {
             <p className="text-lg text-[#1A1614]/70 leading-relaxed">
               {t('travel.splitBody')}
             </p>
+            <div className="mt-8">
+              <DemoWalletPanel tone="light" />
+            </div>
           </div>
 
           <div className="md:col-span-7">

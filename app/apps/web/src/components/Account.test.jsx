@@ -89,6 +89,8 @@ describe('Account', () => {
   beforeEach(() => {
     vi.spyOn(api, 'account').mockResolvedValue(anAccount());
     vi.spyOn(api, 'accountActivity').mockResolvedValue(activity);
+    vi.spyOn(api, 'chainStatus').mockResolvedValue({ demoToken: null });
+    vi.spyOn(api, 'demoHistory').mockResolvedValue({ items: [] });
   });
 
   it('asks an anonymous visitor to sign in, and fetches nothing', async () => {
@@ -245,6 +247,95 @@ describe('Account', () => {
 
     expect(screen.getByText(/No offsets yet/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Open the Carbon Journey/i })).toBeInTheDocument();
+  });
+
+  it('shows household earnings when the account is a provider', async () => {
+    signIn();
+    vi.spyOn(api, 'account').mockResolvedValue(
+      anAccount({
+        moneyView: 'provider',
+        providerMoney: {
+          earnedVnd: 450_000,
+          fundVnd: 15_000,
+          platformVnd: 35_000,
+          bookings: 1,
+          pending: 0,
+        },
+        totals: { ...anAccount().totals, spentVnd: 0 },
+      })
+    );
+    renderScreen(<Account />);
+    expect(await screen.findByText(/What has reached your household/i)).toBeInTheDocument();
+    expect(screen.getByText('450.000 ₫')).toBeInTheDocument();
+  });
+
+  it('shows platform totals when the account is staff', async () => {
+    signIn();
+    vi.spyOn(api, 'account').mockResolvedValue(
+      anAccount({
+        moneyView: 'staff',
+        staffMoney: {
+          settledBookingsVnd: 1_500_000,
+          toProvidersVnd: 1_350_000,
+          toFundVnd: 45_000,
+          paidWithDemo: 3,
+          awaitingPayment: 0,
+        },
+        totals: { ...anAccount().totals, spentVnd: 0 },
+      })
+    );
+    renderScreen(<Account />);
+    expect(await screen.findByText(/Platform money on KNĂ/i)).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText(/bookings with demo mint txs/i)).toBeInTheDocument();
+  });
+
+  it('links a booking activity row to its demo transaction', async () => {
+    signIn();
+    vi.spyOn(api, 'accountActivity').mockResolvedValue([
+      { ...activity[0], demoTxSigs: ['sig1abcdef'] },
+    ]);
+    renderScreen(<Account />);
+    const link = await screen.findByRole('link', { name: /View demo tx on Explorer/i });
+    expect(link).toHaveAttribute('href', expect.stringContaining('explorer.solana.com/tx/sig1abcdef'));
+  });
+
+  it('renders the shared demo wallet panel and mint history', async () => {
+    signIn();
+    vi.spyOn(api, 'chainStatus').mockResolvedValue({
+      demoToken: {
+        mint: 'MintPubkey111',
+        disclaimer: 'Demo token — not real payment. Devnet only.',
+        wallets: { guest: 'GuestPubkey111' },
+        explorer: { guest: 'https://explorer.solana.com/address/GuestPubkey111?cluster=devnet' },
+        balances: {
+          symbol: 'dKNA',
+          vndPerToken: 1000,
+          guest: { uiAmount: 2, symbol: 'dKNA', approxVnd: 2000 },
+        },
+      },
+    });
+    vi.spyOn(api, 'demoHistory').mockResolvedValue({
+      items: [
+        {
+          id: 'hist1',
+          at: '2026-09-21T04:30:57.000Z',
+          title: 'Minted longhouse stay',
+          guestName: 'Demo Traveler',
+          providerName: "Amí H'Bia",
+          totalVnd: 500_000,
+          providerPayoutVnd: 450_000,
+          communityFundVnd: 15_000,
+          demoTxSigs: ['sigexplorer1'],
+          explorer: ['https://explorer.solana.com/tx/sigexplorer1?cluster=devnet'],
+        },
+      ],
+    });
+    renderScreen(<Account />);
+    expect(await screen.findByText(/Demo wallets \(Devnet\)/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Demo mint history/i)).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText(/Minted longhouse stay/)).toBeInTheDocument();
   });
 
 });

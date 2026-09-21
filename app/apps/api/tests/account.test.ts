@@ -110,6 +110,96 @@ describe("account", () => {
     expect(totals.bookingsAwaiting).toBe(0);
   });
 
+  it("labels a guest account as the guest money view", async () => {
+    const body = await account();
+    expect(body.moneyView).toBe("guest");
+    expect(body.providerMoney).toBeNull();
+    expect(body.staffMoney).toBeNull();
+  });
+
+  it("shows the provider what their confirmed bookings earned", async () => {
+    const hostToken = (
+      await request(app).post("/auth/login").send({ email: "host@account.kna", password: PASSWORD })
+    ).body.token as string;
+
+    const body = await account(hostToken);
+    expect(body.moneyView).toBe("provider");
+    expect(body.providerMoney.earnedVnd).toBe(450_000);
+    expect(body.providerMoney.fundVnd).toBe(15_000);
+    expect(body.staffMoney).toBeNull();
+  });
+
+  it("shows the coordinator platform totals, including demo mints", async () => {
+    const before = await account(coordinatorToken);
+    expect(before.moneyView).toBe("staff");
+    expect(before.staffMoney.settledBookingsVnd).toBe(500_000);
+    expect(before.staffMoney.toProvidersVnd).toBe(450_000);
+    expect(before.staffMoney.paidWithDemo).toBe(0);
+
+    await prisma.booking.updateMany({
+      data: {
+        paymentStatus: "PAID",
+        demoTxSigs: JSON.stringify(["sigA", "sigB"]),
+      },
+    });
+
+    const after = await account(coordinatorToken);
+    expect(after.staffMoney.paidWithDemo).toBe(1);
+  });
+
+  it("lets a provider see stays on their listings, and staff see every booking", async () => {
+    const otherHost = await makeProvider("otherhost@account.kna");
+    const otherListing = await makeListing(otherHost.provider.id, 200_000);
+    await prisma.listing.update({
+      where: { id: otherListing.id },
+      data: { title: "Other household stay" },
+    });
+    const stranger = await makeUser("stranger@account.kna", "GUEST");
+    await prisma.booking.create({
+      data: {
+        listingId: otherListing.id,
+        guestId: stranger.id,
+        guests: 1,
+        checkIn: new Date(`${soon(40)}T00:00:00Z`),
+        nights: 1,
+        totalVnd: 200_000,
+        platformFeeVnd: 14_000,
+        communityFundVnd: 6_000,
+        providerPayoutVnd: 180_000,
+        status: "CONFIRMED",
+        paymentStatus: "PAID",
+        demoTxSigs: JSON.stringify(["onlyStaff"]),
+      },
+    });
+
+    const hostToken = (
+      await request(app).post("/auth/login").send({ email: "host@account.kna", password: PASSWORD })
+    ).body.token as string;
+
+    const providerActivity = await request(app)
+      .get("/account/activity")
+      .set("Authorization", `Bearer ${hostToken}`);
+    const providerTitles = providerActivity.body
+      .filter((row: { kind: string }) => row.kind === "booking")
+      .map((row: { title: string }) => row.title);
+    expect(providerTitles).toContain("Test longhouse");
+    expect(providerTitles).not.toContain("Other household stay");
+
+    const hostBooking = providerActivity.body.find(
+      (row: { kind: string; title: string }) => row.kind === "booking" && row.title === "Test longhouse"
+    );
+    expect(hostBooking.demoTxSigs).toEqual(["sigA", "sigB"]);
+
+    const staffActivity = await request(app)
+      .get("/account/activity")
+      .set("Authorization", `Bearer ${coordinatorToken}`);
+    const staffTitles = staffActivity.body
+      .filter((row: { kind: string }) => row.kind === "booking")
+      .map((row: { title: string }) => row.title);
+    expect(staffTitles).toContain("Test longhouse");
+    expect(staffTitles).toContain("Other household stay");
+  });
+
   it("adds a settled marketplace order at the artisan's 95%", async () => {
     const order = await request(app)
       .post("/orders")
@@ -210,7 +300,7 @@ describe("account", () => {
     const res = await request(app)
       .post("/account/password")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ currentPassword: "not-it", newPassword: "a-much-better-password" });
+      .send({ currentPassword: "not-it", newPassword: "a-much-better-password1" });
     expect(res.status).toBe(403);
   });
 
@@ -237,7 +327,7 @@ describe("account", () => {
     const res = await request(app)
       .post("/account/password")
       .set("Authorization", `Bearer ${guestToken}`)
-      .send({ currentPassword: PASSWORD, newPassword: "a-much-better-password" });
+      .send({ currentPassword: PASSWORD, newPassword: "a-much-better-password1" });
 
     expect(res.status).toBe(200);
     expect(res.body.token).toBeTruthy();
@@ -256,7 +346,7 @@ describe("account", () => {
     // And the new password is the one that works.
     const relogin = await request(app)
       .post("/auth/login")
-      .send({ email: "guest@account.kna", password: "a-much-better-password" });
+      .send({ email: "guest@account.kna", password: "a-much-better-password1" });
     expect(relogin.status).toBe(200);
   });
 

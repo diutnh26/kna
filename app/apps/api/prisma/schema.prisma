@@ -36,14 +36,22 @@ generator client {
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
-  passwordHash String
+  // Nullable: Google-only accounts have no password. Password login fails
+  // with a generic message when this is null.
+  passwordHash String?
   fullName     String
   role         String   @default("GUEST")
   locale       String   @default("en") // "en" | "vi"
+  // Google subject ("sub") claim. Unique when present; null for password-only.
+  googleSub    String?  @unique
+  // Soft gate: account is usable immediately; verification is encouraged.
+  emailVerified     Boolean   @default(false)
+  emailVerifyToken  String?   @unique
+  emailVerifyExpiry DateTime?
   // Bumped whenever authority changes or the account signs out everywhere.
   // A token carrying a stale version is rejected, which is what makes
   // withdrawing a seat or a coordinator role take effect now rather than
-  // whenever the seven-day token happens to expire.
+  // whenever the old token happens to expire.
   tokenVersion Int      @default(0)
   createdAt    DateTime @default(now())
 
@@ -56,6 +64,24 @@ model User {
   moderatedEntries   ArchiveEntry[] @relation("ArchiveModerator")
   notifications      Notification[]
   walletLink         WalletLink?
+  refreshTokens      RefreshToken[]
+}
+
+/**
+ * Opaque refresh credentials. The raw token lives only in an HttpOnly cookie;
+ * we store a SHA-256 hash so a DB leak cannot mint sessions. Rotated on every
+ * use; revoked on logout / tokenVersion bump.
+ */
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 /**
@@ -175,6 +201,13 @@ model Booking {
   platformFeeVnd    Int
   communityFundVnd  Int
   providerPayoutVnd Int
+  // VietQR / payment gateway tracking
+  paymentRef      String?
+  paymentStatus   String    @default("AWAITING_PAYMENT")
+  paymentPaidAt   DateTime?
+  // Demo SPL token disbursement (devnet) — JSON array of tx signatures
+  demoTxSigs      String?
+  demoDisburseAt  DateTime?
   createdAt         DateTime @default(now())
 
   ledgerEntries LedgerEntry[]
@@ -249,6 +282,9 @@ model Order {
   status            String   @default("PENDING")
   totalVnd          Int
   marketplaceFeeVnd Int
+  paymentRef      String?
+  paymentStatus   String    @default("AWAITING_PAYMENT")
+  paymentPaidAt   DateTime?
   createdAt         DateTime @default(now())
 
   items         OrderItem[]

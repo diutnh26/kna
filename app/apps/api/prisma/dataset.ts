@@ -32,7 +32,7 @@ export async function populate(prisma: PrismaClient) {
   }) {
     const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
     const user = await prisma.user.create({
-      data: { email: opts.email, passwordHash, fullName: opts.fullName, role: "PROVIDER" },
+      data: { email: opts.email, passwordHash, fullName: opts.fullName, role: "PROVIDER", emailVerified: true },
     });
     return prisma.provider.create({
       data: {
@@ -280,6 +280,7 @@ export async function populate(prisma: PrismaClient) {
       passwordHash: guestPasswordHash,
       fullName: "Demo Traveler",
       role: "GUEST",
+      emailVerified: true,
     },
   });
 
@@ -291,6 +292,7 @@ export async function populate(prisma: PrismaClient) {
       passwordHash: await bcrypt.hash(DEMO_PASSWORD, 10),
       fullName: "H'Linh Niê",
       role: "COORDINATOR",
+      emailVerified: true,
     },
   });
 

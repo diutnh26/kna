@@ -18,6 +18,8 @@ import { api } from '../lib/api';
 import ApiErrorNotice from './ApiErrorNotice';
 import InitialAvatar from './InitialAvatar';
 import { LedgerProofBadge, ProofExplainer } from '../wallet/AttestationPanel';
+import DemoWalletPanel from './DemoWalletPanel';
+import DemoTxHistory from './DemoTxHistory';
 
 // Illustrative only — the provider board is not built. See the note
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
@@ -121,6 +123,10 @@ export default function Community() {
               {t('wallet.publicLedger')}
             </div>
             <ProofExplainer />
+            <div className="mb-8 space-y-5">
+              <DemoWalletPanel />
+              <DemoTxHistory tone="dark" />
+            </div>
             <ul className="space-y-3">
               {ledger.map((row) => (
                 <li key={row.id} className="border border-[#F5EDDD]/15 px-4 py-3 flex flex-wrap gap-3 items-center justify-between text-sm">

@@ -2,100 +2,136 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api';
 import { AuthContext } from './authContext';
 
-const STORAGE_KEY = 'kna-auth';
-
-function readStoredSession() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Session + auth-modal state for the whole app. A guest anywhere in the
- * tree can call `openAuthModal()` (Navbar's "Sign in" button does this);
- * <AuthModal /> is mounted once in App.jsx and reads `modalOpen` from here.
+ * Session + auth-modal state for the whole app.
+ *
+ * Auth is cookie-based: the browser holds HttpOnly access/refresh cookies
+ * and we only keep the `user` object in memory. No tokens in localStorage.
+ *
+ * A guest anywhere in the tree can call `openAuthModal()` (Navbar's
+ * "Sign in" button does this); <AuthModal /> is mounted once in App.jsx.
  */
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(readStoredSession);
+  const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [pendingVerifyNotice, setPendingVerifyNotice] = useState(false);
 
   useEffect(() => {
-    if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    else localStorage.removeItem(STORAGE_KEY);
-  }, [session]);
-
-  // A session restored from localStorage carries whatever the user looked
-  // like when the token was issued. Re-read it once on mount so a seat
-  // granted or withdrawn since then is reflected, and so a revoked or
-  // expired token signs the person out instead of leaving a stale UI.
-  useEffect(() => {
-    const storedToken = readStoredSession()?.token;
-    if (!storedToken) return;
     let cancelled = false;
-    api
-      .me(storedToken)
-      .then(({ user }) => {
-        if (!cancelled) setSession((s) => (s ? { ...s, user } : s));
-      })
-      .catch((err) => {
-        if (!cancelled && err?.status === 401) setSession(null);
-      });
+    (async () => {
+      try {
+        const { user: me } = await api.me();
+        if (!cancelled) setUser(me);
+      } catch (err) {
+        if (err?.status === 401) {
+          try {
+            const refreshed = await api.refresh();
+            if (!cancelled) setUser(refreshed.user ?? null);
+          } catch {
+            if (!cancelled) setUser(null);
+          }
+        } else if (!cancelled) {
+          setUser(null);
+        }
+      } finally {
+        if (!cancelled) setReady(true);
+      }
+    })();
     return () => {
       cancelled = true;
     };
   }, []);
 
+  // Soft email verify: if the account screen (or a pasted link) lands with
+  // ?verify=… or #account?verify=…, consume it once.
+  useEffect(() => {
+    if (!ready) return;
+    const hash = window.location.hash || '';
+    const qs = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : window.location.search.slice(1);
+    const params = new URLSearchParams(qs);
+    const token = params.get('verify');
+    if (!token) return;
+
+    let cancelled = false;
+    api
+      .verifyEmail(token)
+      .then(({ user: me }) => {
+        if (!cancelled && me) setUser(me);
+      })
+      .catch(() => {
+        /* leave a toast-less failure — Account can surface it later */
+      })
+      .finally(() => {
+        // Strip the token from the URL so a refresh doesn't re-consume it.
+        if (hash.startsWith('#account')) {
+          window.history.replaceState(null, '', '#account');
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready]);
+
   const login = useCallback(async (email, password) => {
     const data = await api.login({ email, password });
-    setSession(data);
+    setUser(data.user);
+    setPendingVerifyNotice(false);
     return data;
   }, []);
 
   const signup = useCallback(async (payload) => {
     const data = await api.signup(payload);
-    setSession(data);
+    setUser(data.user);
+    setPendingVerifyNotice(true);
     return data;
   }, []);
 
-  const logout = useCallback(() => setSession(null), []);
+  const loginWithGoogle = useCallback(async (idToken) => {
+    const data = await api.googleLogin(idToken);
+    setUser(data.user);
+    setPendingVerifyNotice(false);
+    return data;
+  }, []);
 
-  /**
-   * Re-reads the signed-in person from the API.
-   *
-   * The session in localStorage is a snapshot from when the token was
-   * issued. After the account screen changes a name or a language, the
-   * navbar greeting and the language toggle are both reading that stale
-   * snapshot until this runs.
-   */
+  const logout = useCallback(async () => {
+    try {
+      await api.logout();
+    } catch {
+      /* still clear local state */
+    }
+    setUser(null);
+    setPendingVerifyNotice(false);
+  }, []);
+
   const refreshUser = useCallback(async () => {
-    const current = readStoredSession()?.token;
-    if (!current) return;
-    const { user } = await api.me(current);
-    setSession((s) => (s ? { ...s, user } : s));
+    const { user: me } = await api.me();
+    setUser(me);
+    return me;
   }, []);
 
   /**
-   * Replaces the token without touching the user.
-   *
-   * Changing a password revokes every token including this tab's, and the
-   * API hands back a replacement. Without this the person would be signed
-   * out of the page they just changed their password on, which reads as
-   * the change having failed.
+   * Kept for call-site compatibility (Account.jsx used to swap a JWT after
+   * password change). Cookies are already rotated by the API; this is a
+   * no-op that just refreshes the in-memory user.
    */
-  const setToken = useCallback((token) => {
-    setSession((s) => (s ? { ...s, token } : s));
-  }, []);
+  const setToken = useCallback(() => {
+    refreshUser().catch(() => {});
+  }, [refreshUser]);
 
   const value = useMemo(
     () => ({
-      user: session?.user ?? null,
-      token: session?.token ?? null,
-      isAuthenticated: Boolean(session?.token),
+      user,
+      // Sentinel so existing `if (!token)` / `api.foo(token)` call sites keep
+      // working — cookies carry the real credential.
+      token: user ? 'session' : null,
+      isAuthenticated: Boolean(user),
+      ready,
+      pendingVerifyNotice,
+      clearVerifyNotice: () => setPendingVerifyNotice(false),
       login,
       signup,
+      loginWithGoogle,
       logout,
       refreshUser,
       setToken,
@@ -103,7 +139,18 @@ export function AuthProvider({ children }) {
       openAuthModal: () => setModalOpen(true),
       closeAuthModal: () => setModalOpen(false),
     }),
-    [session, login, signup, logout, refreshUser, setToken, modalOpen]
+    [
+      user,
+      ready,
+      pendingVerifyNotice,
+      login,
+      signup,
+      loginWithGoogle,
+      logout,
+      refreshUser,
+      setToken,
+      modalOpen,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -85,6 +85,17 @@ providersRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
       providerPayoutVnd: b.providerPayoutVnd,
       communityFundVnd: b.communityFundVnd,
       platformFeeVnd: b.platformFeeVnd,
+      paymentRef: b.paymentRef,
+      paymentStatus: b.paymentStatus,
+      demoTxSigs: (() => {
+        if (!b.demoTxSigs) return [] as string[];
+        try {
+          const parsed = JSON.parse(b.demoTxSigs);
+          return Array.isArray(parsed) ? (parsed as string[]) : [];
+        } catch {
+          return [] as string[];
+        }
+      })(),
     })),
     orders: paidItems.map((i) => ({
       id: i.id,

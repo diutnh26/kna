@@ -9,3 +9,8 @@ app/package-lock.json
 app/**/package-lock.json
 *.md
 .git
+secrets.zip
+secrets/*.json
+secrets/*-keypair.json
+**/*.zip
+tmp-*.sql

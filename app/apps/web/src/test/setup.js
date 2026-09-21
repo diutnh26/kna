@@ -1,10 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { signOut } from './helpers.jsx';
 
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  signOut();
   vi.restoreAllMocks();
 });
 

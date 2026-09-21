@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Landing from './components/Landing';
 import Explore from './components/Explore';
 import Travel from './components/Travel';
@@ -11,6 +12,7 @@ import Dashboard from './components/Dashboard';
 import Account from './components/Account';
 import AuthModal from './components/AuthModal';
 import DemoDataBanner from './components/DemoDataBanner';
+import DemoBanner from './components/DemoBanner';
 import { AuthProvider } from './context/AuthProvider';
 
 /**
@@ -49,7 +51,9 @@ const ROUTES = {
   '#account': Account,
 };
 
-export default function App() {
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
+function AppShell() {
   const [hash, setHash] = useState(window.location.hash);
 
   useEffect(() => {
@@ -62,14 +66,28 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [hash]);
 
-  const Screen = ROUTES[hash] ?? Landing;
+  // Hash may include query (?verify=…) — route on the path segment only.
+  const routeKey = hash.includes('?') ? hash.slice(0, hash.indexOf('?')) : hash;
+  const Screen = ROUTES[routeKey] ?? Landing;
   return (
     <AuthProvider>
       {/* Above everything: a demonstration ledger that does not say it is
           one undermines the exact claim this platform is making. */}
+      <DemoBanner />
       <DemoDataBanner />
       <Screen />
       <AuthModal />
     </AuthProvider>
   );
+}
+
+export default function App() {
+  if (GOOGLE_CLIENT_ID) {
+    return (
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <AppShell />
+      </GoogleOAuthProvider>
+    );
+  }
+  return <AppShell />;
 }

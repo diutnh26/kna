@@ -25,6 +25,7 @@ function pickArrivalDate() {
 describe('Travel', () => {
   beforeEach(() => {
     vi.spyOn(api, 'listings').mockResolvedValue([aListing()]);
+    vi.spyOn(api, 'chainStatus').mockResolvedValue({ demoToken: null });
   });
 
   it('renders a listing from the API, not a hardcoded array', async () => {
@@ -163,6 +164,89 @@ describe('Travel', () => {
 
     const date = screen.getByLabelText(/Arrival date/i);
     expect(price.parentElement.contains(date)).toBe(false);
+  });
+
+  it('shows the VietQR image returned by the booking', async () => {
+    signIn();
+    vi.spyOn(api, 'createBooking').mockResolvedValue({
+      id: 'b1',
+      status: 'PENDING',
+      paymentRef: 'TWRTCKQR1',
+      payment: {
+        provider: 'vietqr',
+        status: 'AWAITING_PAYMENT',
+        qrUrl: 'https://img.vietqr.io/image/TCB-1-compact2.png?amount=500000',
+        paymentRef: 'TWRTCKQR1',
+        amountVnd: 500_000,
+        instructions: 'Transfer with the reference.',
+      },
+    });
+    vi.spyOn(api, 'paymentStatus').mockResolvedValue({
+      paymentStatus: 'AWAITING_PAYMENT',
+      demoTxSigs: [],
+    });
+
+    renderScreen(<Travel />);
+    await screen.findByRole('heading', { name: /Two nights/ });
+    pickArrivalDate();
+    await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
+
+    const qr = await screen.findByRole('img', { name: /Pay with bank QR/i });
+    expect(qr).toHaveAttribute('src', expect.stringContaining('vietqr.io'));
+  });
+
+  it('shows explorer links once the payment poll reports demo signatures', async () => {
+    signIn();
+    vi.spyOn(api, 'createBooking').mockResolvedValue({
+      id: 'b1',
+      status: 'PENDING',
+      paymentRef: 'TWRTCKPOLL1',
+      payment: {
+        provider: 'vietqr',
+        status: 'AWAITING_PAYMENT',
+        qrUrl: 'https://img.vietqr.io/image/TCB-1.png',
+        paymentRef: 'TWRTCKPOLL1',
+      },
+    });
+    vi.spyOn(api, 'paymentStatus').mockResolvedValue({
+      paymentStatus: 'PAID',
+      demoTxSigs: ['sigexplorer1'],
+    });
+
+    renderScreen(<Travel />);
+    await screen.findByRole('heading', { name: /Two nights/ });
+    pickArrivalDate();
+    await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
+
+    expect(await screen.findByText(/Demo tokens sent to linked wallets/i)).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /View demo tx on Explorer/i });
+    expect(link).toHaveAttribute('href', expect.stringContaining('explorer.solana.com/tx/sigexplorer1'));
+  });
+
+  it('says the mint was skipped when payment is confirmed without signatures', async () => {
+    signIn();
+    vi.spyOn(api, 'createBooking').mockResolvedValue({
+      id: 'b1',
+      status: 'PENDING',
+      paymentRef: 'TWRTCKSKIP1',
+      payment: {
+        provider: 'vietqr',
+        status: 'AWAITING_PAYMENT',
+        qrUrl: 'https://img.vietqr.io/image/TCB-1.png',
+        paymentRef: 'TWRTCKSKIP1',
+      },
+    });
+    vi.spyOn(api, 'paymentStatus').mockResolvedValue({
+      paymentStatus: 'PAID',
+      demoTxSigs: [],
+    });
+
+    renderScreen(<Travel />);
+    await screen.findByRole('heading', { name: /Two nights/ });
+    pickArrivalDate();
+    await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
+
+    expect(await screen.findByText(/No demo mint/i)).toBeInTheDocument();
   });
 
 });

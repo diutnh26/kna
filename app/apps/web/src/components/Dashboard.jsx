@@ -7,6 +7,8 @@ import { useAuth } from '../context/useAuth';
 import ApiErrorNotice from './ApiErrorNotice';
 import { OperatorWalletBar } from '../wallet/WalletConnect';
 import AttestationPanel from '../wallet/AttestationPanel';
+import DemoWalletPanel from './DemoWalletPanel';
+import DemoTxHistory from './DemoTxHistory';
 
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 const dmy = (iso) =>
@@ -154,11 +156,17 @@ export default function Dashboard() {
       )}
 
       {isAuthenticated && loadState === 'ready' && mayCoordinate && (
-        <section className="px-8 lg:px-12 xl:px-16 pb-6 max-w-6xl">
+        <section className="px-8 lg:px-12 xl:px-16 pb-6 max-w-6xl space-y-6">
           <OperatorWalletBar />
           {attestLedgerId ? (
             <div className="mt-4">
-              <AttestationPanel ledgerEntryId={attestLedgerId} token={token} />
+              <AttestationPanel ledgerEntryId={attestLedgerId} />
+            </div>
+          ) : null}
+          {!data ? (
+            <div className="space-y-5">
+              <DemoWalletPanel />
+              <DemoTxHistory />
             </div>
           ) : null}
         </section>
@@ -245,6 +253,11 @@ export default function Dashboard() {
       {/* ── PROVIDER EARNINGS ─────────────────────── */}
       {data && (
         <>
+          <section className="px-8 lg:px-12 xl:px-16 py-12 max-w-6xl space-y-5">
+            <DemoWalletPanel />
+            <DemoTxHistory />
+          </section>
+
           <section className="bg-[#F5EDDD] text-[#1A1614]">
             <div className="px-8 lg:px-12 xl:px-16 py-20">
               <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-8">
@@ -324,6 +337,21 @@ export default function Dashboard() {
                         <div className="text-[11px] text-[#F5EDDD]/40">
                           of {vnd(b.totalVnd)} · {vnd(b.communityFundVnd)} to the Fund
                         </div>
+                        {b.demoTxSigs?.length ? (
+                          <div className="mt-2 space-y-1 text-left">
+                            {b.demoTxSigs.slice(0, 3).map((sig) => (
+                              <a
+                                key={sig}
+                                href={`https://explorer.solana.com/tx/${sig}?cluster=devnet`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block text-[10px] underline text-[#8FA37B] font-mono"
+                              >
+                                {t('travel.viewDemoTx')} · {String(sig).slice(0, 8)}…
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                     </article>
                   );

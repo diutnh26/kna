@@ -4,8 +4,9 @@
 
 FROM node:24-bookworm-slim AS base
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends openssl ca-certificates \
+# Check-Valid-Until=false: host/VM clock skew can make Debian InRelease look "not yet valid".
+RUN apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update \
+  && apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -44,7 +45,11 @@ CMD ["node", "/app/entrypoint-api.js"]
 # http://localhost:4000, which this compose file publishes on the host.
 FROM base AS web-build
 
+ARG VITE_GOOGLE_CLIENT_ID=
+ARG VITE_DEMO_MODE=true
 ENV VITE_API_URL=http://localhost:4000
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+ENV VITE_DEMO_MODE=$VITE_DEMO_MODE
 WORKDIR /app/apps/web
 RUN npx vite build --mode development
 

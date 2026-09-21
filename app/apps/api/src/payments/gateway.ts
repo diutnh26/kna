@@ -13,6 +13,8 @@
  * need to know which is in use.
  */
 
+import { VietQRGateway } from "./vietqr-gateway";
+
 export type PaymentStatus = "AWAITING_PAYMENT" | "PAID" | "FAILED" | "REFUNDED";
 
 export interface PaymentIntent {
@@ -29,6 +31,14 @@ export interface PaymentInstruction {
   status: PaymentStatus;
   /** Present only for gateways that redirect the payer. */
   redirectUrl?: string;
+  /** VietQR / bank QR image URL. */
+  qrUrl?: string;
+  /** Short transfer content / addInfo reference when the gateway issues one. */
+  paymentRef?: string;
+  /** Amount echoed for QR UIs. */
+  amountVnd?: number;
+  bankId?: string;
+  bankAccount?: string;
   /** Shown to the payer as-is. For manual settlement this is the actual instruction. */
   instructions: string;
 }
@@ -74,6 +84,7 @@ export class ManualSettlementGateway implements PaymentGateway {
 
 const GATEWAYS: Record<string, () => PaymentGateway> = {
   manual: () => new ManualSettlementGateway(),
+  vietqr: () => new VietQRGateway(),
   // vnpay: () => new VnpayGateway(...),   ← Phase 1 completion, once a
   // momo:  () => new MomoGateway(...),      merchant account exists
 };

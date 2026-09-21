@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
 
@@ -7,30 +8,104 @@ export interface AuthedRequest extends Request {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "dev-only-change-me";
+const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL ?? "15m";
+const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
+const COOKIE_SECURE =
+  process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production";
+
+export const ACCESS_COOKIE = "access_token";
+export const REFRESH_COOKIE = "refresh_token";
 
 export function signToken(payload: { id: string; role: string; tokenVersion: number }) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ ...payload, type: "user" }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_TTL } as jwt.SignOptions);
+}
+
+export function hashToken(raw: string) {
+  return crypto.createHash("sha256").update(raw).digest("hex");
+}
+
+export function cookieOptions(maxAgeMs: number) {
+  return {
+    httpOnly: true,
+    secure: COOKIE_SECURE,
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: maxAgeMs,
+  };
+}
+
+/** Issue a fresh opaque refresh token, persist its hash, return the raw value for the cookie. */
+export async function issueRefreshToken(userId: string) {
+  const raw = crypto.randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000);
+  await prisma.refreshToken.create({
+    data: {
+      userId,
+      tokenHash: hashToken(raw),
+      expiresAt,
+    },
+  });
+  return { raw, expiresAt };
+}
+
+export function setAuthCookies(res: Response, accessJwt: string, refreshRaw: string) {
+  // Access cookie lifetime mirrors the JWT; refresh uses its own TTL.
+  const accessMaxAgeMs = parseTtlMs(ACCESS_TOKEN_TTL) ?? 15 * 60 * 1000;
+  const refreshMaxAgeMs = REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
+  res.cookie(ACCESS_COOKIE, accessJwt, cookieOptions(accessMaxAgeMs));
+  res.cookie(REFRESH_COOKIE, refreshRaw, cookieOptions(refreshMaxAgeMs));
+}
+
+export function clearAuthCookies(res: Response) {
+  res.clearCookie(ACCESS_COOKIE, { httpOnly: true, secure: COOKIE_SECURE, sameSite: "lax", path: "/" });
+  res.clearCookie(REFRESH_COOKIE, { httpOnly: true, secure: COOKIE_SECURE, sameSite: "lax", path: "/" });
 }
 
 /**
- * Rejects the request unless a valid Bearer token is present *and* still
+ * Sign cookies for a freshly authenticated session and return the access JWT
+ * (still returned in the JSON body so existing API tests that use Bearer keep working).
+ */
+export async function establishSession(
+  res: Response,
+  user: { id: string; role: string; tokenVersion: number }
+) {
+  const accessJwt = signToken({ id: user.id, role: user.role, tokenVersion: user.tokenVersion });
+  const { raw: refreshRaw } = await issueRefreshToken(user.id);
+  setAuthCookies(res, accessJwt, refreshRaw);
+  return accessJwt;
+}
+
+function parseTtlMs(ttl: string): number | null {
+  const m = /^(\d+)([smhd])$/i.exec(ttl.trim());
+  if (!m) return null;
+  const n = Number(m[1]);
+  const unit = m[2].toLowerCase();
+  const mult = unit === "s" ? 1000 : unit === "m" ? 60_000 : unit === "h" ? 3_600_000 : 86_400_000;
+  return n * mult;
+}
+
+function extractAccessToken(req: Request): string | null {
+  const fromCookie = (req as Request & { cookies?: Record<string, string> }).cookies?.[ACCESS_COOKIE];
+  if (fromCookie) return fromCookie;
+  const header = req.headers.authorization;
+  if (header?.startsWith("Bearer ")) return header.slice(7);
+  return null;
+}
+
+/**
+ * Rejects the request unless a valid access credential is present *and* still
  * matches the account it names.
  *
- * The token is not the authority on what someone may do — the database is.
- * Previously `role` was read straight off the claim, so demoting a
- * coordinator left their existing token working for up to seven days, and
- * a leaked token could not be revoked at all. Now the role is re-read on
- * every request and the token's version must match the account's, which is
- * bumped whenever authority changes or the account signs out everywhere.
+ * Credentials are read from the HttpOnly `access_token` cookie first; a
+ * Bearer header is still accepted so existing tests and operators keep working.
  *
- * The cost is one primary-key lookup per authenticated request. At pilot
- * scale that is not a consideration worth trading correctness for; if it
- * ever becomes one, the answer is a short-lived token with a refresh, not
- * trusting a week-old claim.
+ * The token is not the authority on what someone may do — the database is.
+ * Role is re-read on every request and the token's version must match the
+ * account's, which is bumped whenever authority changes or the account
+ * signs out everywhere.
  */
 export async function requireAuth(req: AuthedRequest, res: Response, next: NextFunction) {
-  const header = req.headers.authorization;
-  const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
+  const token = extractAccessToken(req);
   if (!token) {
     return res.status(401).json({ error: "Sign in required." });
   }
@@ -51,10 +126,6 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     if (!user) {
       return res.status(401).json({ error: "That account no longer exists." });
     }
-    // Tokens issued before this change carry no version; treat them as 0 so
-    // an existing session survives the deploy rather than logging everyone
-    // out — and any real revocation still invalidates them, because the
-    // bump moves the account past 0.
     if ((claim.tokenVersion ?? 0) !== user.tokenVersion) {
       return res.status(401).json({ error: "Session ended — sign in again." });
     }
@@ -67,18 +138,20 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
 }
 
 /**
- * Ends every existing session for an account.
- *
- * Call this wherever authority changes — granting or withdrawing a
- * Committee seat, changing a role, a password reset, or a "sign out
- * everywhere" — so the change binds immediately instead of whenever the
- * old token happens to expire.
+ * Ends every existing session for an account: bump tokenVersion (kills access
+ * JWTs) and revoke outstanding refresh rows.
  */
 export async function revokeSessions(userId: string) {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { tokenVersion: { increment: 1 } },
-  });
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: userId },
+      data: { tokenVersion: { increment: 1 } },
+    }),
+    prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    }),
+  ]);
 }
 
 /** Restricts a route to one or more roles. Use after requireAuth. */
@@ -93,11 +166,6 @@ export function requireRole(...roles: string[]) {
 
 /**
  * Committee authority comes from *holding a seat*, not from the Role enum.
- * A person can be a host and a Committee member at once — Amí H'Bia is
- * both — and a single-valued enum can't express that. So this checks for a
- * CommitteeMember record, which is also what the governance model says
- * confers the authority. ADMIN passes as a platform-operations escape
- * hatch (someone has to be able to unstick the queue).
  */
 export async function requireCommittee(req: AuthedRequest, res: Response, next: NextFunction) {
   if (!req.user) {
@@ -118,12 +186,6 @@ export async function requireCommittee(req: AuthedRequest, res: Response, next: 
   }
 }
 
-/**
- * Booking coordination — confirming that a household actually has the
- * dates — is platform operations, not governance. Committee members can
- * do it too, since in the pilot the same people often are the community
- * coordinators, but it does not require a seat the way reviewing does.
- */
 export async function requireCoordinator(req: AuthedRequest, res: Response, next: NextFunction) {
   if (!req.user) {
     return res.status(401).json({ error: "Sign in required." });
@@ -141,10 +203,6 @@ export async function requireCoordinator(req: AuthedRequest, res: Response, next
   }
 }
 
-/**
- * Contributing to the archive requires being someone the community can
- * identify: a verified provider, a Committee member, or platform staff.
- */
 export async function requireContributor(req: AuthedRequest, res: Response, next: NextFunction) {
   if (!req.user) {
     return res.status(401).json({ error: "Sign in required." });

@@ -3,7 +3,12 @@ import bcrypt from "bcryptjs";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
-import { requireAuth, revokeSessions, signToken, type AuthedRequest } from "../middleware/auth";
+import {
+  establishSession,
+  requireAuth,
+  revokeSessions,
+  type AuthedRequest,
+} from "../middleware/auth";
 
 export const accountRouter = Router();
 
@@ -58,6 +63,71 @@ async function describeAccount(userId: string) {
   const settledBookings = bookings.filter((b) => SETTLED_BOOKING.includes(b.status));
   const settledOrders = orders.filter((o) => SETTLED_ORDER.includes(o.status));
 
+  const isStaff = user.role === "COORDINATOR" || user.role === "ADMIN";
+  const providerId = user.provider?.id ?? null;
+
+  let providerMoney: {
+    earnedVnd: number;
+    fundVnd: number;
+    platformVnd: number;
+    bookings: number;
+    pending: number;
+  } | null = null;
+
+  if (providerId) {
+    const providerBookings = await prisma.booking.findMany({
+      where: { listing: { providerId } },
+      select: {
+        status: true,
+        providerPayoutVnd: true,
+        communityFundVnd: true,
+        platformFeeVnd: true,
+      },
+    });
+    const confirmed = providerBookings.filter((b) => SETTLED_BOOKING.includes(b.status));
+    providerMoney = {
+      earnedVnd: confirmed.reduce((n, b) => n + b.providerPayoutVnd, 0),
+      fundVnd: confirmed.reduce((n, b) => n + b.communityFundVnd, 0),
+      platformVnd: confirmed.reduce((n, b) => n + b.platformFeeVnd, 0),
+      bookings: confirmed.length,
+      pending: providerBookings.filter((b) => b.status === "PENDING").length,
+    };
+  }
+
+  let staffMoney: {
+    settledBookingsVnd: number;
+    toProvidersVnd: number;
+    toFundVnd: number;
+    paidWithDemo: number;
+    awaitingPayment: number;
+  } | null = null;
+
+  if (isStaff) {
+    const [allBookings, demoPaid] = await Promise.all([
+      prisma.booking.findMany({
+        where: { status: { in: SETTLED_BOOKING } },
+        select: {
+          totalVnd: true,
+          providerPayoutVnd: true,
+          communityFundVnd: true,
+        },
+      }),
+      prisma.booking.count({
+        where: { paymentStatus: "PAID", demoTxSigs: { not: null } },
+      }),
+    ]);
+    const awaitingPayment = await prisma.booking.count({
+      where: { paymentStatus: "AWAITING_PAYMENT" },
+    });
+    staffMoney = {
+      settledBookingsVnd: allBookings.reduce((n, b) => n + b.totalVnd, 0),
+      toProvidersVnd: allBookings.reduce((n, b) => n + b.providerPayoutVnd, 0),
+      toFundVnd: allBookings.reduce((n, b) => n + b.communityFundVnd, 0),
+      paidWithDemo: demoPaid,
+      awaitingPayment,
+    };
+  }
+
   return {
     user: {
       id: user.id,
@@ -70,6 +140,9 @@ async function describeAccount(userId: string) {
       committeeRole: user.committeeSeat?.role ?? null,
       provider: user.provider,
     },
+    moneyView: isStaff ? "staff" : providerId ? "provider" : "guest",
+    providerMoney,
+    staffMoney,
     totals: {
       bookings: bookings.length,
       bookingsAwaiting: bookings.filter((b) => b.status === "PENDING").length,
@@ -151,7 +224,11 @@ const passwordLimiter = rateLimit({
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Your current password is required."),
-  newPassword: z.string().min(8, "New password must be at least 8 characters."),
+  newPassword: z
+    .string()
+    .min(8, "New password must be at least 8 characters.")
+    .regex(/[A-Za-z]/, "New password must include a letter.")
+    .regex(/\d/, "New password must include a digit."),
 });
 
 /**
@@ -169,6 +246,11 @@ accountRouter.post("/password", requireAuth, passwordLimiter, async (req: Authed
   const { currentPassword, newPassword } = parsed.data;
 
   const user = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id } });
+  if (!user.passwordHash) {
+    return res.status(400).json({
+      error: "This account signs in with Google and has no password to change.",
+    });
+  }
   if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
     return res.status(403).json({ error: "That is not your current password." });
   }
@@ -182,13 +264,11 @@ accountRouter.post("/password", requireAuth, passwordLimiter, async (req: Authed
   });
   await revokeSessions(user.id);
 
-  // The caller's own token was just invalidated along with the rest, so
-  // issue a fresh one — otherwise changing your password signs you out of
-  // the tab you changed it in.
+  // The caller's own session was just invalidated — re-issue cookies so
+  // this tab stays signed in after the change.
   const updated = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
-  res.json({
-    token: signToken({ id: updated.id, role: updated.role, tokenVersion: updated.tokenVersion }),
-  });
+  const token = await establishSession(res, updated);
+  res.json({ token });
 });
 
 /**
@@ -202,10 +282,27 @@ accountRouter.post("/password", requireAuth, passwordLimiter, async (req: Authed
  */
 accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
   const userId = req.user!.id;
+  const me = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: {
+      role: true,
+      provider: { select: { id: true } },
+    },
+  });
+  const isStaff = me.role === "COORDINATOR" || me.role === "ADMIN";
+  const providerId = me.provider?.id ?? null;
+
+  // Guest: own trips. Provider: own trips + stays on their listings.
+  // Staff: platform-wide recent bookings (incl. demo mint history).
+  const bookingWhere = isStaff
+    ? {}
+    : providerId
+      ? { OR: [{ guestId: userId }, { listing: { providerId } }] }
+      : { guestId: userId };
 
   const [bookings, orders, contributions] = await Promise.all([
     prisma.booking.findMany({
-      where: { guestId: userId },
+      where: bookingWhere,
       include: {
         listing: {
           select: {
@@ -214,12 +311,21 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
             provider: { select: { displayName: true, buon: true } },
           },
         },
+        guest: { select: { fullName: true, email: true } },
         offset: true,
       },
       orderBy: { createdAt: "desc" },
+      take: isStaff ? 60 : 40,
     }),
     prisma.order.findMany({
-      where: { buyerId: userId },
+      where: providerId
+        ? {
+            OR: [
+              { buyerId: userId },
+              { items: { some: { product: { providerId } } } },
+            ],
+          }
+        : { buyerId: userId },
       include: {
         items: {
           include: {
@@ -234,6 +340,7 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
         },
       },
       orderBy: { createdAt: "desc" },
+      take: 40,
     }),
     prisma.archiveEntry.findMany({
       where: { contributedById: userId },
@@ -260,14 +367,24 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
       imageUrl: b.listing.imageUrl,
       from: b.listing.provider.displayName,
       buon: b.listing.provider.buon,
+      guestName: b.guest.fullName,
       checkIn: b.checkIn,
       nights: b.nights,
       guests: b.guests,
       totalVnd: b.totalVnd,
       toProviderVnd: b.providerPayoutVnd,
       toCommunityFundVnd: b.communityFundVnd,
-      // Shown on the booking rather than as its own row: an offset is part
-      // of the stay, not a separate transaction the guest made.
+      paymentRef: b.paymentRef,
+      paymentStatus: b.paymentStatus,
+      demoTxSigs: (() => {
+        if (!b.demoTxSigs) return [] as string[];
+        try {
+          const parsed = JSON.parse(b.demoTxSigs);
+          return Array.isArray(parsed) ? (parsed as string[]) : [];
+        } catch {
+          return [] as string[];
+        }
+      })(),
       offset: b.offset
         ? {
             projectId: b.offset.projectId,
