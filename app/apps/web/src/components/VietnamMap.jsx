@@ -2,19 +2,21 @@ import { useTranslation } from 'react-i18next';
 import {
   MAINLAND,
   DAK_LAK_PRE_MERGER,
-  BUON_MA_THUOT,
+  ETHNICITY_SITES,
   HOANG_SA,
   TRUONG_SA,
   PHU_QUOC,
   CON_DAO,
 } from '../lib/geography';
+import { ETHNICITIES } from '../content/ethnicities';
+import { useEthnicity } from '../context/useEthnicity';
 
 /**
- * Where Đắk Lắk is, for a reader who has never placed it.
+ * Where these communities are, for a reader who has never placed them.
  *
  * A schematic outline, not survey data. The coordinates in lib/geography
  * are traced by hand at roughly one point per 50–100 km, enough to make the
- * country recognisable and Đắk Lắk findable, and not enough to settle a
+ * country recognisable and each site findable, and not enough to settle a
  * boundary question. A caption used to say so on the page; it was removed
  * on request, so this comment is now the only place it is written down.
  * Worth restoring if the outline ever starts being read as authoritative.
@@ -24,8 +26,13 @@ import {
  * project's own rather than something overridden after the fact.
  *
  * Shares its coordinates with InteractiveMap through lib/geography, so the
- * province drawn here and the province drawn over the imagery are the
- * same trace rather than two that can drift apart.
+ * shapes drawn here and the shapes drawn over the imagery are the same
+ * trace rather than two that can drift apart.
+ *
+ * The five sites are all drawn at once, with the selected one raised. Only
+ * showing the current site would hide the thing the map is best placed to
+ * say — that these communities sit most of the length of the country
+ * apart, from Lũng Cú at 23.4°N to Trà Vinh at 9.9°N.
  */
 
 // Equirectangular. At Vietnam's latitudes a degree of longitude is about
@@ -49,8 +56,20 @@ const shape = (points) =>
     .map(([lat, lon], i) => `${i ? 'L' : 'M'}${x(lon).toFixed(1)},${y(lat).toFixed(1)}`)
     .join(' ') + ' Z';
 
+// Where each site's label sits relative to its marker. The northern three
+// crowd together against the Chinese border and would overprint each other
+// if they all sat to the same side, so they are fanned by hand.
+const LABEL_OFFSET = {
+  lolo: { dx: 10, dy: -14, anchor: 'start' },
+  hmong: { dx: -10, dy: 4, anchor: 'end' },
+  tay: { dx: 10, dy: 20, anchor: 'start' },
+  ede: { dx: 14, dy: 6, anchor: 'start' },
+  khmer: { dx: -12, dy: 16, anchor: 'end' },
+};
+
 export default function VietnamMap() {
   const { t } = useTranslation();
+  const { slug, select } = useEthnicity();
   const workArea = t('explore.map.workArea', { returnObjects: true });
 
   return (
@@ -84,32 +103,27 @@ export default function VietnamMap() {
         strokeLinejoin="round"
       />
 
-      {/* Đắk Lắk as it was before the 2025 merger with Phú Yên, which is
-          the area KNĂ works in. Deliberately not the current province the
-          zoomable map draws: that one reaches the coast, this one shows
-          the ground the platform actually covers. Labelled as such. */}
-      <path
-        d={shape(DAK_LAK_PRE_MERGER)}
-        fill="#C8302E"
-        stroke="#C8302E"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
+      {/* Đắk Lắk as it was before the 2025 merger with Phú Yên. Drawn only
+          while Ê Đê is selected: it is the one place the platform covers as
+          a province rather than as a village, and leaving it filled under
+          another profile would say the work is there when it is not.
 
-      {/* Buôn Ma Thuột */}
-      <circle cx={x(BUON_MA_THUOT[1])} cy={y(BUON_MA_THUOT[0])} r="6" fill="#E8A33D" />
-      <circle
-        cx={x(BUON_MA_THUOT[1])}
-        cy={y(BUON_MA_THUOT[0])}
-        r="13"
-        fill="none"
-        stroke="#E8A33D"
-        strokeOpacity="0.45"
-        strokeWidth="2"
-      />
+          Deliberately not the current province the zoomable map draws: that
+          one reaches the coast, this one shows the ground actually covered. */}
+      {slug === 'ede' && (
+        <path
+          d={shape(DAK_LAK_PRE_MERGER)}
+          fill="var(--c-kteh)"
+          stroke="var(--c-kteh)"
+          strokeWidth="2"
+          strokeLinejoin="round"
+          style={{ transition: 'fill 500ms ease, stroke 500ms ease' }}
+        />
+      )}
 
-      {/* Offshore islands */}
-      <g fill="#B87333">
+      {/* Offshore islands. Drawn before the site markers so that a marker
+          near the coast sits above them rather than behind. */}
+      <g fill="var(--c-copper)" style={{ transition: 'fill 500ms ease' }}>
         {HOANG_SA.map(([lat, lon]) => (
           <circle key={`hs-${lat}-${lon}`} cx={x(lon)} cy={y(lat)} r="3.5" />
         ))}
@@ -119,6 +133,63 @@ export default function VietnamMap() {
         <circle cx={x(PHU_QUOC[1])} cy={y(PHU_QUOC[0])} r="4.5" />
         <circle cx={x(CON_DAO[1])} cy={y(CON_DAO[0])} r="3.5" />
       </g>
+
+      {/* The five sites. Clicking one switches the whole page to it, which
+          makes the map a second switcher for anyone who thinks in places
+          rather than in names. */}
+      {ETHNICITIES.map((profile) => {
+        const site = ETHNICITY_SITES[profile.slug];
+        if (!site) return null;
+        const [lat, lon] = site.coords;
+        const active = profile.slug === slug;
+        const offset = LABEL_OFFSET[profile.slug] ?? { dx: 12, dy: 5, anchor: 'start' };
+
+        return (
+          <g
+            key={profile.slug}
+            onClick={() => select(profile.slug)}
+            className="cursor-pointer"
+            style={{ transition: 'opacity 500ms ease', opacity: active ? 1 : 0.42 }}
+          >
+            {/* Generous invisible hit area. The visible dot is 6 units
+                across, which on a phone is far under a fingertip. */}
+            <circle cx={x(lon)} cy={y(lat)} r="26" fill="transparent" />
+
+            {active && (
+              <circle
+                cx={x(lon)}
+                cy={y(lat)}
+                r="13"
+                fill="none"
+                stroke="var(--c-amber)"
+                strokeOpacity="0.45"
+                strokeWidth="2"
+              />
+            )}
+            <circle
+              cx={x(lon)}
+              cy={y(lat)}
+              r={active ? 6 : 4}
+              fill={active ? 'var(--c-amber)' : '#F5EDDD'}
+              fillOpacity={active ? 1 : 0.7}
+              style={{ transition: 'r 300ms ease, fill 500ms ease' }}
+            />
+            <text
+              x={x(lon) + offset.dx}
+              y={y(lat) + offset.dy}
+              textAnchor={offset.anchor}
+              fontSize={active ? 22 : 17}
+              fontWeight={active ? 600 : 400}
+              fill={active ? 'var(--c-amber)' : '#F5EDDD'}
+              fillOpacity={active ? 1 : 0.55}
+              fontFamily="'Be Vietnam Pro', sans-serif"
+              style={{ transition: 'fill 500ms ease' }}
+            >
+              {site.label}
+            </text>
+          </g>
+        );
+      })}
 
       {/* Labels. Font sizes are in user units, so they scale with the map
           rather than needing a breakpoint of their own. */}
@@ -131,63 +202,20 @@ export default function VietnamMap() {
         </text>
       </g>
 
-      {/* Both labels sit out in the sea to the east. The coast at these
-          latitudes reaches about 109.2°E, so they start at 109.7 to keep
-          clear of the outline rather than printing over it. */}
-      <text
-        x={x(109.7)}
-        y={y(13.15)}
-        fontSize="24"
-        fill="#C8302E"
-        fontFamily="'Be Vietnam Pro', sans-serif"
-        fontWeight="600"
-      >
-        {t('explore.map.dakLak')}
-      </text>
-
-      <text
-        x={x(109.7)}
-        y={y(11.75)}
-        fontSize="20"
-        fill="#E8A33D"
-        fillOpacity="0.9"
-        fontFamily="'Be Vietnam Pro', sans-serif"
-      >
-        {t('explore.map.buonMaThuot')}
-      </text>
-
-      {/* Leaders from each label back to what it names, which neither can
-          sit on top of at this scale without covering it. */}
-      <path
-        d={`M${x(109.6)},${y(13.08)} L${x(108.8)},${y(12.95)}`}
-        stroke="#C8302E"
-        strokeOpacity="0.6"
-        strokeWidth="1.5"
-      />
-      <path
-        d={`M${x(109.6)},${y(11.85)} L${x(108.2)},${y(12.55)}`}
-        stroke="#E8A33D"
-        strokeOpacity="0.4"
-        strokeWidth="1.5"
-      />
-
-      {/* Why this outline stops short of the coast while the zoomable map
-          beside it does not. The red shape is the pre-merger province,
-          which is the area KNĂ actually operates in, so the difference is
-          the point rather than an oversight. Sits under the two labels it
-          qualifies, and clear of the Trường Sa cluster to its right. */}
-      <g
-        fontSize="16"
-        fill="#F5EDDD"
-        fillOpacity="0.5"
-        fontFamily="'Be Vietnam Pro', sans-serif"
-      >
-        {workArea.map((line, i) => (
-          <text key={line} x={x(109.7)} y={y(11.0) + i * 22}>
-            {line}
-          </text>
-        ))}
-      </g>
+      {/* Why the Đắk Lắk outline stops short of the coast while the zoomable
+          map beside it does not. The filled shape is the pre-merger
+          province, which is the area KNĂ actually operates in, so the
+          difference is the point rather than an oversight. Only shown
+          alongside the shape it qualifies. */}
+      {slug === 'ede' && (
+        <g fontSize="16" fill="#F5EDDD" fillOpacity="0.5" fontFamily="'Be Vietnam Pro', sans-serif">
+          {workArea.map((line, i) => (
+            <text key={line} x={x(109.7)} y={y(11.0) + i * 22}>
+              {line}
+            </text>
+          ))}
+        </g>
+      )}
     </svg>
   );
 }

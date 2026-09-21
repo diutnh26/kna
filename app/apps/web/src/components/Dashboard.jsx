@@ -28,10 +28,10 @@ export default function Dashboard() {
   // Status labels are built from t() rather than a module constant, so
   // they follow the language toggle instead of freezing at import time.
   const BOOKING_STATUS = {
-    PENDING: { label: t('dashboard.statusPending'), cls: 'text-[#B87333] border-[#B87333]/40' },
-    CONFIRMED: { label: t('dashboard.statusConfirmed'), cls: 'text-[#E8A33D] border-[#E8A33D]/40' },
-    COMPLETED: { label: t('dashboard.statusCompleted'), cls: 'text-[#8FA37B] border-[#8FA37B]/40' },
-    CANCELLED: { label: t('dashboard.statusCancelled'), cls: 'text-[#F5EDDD]/40 border-[#F5EDDD]/20' },
+    PENDING: { label: t('dashboard.statusPending'), cls: 'text-copper border-copper/40' },
+    CONFIRMED: { label: t('dashboard.statusConfirmed'), cls: 'text-amber border-amber/40' },
+    COMPLETED: { label: t('dashboard.statusCompleted'), cls: 'text-sage border-sage/40' },
+    CANCELLED: { label: t('dashboard.statusCancelled'), cls: 'text-bone/40 border-bone/20' },
   };
   const { user, token, isAuthenticated, openAuthModal } = useAuth();
   const [data, setData] = useState(null);
@@ -94,26 +94,26 @@ export default function Dashboard() {
   const totals = data?.totals;
 
   return (
-    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+    <div className="min-h-screen bg-ink text-bone font-body antialiased">
       <Navbar active="dashboard" theme="dark" />
 
       {/* Full-bleed, matching Review and the earnings panel below, which
           was already unclamped — so the header and the queue were reading
           narrower than the panel they sit above. Padding is the only margin. */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24">
-        <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
-          <span className="h-px w-12 bg-[#B87333]" />
+        <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-8">
+          <span className="h-px w-12 bg-copper" />
           <span>{t('dashboard.eyebrow')}</span>
         </div>
         <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-6">
           {data ? data.provider.displayName : t('dashboard.fallbackTitle')}
         </h1>
         {data && (
-          <p className="text-lg text-[#F5EDDD]/70 leading-relaxed flex items-center gap-3">
+          <p className="text-lg text-bone/70 leading-relaxed flex items-center gap-3">
             <MapPin className="w-4 h-4 shrink-0" />
             {data.provider.buon}
             {data.provider.verified && (
-              <span className="inline-flex items-center gap-1.5 text-sm text-[#E8A33D]">
+              <span className="inline-flex items-center gap-1.5 text-sm text-amber">
                 <BadgeCheck className="w-4 h-4" />
                 {t('dashboard.verified')}
               </span>
@@ -124,11 +124,11 @@ export default function Dashboard() {
 
       {!isAuthenticated && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
-          <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
+          <div className="border border-dashed border-bone/20 py-16 text-center">
             <p className="font-display text-2xl mb-4">{t('dashboard.signInPrompt')}</p>
             <button
               onClick={openAuthModal}
-              className="bg-[#C8302E] hover:bg-[#A82826] px-6 py-3 text-sm uppercase tracking-wider transition"
+              className="bg-kteh hover:bg-kteh-hover px-6 py-3 text-sm uppercase tracking-wider transition"
             >
               {t('dashboard.signIn')}
             </button>
@@ -144,9 +144,9 @@ export default function Dashboard() {
 
       {isAuthenticated && loadState === 'ready' && !data && !mayCoordinate && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
-          <div className="border border-dashed border-[#F5EDDD]/20 py-16 px-8 text-center">
+          <div className="border border-dashed border-bone/20 py-16 px-8 text-center">
             <p className="font-display text-2xl mb-3">{t('dashboard.noProviderTitle')}</p>
-            <p className="text-sm text-[#F5EDDD]/60 max-w-lg mx-auto leading-relaxed">
+            <p className="text-sm text-bone/60 max-w-lg mx-auto leading-relaxed">
               {t('dashboard.noProviderBody')}
             </p>
           </div>
@@ -169,16 +169,16 @@ export default function Dashboard() {
         <section className="px-8 lg:px-12 xl:px-16 pb-20">
           <h2 className="font-display text-3xl font-medium mb-2">
             {t('dashboard.queueTitle')}
-            <span className="text-[#B87333] ml-3 text-2xl">{pending?.length ?? 0}</span>
+            <span className="text-copper ml-3 text-2xl">{pending?.length ?? 0}</span>
           </h2>
-          <p className="text-sm text-[#F5EDDD]/50 mb-8 leading-relaxed">
+          <p className="text-sm text-bone/50 mb-8 leading-relaxed">
             {t('dashboard.queueIntro')}
           </p>
 
-          {error && <p className="text-sm text-[#E8A33D] mb-6">{error}</p>}
+          {error && <p className="text-sm text-amber mb-6">{error}</p>}
 
           {pending?.length === 0 ? (
-            <div className="border border-dashed border-[#F5EDDD]/20 py-12 text-center text-sm text-[#F5EDDD]/60">
+            <div className="border border-dashed border-bone/20 py-12 text-center text-sm text-bone/60">
               {t('dashboard.queueEmpty')}
             </div>
           ) : (
@@ -186,22 +186,22 @@ export default function Dashboard() {
               {pending?.map((b) => (
                 <article
                   key={b.id}
-                  className="border border-[#F5EDDD]/15 p-6 flex flex-wrap items-start gap-6"
+                  className="border border-bone/15 p-6 flex flex-wrap items-start gap-6"
                 >
                   <div className="flex-1 min-w-[260px]">
                     <h3 className="font-display text-xl font-medium leading-tight mb-2">
                       {b.listing.title}
                     </h3>
-                    <p className="text-sm text-[#F5EDDD]/60 mb-1">
+                    <p className="text-sm text-bone/60 mb-1">
                       {b.listing.provider.displayName} · {b.listing.provider.buon}
                     </p>
                     {/* The dates lead: this is the question the coordinator
                         has to put to the household, and it is the reason the
                         queue is ordered by arrival rather than by request. */}
-                    <p className="text-sm text-[#E8A33D] mb-1">
+                    <p className="text-sm text-amber mb-1">
                       {t('dashboard.arriving', { date: dmy(b.checkIn), count: b.nights })}
                     </p>
-                    <p className="text-xs text-[#F5EDDD]/45">
+                    <p className="text-xs text-bone/45">
                       {b.guest.fullName} ({b.guest.email}) ·{' '}
                       {t('dashboard.guest', { count: b.guests })} ·{' '}
                       {t('dashboard.requested', { date: dmy(b.createdAt) })}
@@ -209,10 +209,10 @@ export default function Dashboard() {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <div className="font-display price-sm text-[#E8A33D] leading-none mb-1">
+                    <div className="font-display price-sm text-amber leading-none mb-1">
                       {vnd(b.totalVnd)}
                     </div>
-                    <div className="text-[11px] text-[#F5EDDD]/40">
+                    <div className="text-[11px] text-bone/40">
                       {vnd(b.providerPayoutVnd)} to the household
                     </div>
                   </div>
@@ -229,7 +229,7 @@ export default function Dashboard() {
                     <button
                       onClick={() => decide(b, 'decline')}
                       disabled={busyId === b.id}
-                      className="inline-flex items-center gap-2 border border-[#C8302E] text-[#C8302E] hover:bg-[#C8302E] hover:text-[#F5EDDD] disabled:opacity-50 px-5 py-3 text-sm transition"
+                      className="inline-flex items-center gap-2 border border-kteh text-kteh hover:bg-kteh hover:text-bone disabled:opacity-50 px-5 py-3 text-sm transition"
                     >
                       <X className="w-4 h-4" />
                       {t('dashboard.decline')}
@@ -245,43 +245,43 @@ export default function Dashboard() {
       {/* ── PROVIDER EARNINGS ─────────────────────── */}
       {data && (
         <>
-          <section className="bg-[#F5EDDD] text-[#1A1614]">
+          <section className="bg-bone text-ink">
             <div className="px-8 lg:px-12 xl:px-16 py-20">
-              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-8">
+              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-kteh mb-8">
                 <Wallet className="w-4 h-4" />
                 {t('dashboard.earningsEyebrow')}
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
                 <div>
-                  <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
+                  <div className="font-display price-lg font-medium text-deep mb-1">
                     {vnd(totals.bookingEarnedVnd + totals.marketplaceEarnedVnd)}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">{t('dashboard.yours')}</p>
+                  <p className="text-sm text-ink/60">{t('dashboard.yours')}</p>
                 </div>
                 <div>
-                  <div className="font-display price-lg font-medium text-[#B87333] mb-1">
+                  <div className="font-display price-lg font-medium text-copper mb-1">
                     {vnd(totals.bookingFundVnd)}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">{t('dashboard.toFund')}</p>
+                  <p className="text-sm text-ink/60">{t('dashboard.toFund')}</p>
                 </div>
                 <div>
-                  <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
+                  <div className="font-display price-lg font-medium text-ink/70 mb-1">
                     {vnd(totals.bookingPlatformVnd)}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">{t('dashboard.platformCut')}</p>
+                  <p className="text-sm text-ink/60">{t('dashboard.platformCut')}</p>
                 </div>
                 <div>
-                  <div className="font-display text-4xl font-medium text-[#1A1614]/70 mb-1">
+                  <div className="font-display text-4xl font-medium text-ink/70 mb-1">
                     {totals.pendingBookings}
                   </div>
-                  <p className="text-sm text-[#1A1614]/60">
+                  <p className="text-sm text-ink/60">
                     {t('dashboard.awaiting', { count: totals.pendingBookings })}
                   </p>
                 </div>
               </div>
 
-              <p className="text-xs text-[#1A1614]/50 leading-relaxed">
+              <p className="text-xs text-ink/50 leading-relaxed">
                 {t('dashboard.earningsNote')}
               </p>
             </div>
@@ -292,7 +292,7 @@ export default function Dashboard() {
             <h2 className="font-display text-3xl font-medium mb-8">{t('dashboard.yourBookings')}</h2>
 
             {data.bookings.length === 0 ? (
-              <p className="text-sm text-[#F5EDDD]/60 border border-dashed border-[#F5EDDD]/20 py-12 text-center">
+              <p className="text-sm text-bone/60 border border-dashed border-bone/20 py-12 text-center">
                 {t('dashboard.noBookings')}
               </p>
             ) : (
@@ -302,7 +302,7 @@ export default function Dashboard() {
                   return (
                     <article
                       key={b.id}
-                      className="border border-[#F5EDDD]/10 p-5 flex flex-wrap items-center gap-5"
+                      className="border border-bone/10 p-5 flex flex-wrap items-center gap-5"
                     >
                       <span
                         className={`inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] border px-3 py-1.5 shrink-0 ${s.cls}`}
@@ -312,16 +312,16 @@ export default function Dashboard() {
                       </span>
                       <div className="flex-1 min-w-[220px]">
                         <div className="text-sm mb-1">{b.listingTitle}</div>
-                        <div className="text-xs text-[#F5EDDD]/45">
+                        <div className="text-xs text-bone/45">
                           {b.guestName} · {t('dashboard.guest', { count: b.guests })} ·{' '}
                           {t('dashboard.arriving', { date: dmy(b.checkIn), count: b.nights })}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="font-mono price-xs text-[#E8A33D]">
+                        <div className="font-mono price-xs text-amber">
                           {vnd(b.providerPayoutVnd)}
                         </div>
-                        <div className="text-[11px] text-[#F5EDDD]/40">
+                        <div className="text-[11px] text-bone/40">
                           of {vnd(b.totalVnd)} · {vnd(b.communityFundVnd)} to the Fund
                         </div>
                       </div>
@@ -340,17 +340,17 @@ export default function Dashboard() {
                 {data.orders.map((o) => (
                   <article
                     key={o.id}
-                    className="border border-[#F5EDDD]/10 p-5 flex flex-wrap items-center gap-5"
+                    className="border border-bone/10 p-5 flex flex-wrap items-center gap-5"
                   >
                     <div className="flex-1 min-w-[220px]">
                       <div className="text-sm mb-1">{o.productTitle}</div>
-                      <div className="text-xs text-[#F5EDDD]/45">
+                      <div className="text-xs text-bone/45">
                         ×{o.quantity} · {dmy(o.createdAt)}
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-mono price-xs text-[#E8A33D]">{vnd(o.earnedVnd)}</div>
-                      <div className="text-[11px] text-[#F5EDDD]/40">of {vnd(o.grossVnd)} · 95%</div>
+                      <div className="font-mono price-xs text-amber">{vnd(o.earnedVnd)}</div>
+                      <div className="text-[11px] text-bone/40">of {vnd(o.grossVnd)} · 95%</div>
                     </div>
                   </article>
                 ))}

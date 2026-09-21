@@ -62,7 +62,7 @@ export default function InitialAvatar({ name = '', className = '', ratio = 'aspe
         }}
       />
       <span
-        className="relative font-display font-medium text-[#F5EDDD] leading-none"
+        className="relative font-display font-medium text-bone leading-none"
         style={{ fontSize: '38%' }}
       >
         {mark}

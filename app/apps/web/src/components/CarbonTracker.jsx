@@ -213,31 +213,31 @@ export default function CarbonTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+    <div className="min-h-screen bg-ink text-bone font-body antialiased">
       <Navbar active="carbon" theme="dark" />
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">
         <div className="md:col-span-7">
-          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
-            <span className="h-px w-12 bg-[#B87333]" />
+          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-8">
+            <span className="h-px w-12 bg-copper" />
             <span>{t('carbon.eyebrow')}</span>
           </div>
           <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
             {t('carbon.title')}
           </h1>
-          <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
+          <p className="text-lg text-bone/70 max-w-2xl leading-relaxed">
             {t('carbon.intro')}
           </p>
         </div>
 
         <div className="md:col-span-5">
-          <div className="border border-[#F5EDDD]/15 p-6 space-y-4">
-            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[#B87333]">
+          <div className="border border-bone/15 p-6 space-y-4">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-copper">
               <Users className="w-4 h-4" />
               {t('carbon.communityLedTitle')}
             </div>
-            <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
+            <p className="text-sm text-bone/70 leading-relaxed">
               {t('carbon.communityLedBody')}
             </p>
           </div>
@@ -249,16 +249,16 @@ export default function CarbonTracker() {
         <div className="grid lg:grid-cols-12 gap-8">
 
           {/* Inputs */}
-          <div className="lg:col-span-5 border border-[#F5EDDD]/15 p-8 space-y-10">
+          <div className="lg:col-span-5 border border-bone/15 p-8 space-y-10">
             <div>
-              <label htmlFor="origin" className="block text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
+              <label htmlFor="origin" className="block text-xs uppercase tracking-[0.2em] text-copper mb-4">
                 {t('carbon.travellingFrom')}
               </label>
               <select
                 id="origin"
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
-                className="w-full bg-[#1A1614] border border-[#F5EDDD]/25 px-4 py-3 text-sm focus:outline-none focus:border-[#F5EDDD]/60"
+                className="w-full bg-ink border border-bone/25 px-4 py-3 text-sm focus:outline-none focus:border-bone/60"
               >
                 {ORIGINS.map((o) => (
                   <option key={o.id} value={o.id}>{t(o.labelKey)}</option>
@@ -267,7 +267,7 @@ export default function CarbonTracker() {
             </div>
 
             <div>
-              <span className="block text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
+              <span className="block text-xs uppercase tracking-[0.2em] text-copper mb-4">
                 {t('carbon.howYouArrive')}
               </span>
               <div className="grid grid-cols-3 gap-2">
@@ -281,10 +281,10 @@ export default function CarbonTracker() {
                       disabled={disabled}
                       className={`flex flex-col items-center gap-2 py-4 border text-xs uppercase tracking-wider transition ${
                         active
-                          ? 'bg-[#F5EDDD] text-[#1A1614] border-[#F5EDDD]'
+                          ? 'bg-bone text-ink border-bone'
                           : disabled
-                          ? 'border-[#F5EDDD]/10 text-[#F5EDDD]/20 cursor-not-allowed'
-                          : 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
+                          ? 'border-bone/10 text-bone/20 cursor-not-allowed'
+                          : 'border-bone/25 hover:border-bone/60'
                       }`}
                     >
                       <m.icon className="w-4 h-4" />
@@ -294,16 +294,16 @@ export default function CarbonTracker() {
                 })}
               </div>
               {availableModes.length < MODES.length && (
-                <p className="text-[11px] text-[#F5EDDD]/40 mt-3">
+                <p className="text-[11px] text-bone/40 mt-3">
                   {t('carbon.noOverland')}
                 </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="nights" className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
+              <label htmlFor="nights" className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-copper mb-4">
                 <span>{t('carbon.nightsLabel')}</span>
-                <span className="font-display text-2xl text-[#E8A33D] normal-case tracking-normal">
+                <span className="font-display text-2xl text-amber normal-case tracking-normal">
                   {nights}
                 </span>
               </label>
@@ -314,63 +314,63 @@ export default function CarbonTracker() {
                 max="14"
                 value={nights}
                 onChange={(e) => setNights(Number(e.target.value))}
-                className="w-full accent-[#C8302E]"
+                className="w-full accent-kteh"
               />
-              <div className="flex justify-between text-[11px] text-[#F5EDDD]/35 mt-2">
+              <div className="flex justify-between text-[11px] text-bone/35 mt-2">
                 <span>1</span>
                 <span>14</span>
               </div>
             </div>
 
-            <p className="text-[11px] text-[#F5EDDD]/40 leading-relaxed border-t border-[#F5EDDD]/10 pt-5">
+            <p className="text-[11px] text-bone/40 leading-relaxed border-t border-bone/10 pt-5">
               Homestays are counted at {PER_NIGHT} kg per night, well below a hotel, because none of
               them run air conditioning. Local movement between buôn adds {PER_DAY_LOCAL} kg a day.
             </p>
           </div>
 
           {/* Result */}
-          <div className="lg:col-span-7 border border-[#F5EDDD]/15 p-8 flex flex-col">
-            <div className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD]/40 mb-6">
+          <div className="lg:col-span-7 border border-bone/15 p-8 flex flex-col">
+            <div className="text-xs uppercase tracking-[0.2em] text-bone/40 mb-6">
               {t('carbon.estimatedFootprint')}
             </div>
 
             <div className="flex items-baseline gap-4 mb-2">
-              <span className="font-display text-6xl md:text-7xl font-medium text-[#E8A33D] leading-none">
+              <span className="font-display text-6xl md:text-7xl font-medium text-amber leading-none">
                 {breakdown.total.toLocaleString('vi-VN')}
               </span>
-              <span className="text-lg text-[#F5EDDD]/50">kg CO₂e</span>
+              <span className="text-lg text-bone/50">kg CO₂e</span>
             </div>
-            <p className="text-sm text-[#F5EDDD]/50 mb-10">per person, return</p>
+            <p className="text-sm text-bone/50 mb-10">per person, return</p>
 
             {/* Proportional bar */}
             <div className="flex h-3 mb-8 overflow-hidden">
-              <div className="bg-[#C8302E]" style={{ width: bar(breakdown.travel) }} />
-              <div className="bg-[#B87333]" style={{ width: bar(breakdown.stay) }} />
-              <div className="bg-[#E8A33D]" style={{ width: bar(breakdown.local) }} />
+              <div className="bg-kteh" style={{ width: bar(breakdown.travel) }} />
+              <div className="bg-copper" style={{ width: bar(breakdown.stay) }} />
+              <div className="bg-amber" style={{ width: bar(breakdown.local) }} />
             </div>
 
             <dl className="space-y-5 mb-10">
               {[
-                { c: 'bg-[#C8302E]', k: t('carbon.rowTravel'), v: breakdown.travel, i: MODES.find((m) => m.id === activeMode).icon },
-                { c: 'bg-[#B87333]', k: t('carbon.rowStay', { count: nights }), v: breakdown.stay, i: Moon },
-                { c: 'bg-[#E8A33D]', k: t('carbon.rowLocal'), v: breakdown.local, i: Car },
+                { c: 'bg-kteh', k: t('carbon.rowTravel'), v: breakdown.travel, i: MODES.find((m) => m.id === activeMode).icon },
+                { c: 'bg-copper', k: t('carbon.rowStay', { count: nights }), v: breakdown.stay, i: Moon },
+                { c: 'bg-amber', k: t('carbon.rowLocal'), v: breakdown.local, i: Car },
               ].map((row) => (
-                <div key={row.k} className="flex items-center gap-4 border-b border-[#F5EDDD]/10 pb-4">
+                <div key={row.k} className="flex items-center gap-4 border-b border-bone/10 pb-4">
                   <span className={`w-2 h-2 ${row.c} shrink-0`} />
-                  <row.i className="w-4 h-4 text-[#F5EDDD]/40 shrink-0" />
+                  <row.i className="w-4 h-4 text-bone/40 shrink-0" />
                   <dt className="text-sm flex-1">{row.k}</dt>
-                  <dd className="font-mono text-sm text-[#F5EDDD]/70">
+                  <dd className="font-mono text-sm text-bone/70">
                     {row.v.toLocaleString('vi-VN')} kg
                   </dd>
-                  <dd className="font-mono text-xs text-[#F5EDDD]/35 w-12 text-right">
+                  <dd className="font-mono text-xs text-bone/35 w-12 text-right">
                     {Math.round((row.v / breakdown.total) * 100)}%
                   </dd>
                 </div>
               ))}
             </dl>
 
-            <div className="mt-auto flex items-start gap-3 text-xs text-[#F5EDDD]/45 leading-relaxed">
-              <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#B87333]" />
+            <div className="mt-auto flex items-start gap-3 text-xs text-bone/45 leading-relaxed">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-copper" />
               <p>
                 {t('carbon.estimateNote')}
               </p>
@@ -380,28 +380,28 @@ export default function CarbonTracker() {
       </section>
 
       {/* ── OFFSET PROJECTS ───────────────────────── */}
-      <section className="bg-[#F5EDDD] text-[#1A1614]">
+      <section className="bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
           {/* Title left, prose right, filling the row. It was a max-w-2xl
               column, which wrapped the heading into several short lines and
               left the other half of the section empty. */}
           <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-14">
             <div className="md:col-span-5">
-              <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+              <div className="text-xs uppercase tracking-[0.25em] text-kteh mb-6">
                 {t('carbon.projectsEyebrow')}
               </div>
-              <h2 className="font-display page-title-sm font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+              <h2 className="font-display page-title-sm font-medium leading-[1.1] tracking-tight text-deep">
                 {t('carbon.projectsHeading')}
               </h2>
             </div>
             <div className="md:col-span-7 md:pt-10">
-              <p className="text-lg text-[#1A1614]/70 leading-relaxed">
+              <p className="text-lg text-ink/70 leading-relaxed">
                 {t('carbon.projectsBody')}
               </p>
               {/* Said plainly here rather than only in the donation note: the
                   saplings are already paid for, and a visitor should know
                   that before deciding what to add. */}
-              <p className="text-sm text-[#1A1614]/60 leading-relaxed mt-4">
+              <p className="text-sm text-ink/60 leading-relaxed mt-4">
                 {t('carbon.communityFundAlreadyCovers')}
               </p>
             </div>
@@ -416,8 +416,8 @@ export default function CarbonTracker() {
                   onClick={() => setProject(p.id)}
                   className={`text-left border transition flex flex-col ${
                     active
-                      ? 'border-[#C8302E] border-2 bg-[#1A1614] text-[#F5EDDD]'
-                      : 'border-[#1A1614]/15 hover:border-[#1A1614]/40'
+                      ? 'border-kteh border-2 bg-ink text-bone'
+                      : 'border-ink/15 hover:border-ink/40'
                   }`}
                 >
                   <ImageSlot
@@ -431,11 +431,11 @@ export default function CarbonTracker() {
                   />
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex items-center justify-between gap-3 mb-3">
-                      <span className={`text-[10px] uppercase tracking-[0.2em] ${active ? 'text-[#B87333]' : 'text-[#B87333]'}`}>
+                      <span className={`text-[10px] uppercase tracking-[0.2em] ${active ? 'text-copper' : 'text-copper'}`}>
                         Led by {p.led}
                       </span>
                       {p.joinable && (
-                        <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#E8A33D]">
+                        <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-amber">
                           <Sprout className="w-3 h-3" />
                           {t('carbon.joinIn')}
                         </span>
@@ -444,10 +444,10 @@ export default function CarbonTracker() {
                     <h3 className="font-display text-xl font-medium leading-tight mb-3">
                       {p.name}
                     </h3>
-                    <p className={`text-sm leading-relaxed mb-5 flex-1 ${active ? 'text-[#F5EDDD]/60' : 'text-[#1A1614]/65'}`}>
+                    <p className={`text-sm leading-relaxed mb-5 flex-1 ${active ? 'text-bone/60' : 'text-ink/65'}`}>
                       {p.body}
                     </p>
-                    <div className={`text-xs pt-4 border-t ${active ? 'border-[#F5EDDD]/15 text-[#F5EDDD]/50' : 'border-[#1A1614]/10 text-[#1A1614]/50'}`}>
+                    <div className={`text-xs pt-4 border-t ${active ? 'border-bone/15 text-bone/50' : 'border-ink/10 text-ink/50'}`}>
                       {vnd(p.rate)} per kg · {p.unit}
                     </div>
                   </div>
@@ -457,14 +457,14 @@ export default function CarbonTracker() {
           </div>
 
           {/* Summary */}
-          <div className="bg-[#1A1614] text-[#F5EDDD] p-8 md:p-10 grid md:grid-cols-12 gap-8 items-center">
+          <div className="bg-ink text-bone p-8 md:p-10 grid md:grid-cols-12 gap-8 items-center">
             <div className="md:col-span-7">
-              <div className="text-xs uppercase tracking-[0.2em] text-[#B87333] mb-4">
+              <div className="text-xs uppercase tracking-[0.2em] text-copper mb-4">
                 {t('carbon.yourContribution')}
               </div>
-              <p className="text-lg leading-relaxed text-[#F5EDDD]/80">
+              <p className="text-lg leading-relaxed text-bone/80">
                 {t('carbon.offsetting', { kg: breakdown.total.toLocaleString('vi-VN') })}{' '}
-                <span className="text-[#E8A33D]">{selected.name}</span>
+                <span className="text-amber">{selected.name}</span>
                 {t('carbon.ledBy', { led: selected.led })}
                 {selected.joinable ? t('carbon.joinableYes') : t('carbon.joinableNo')}
               </p>
@@ -473,10 +473,10 @@ export default function CarbonTracker() {
                   for, not across the card from it. The right column is the
                   controls. */}
               <div className="mt-8">
-                <div className="font-display price-hero font-medium text-[#E8A33D] leading-none">
+                <div className="font-display price-hero font-medium text-amber leading-none">
                   {chosen === 'DONATE' ? vnd(cost) : t('carbon.free')}
                 </div>
-                <div className="text-xs text-[#F5EDDD]/40 mt-2">
+                <div className="text-xs text-bone/40 mt-2">
                   {chosen === 'DONATE'
                     ? t('carbon.perPerson')
                     : chosen === 'IN_PERSON'
@@ -488,31 +488,31 @@ export default function CarbonTracker() {
 
             <div className="md:col-span-5">
               <div className="w-full space-y-3">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-copper">
                   {t('carbon.attachEyebrow')}
                 </div>
 
                 {!isAuthenticated ? (
                   <>
-                    <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">
+                    <p className="text-sm text-bone/60 leading-relaxed">
                       {t('carbon.signedOut')}
                     </p>
                     <button
                       onClick={openAuthModal}
-                      className="w-full bg-[#C8302E] hover:bg-[#A82826] px-6 py-3 text-sm uppercase tracking-wider transition"
+                      className="w-full bg-kteh hover:bg-kteh-hover px-6 py-3 text-sm uppercase tracking-wider transition"
                     >
                       {t('carbon.signIn')}
                     </button>
                   </>
                 ) : bookings.length === 0 ? (
                   <>
-                    <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">
-                      <span className="text-[#F5EDDD]/80">{t('carbon.noBookings')}</span>{' '}
+                    <p className="text-sm text-bone/60 leading-relaxed">
+                      <span className="text-bone/80">{t('carbon.noBookings')}</span>{' '}
                       {t('carbon.noBookingsBody')}
                     </p>
                     <a
                       href="#travel"
-                      className="inline-flex items-center gap-2 text-sm text-[#E8A33D] underline underline-offset-4"
+                      className="inline-flex items-center gap-2 text-sm text-amber underline underline-offset-4"
                     >
                       {t('carbon.seeExperiences')}
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -525,7 +525,7 @@ export default function CarbonTracker() {
                       <div>
                         <label
                           htmlFor="offset-booking"
-                          className="block text-xs text-[#F5EDDD]/50 mb-2"
+                          className="block text-xs text-bone/50 mb-2"
                         >
                           {t('carbon.chooseBooking')}
                         </label>
@@ -536,7 +536,7 @@ export default function CarbonTracker() {
                             setBookingId(e.target.value);
                             setAttachState({ busy: false, message: '', error: '' });
                           }}
-                          className="w-full bg-[#1A1614] border border-[#F5EDDD]/25 text-sm px-3 py-2.5 focus:outline-none focus:border-[#F5EDDD]/60"
+                          className="w-full bg-ink border border-bone/25 text-sm px-3 py-2.5 focus:outline-none focus:border-bone/60"
                         >
                           {bookings.map((b) => (
                             <option key={b.id} value={b.id}>
@@ -550,7 +550,7 @@ export default function CarbonTracker() {
                       </div>
                     ) : (
                       chosenBooking && (
-                        <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">
+                        <p className="text-sm text-bone/60 leading-relaxed">
                           {t('carbon.onlyBooking', {
                             title: chosenBooking.listingTitle,
                             date: dmy(chosenBooking.checkIn),
@@ -561,7 +561,7 @@ export default function CarbonTracker() {
 
                     {selected.joinable ? (
                       <fieldset className="space-y-2">
-                        <legend className="text-xs text-[#F5EDDD]/50 mb-2">
+                        <legend className="text-xs text-bone/50 mb-2">
                           {t('carbon.howToTakePart')}
                         </legend>
 
@@ -571,10 +571,10 @@ export default function CarbonTracker() {
                         <label
                           className={`flex gap-3 border p-3 transition ${
                             !canJoin
-                              ? 'border-[#F5EDDD]/10 opacity-45 cursor-not-allowed'
+                              ? 'border-bone/10 opacity-45 cursor-not-allowed'
                               : chosen === 'IN_PERSON'
-                                ? 'border-[#8FA37B] bg-[#8FA37B]/10 cursor-pointer'
-                                : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40 cursor-pointer'
+                                ? 'border-sage bg-sage/10 cursor-pointer'
+                                : 'border-bone/20 hover:border-bone/40 cursor-pointer'
                           }`}
                         >
                           <input
@@ -584,18 +584,18 @@ export default function CarbonTracker() {
                             checked={chosen === 'IN_PERSON'}
                             disabled={!canJoin}
                             onChange={() => setContribution('IN_PERSON')}
-                            className="mt-1 accent-[#8FA37B] shrink-0"
+                            className="mt-1 accent-sage shrink-0"
                           />
                           <span>
                             <span className="flex items-baseline gap-2">
                               <span className="text-sm">{t('carbon.optionInPerson')}</span>
                               {canJoin && (
-                                <span className="text-[10px] uppercase tracking-wider text-[#8FA37B]">
+                                <span className="text-[10px] uppercase tracking-wider text-sage">
                                   {t('carbon.free')}
                                 </span>
                               )}
                             </span>
-                            <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
+                            <span className="block text-xs text-bone/55 leading-snug mt-1">
                               {canJoin
                                 ? t('carbon.optionInPersonBody', { range: range(activity.current) })
                                 : activity.next
@@ -614,8 +614,8 @@ export default function CarbonTracker() {
                           <label
                             className={`flex gap-3 border p-3 cursor-pointer transition ${
                               chosen === 'NEXT_SESSION'
-                                ? 'border-[#8FA37B] bg-[#8FA37B]/10'
-                                : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40'
+                                ? 'border-sage bg-sage/10'
+                                : 'border-bone/20 hover:border-bone/40'
                             }`}
                           >
                             <input
@@ -624,16 +624,16 @@ export default function CarbonTracker() {
                               value="NEXT_SESSION"
                               checked={chosen === 'NEXT_SESSION'}
                               onChange={() => setContribution('NEXT_SESSION')}
-                              className="mt-1 accent-[#8FA37B] shrink-0"
+                              className="mt-1 accent-sage shrink-0"
                             />
                             <span>
                               <span className="flex items-baseline gap-2">
                                 <span className="text-sm">{t('carbon.optionNextSession')}</span>
-                                <span className="text-[10px] uppercase tracking-wider text-[#8FA37B]">
+                                <span className="text-[10px] uppercase tracking-wider text-sage">
                                   {t('carbon.free')}
                                 </span>
                               </span>
-                              <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
+                              <span className="block text-xs text-bone/55 leading-snug mt-1">
                                 {t('carbon.optionNextSessionBody', { range: range(activity.next) })}
                               </span>
                             </span>
@@ -643,8 +643,8 @@ export default function CarbonTracker() {
                         <label
                           className={`flex gap-3 border p-3 cursor-pointer transition ${
                             chosen === 'DONATE'
-                              ? 'border-[#E8A33D] bg-[#E8A33D]/10'
-                              : 'border-[#F5EDDD]/20 hover:border-[#F5EDDD]/40'
+                              ? 'border-amber bg-amber/10'
+                              : 'border-bone/20 hover:border-bone/40'
                           }`}
                         >
                           <input
@@ -653,15 +653,15 @@ export default function CarbonTracker() {
                             value="DONATE"
                             checked={chosen === 'DONATE'}
                             onChange={() => setContribution('DONATE')}
-                            className="mt-1 accent-[#E8A33D] shrink-0"
+                            className="mt-1 accent-amber shrink-0"
                           />
                           <span>
                             <span className="text-sm">{t('carbon.optionDonate')}</span>
-                            <span className="block text-xs text-[#F5EDDD]/55 leading-snug mt-1">
+                            <span className="block text-xs text-bone/55 leading-snug mt-1">
                               {t('carbon.optionDonateBody', { amount: vnd(cost) })}
                             </span>
                             {isInternational && (
-                              <span className="block text-[11px] text-[#B87333] leading-snug mt-1.5">
+                              <span className="block text-[11px] text-copper leading-snug mt-1.5">
                                 {t('carbon.internationalRateNote')}
                               </span>
                             )}
@@ -669,13 +669,13 @@ export default function CarbonTracker() {
                         </label>
                       </fieldset>
                     ) : (
-                      <p className="text-xs text-[#F5EDDD]/40 leading-snug">
+                      <p className="text-xs text-bone/40 leading-snug">
                         {t('carbon.noSessions')}
                       </p>
                     )}
 
                     {existingOffset && (
-                      <p className="text-xs text-[#B87333] leading-snug">
+                      <p className="text-xs text-copper leading-snug">
                         {t('carbon.replaceNote', {
                           project: PROJECTS.find((p) => p.id === existingOffset.projectId)?.name ?? '',
                         })}
@@ -692,7 +692,7 @@ export default function CarbonTracker() {
                       <button
                         onClick={attachOffset}
                         disabled={attachState.busy || !bookingId}
-                        className="group flex-1 inline-flex items-center justify-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-4 py-2.5 text-xs uppercase tracking-wider transition"
+                        className="group flex-1 inline-flex items-center justify-center gap-2 bg-kteh hover:bg-kteh-hover disabled:opacity-50 px-4 py-2.5 text-xs uppercase tracking-wider transition"
                       >
                         {attachState.busy ? t('carbon.attaching') : t('carbon.attach')}
                         <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
@@ -701,7 +701,7 @@ export default function CarbonTracker() {
                       {existingOffset && !attachState.busy && (
                         <button
                           onClick={removeOffset}
-                          className="shrink-0 text-xs text-[#F5EDDD]/45 underline underline-offset-4 hover:text-[#F5EDDD]/70"
+                          className="shrink-0 text-xs text-bone/45 underline underline-offset-4 hover:text-bone/70"
                         >
                           {t('carbon.remove')}
                         </button>
@@ -709,13 +709,13 @@ export default function CarbonTracker() {
                     </div>
 
                     {attachState.message && (
-                      <p className="text-sm text-[#8FA37B]">
+                      <p className="text-sm text-sage">
                         {attachState.message}{' '}
-                        <span className="text-[#F5EDDD]/45">{t('carbon.pendingNote')}</span>
+                        <span className="text-bone/45">{t('carbon.pendingNote')}</span>
                       </p>
                     )}
                     {attachState.error && (
-                      <p className="text-sm text-[#E8A33D]">{attachState.error}</p>
+                      <p className="text-sm text-amber">{attachState.error}</p>
                     )}
                   </>
                 )}
@@ -728,27 +728,27 @@ export default function CarbonTracker() {
       {/* ── VERIFICATION ──────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-24 grid md:grid-cols-12 gap-12 items-center">
         <div className="md:col-span-6">
-          <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+          <div className="text-xs uppercase tracking-[0.25em] text-copper mb-6">
             {t('carbon.afterwardsEyebrow')}
           </div>
           <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight mb-8">
             {t('carbon.afterwardsHeading')}
           </h2>
-          <p className="text-lg text-[#F5EDDD]/70 leading-relaxed mb-6">
+          <p className="text-lg text-bone/70 leading-relaxed mb-6">
             {t('carbon.afterwardsBody')}
           </p>
-          <p className="text-sm text-[#F5EDDD]/55 leading-relaxed">
+          <p className="text-sm text-bone/55 leading-relaxed">
             {t('carbon.afterwardsNote')}
           </p>
         </div>
 
         <div className="md:col-span-6">
-          <div className="bg-[#F5EDDD]/[0.04] border border-[#F5EDDD]/10 p-8 font-mono text-sm">
+          <div className="bg-bone/[0.04] border border-bone/10 p-8 font-mono text-sm">
             <div className="flex items-center justify-between gap-4 mb-8">
-              <span className="text-[#F5EDDD]/40 text-xs uppercase tracking-wider">
+              <span className="text-bone/40 text-xs uppercase tracking-wider">
                 {t('carbon.ledgerSample')}
               </span>
-              <ScanLine className="w-4 h-4 text-[#B87333]" />
+              <ScanLine className="w-4 h-4 text-copper" />
             </div>
             <dl className="space-y-4 text-xs">
               {[
@@ -766,14 +766,14 @@ export default function CarbonTracker() {
                 [t('carbon.ledgerPlanted'), t('carbon.ledgerPlantedValue')],
                 [t('carbon.ledgerSurvival'), t('carbon.ledgerSurvivalValue')],
               ].map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-6 border-b border-[#F5EDDD]/10 pb-3">
-                  <dt className="text-[#F5EDDD]/45 shrink-0">{k}</dt>
+                <div key={k} className="flex justify-between gap-6 border-b border-bone/10 pb-3">
+                  <dt className="text-bone/45 shrink-0">{k}</dt>
                   <dd className="text-right">{v}</dd>
                 </div>
               ))}
               <div className="flex justify-between gap-6 pt-1">
-                <dt className="text-[#F5EDDD]/45 shrink-0">Status</dt>
-                <dd className="text-[#E8A33D]">Verified on site</dd>
+                <dt className="text-bone/45 shrink-0">Status</dt>
+                <dd className="text-amber">Verified on site</dd>
               </div>
             </dl>
           </div>
@@ -788,13 +788,13 @@ export default function CarbonTracker() {
           <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
             {t('carbon.handoffHeading')}
           </h2>
-          <p className="text-[#F5EDDD]/70">
+          <p className="text-bone/70">
             {t('carbon.handoffBody')}
           </p>
         </div>
         <a
           href="#community"
-          className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
+          className="group inline-flex items-center gap-3 bg-kteh hover:bg-kteh-hover px-8 py-4 transition"
         >
           {t('carbon.handoffCta')}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />

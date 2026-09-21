@@ -95,12 +95,12 @@ export default function NotificationBell({ theme = 'dark' }) {
 
   const isDark = theme === 'dark';
   const surface = isDark
-    ? 'bg-[#1A1614] border-[#F5EDDD]/20 text-[#F5EDDD]'
-    : 'bg-[#F5EDDD] border-[#1A1614]/20 text-[#1A1614]';
-  const rule = isDark ? 'border-[#F5EDDD]/10' : 'border-[#1A1614]/10';
+    ? 'bg-ink border-bone/20 text-bone'
+    : 'bg-bone border-ink/20 text-ink';
+  const rule = isDark ? 'border-bone/10' : 'border-ink/10';
   const btnBorder = isDark
-    ? 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
-    : 'border-[#1A1614]/25 hover:border-[#1A1614]/60';
+    ? 'border-bone/25 hover:border-bone/60'
+    : 'border-ink/25 hover:border-ink/60';
 
   return (
     <div className="relative" ref={panelRef}>
@@ -115,7 +115,7 @@ export default function NotificationBell({ theme = 'dark' }) {
           <span
             // A count, not a dot: "3 waiting" and "12 waiting" are
             // different amounts of work for a coordinator.
-            className="absolute -top-1.5 -right-1.5 min-w-[1.1rem] h-[1.1rem] px-1 bg-[#C8302E] text-[#F5EDDD] text-[10px] font-medium leading-[1.1rem] text-center rounded-full"
+            className="absolute -top-1.5 -right-1.5 min-w-[1.1rem] h-[1.1rem] px-1 bg-kteh text-bone text-[10px] font-medium leading-[1.1rem] text-center rounded-full"
           >
             {unread > 9 ? '9+' : unread}
           </span>
@@ -127,7 +127,7 @@ export default function NotificationBell({ theme = 'dark' }) {
           className={`absolute right-0 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] border ${surface} shadow-xl z-50`}
         >
           <div className={`flex items-center justify-between gap-3 px-4 py-3 border-b ${rule}`}>
-            <span className="text-xs uppercase tracking-[0.2em] text-[#B87333]">
+            <span className="text-xs uppercase tracking-[0.2em] text-copper">
               {t('notifications.title')}
             </span>
             {unread > 0 && (
@@ -150,12 +150,12 @@ export default function NotificationBell({ theme = 'dark' }) {
                     href={n.href ?? '#account'}
                     onClick={() => setOpen(false)}
                     className={`block px-4 py-3 transition ${
-                      isDark ? 'hover:bg-[#F5EDDD]/5' : 'hover:bg-[#1A1614]/5'
+                      isDark ? 'hover:bg-bone/5' : 'hover:bg-ink/5'
                     } ${n.readAt ? 'opacity-55' : ''}`}
                   >
                     <div className="flex items-start gap-2">
                       {!n.readAt && (
-                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#C8302E] shrink-0" />
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-kteh shrink-0" />
                       )}
                       <div className={n.readAt ? 'pl-3.5' : ''}>
                         <p className="text-sm leading-snug">

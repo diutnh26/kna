@@ -10,7 +10,7 @@ export default function WalletConnectButton({ className = '' }) {
       <button
         type="button"
         onClick={disconnect}
-        className={`text-xs uppercase tracking-wider border border-[#E8A33D]/40 px-3 py-1.5 ${className}`}
+        className={`text-xs uppercase tracking-wider border border-amber/40 px-3 py-1.5 ${className}`}
         title={pubkey}
       >
         {t('wallet.connectedShort', { short: pubkey?.slice(0, 4) })}
@@ -24,11 +24,11 @@ export default function WalletConnectButton({ className = '' }) {
         type="button"
         disabled={connecting}
         onClick={connect}
-        className={`text-xs uppercase tracking-wider border border-[#E8A33D]/40 px-3 py-1.5 disabled:opacity-50 ${className}`}
+        className={`text-xs uppercase tracking-wider border border-amber/40 px-3 py-1.5 disabled:opacity-50 ${className}`}
       >
         {connecting ? t('wallet.connecting') : t('wallet.connect')}
       </button>
-      {error ? <span className="text-[10px] text-[#C8302E] max-w-[12rem] text-right">{error}</span> : null}
+      {error ? <span className="text-[10px] text-kteh max-w-[12rem] text-right">{error}</span> : null}
     </div>
   );
 }
@@ -36,8 +36,8 @@ export default function WalletConnectButton({ className = '' }) {
 export function OperatorWalletBar() {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center justify-between gap-4 border border-[#E8A33D]/20 bg-[#1A1614]/80 px-4 py-2 text-xs">
-      <span className="text-[#F5EDDD]/70">{t('wallet.operatorHint')}</span>
+    <div className="flex items-center justify-between gap-4 border border-amber/20 bg-ink/80 px-4 py-2 text-xs">
+      <span className="text-bone/70">{t('wallet.operatorHint')}</span>
       <WalletConnectButton />
     </div>
   );

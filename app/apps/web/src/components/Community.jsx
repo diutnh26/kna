@@ -31,9 +31,9 @@ export default function Community() {
   // Built from t() rather than a module constant, so these follow the
   // language toggle instead of freezing at import time.
   const STATUS = {
-    passed: { icon: Check, label: t('community.statusPassed'), cls: 'text-[#E8A33D] border-[#E8A33D]/40' },
-    declined: { icon: X, label: t('community.statusDeclined'), cls: 'text-[#C8302E] border-[#C8302E]/50' },
-    open: { icon: Clock, label: t('community.statusOpen'), cls: 'text-[#B87333] border-[#B87333]/40' },
+    passed: { icon: Check, label: t('community.statusPassed'), cls: 'text-amber border-amber/40' },
+    declined: { icon: X, label: t('community.statusDeclined'), cls: 'text-kteh border-kteh/50' },
+    open: { icon: Clock, label: t('community.statusOpen'), cls: 'text-copper border-copper/40' },
   };
   const exampleThreads = t('community.threads', { returnObjects: true });
   const feedbackNotes = t('community.feedbackNotes', { returnObjects: true });
@@ -68,39 +68,39 @@ export default function Community() {
   const fund = quarters[quarterIndex] ?? null;
 
   return (
-    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+    <div className="min-h-screen bg-ink text-bone font-body antialiased">
       <Navbar active="community" theme="dark" />
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">
         <div className="md:col-span-7">
-          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
-            <span className="h-px w-12 bg-[#B87333]" />
+          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-8">
+            <span className="h-px w-12 bg-copper" />
             <span>{t('community.eyebrow')}</span>
           </div>
           <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
             {t('community.title')}
           </h1>
-          <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
+          <p className="text-lg text-bone/70 max-w-2xl leading-relaxed">
             {t('community.intro')}
           </p>
         </div>
 
         <div className="md:col-span-5">
-          <div className="border-l-2 border-[#B87333] pl-8 space-y-6">
+          <div className="border-l-2 border-copper pl-8 space-y-6">
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">
+              <div className="font-display text-4xl font-medium text-copper">
                 {stats ? stats.committeeMembers : '—'}
               </div>
-              <p className="text-sm text-[#F5EDDD]/60">{t('community.statMembers')}</p>
+              <p className="text-sm text-bone/60">{t('community.statMembers')}</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">{t('community.statMonthly')}</div>
-              <p className="text-sm text-[#F5EDDD]/60">{t('community.statMeetings')}</p>
+              <div className="font-display text-4xl font-medium text-copper">{t('community.statMonthly')}</div>
+              <p className="text-sm text-bone/60">{t('community.statMeetings')}</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">0</div>
-              <p className="text-sm text-[#F5EDDD]/60">{t('community.statNoVote')}</p>
+              <div className="font-display text-4xl font-medium text-copper">0</div>
+              <p className="text-sm text-bone/60">{t('community.statNoVote')}</p>
             </div>
           </div>
         </div>
@@ -115,20 +115,20 @@ export default function Community() {
       {loadState === 'ready' && (
         <>
           {/* ── PUBLIC LEDGER + ON-CHAIN PROOF ───────── */}
-          <section className="px-8 lg:px-12 xl:px-16 py-16 border-b border-[#F5EDDD]/10">
-            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+          <section className="px-8 lg:px-12 xl:px-16 py-16 border-b border-bone/10">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-copper mb-6">
               <Wallet className="w-4 h-4" />
               {t('wallet.publicLedger')}
             </div>
             <ProofExplainer />
             <ul className="space-y-3">
               {ledger.map((row) => (
-                <li key={row.id} className="border border-[#F5EDDD]/15 px-4 py-3 flex flex-wrap gap-3 items-center justify-between text-sm">
+                <li key={row.id} className="border border-bone/15 px-4 py-3 flex flex-wrap gap-3 items-center justify-between text-sm">
                   <div>
                     <span>{row.fromLabel}</span>
-                    <span className="text-[#F5EDDD]/40 mx-2">→</span>
+                    <span className="text-bone/40 mx-2">→</span>
                     <span>{row.toLabel}</span>
-                    <span className="font-mono ml-3 text-[#E8A33D]">{vnd(row.totalVnd)}</span>
+                    <span className="font-mono ml-3 text-amber">{vnd(row.totalVnd)}</span>
                   </div>
                   <LedgerProofBadge attestation={row.attestation} />
                 </li>
@@ -137,19 +137,19 @@ export default function Community() {
           </section>
 
           {/* ── COMMITTEE ─────────────────────────────── */}
-          <section className="bg-[#F5EDDD] text-[#1A1614]">
+          <section className="bg-bone text-ink">
             <div className="px-8 lg:px-12 xl:px-16 py-24">
               <div className="flex flex-wrap items-end justify-between gap-8 mb-14">
                 <div className="max-w-xl">
-                  <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+                  <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-kteh mb-6">
                     <Gavel className="w-4 h-4" />
                     {t('community.committeeEyebrow')}
                   </div>
-                  <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+                  <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-deep">
                     {t('community.committeeHeading')}
                   </h2>
                 </div>
-                <p className="text-sm text-[#1A1614]/60 max-w-sm leading-relaxed">
+                <p className="text-sm text-ink/60 max-w-sm leading-relaxed">
                   {t('community.committeeBody')}
                 </p>
               </div>
@@ -177,12 +177,12 @@ export default function Community() {
                     )}
                     <div className="pt-1">
                       <h3 className="font-display text-xl font-medium leading-tight mb-1">{m.name}</h3>
-                      <p className="text-sm text-[#B87333] mb-2">{m.role}</p>
-                      <p className="text-xs text-[#1A1614]/55 flex items-center gap-1.5">
+                      <p className="text-sm text-copper mb-2">{m.role}</p>
+                      <p className="text-xs text-ink/55 flex items-center gap-1.5">
                         <MapPin className="w-3 h-3" />
                         {m.buon}
                       </p>
-                      <p className="text-xs text-[#1A1614]/40 mt-1">{t('community.servingSince', { date: m.since })}</p>
+                      <p className="text-xs text-ink/40 mt-1">{t('community.servingSince', { date: m.since })}</p>
                     </div>
                   </article>
                 ))}
@@ -197,7 +197,7 @@ export default function Community() {
                 several lines while most of the row sat empty. */}
             <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-10">
               <div className="md:col-span-5">
-                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-copper mb-6">
                   <Wallet className="w-4 h-4" />
                   {t('community.fundEyebrow')}
                 </div>
@@ -206,7 +206,7 @@ export default function Community() {
                 </h2>
               </div>
               <div className="md:col-span-7 md:pt-10">
-                <p className="text-lg text-[#F5EDDD]/70 leading-relaxed">
+                <p className="text-lg text-bone/70 leading-relaxed">
                   {t('community.fundBody')}
                 </p>
               </div>
@@ -220,8 +220,8 @@ export default function Community() {
                     onClick={() => setQuarterIndex(i)}
                     className={`px-4 py-2 text-xs uppercase tracking-wider border transition ${
                       quarterIndex === i
-                        ? 'bg-[#F5EDDD] text-[#1A1614] border-[#F5EDDD]'
-                        : 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
+                        ? 'bg-bone text-ink border-bone'
+                        : 'border-bone/25 hover:border-bone/60'
                     }`}
                   >
                     {q.quarter}
@@ -231,34 +231,34 @@ export default function Community() {
             </div>
 
             {fund && (
-              <div className="border border-[#F5EDDD]/15">
-                <div className="px-8 py-6 border-b border-[#F5EDDD]/10 flex flex-wrap items-baseline justify-between gap-4">
-                  <span className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD]/40">
+              <div className="border border-bone/15">
+                <div className="px-8 py-6 border-b border-bone/10 flex flex-wrap items-baseline justify-between gap-4">
+                  <span className="text-xs uppercase tracking-[0.2em] text-bone/40">
                     {t('community.fundAllocated', { quarter: fund.quarter })}
                   </span>
-                  <span className="font-display price-md text-[#E8A33D]">{vnd(fund.totalVnd)}</span>
+                  <span className="font-display price-md text-amber">{vnd(fund.totalVnd)}</span>
                 </div>
 
                 <ul>
                   {fund.lines.map((l) => (
                     <li
                       key={l.id}
-                      className="px-8 py-5 border-b border-[#F5EDDD]/10 last:border-0 flex flex-wrap items-center gap-4"
+                      className="px-8 py-5 border-b border-bone/10 last:border-0 flex flex-wrap items-center gap-4"
                     >
                       <div className="flex-1 min-w-[240px]">
                         <div className="text-sm mb-1">{l.what}</div>
-                        <div className="text-xs text-[#F5EDDD]/45 flex items-center gap-1.5">
+                        <div className="text-xs text-bone/45 flex items-center gap-1.5">
                           <MapPin className="w-3 h-3" />
                           {l.toBuon}
                         </div>
                       </div>
-                      <div className="w-40 h-1.5 bg-[#F5EDDD]/10 overflow-hidden shrink-0">
+                      <div className="w-40 h-1.5 bg-bone/10 overflow-hidden shrink-0">
                         <div
-                          className="h-full bg-[#B87333]"
+                          className="h-full bg-copper"
                           style={{ width: `${(l.amountVnd / fund.totalVnd) * 100}%` }}
                         />
                       </div>
-                      <span className="font-mono price-xs text-[#F5EDDD]/70 w-32 text-right shrink-0">
+                      <span className="font-mono price-xs text-bone/70 w-32 text-right shrink-0">
                         {vnd(l.amountVnd)}
                       </span>
                     </li>
@@ -269,30 +269,30 @@ export default function Community() {
           </section>
 
           {/* ── DECISIONS ─────────────────────────────── */}
-          <section className="bg-[#F5EDDD] text-[#1A1614]">
+          <section className="bg-bone text-ink">
             <div className="px-8 lg:px-12 xl:px-16 py-24">
               <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-start mb-14">
                 <div className="md:col-span-5">
-                  <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+                  <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-kteh mb-6">
                     <FileText className="w-4 h-4" />
                     {t('community.minutesEyebrow')}
                   </div>
-                  <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+                  <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-deep">
                     {t('community.minutesHeading')}
                   </h2>
                 </div>
                 <div className="md:col-span-7 md:pt-10">
-                  <p className="text-lg text-[#1A1614]/70 leading-relaxed">
+                  <p className="text-lg text-ink/70 leading-relaxed">
                     {t('community.minutesBody')}
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-px bg-[#1A1614]/10">
+              <div className="space-y-px bg-ink/10">
                 {decisions.map((d) => {
                   const s = STATUS[d.status] ?? STATUS.open;
                   return (
-                    <article key={d.id} className="bg-[#F5EDDD] p-6 md:p-8 flex flex-wrap gap-6">
+                    <article key={d.id} className="bg-bone p-6 md:p-8 flex flex-wrap gap-6">
                       <div className="w-32 shrink-0">
                         <span
                           className={`inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] border px-3 py-1.5 ${s.cls}`}
@@ -300,15 +300,15 @@ export default function Community() {
                           <s.icon className="w-3 h-3" />
                           {s.label}
                         </span>
-                        <div className="text-xs text-[#1A1614]/45 mt-3">{dmy(d.date)}</div>
+                        <div className="text-xs text-ink/45 mt-3">{dmy(d.date)}</div>
                       </div>
 
                       <div className="flex-1 min-w-[260px]">
                         <h3 className="font-display text-xl font-medium leading-tight mb-2">
                           {d.title}
                         </h3>
-                        <p className="text-xs text-[#1A1614]/50 mb-3">Raised by {d.fromLabel}</p>
-                        <p className="text-sm text-[#1A1614]/70 leading-relaxed">{d.note}</p>
+                        <p className="text-xs text-ink/50 mb-3">Raised by {d.fromLabel}</p>
+                        <p className="text-sm text-ink/70 leading-relaxed">{d.note}</p>
                       </div>
                     </article>
                   );
@@ -323,7 +323,7 @@ export default function Community() {
       <section className="px-8 lg:px-12 xl:px-16 py-24">
         <div className="flex flex-wrap items-end justify-between gap-8 mb-6">
           <div className="max-w-xl">
-            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-copper mb-6">
               <MessageSquare className="w-4 h-4" />
               {t('community.boardEyebrow')}
             </div>
@@ -331,21 +331,21 @@ export default function Community() {
               {t('community.boardHeading')}
             </h2>
           </div>
-          <p className="text-sm text-[#F5EDDD]/50 max-w-sm leading-relaxed">
+          <p className="text-sm text-bone/50 max-w-sm leading-relaxed">
             {t('community.boardBody')}
           </p>
         </div>
 
-        <div className="border border-[#B87333]/40 bg-[#B87333]/5 px-6 py-4 mb-10">
-          <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
-            <span className="text-[#B87333] uppercase tracking-wider text-xs">{t('community.boardNotBuiltLabel')}</span>
+        <div className="border border-copper/40 bg-copper/5 px-6 py-4 mb-10">
+          <p className="text-sm text-bone/70 leading-relaxed">
+            <span className="text-copper uppercase tracking-wider text-xs">{t('community.boardNotBuiltLabel')}</span>
             {t('community.boardNotBuiltBody')}
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 opacity-60">
           {exampleThreads.map((thread) => (
-            <article key={thread.title} className="border border-dashed border-[#F5EDDD]/15 p-6 flex flex-col">
+            <article key={thread.title} className="border border-dashed border-bone/15 p-6 flex flex-col">
               <div className="flex items-center gap-3 mb-5">
                 {/* A monogram, not a face. These posts are illustrative —
                     there is no real person to photograph, and a generated
@@ -353,29 +353,29 @@ export default function Community() {
                 <InitialAvatar name={thread.author} className="w-9 shrink-0" />
                 <div className="min-w-0">
                   <div className="text-sm truncate">{thread.author}</div>
-                  <div className="text-[11px] text-[#F5EDDD]/45 truncate">{thread.role}</div>
+                  <div className="text-[11px] text-bone/45 truncate">{thread.role}</div>
                 </div>
               </div>
 
               <h3 className="font-display text-lg font-medium leading-tight mb-3">{thread.title}</h3>
-              <p className="text-sm text-[#F5EDDD]/60 leading-relaxed flex-1">{thread.body}</p>
+              <p className="text-sm text-bone/60 leading-relaxed flex-1">{thread.body}</p>
             </article>
           ))}
         </div>
       </section>
 
       {/* ── FEEDBACK ──────────────────────────────── */}
-      <section className="bg-[#F5EDDD] text-[#1A1614]">
+      <section className="bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-20 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-6">
-            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-kteh mb-6">
               <Megaphone className="w-4 h-4" />
               {t('community.feedbackEyebrow')}
             </div>
-            <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-6">
+            <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight text-deep mb-6">
               {t('community.feedbackHeading')}
             </h2>
-            <p className="text-lg text-[#1A1614]/70 leading-relaxed">
+            <p className="text-lg text-ink/70 leading-relaxed">
               {t('community.feedbackBody')}
             </p>
           </div>
@@ -383,8 +383,8 @@ export default function Community() {
           <div className="md:col-span-6 grid sm:grid-cols-2 gap-8">
             {feedbackNotes.map((n) => (
               <div key={n.h}>
-                <h3 className="font-display text-lg font-medium mb-2 text-[#B87333]">{n.h}</h3>
-                <p className="text-sm text-[#1A1614]/65 leading-relaxed">{n.b}</p>
+                <h3 className="font-display text-lg font-medium mb-2 text-copper">{n.h}</h3>
+                <p className="text-sm text-ink/65 leading-relaxed">{n.b}</p>
               </div>
             ))}
           </div>
@@ -399,13 +399,13 @@ export default function Community() {
           <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
             {t('community.closingHeading')}
           </h2>
-          <p className="text-[#F5EDDD]/70">
+          <p className="text-bone/70">
             {t('community.closingBody')}
           </p>
         </div>
         <a
           href="#home"
-          className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
+          className="group inline-flex items-center gap-3 bg-kteh hover:bg-kteh-hover px-8 py-4 transition"
         >
           {t('community.closingCta')}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />

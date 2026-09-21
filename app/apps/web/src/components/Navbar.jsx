@@ -41,15 +41,15 @@ export default function Navbar({ active = '', theme = 'dark' }) {
     i18n.changeLanguage(i18n.resolvedLanguage === 'vi' ? 'en' : 'vi');
   }
 
-  const bg = isDark ? 'bg-[#1A1614]' : 'bg-[#F5EDDD]';
-  const text = isDark ? 'text-[#F5EDDD]' : 'text-[#1A1614]';
-  const muted = isDark ? 'text-[#F5EDDD]/70' : 'text-[#1A1614]/70';
-  const faint = isDark ? 'text-[#F5EDDD]/50' : 'text-[#1A1614]/50';
-  const rule = isDark ? 'border-[#F5EDDD]/10' : 'border-[#1A1614]/10';
-  const divider = isDark ? 'bg-[#F5EDDD]/20' : 'bg-[#1A1614]/20';
+  const bg = isDark ? 'bg-ink' : 'bg-bone';
+  const text = isDark ? 'text-bone' : 'text-ink';
+  const muted = isDark ? 'text-bone/70' : 'text-ink/70';
+  const faint = isDark ? 'text-bone/50' : 'text-ink/50';
+  const rule = isDark ? 'border-bone/10' : 'border-ink/10';
+  const divider = isDark ? 'bg-bone/20' : 'bg-ink/20';
   const btnBorder = isDark
-    ? 'border-[#F5EDDD]/30 hover:border-[#F5EDDD]/70'
-    : 'border-[#1A1614]/30 hover:border-[#1A1614]/70';
+    ? 'border-bone/30 hover:border-bone/70'
+    : 'border-ink/30 hover:border-ink/70';
 
   return (
     <header className={`${bg} ${text} border-b ${rule} sticky top-0 z-50`}>
@@ -74,12 +74,12 @@ export default function Navbar({ active = '', theme = 'dark' }) {
                   key={link.key}
                   href={link.href}
                   className={`relative transition ${
-                    isActive ? (isDark ? 'text-[#F5EDDD]' : 'text-[#1A1614]') : ''
-                  } ${isDark ? 'hover:text-[#F5EDDD]' : 'hover:text-[#1A1614]'}`}
+                    isActive ? (isDark ? 'text-bone' : 'text-ink') : ''
+                  } ${isDark ? 'hover:text-bone' : 'hover:text-ink'}`}
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-[#C8302E]" />
+                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-kteh" />
                   )}
                 </a>
               );

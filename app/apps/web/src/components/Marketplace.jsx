@@ -112,72 +112,72 @@ export default function Marketplace() {
   const shown = products;
 
   return (
-    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+    <div className="min-h-screen bg-ink text-bone font-body antialiased">
       <Navbar active="marketplace" theme="dark" />
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">
         <div className="md:col-span-7">
-          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
-            <span className="h-px w-12 bg-[#B87333]" />
+          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-8">
+            <span className="h-px w-12 bg-copper" />
             <span>{t('marketplace.eyebrow')}</span>
           </div>
           <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
             {t('marketplace.title')}
           </h1>
-          <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
+          <p className="text-lg text-bone/70 max-w-2xl leading-relaxed">
             {t('marketplace.intro')}
           </p>
         </div>
 
         <div className="md:col-span-5">
-          <div className="border-l-2 border-[#B87333] pl-8 space-y-6">
+          <div className="border-l-2 border-copper pl-8 space-y-6">
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">95%</div>
-              <p className="text-sm text-[#F5EDDD]/60">{t('marketplace.statArtisanShare')}</p>
+              <div className="font-display text-4xl font-medium text-copper">95%</div>
+              <p className="text-sm text-bone/60">{t('marketplace.statArtisanShare')}</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">
+              <div className="font-display text-4xl font-medium text-copper">
                 {stats ? stats.verifiedArtisans : '—'}
               </div>
-              <p className="text-sm text-[#F5EDDD]/60">{t('marketplace.statMakers')}</p>
+              <p className="text-sm text-bone/60">{t('marketplace.statMakers')}</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-[#B87333]">
+              <div className="font-display text-4xl font-medium text-copper">
                 {stats ? stats.buonOnboarded : '—'}
               </div>
-              <p className="text-sm text-[#F5EDDD]/60">{t('marketplace.statBuon')}</p>
+              <p className="text-sm text-bone/60">{t('marketplace.statBuon')}</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── CERTIFICATE EXPLAINER ─────────────────── */}
-      <section className="bg-[#F5EDDD] text-[#1A1614]">
+      <section className="bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-20 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-6">
-            <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+            <div className="text-xs uppercase tracking-[0.25em] text-kteh mb-6">
               {t('marketplace.certEyebrow')}
             </div>
-            <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
+            <h2 className="font-display section-title font-medium leading-[1.1] tracking-tight text-deep mb-8">
               {t('marketplace.certHeading')}
             </h2>
-            <p className="text-lg text-[#1A1614]/70 leading-relaxed mb-6">
+            <p className="text-lg text-ink/70 leading-relaxed mb-6">
               {t('marketplace.certBody')}
             </p>
-            <p className="text-sm text-[#1A1614]/55 leading-relaxed">
+            <p className="text-sm text-ink/55 leading-relaxed">
               {t('marketplace.certNote')}
             </p>
           </div>
 
           {/* Sample certificate */}
           <div className="md:col-span-6">
-            <div className="bg-[#1A1614] text-[#F5EDDD] p-8 font-mono text-sm">
+            <div className="bg-ink text-bone p-8 font-mono text-sm">
               <div className="flex items-center justify-between gap-4 mb-8">
-                <span className="text-[#F5EDDD]/40 text-xs uppercase tracking-wider">
+                <span className="text-bone/40 text-xs uppercase tracking-wider">
                   {t('marketplace.certLabel')}
                 </span>
-                <ScanLine className="w-4 h-4 text-[#B87333]" />
+                <ScanLine className="w-4 h-4 text-copper" />
               </div>
 
               <dl className="space-y-4 text-xs">
@@ -189,14 +189,14 @@ export default function Marketplace() {
                   [t('marketplace.certTime'), t('marketplace.certTimeValue')],
                   [t('marketplace.certReviewedBy'), t('marketplace.certReviewedByValue')],
                 ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-6 border-b border-[#F5EDDD]/10 pb-3">
-                    <dt className="text-[#F5EDDD]/45 shrink-0">{k}</dt>
+                  <div key={k} className="flex justify-between gap-6 border-b border-bone/10 pb-3">
+                    <dt className="text-bone/45 shrink-0">{k}</dt>
                     <dd className="text-right">{v}</dd>
                   </div>
                 ))}
                 <div className="flex justify-between gap-6 pt-1">
-                  <dt className="text-[#F5EDDD]/45 shrink-0">{t('marketplace.certToMaker')}</dt>
-                  <dd className="text-[#E8A33D]">3,990,000 ₫ of 4,200,000 ₫</dd>
+                  <dt className="text-bone/45 shrink-0">{t('marketplace.certToMaker')}</dt>
+                  <dd className="text-amber">3,990,000 ₫ of 4,200,000 ₫</dd>
                 </div>
               </dl>
             </div>
@@ -206,9 +206,9 @@ export default function Marketplace() {
 
       {/* ── FILTER ────────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 pt-16">
-        <div className="border-y border-[#F5EDDD]/10 py-6 flex flex-wrap items-center gap-6">
+        <div className="border-y border-bone/10 py-6 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-3 flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 text-[#F5EDDD]/40 shrink-0" />
+            <Search className="w-4 h-4 text-bone/40 shrink-0" />
             <label htmlFor="mq" className="sr-only">{t('marketplace.searchLabel')}</label>
             <input
               id="mq"
@@ -216,7 +216,7 @@ export default function Marketplace() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('marketplace.searchPlaceholder')}
-              className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-[#F5EDDD]/35 border-b border-transparent focus:border-[#F5EDDD]/30 transition"
+              className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-bone/35 border-b border-transparent focus:border-bone/30 transition"
             />
           </div>
 
@@ -227,8 +227,8 @@ export default function Marketplace() {
                 onClick={() => setCategory(c)}
                 className={`px-4 py-2 text-xs uppercase tracking-wider border transition ${
                   category === c
-                    ? 'bg-[#F5EDDD] text-[#1A1614] border-[#F5EDDD]'
-                    : 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
+                    ? 'bg-bone text-ink border-bone'
+                    : 'border-bone/25 hover:border-bone/60'
                 }`}
               >
                 {CATEGORY_KEYS[c] ? t(CATEGORY_KEYS[c]) : c}
@@ -241,7 +241,7 @@ export default function Marketplace() {
       {/* ── PRODUCTS ──────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-12 pb-24">
         {loadState === 'loading' && (
-          <div className="text-sm text-[#F5EDDD]/50 py-20 text-center">{t('marketplace.loading')}</div>
+          <div className="text-sm text-bone/50 py-20 text-center">{t('marketplace.loading')}</div>
         )}
 
         {loadState === 'error' && (
@@ -250,19 +250,19 @@ export default function Marketplace() {
 
         {loadState === 'ready' && (
           <>
-            <div className="text-sm text-[#F5EDDD]/50 mb-8">
+            <div className="text-sm text-bone/50 mb-8">
               {t('marketplace.listed', { count: shown.length })}
             </div>
 
             {shown.length === 0 ? (
-              <div className="border border-dashed border-[#F5EDDD]/20 py-20 text-center">
+              <div className="border border-dashed border-bone/20 py-20 text-center">
                 <p className="font-display text-2xl mb-3">{t('marketplace.emptyTitle')}</p>
-                <p className="text-sm text-[#F5EDDD]/60 mb-6">
+                <p className="text-sm text-bone/60 mb-6">
                   {t('marketplace.emptyBody')}
                 </p>
                 <button
                   onClick={() => { setCategory('All'); setSearch(''); }}
-                  className="text-sm text-[#E8A33D] underline underline-offset-4"
+                  className="text-sm text-amber underline underline-offset-4"
                 >
                   {t('marketplace.seeEverything')}
                 </button>
@@ -277,8 +277,8 @@ export default function Marketplace() {
                       key={p.id}
                       className={`group border transition flex flex-col ${
                         soldOut
-                          ? 'border-[#F5EDDD]/10'
-                          : 'border-[#F5EDDD]/10 hover:border-[#F5EDDD]/30'
+                          ? 'border-bone/10'
+                          : 'border-bone/10 hover:border-bone/30'
                       }`}
                     >
                       <div className="relative">
@@ -294,12 +294,12 @@ export default function Marketplace() {
                           />
                         </div>
                         {soldOut ? (
-                          <span className="absolute top-4 left-4 bg-[#1A1614] text-[#F5EDDD]/70 border border-[#F5EDDD]/25 text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
+                          <span className="absolute top-4 left-4 bg-ink text-bone/70 border border-bone/25 text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
                             {t('marketplace.soldOut')}
                           </span>
                         ) : (
                           p.stock === 1 && (
-                            <span className="absolute top-4 left-4 bg-[#C8302E] text-[#F5EDDD] text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
+                            <span className="absolute top-4 left-4 bg-kteh text-bone text-[10px] uppercase tracking-[0.15em] px-3 py-1.5">
                               {t('marketplace.oneOfAKind')}
                             </span>
                           )
@@ -308,10 +308,10 @@ export default function Marketplace() {
 
                       <div className="p-6 flex flex-col flex-1">
                         <div className="flex items-center justify-between gap-3 mb-3">
-                          <span className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-copper">
                             {p.category}
                           </span>
-                          <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#E8A33D]">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-amber">
                             <ShieldCheck className="w-3 h-3" />
                             {t('marketplace.verifiedMaker')}
                           </span>
@@ -321,20 +321,20 @@ export default function Marketplace() {
                           {p.title}
                         </h3>
 
-                        <p className="text-sm text-[#F5EDDD]/60 leading-relaxed mb-5 flex-1">
+                        <p className="text-sm text-bone/60 leading-relaxed mb-5 flex-1">
                           {p.note}
                         </p>
 
-                        <dl className="text-xs text-[#F5EDDD]/50 space-y-2 mb-5">
+                        <dl className="text-xs text-bone/50 space-y-2 mb-5">
                           <div className="flex items-center gap-2">
                             <MapPin className="w-3 h-3 shrink-0" />
                             <dd>{p.provider.displayName} · {p.provider.buon}</dd>
                           </div>
                         </dl>
 
-                        <div className="border-t border-[#F5EDDD]/10 pt-4 mb-4">
-                          <p className="text-[11px] text-[#F5EDDD]/45">
-                            <span className="text-[#B87333]">To the maker · </span>
+                        <div className="border-t border-bone/10 pt-4 mb-4">
+                          <p className="text-[11px] text-bone/45">
+                            <span className="text-copper">To the maker · </span>
                             {vnd(Math.round(p.priceVnd * 0.95))}
                           </p>
                         </div>
@@ -342,10 +342,10 @@ export default function Marketplace() {
                         <div className="mt-auto space-y-4">
                           <div className="flex items-end justify-between gap-4">
                             <div>
-                              <div className="font-display price-sm text-[#E8A33D] leading-none">
+                              <div className="font-display price-sm text-amber leading-none">
                                 {vnd(p.priceVnd)}
                               </div>
-                              <div className="text-[11px] text-[#F5EDDD]/40 mt-1">
+                              <div className="text-[11px] text-bone/40 mt-1">
                                 {soldOut
                                   ? t('marketplace.soldOut')
                                   : p.stock === 1
@@ -355,11 +355,11 @@ export default function Marketplace() {
                             </div>
 
                             {order?.status === 'done' ? (
-                              <span className="text-xs text-[#E8A33D] uppercase tracking-wider">
+                              <span className="text-xs text-amber uppercase tracking-wider">
                                 {t('marketplace.ordered')}
                               </span>
                             ) : soldOut ? (
-                              <span className="text-xs text-[#F5EDDD]/40 uppercase tracking-wider">
+                              <span className="text-xs text-bone/40 uppercase tracking-wider">
                                 {t('marketplace.soldOut')}
                               </span>
                             ) : (
@@ -372,12 +372,12 @@ export default function Marketplace() {
                                   max={p.stock}
                                   value={qtyFor(p)}
                                   onChange={(e) => setQty(p, Number(e.target.value))}
-                                  className="w-14 bg-transparent border border-[#F5EDDD]/25 text-sm text-center py-2 focus:outline-none focus:border-[#F5EDDD]/60"
+                                  className="w-14 bg-transparent border border-bone/25 text-sm text-center py-2 focus:outline-none focus:border-bone/60"
                                 />
                                 <button
                                   onClick={() => handleBuy(p)}
                                   disabled={order?.status === 'submitting'}
-                                  className="group/btn inline-flex items-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-5 py-3 text-sm transition"
+                                  className="group/btn inline-flex items-center gap-2 bg-kteh hover:bg-kteh-hover disabled:opacity-50 px-5 py-3 text-sm transition"
                                 >
                                   <ShoppingBag className="w-3.5 h-3.5" />
                                   {order?.status === 'submitting' ? t('marketplace.placing') : t('marketplace.buy')}
@@ -387,7 +387,7 @@ export default function Marketplace() {
                           </div>
 
                           {order?.status === 'error' && (
-                            <p className="text-xs text-[#E8A33D]">{order.error}</p>
+                            <p className="text-xs text-amber">{order.error}</p>
                           )}
                         </div>
                       </div>
@@ -401,15 +401,15 @@ export default function Marketplace() {
       </section>
 
       {/* ── SHIPPING NOTE ─────────────────────────── */}
-      <section className="bg-[#F5EDDD] text-[#1A1614]">
+      <section className="bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-20">
           <div className="grid md:grid-cols-12 gap-12">
             <div className="md:col-span-4">
-              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-kteh mb-6">
                 <Info className="w-4 h-4" />
                 {t('marketplace.notesEyebrow')}
               </div>
-              <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight text-[#6B1A1A]">
+              <h2 className="font-display text-3xl md:text-4xl font-medium leading-[1.1] tracking-tight text-deep">
                 {t('marketplace.notesHeading')}
               </h2>
             </div>
@@ -417,8 +417,8 @@ export default function Marketplace() {
             <div className="md:col-span-8 grid sm:grid-cols-2 gap-10 pt-2">
               {notes.map((n) => (
                 <div key={n.h}>
-                  <h3 className="font-display text-lg font-medium mb-2 text-[#B87333]">{n.h}</h3>
-                  <p className="text-sm text-[#1A1614]/65 leading-relaxed">{n.b}</p>
+                  <h3 className="font-display text-lg font-medium mb-2 text-copper">{n.h}</h3>
+                  <p className="text-sm text-ink/65 leading-relaxed">{n.b}</p>
                 </div>
               ))}
             </div>
@@ -434,13 +434,13 @@ export default function Marketplace() {
           <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
             {t('marketplace.handoffHeading')}
           </h2>
-          <p className="text-[#F5EDDD]/70">
+          <p className="text-bone/70">
             {t('marketplace.handoffBody')}
           </p>
         </div>
         <a
           href="#assistant"
-          className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
+          className="group inline-flex items-center gap-3 bg-kteh hover:bg-kteh-hover px-8 py-4 transition"
         >
           {t('marketplace.handoffCta')}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />

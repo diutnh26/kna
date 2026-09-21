@@ -68,6 +68,26 @@ export const DAK_LAK_PRE_MERGER = [
 
 export const BUON_MA_THUOT = [12.68, 108.05];
 
+// The four communities the platform reaches beyond Đắk Lắk, keyed by the
+// slug their profile in content/ethnicities carries.
+//
+// Points rather than outlines. A traced province boundary is a claim about
+// where a border runs; a marker on a village is a claim only about where
+// that village is, and at this zoom that is all either map can honestly
+// say. Đắk Lắk keeps its outline because the platform operates across the
+// whole province, not from a single buôn.
+//
+// Coordinates are village-centre to about a kilometre, read off the places
+// named in the research report. Good enough to put the marker on the right
+// valley; not good enough to navigate by.
+export const ETHNICITY_SITES = {
+  ede: { coords: BUON_MA_THUOT, label: 'Buôn Ma Thuột' },
+  tay: { coords: [22.45, 104.35], label: 'Bản Liền' },
+  lolo: { coords: [23.36, 105.31], label: 'Lô Lô Chải' },
+  hmong: { coords: [22.47, 103.53], label: 'Sin Suối Hồ' },
+  khmer: { coords: [9.93, 106.34], label: 'Trà Vinh' },
+};
+
 // Named islands rather than a scatter, so the clusters sit where the real
 // ones do. Not every feature in either group, which no map at this scale
 // shows.

@@ -234,12 +234,18 @@
       "gettingLabel": "Getting there",
       "gettingValue": "350 km from Ho Chi Minh City by road, 190 km from the coast at Nha Trang, or a 55-minute flight",
       "interactiveUnavailable": "The map could not be loaded. The outline beside this one needs no connection.",
-      "workArea": ["KNĂ works here:","Đắk Lắk as it was before","the 2025 merger"],
+      "workArea": [
+        "KNĂ works here:",
+        "Đắk Lắk as it was before",
+        "the 2025 merger"
+      ],
       "alt": "Map of Vietnam with the former Đắk Lắk province highlighted in the Central Highlands, the area KNĂ works in, Buôn Ma Thuột marked within it, and the Hoàng Sa and Trường Sa archipelagos marked in the East Sea.",
       "dakLak": "Đắk Lắk",
       "buonMaThuot": "Buôn Ma Thuột",
       "hoangSa": "Hoàng Sa",
-      "truongSa": "Trường Sa"
+      "truongSa": "Trường Sa",
+      "districtLabel": "District",
+      "provinceLabel": "Province"
     },
     "pillarsEyebrow": "Where the archive begins",
     "pillarsHeading": "Three traditions carry most of what the Ê Đê know.",
@@ -288,7 +294,23 @@
     "phrasesAudio": "Pronunciation audio is recorded but not yet hosted.",
     "handoffHeading": "Read enough. Ready to visit?",
     "handoffBody": "Every household in this archive also hosts, guides, or sells through KNĂ.",
-    "handoffCta": "See experiences"
+    "handoffCta": "See experiences",
+    "pillarsHeadingFor": "{{count}} traditions carry most of what the {{name}} know.",
+    "statHouseholds": "households in the village",
+    "statHomestays": "households taking guests",
+    "experiencesEyebrow": "What there is to do",
+    "experiencesHeading": "Work and ceremony, joined rather than watched.",
+    "institutionsLabel": "Who helped build this",
+    "otherPlaces": "Also here",
+    "archiveNotOpenTitle": "The archive is not open here yet.",
+    "archiveNotOpenBody": "Everything above was compiled from published research. The archive holds only what a community has contributed and the Committee has reviewed, and no {{name}} household has been onboarded yet — so it is empty rather than unfinished.",
+    "phrasesMissingTitle": "No greetings recorded yet.",
+    "phrasesMissingBody": "The research this profile is built from carries no {{name}} phrases. Rather than approximate them from a related language, the gap is left open until a speaker fills it.",
+    "additionalPhrasesLabel": "Also in the record",
+    "provenance": {
+      "community": "Contributed by households and reviewed by the Community Governance Committee before publication.",
+      "research": "Compiled from published research, not yet reviewed by the community it describes."
+    }
   },
   "travel": {
     "eyebrow": "Experiences in Đắk Lắk",
@@ -799,5 +821,8 @@
     "squadsPasteback": "After Squads executes the vault transaction, paste the executed transaction signature back into KNĂ so the API can verify the final PDA and update the public ledger.",
     "publicLedger": "Public ledger",
     "verifyOnChain": "Verify on-chain"
+  },
+  "ethnicity": {
+    "label": "Peoples"
   }
 }

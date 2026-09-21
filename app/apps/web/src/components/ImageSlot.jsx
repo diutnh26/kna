@@ -65,10 +65,10 @@ export default function ImageSlot({
     );
   }
 
-  const border = isDark ? 'border-[#F5EDDD]/20' : 'border-[#1A1614]/20';
-  const fill = isDark ? 'bg-[#F5EDDD]/[0.04]' : 'bg-[#1A1614]/[0.04]';
-  const icon = isDark ? 'text-[#F5EDDD]/30' : 'text-[#1A1614]/30';
-  const text = isDark ? 'text-[#F5EDDD]/40' : 'text-[#1A1614]/40';
+  const border = isDark ? 'border-bone/20' : 'border-ink/20';
+  const fill = isDark ? 'bg-bone/[0.04]' : 'bg-ink/[0.04]';
+  const icon = isDark ? 'text-bone/30' : 'text-ink/30';
+  const text = isDark ? 'text-bone/40' : 'text-ink/40';
 
   return (
     <div

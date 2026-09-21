@@ -55,10 +55,10 @@ export default function AttestationPanel({ ledgerEntryId, token }) {
   const explorer = status?.explorer?.pending || status?.explorer?.pendingPda;
 
   return (
-    <div className="mt-3 border border-[#E8A33D]/20 p-3 text-xs space-y-2">
-      <div className="uppercase tracking-wider text-[#B87333]">{t('wallet.attestation')}</div>
+    <div className="mt-3 border border-amber/20 p-3 text-xs space-y-2">
+      <div className="uppercase tracking-wider text-copper">{t('wallet.attestation')}</div>
       {status ? (
-        <div className="text-[#F5EDDD]/80 space-y-1">
+        <div className="text-bone/80 space-y-1">
           <div>{t('wallet.attestationState', { state: status.state })}</div>
           {status.payloadHash ? (
             <div className="font-mono text-[10px] break-all opacity-70">
@@ -70,23 +70,23 @@ export default function AttestationPanel({ ledgerEntryId, token }) {
               {t('wallet.viewExplorer')}
             </a>
           ) : (
-            <p className="text-[#F5EDDD]/50">{t('wallet.proofPending')}</p>
+            <p className="text-bone/50">{t('wallet.proofPending')}</p>
           )}
         </div>
       ) : (
-        <div className="text-[#F5EDDD]/60">{t('wallet.noAttestation')}</div>
+        <div className="text-bone/60">{t('wallet.noAttestation')}</div>
       )}
       {status?.state !== 'FINALIZED' ? (
         <button
           type="button"
           disabled={busy}
           onClick={prepareAndSubmit}
-          className="border border-[#E8A33D]/40 px-2 py-1 uppercase tracking-wider disabled:opacity-50"
+          className="border border-amber/40 px-2 py-1 uppercase tracking-wider disabled:opacity-50"
         >
           {busy ? t('wallet.submitting') : t('wallet.submitAttestation')}
         </button>
       ) : null}
-      {error ? <p className="text-[#C8302E]">{error}</p> : null}
+      {error ? <p className="text-kteh">{error}</p> : null}
     </div>
   );
 }
@@ -101,11 +101,11 @@ export function LedgerProofBadge({ attestation }) {
     attestation.explorer?.pendingPda;
   return (
     <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-wider">
-      <span className="border border-[#8FA37B]/40 text-[#8FA37B] px-1.5 py-0.5">
+      <span className="border border-sage/40 text-sage px-1.5 py-0.5">
         {t('wallet.proofState', { state: attestation.state })}
       </span>
       {href ? (
-        <a href={href} target="_blank" rel="noreferrer" className="underline text-[#E8A33D]">
+        <a href={href} target="_blank" rel="noreferrer" className="underline text-amber">
           {t('wallet.viewExplorer')}
         </a>
       ) : null}
@@ -121,9 +121,9 @@ export function ProofExplainer() {
   }, []);
   return (
     <div className="mb-4 max-w-2xl space-y-2">
-      <p className="text-xs text-[#F5EDDD]/55">{t('wallet.proofExplainer')}</p>
+      <p className="text-xs text-bone/55">{t('wallet.proofExplainer')}</p>
       {chain?.committeeVault ? (
-        <p className="text-[10px] font-mono text-[#F5EDDD]/45 break-all">
+        <p className="text-[10px] font-mono text-bone/45 break-all">
           {t('wallet.committeeVault')}: {chain.committeeVault}
         </p>
       ) : null}
@@ -169,8 +169,8 @@ export function GuestReceiptPanel() {
   }
 
   return (
-    <div className="border border-[#F5EDDD]/10 p-4 space-y-2 text-sm">
-      <p className="text-[#F5EDDD]/70">{t('wallet.guestReceiptHint')}</p>
+    <div className="border border-bone/10 p-4 space-y-2 text-sm">
+      <p className="text-bone/70">{t('wallet.guestReceiptHint')}</p>
       {linked?.pubkey ? (
         <p className="text-xs font-mono">{linked.pubkey}</p>
       ) : (
@@ -182,8 +182,8 @@ export function GuestReceiptPanel() {
           {t('wallet.linkOptional')}
         </button>
       )}
-      {msg ? <p className="text-[#8FA37B] text-xs">{msg}</p> : null}
-      {error ? <p className="text-[#C8302E] text-xs">{error}</p> : null}
+      {msg ? <p className="text-sage text-xs">{msg}</p> : null}
+      {error ? <p className="text-kteh text-xs">{error}</p> : null}
     </div>
   );
 }
@@ -248,15 +248,15 @@ export function CommitteeFinalizePanel({ token }) {
   if (!token) return null;
 
   return (
-    <div className="border border-[#8FA37B]/30 p-4 space-y-3 text-xs">
-      <div className="uppercase tracking-wider text-[#8FA37B]">{t('wallet.committeeQueue')}</div>
-      <p className="text-[#F5EDDD]/60">{t('wallet.squadsHint')}</p>
+    <div className="border border-sage/30 p-4 space-y-3 text-xs">
+      <div className="uppercase tracking-wider text-sage">{t('wallet.committeeQueue')}</div>
+      <p className="text-bone/60">{t('wallet.squadsHint')}</p>
       {rows.length === 0 ? (
-        <p className="text-[#F5EDDD]/40">{t('wallet.noAwaiting')}</p>
+        <p className="text-bone/40">{t('wallet.noAwaiting')}</p>
       ) : (
         <ul className="space-y-2">
           {rows.map((row) => (
-            <li key={row.ledgerEntryId} className="border border-[#F5EDDD]/10 p-2 space-y-2">
+            <li key={row.ledgerEntryId} className="border border-bone/10 p-2 space-y-2">
               <div className="font-mono">{row.ledgerEntryId.slice(-10)}</div>
               <div>
                 {row.toLabel} · {row.totalVnd?.toLocaleString?.('vi-VN')} ₫
@@ -277,7 +277,7 @@ export function CommitteeFinalizePanel({ token }) {
                     const sig = window.prompt(t('wallet.pasteFinalizeSig'));
                     if (sig) recordFinalize(row.ledgerEntryId, sig.trim());
                   }}
-                  className="border border-[#8FA37B]/50 px-2 py-1 uppercase tracking-wider"
+                  className="border border-sage/50 px-2 py-1 uppercase tracking-wider"
                 >
                   {t('wallet.recordFinalize')}
                 </button>
@@ -286,11 +286,11 @@ export function CommitteeFinalizePanel({ token }) {
           ))}
         </ul>
       )}
-      <p className="text-[#F5EDDD]/45">
+      <p className="text-bone/45">
         {t('wallet.squadsPasteback')}
       </p>
       {note ? <pre className="whitespace-pre-wrap text-[10px] opacity-70">{note}</pre> : null}
-      {error ? <p className="text-[#C8302E]">{error}</p> : null}
+      {error ? <p className="text-kteh">{error}</p> : null}
     </div>
   );
 }

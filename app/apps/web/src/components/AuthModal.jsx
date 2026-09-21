@@ -56,8 +56,8 @@ export default function AuthModal() {
   }
 
   const inputClass =
-    'w-full bg-transparent border border-[#F5EDDD]/25 px-3 py-2.5 text-sm text-[#F5EDDD] focus:outline-none focus:border-[#F5EDDD]/60 transition';
-  const labelClass = 'block text-xs uppercase tracking-wider text-[#F5EDDD]/50 mb-2';
+    'w-full bg-transparent border border-bone/25 px-3 py-2.5 text-sm text-bone focus:outline-none focus:border-bone/60 transition';
+  const labelClass = 'block text-xs uppercase tracking-wider text-bone/50 mb-2';
 
   return (
     <div
@@ -66,25 +66,25 @@ export default function AuthModal() {
       role="presentation"
     >
       <div
-        className="w-full max-w-sm bg-[#1A1614] border border-[#F5EDDD]/15 p-8 relative"
+        className="w-full max-w-sm bg-ink border border-bone/15 p-8 relative"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-[#F5EDDD]/50 hover:text-[#F5EDDD] transition"
+          className="absolute top-4 right-4 text-bone/50 hover:text-bone transition"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-6 text-sm mb-8 border-b border-[#F5EDDD]/10">
+        <div className="flex items-center gap-6 text-sm mb-8 border-b border-bone/10">
           <button
             type="button"
             onClick={() => switchMode('login')}
             className={`pb-3 -mb-px border-b-2 transition ${
-              mode === 'login' ? 'border-[#C8302E] text-[#F5EDDD]' : 'border-transparent text-[#F5EDDD]/50'
+              mode === 'login' ? 'border-kteh text-bone' : 'border-transparent text-bone/50'
             }`}
           >
             {t('auth.signIn')}
@@ -93,7 +93,7 @@ export default function AuthModal() {
             type="button"
             onClick={() => switchMode('signup')}
             className={`pb-3 -mb-px border-b-2 transition ${
-              mode === 'signup' ? 'border-[#C8302E] text-[#F5EDDD]' : 'border-transparent text-[#F5EDDD]/50'
+              mode === 'signup' ? 'border-kteh text-bone' : 'border-transparent text-bone/50'
             }`}
           >
             {t('auth.createAccount')}
@@ -137,12 +137,12 @@ export default function AuthModal() {
             />
           </div>
 
-          {error && <p className="text-sm text-[#E8A33D]">{error}</p>}
+          {error && <p className="text-sm text-amber">{error}</p>}
 
           <button
             type="submit"
             disabled={busy}
-            className="w-full bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 text-[#F5EDDD] py-3 text-sm uppercase tracking-wider transition"
+            className="w-full bg-kteh hover:bg-kteh-hover disabled:opacity-50 text-bone py-3 text-sm uppercase tracking-wider transition"
           >
             {busy ? t('auth.pleaseWait') : mode === 'login' ? t('auth.submitSignIn') : t('auth.submitCreateAccount')}
           </button>

@@ -42,7 +42,7 @@ export default function DemoDataBanner() {
   return (
     <div
       role="status"
-      className="bg-[#B87333] text-[#1A1614] px-8 lg:px-12 xl:px-16 py-2.5 text-sm flex items-start gap-2.5"
+      className="bg-copper text-ink px-8 lg:px-12 xl:px-16 py-2.5 text-sm flex items-start gap-2.5"
     >
       <Info className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
       <p className="leading-snug">

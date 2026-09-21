@@ -12,6 +12,7 @@ import Account from './components/Account';
 import AuthModal from './components/AuthModal';
 import DemoDataBanner from './components/DemoDataBanner';
 import { AuthProvider } from './context/AuthProvider';
+import { EthnicityProvider } from './context/EthnicityProvider';
 
 /**
  * Lightweight hash router for the KNĂ prototype.
@@ -58,18 +59,29 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
+  // The route, with any query dropped. The ethnicity switcher writes its
+  // choice into the hash as `#explore?e=tay`, and ROUTES is an exact-match
+  // lookup — without this split every switch would fall through to Landing.
+  const path = hash.split('?')[0];
+
+  // Keyed on the route rather than the whole hash, so switching ethnicity
+  // leaves the reader where they were. It is a change of subject, not a
+  // change of page, and yanking them back to the top mid-read is the
+  // single most jarring thing the switch could do.
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [hash]);
+  }, [path]);
 
-  const Screen = ROUTES[hash] ?? Landing;
+  const Screen = ROUTES[path] ?? Landing;
   return (
     <AuthProvider>
-      {/* Above everything: a demonstration ledger that does not say it is
-          one undermines the exact claim this platform is making. */}
-      <DemoDataBanner />
-      <Screen />
-      <AuthModal />
+      <EthnicityProvider>
+        {/* Above everything: a demonstration ledger that does not say it is
+            one undermines the exact claim this platform is making. */}
+        <DemoDataBanner />
+        <Screen />
+        <AuthModal />
+      </EthnicityProvider>
     </AuthProvider>
   );
 }

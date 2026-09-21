@@ -161,31 +161,31 @@ export default function Travel() {
   const shown = listings;
 
   return (
-    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+    <div className="min-h-screen bg-ink text-bone font-body antialiased">
       <Navbar active="travel" theme="dark" />
 
       {/* ── OPENING ───────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-end">
         <div className="md:col-span-7">
-          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
-            <span className="h-px w-12 bg-[#B87333]" />
+          <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-8">
+            <span className="h-px w-12 bg-copper" />
             <span>{t('travel.eyebrow')}</span>
           </div>
           <h1 className="font-display page-title-sm font-medium leading-[1.05] tracking-tight mb-8">
             {t('travel.title')}
           </h1>
-          <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">
+          <p className="text-lg text-bone/70 max-w-2xl leading-relaxed">
             {t('travel.intro')}
           </p>
         </div>
 
         <div className="md:col-span-5">
-          <div className="border border-[#F5EDDD]/15 p-6 space-y-5">
-            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[#B87333]">
+          <div className="border border-bone/15 p-6 space-y-5">
+            <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-copper">
               <BadgeCheck className="w-4 h-4" />
               {t('travel.verifiedTitle')}
             </div>
-            <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
+            <p className="text-sm text-bone/70 leading-relaxed">
               {t('travel.verifiedBody')}
             </p>
           </div>
@@ -194,9 +194,9 @@ export default function Travel() {
 
       {/* ── SEARCH & FILTER ───────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 pb-12">
-        <div className="border-y border-[#F5EDDD]/10 py-6 flex flex-wrap items-center gap-6">
+        <div className="border-y border-bone/10 py-6 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-3 flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 text-[#F5EDDD]/40 shrink-0" />
+            <Search className="w-4 h-4 text-bone/40 shrink-0" />
             <label htmlFor="q" className="sr-only">{t('travel.searchLabel')}</label>
             <input
               id="q"
@@ -204,7 +204,7 @@ export default function Travel() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('travel.searchPlaceholder')}
-              className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-[#F5EDDD]/35 border-b border-transparent focus:border-[#F5EDDD]/30 transition"
+              className="bg-transparent text-sm w-full py-2 focus:outline-none placeholder:text-bone/35 border-b border-transparent focus:border-bone/30 transition"
             />
           </div>
 
@@ -215,8 +215,8 @@ export default function Travel() {
                 onClick={() => setCategory(c)}
                 className={`px-4 py-2 text-xs uppercase tracking-wider border transition ${
                   category === c
-                    ? 'bg-[#F5EDDD] text-[#1A1614] border-[#F5EDDD]'
-                    : 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
+                    ? 'bg-bone text-ink border-bone'
+                    : 'border-bone/25 hover:border-bone/60'
                 }`}
               >
                 {FILTER_KEYS[c] ? t(FILTER_KEYS[c]) : c}
@@ -225,13 +225,13 @@ export default function Travel() {
           </div>
 
           <div className="flex items-center gap-3">
-            <SlidersHorizontal className="w-4 h-4 text-[#F5EDDD]/40" />
+            <SlidersHorizontal className="w-4 h-4 text-bone/40" />
             <label htmlFor="buon" className="sr-only">{t('travel.filterByBuon')}</label>
             <select
               id="buon"
               value={buon}
               onChange={(e) => setBuon(e.target.value)}
-              className="bg-[#1A1614] border border-[#F5EDDD]/25 text-xs uppercase tracking-wider px-3 py-2 focus:outline-none focus:border-[#F5EDDD]/60"
+              className="bg-ink border border-bone/25 text-xs uppercase tracking-wider px-3 py-2 focus:outline-none focus:border-bone/60"
             >
               {BUON.map((b) => (
                 // Buôn names are proper nouns; only "All buôn" is translated.
@@ -245,7 +245,7 @@ export default function Travel() {
       {/* ── LISTINGS ──────────────────────────────── */}
       <section className="px-8 lg:px-12 xl:px-16 pb-24">
         {loadState === 'loading' && (
-          <div className="text-sm text-[#F5EDDD]/50 py-20 text-center">{t('travel.loading')}</div>
+          <div className="text-sm text-bone/50 py-20 text-center">{t('travel.loading')}</div>
         )}
 
         {loadState === 'error' && (
@@ -254,19 +254,19 @@ export default function Travel() {
 
         {loadState === 'ready' && (
           <>
-            <div className="text-sm text-[#F5EDDD]/50 mb-8">
+            <div className="text-sm text-bone/50 mb-8">
               {t('travel.available', { count: shown.length })}
             </div>
 
             {shown.length === 0 ? (
-              <div className="border border-dashed border-[#F5EDDD]/20 py-20 text-center">
+              <div className="border border-dashed border-bone/20 py-20 text-center">
                 <p className="font-display text-2xl mb-3">{t('travel.emptyTitle')}</p>
-                <p className="text-sm text-[#F5EDDD]/60 mb-6">
+                <p className="text-sm text-bone/60 mb-6">
                   {t('travel.emptyBody')}
                 </p>
                 <button
                   onClick={() => { setCategory('All'); setBuon('All buôn'); setSearch(''); }}
-                  className="text-sm text-[#E8A33D] underline underline-offset-4"
+                  className="text-sm text-amber underline underline-offset-4"
                 >
                   {t('travel.clearFilters')}
                 </button>
@@ -279,7 +279,7 @@ export default function Travel() {
                   return (
                     <article
                       key={l.id}
-                      className="group border border-[#F5EDDD]/10 hover:border-[#F5EDDD]/30 transition flex flex-col"
+                      className="group border border-bone/10 hover:border-bone/30 transition flex flex-col"
                     >
                       <ImageSlot
                         src={l.imageUrl}
@@ -290,10 +290,10 @@ export default function Travel() {
 
                       <div className="p-6 flex flex-col flex-1">
                         <div className="flex items-center justify-between gap-3 mb-3">
-                          <span className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-copper">
                             {CATEGORY_KEYS[l.category] ? t(CATEGORY_KEYS[l.category]) : l.category}
                           </span>
-                          <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#E8A33D]">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-amber">
                             <BadgeCheck className="w-3 h-3" />
                             {t('travel.verified')}
                           </span>
@@ -303,11 +303,11 @@ export default function Travel() {
                           {l.title}
                         </h3>
 
-                        <p className="text-sm text-[#F5EDDD]/60 leading-relaxed mb-5 flex-1">
+                        <p className="text-sm text-bone/60 leading-relaxed mb-5 flex-1">
                           {l.blurb}
                         </p>
 
-                        <dl className="text-xs text-[#F5EDDD]/50 space-y-2 mb-5">
+                        <dl className="text-xs text-bone/50 space-y-2 mb-5">
                           <div className="flex items-center gap-2">
                             <MapPin className="w-3 h-3 shrink-0" />
                             <dd>{t('travel.hostedBy', { name: l.provider.displayName, buon: l.provider.buon })}</dd>
@@ -321,15 +321,15 @@ export default function Travel() {
                             <dd>{l.groupSize}</dd>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Leaf className="w-3 h-3 shrink-0 text-[#B87333]" />
+                            <Leaf className="w-3 h-3 shrink-0 text-copper" />
                             <dd>{t('travel.carbonEstimate', { rating: l.carbonRating })}</dd>
                           </div>
                         </dl>
 
                         {l.customs && (
-                          <div className="border-t border-[#F5EDDD]/10 pt-4 mb-4">
-                            <p className="text-[11px] text-[#F5EDDD]/45 leading-relaxed">
-                              <span className="text-[#B87333]">House rule · </span>
+                          <div className="border-t border-bone/10 pt-4 mb-4">
+                            <p className="text-[11px] text-bone/45 leading-relaxed">
+                              <span className="text-copper">House rule · </span>
                               {l.customs}
                             </p>
                           </div>
@@ -343,15 +343,15 @@ export default function Travel() {
                               the flex parent took the space out of the price,
                               wrapping it mid-figure. */}
                           <div className="flex items-baseline justify-between gap-3">
-                            <div className="font-display price-sm text-[#E8A33D] leading-none whitespace-nowrap">
+                            <div className="font-display price-sm text-amber leading-none whitespace-nowrap">
                               {vnd(l.priceVnd)}
                             </div>
-                            <div className="text-[11px] text-[#F5EDDD]/40 whitespace-nowrap">{l.unit}</div>
+                            <div className="text-[11px] text-bone/40 whitespace-nowrap">{l.unit}</div>
                           </div>
 
                           <div>
                             {booking?.status === 'done' ? (
-                              <span className="text-xs text-[#E8A33D] uppercase tracking-wider">
+                              <span className="text-xs text-amber uppercase tracking-wider">
                                 {t('travel.requested')}
                               </span>
                             ) : (
@@ -365,7 +365,7 @@ export default function Travel() {
                                   min={today}
                                   value={checkInFor(l)}
                                   onChange={(e) => setCheckIn(l, e.target.value)}
-                                  className="w-full bg-transparent border border-[#F5EDDD]/25 text-sm py-2 px-3 focus:outline-none focus:border-[#F5EDDD]/60 [color-scheme:dark]"
+                                  className="w-full bg-transparent border border-bone/25 text-sm py-2 px-3 focus:outline-none focus:border-bone/60 [color-scheme:dark]"
                                 />
                                 <div className="flex items-stretch gap-3">
                                   <label className="sr-only" htmlFor={`qty-${l.id}`}>
@@ -378,12 +378,12 @@ export default function Travel() {
                                     max={perNight ? 30 : 20}
                                     value={qtyFor(l)}
                                     onChange={(e) => setQty(l, Number(e.target.value))}
-                                    className="w-16 shrink-0 bg-transparent border border-[#F5EDDD]/25 text-sm text-center py-2 focus:outline-none focus:border-[#F5EDDD]/60"
+                                    className="w-16 shrink-0 bg-transparent border border-bone/25 text-sm text-center py-2 focus:outline-none focus:border-bone/60"
                                   />
                                   <button
                                     onClick={() => handleBook(l)}
                                     disabled={booking?.status === 'submitting'}
-                                    className="group/btn flex-1 inline-flex items-center justify-center gap-2 bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-5 py-3 text-sm transition"
+                                    className="group/btn flex-1 inline-flex items-center justify-center gap-2 bg-kteh hover:bg-kteh-hover disabled:opacity-50 px-5 py-3 text-sm transition"
                                   >
                                     {booking?.status === 'submitting' ? t('travel.sending') : t('travel.book')}
                                     <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition" />
@@ -394,12 +394,12 @@ export default function Travel() {
                           </div>
 
                           {booking?.status === 'done' && booking.payment && (
-                            <p className="text-xs text-[#F5EDDD]/50 leading-relaxed">
+                            <p className="text-xs text-bone/50 leading-relaxed">
                               {booking.payment.instructions}
                             </p>
                           )}
                           {booking?.status === 'error' && (
-                            <p className="text-xs text-[#E8A33D]">{booking.error}</p>
+                            <p className="text-xs text-amber">{booking.error}</p>
                           )}
                         </div>
                       </div>
@@ -413,16 +413,16 @@ export default function Travel() {
       </section>
 
       {/* ── WHERE THE MONEY GOES ──────────────────── */}
-      <section className="bg-[#F5EDDD] text-[#1A1614]">
+      <section className="bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-24 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-5">
-            <div className="text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-6">
+            <div className="text-xs uppercase tracking-[0.25em] text-kteh mb-6">
               {t('travel.splitEyebrow')}
             </div>
-            <h2 className="font-display page-title-sm font-medium leading-[1.1] tracking-tight text-[#6B1A1A] mb-8">
+            <h2 className="font-display page-title-sm font-medium leading-[1.1] tracking-tight text-deep mb-8">
               {t('travel.splitHeading')}
             </h2>
-            <p className="text-lg text-[#1A1614]/70 leading-relaxed">
+            <p className="text-lg text-ink/70 leading-relaxed">
               {t('travel.splitBody')}
             </p>
           </div>
@@ -430,26 +430,26 @@ export default function Travel() {
           <div className="md:col-span-7">
             {/* Proportional bar */}
             <div className="flex h-3 mb-10 overflow-hidden">
-              <div className="bg-[#6B1A1A]" style={{ width: '90%' }} />
-              <div className="bg-[#B87333]" style={{ width: '3%' }} />
-              <div className="bg-[#C8302E]" style={{ width: '7%' }} />
+              <div className="bg-deep" style={{ width: '90%' }} />
+              <div className="bg-copper" style={{ width: '3%' }} />
+              <div className="bg-kteh" style={{ width: '7%' }} />
             </div>
 
             <div className="space-y-8">
               {split.map((s) => (
-                <div key={s.who} className="flex items-baseline gap-6 border-b border-[#1A1614]/10 pb-6">
-                  <div className="font-display text-4xl font-medium text-[#6B1A1A] w-24 shrink-0">
+                <div key={s.who} className="flex items-baseline gap-6 border-b border-ink/10 pb-6">
+                  <div className="font-display text-4xl font-medium text-deep w-24 shrink-0">
                     {s.pct}
                   </div>
                   <div>
                     <div className="font-display text-lg font-medium mb-1">{s.who}</div>
-                    <p className="text-sm text-[#1A1614]/60 leading-relaxed">{s.note}</p>
+                    <p className="text-sm text-ink/60 leading-relaxed">{s.note}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <p className="text-xs text-[#1A1614]/45 mt-6 leading-relaxed">
+            <p className="text-xs text-ink/45 mt-6 leading-relaxed">
               {t('travel.splitNote')}
             </p>
           </div>
@@ -464,13 +464,13 @@ export default function Travel() {
           <h2 className="font-display text-3xl md:text-4xl font-medium leading-tight mb-3">
             {t('travel.handoffHeading')}
           </h2>
-          <p className="text-[#F5EDDD]/70">
+          <p className="text-bone/70">
             {t('travel.handoffBody')}
           </p>
         </div>
         <a
           href="#marketplace"
-          className="group inline-flex items-center gap-3 bg-[#C8302E] hover:bg-[#A82826] px-8 py-4 transition"
+          className="group inline-flex items-center gap-3 bg-kteh hover:bg-kteh-hover px-8 py-4 transition"
         >
           {t('travel.handoffCta')}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />

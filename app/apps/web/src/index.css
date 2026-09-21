@@ -11,11 +11,67 @@
    rest all depend on them.
    ───────────────────────────────────────────── */
 
+/* ── Accent palette, per ethnicity ─────────────
+   These five change when the reader switches
+   between ethnicities; Bone, Ink and Sage do not,
+   because they are the product rather than the
+   culture being shown.
+
+   @property is what makes them animate. A custom
+   property declared only in :root is an unparsed
+   string as far as the browser is concerned, so
+   `transition: --c-kteh` does nothing — the value
+   jumps. Registering it with syntax '<color>'
+   makes it a typed value the engine can
+   interpolate. Drop these declarations and the
+   switch still works, just as a hard cut.
+
+   Initial values are the Ê Đê palette the product
+   was designed in, so a page that never sets
+   data-ethnicity looks exactly as it did before. */
+@property --c-kteh {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #c8302e;
+}
+@property --c-kteh-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #a82826;
+}
+@property --c-copper {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #b87333;
+}
+@property --c-amber {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e8a33d;
+}
+@property --c-deep {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #6b1a1a;
+}
+
 @layer base {
   body {
     margin: 0;
     background-color: #1a1614;
     color: #f5eddd;
+  }
+
+  /* The element carrying data-ethnicity is the one that transitions. Put
+     it high — App's wrapper — so every accent on the page moves together
+     instead of section by section. */
+  [data-ethnicity] {
+    transition:
+      --c-kteh 500ms ease,
+      --c-kteh-hover 500ms ease,
+      --c-copper 500ms ease,
+      --c-amber 500ms ease,
+      --c-deep 500ms ease;
   }
 }
 
@@ -124,28 +180,74 @@
   } /* text-sm */
 
   /* Signature woven band, used as a section divider.
-     Diagonals in Kteh red and Gong copper. */
+     Diagonals in Kteh red and Gong copper — or whichever pair the current
+     ethnicity carries. color-mix reaches the alpha the literal rgba() used
+     to hard-code, while still reading from the animated custom property,
+     so the band re-weaves itself along with everything else. */
   .textile {
     background-image:
       linear-gradient(
         135deg,
         transparent 45%,
-        rgba(200, 48, 46, 0.35) 45%,
-        rgba(200, 48, 46, 0.35) 55%,
+        color-mix(in srgb, var(--c-kteh) 35%, transparent) 45%,
+        color-mix(in srgb, var(--c-kteh) 35%, transparent) 55%,
         transparent 55%
       ),
       linear-gradient(
         45deg,
         transparent 45%,
-        rgba(184, 115, 51, 0.35) 45%,
-        rgba(184, 115, 51, 0.35) 55%,
+        color-mix(in srgb, var(--c-copper) 35%, transparent) 45%,
+        color-mix(in srgb, var(--c-copper) 35%, transparent) 55%,
         transparent 55%
       );
     background-size: 28px 28px;
   }
 }
 
-/* Accessibility floor */
+/* ── Switching between ethnicities ─────────────
+   Two mechanisms, one look.
+
+   Where the View Transitions API exists the
+   browser crossfades old and new snapshots and
+   ::view-transition-* below tunes the timing.
+   Where it does not, EthnicitySwitcher remounts
+   the panel with a changed key and .ethnicity-
+   enter plays instead. Both land on the same
+   320ms fade with a short rise. */
+@keyframes ethnicity-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ethnicity-enter {
+  animation: ethnicity-enter 320ms ease-out both;
+}
+
+/* Held while a switch is in flight. Profiles carry different numbers of
+   traditions and places, so the panel's height changes between them; without
+   this the page collapses and reflows under the reader mid-fade. The height
+   is measured and set inline before the swap, then released after. */
+.ethnicity-panel {
+  transition: min-height 320ms ease;
+}
+
+::view-transition-old(ethnicity),
+::view-transition-new(ethnicity) {
+  animation-duration: 320ms;
+  animation-timing-function: ease;
+}
+
+/* Accessibility floor.
+
+   This also disarms the accent-colour interpolation and both switch
+   animations above, which is the intent: everything still changes, it
+   just changes at once. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -154,5 +256,11 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

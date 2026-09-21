@@ -16,13 +16,13 @@ import { useTranslation } from 'react-i18next';
 export default function ApiErrorNotice({ className = 'py-20' }) {
   const { t } = useTranslation();
   return (
-    <div className={`border border-dashed border-[#F5EDDD]/20 text-center ${className}`}>
+    <div className={`border border-dashed border-bone/20 text-center ${className}`}>
       <p className="font-display text-2xl mb-3">{t('apiError.unreachable')}</p>
-      <p className="text-sm text-[#F5EDDD]/60">
+      <p className="text-sm text-bone/60">
         {import.meta.env.DEV ? (
           <>
-            Is <code className="text-[#E8A33D]">apps/api</code> running on{' '}
-            <code className="text-[#E8A33D]">localhost:4000</code>?
+            Is <code className="text-amber">apps/api</code> running on{' '}
+            <code className="text-amber">localhost:4000</code>?
           </>
         ) : (
           <>{t('apiError.waking')}</>

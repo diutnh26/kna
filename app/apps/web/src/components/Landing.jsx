@@ -87,36 +87,36 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+    <div className="min-h-screen bg-ink text-bone font-body antialiased">
       <Navbar active="" theme="dark" />
 
       {/* ── HERO ──────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-[#F5EDDD]">
+      <section className="relative overflow-hidden bg-bone">
         <div className="px-8 lg:px-12 xl:px-16 py-16 md:py-24 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-6">
-            <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-10">
-              <span className="h-px w-12 bg-[#B87333]" />
+            <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-10">
+              <span className="h-px w-12 bg-copper" />
               <span>{t('landing.hero.eyebrow')}</span>
             </div>
-            <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-10 text-[#1A1614]">
+            <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-10 text-ink">
               {t('landing.hero.titleLine1')}{' '}
-              <span className="text-[#C8302E]">{t('landing.hero.titleEm')}</span>{' '}
+              <span className="text-kteh">{t('landing.hero.titleEm')}</span>{' '}
               {t('landing.hero.titleRest')}
             </h1>
-            <p className="text-lg text-[#1A1614]/70 max-w-2xl mb-10 leading-relaxed">
+            <p className="text-lg text-ink/70 max-w-2xl mb-10 leading-relaxed">
               {t('landing.hero.body')}
             </p>
             <div className="flex flex-wrap gap-4">
               <a
                 href="#travel"
-                className="group bg-[#C8302E] hover:bg-[#A82826] text-[#F5EDDD] px-8 py-4 inline-flex items-center gap-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1614]"
+                className="group bg-kteh hover:bg-kteh-hover text-bone px-8 py-4 inline-flex items-center gap-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink"
               >
                 {t('landing.hero.ctaPrimary')}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
               </a>
               <a
                 href="#community"
-                className="border border-[#1A1614]/30 hover:border-[#1A1614]/70 text-[#1A1614] px-8 py-4 inline-flex items-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1614]"
+                className="border border-ink/30 hover:border-ink/70 text-ink px-8 py-4 inline-flex items-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink"
               >
                 {t('landing.hero.ctaSecondary')}
               </a>
@@ -137,10 +137,10 @@ export default function Landing() {
       <div className="h-3 textile" />
 
       {/* ── FOUR PILLARS ──────────────────────────── */}
-      <section className="bg-[#1A1614] text-[#F5EDDD]">
+      <section className="bg-ink text-bone">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
           <div className="mb-16 text-left">
-            <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+            <div className="text-xs uppercase tracking-[0.25em] text-copper mb-6">
               {t('landing.pillars.eyebrow')}
             </div>
             <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight text-white">
@@ -149,18 +149,18 @@ export default function Landing() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#F5EDDD]/10">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-bone/10">
             {PILLAR_ICONS.map((p, i) => (
               <div
                 key={p.vn}
-                className="bg-[#1A1614] p-6 flex flex-col min-h-[320px] items-start text-left"
+                className="bg-ink p-6 flex flex-col min-h-[320px] items-start text-left"
               >
-                <p.icon className="w-5 h-5 text-[#B87333] mb-10" />
-                <div className="font-display text-lg text-[#B87333] mb-2">{p.vn}</div>
+                <p.icon className="w-5 h-5 text-copper mb-10" />
+                <div className="font-display text-lg text-copper mb-2">{p.vn}</div>
                 <h3 className="font-display text-xl font-medium mb-4 leading-tight">
                   {pillars[i]?.title}
                 </h3>
-                <p className="text-sm text-[#F5EDDD]/60 leading-relaxed">{pillars[i]?.body}</p>
+                <p className="text-sm text-bone/60 leading-relaxed">{pillars[i]?.body}</p>
               </div>
             ))}
           </div>
@@ -168,7 +168,7 @@ export default function Landing() {
           {/* The same four foundations, named in a vocabulary a partner or
               an assessor already reads. Marks only: the goals are evidence
               for the pillars above, not a fifth thing to read. */}
-          <div className="mt-16 pt-10 border-t border-[#F5EDDD]/10 flex flex-wrap items-center justify-between gap-x-12 gap-y-8">
+          <div className="mt-16 pt-10 border-t border-bone/10 flex flex-wrap items-center justify-between gap-x-12 gap-y-8">
             <div className="flex items-center gap-4">
               <img
                 src="/images/sdg/sdg-wheel.png"
@@ -177,7 +177,7 @@ export default function Landing() {
                 height="256"
                 className="w-24 h-24 md:w-28 md:h-28 rounded shrink-0"
               />
-              <p className="text-sm text-[#F5EDDD]/55 max-w-xs leading-relaxed">
+              <p className="text-sm text-bone/55 max-w-xs leading-relaxed">
                 {t('landing.pillars.sdgLine')}
               </p>
             </div>
@@ -200,7 +200,7 @@ export default function Landing() {
       </section>
 
       {/* ── Ê ĐÊ CULTURE ──────────────────────────── */}
-      <section className="bg-[#F5EDDD] text-[#1A1614]">
+      <section className="bg-bone text-ink">
         <div className="grid md:grid-cols-2">
           <div className="relative overflow-hidden min-h-[400px]">
             <img
@@ -208,17 +208,17 @@ export default function Landing() {
               alt="Ê Đê community performing a torchlit Cồng Chiêng circle beside a communal house"
               className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#F5EDDD]/80" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-bone/80" />
           </div>
 
           <div className="px-8 md:px-12 lg:px-16 py-16 md:py-20 flex flex-col justify-center">
-            <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+            <div className="text-xs uppercase tracking-[0.25em] text-copper mb-6">
               {t('landing.culture.eyebrow')}
             </div>
-            <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8 text-[#C8302E]">
+            <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8 text-kteh">
               {t('landing.culture.headingLine1')}
             </h2>
-            <p className="text-lg leading-relaxed text-[#1A1614]/80 mb-10">
+            <p className="text-lg leading-relaxed text-ink/80 mb-10">
               {t('landing.culture.body')}
             </p>
 
@@ -227,17 +227,17 @@ export default function Landing() {
                 <div
                   key={mark}
                   className={`flex items-start gap-5 ${
-                    i < CULTURE_MARKS.length - 1 ? 'border-b border-[#1A1614]/10 pb-6' : 'pb-2'
+                    i < CULTURE_MARKS.length - 1 ? 'border-b border-ink/10 pb-6' : 'pb-2'
                   }`}
                 >
-                  <span className="text-[#1A1614] text-xl font-medium w-6 shrink-0 mt-0.5">
+                  <span className="text-ink text-xl font-medium w-6 shrink-0 mt-0.5">
                     {mark}
                   </span>
                   <div>
-                    <div className="font-display font-display-optical text-base font-medium mb-2 text-[#1A1614]">
+                    <div className="font-display font-display-optical text-base font-medium mb-2 text-ink">
                       {culture[i]?.title}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60 leading-relaxed">{culture[i]?.body}</p>
+                    <p className="text-sm text-ink/60 leading-relaxed">{culture[i]?.body}</p>
                   </div>
                 </div>
               ))}
@@ -248,7 +248,7 @@ export default function Landing() {
                 was being overridden. */}
             <a
               href="#explore"
-              className="group flex items-center justify-center gap-2 bg-[#1A1614] text-[#F5EDDD] text-sm px-4 py-3.5 transition hover:bg-black"
+              className="group flex items-center justify-center gap-2 bg-ink text-bone text-sm px-4 py-3.5 transition hover:bg-black"
             >
               {t('landing.culture.cta')}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
@@ -258,49 +258,49 @@ export default function Landing() {
       </section>
 
       {/* ── TRANSPARENCY ──────────────────────────── */}
-      <section className="bg-[#8B1A1A] text-[#F5EDDD] relative overflow-hidden">
+      <section className="bg-[#8B1A1A] text-bone relative overflow-hidden">
         <div className="px-8 lg:px-12 xl:px-16 py-24 grid md:grid-cols-12 gap-12 relative z-10">
           <div className="md:col-span-6">
-            <div className="text-xs uppercase tracking-[0.25em] text-[#F5EDDD]/70 mb-6">
+            <div className="text-xs uppercase tracking-[0.25em] text-bone/70 mb-6">
               {t('landing.transparency.eyebrow')}
             </div>
             <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8">
               {t('landing.transparency.heading')}
             </h2>
-            <p className="text-lg leading-relaxed text-[#F5EDDD]/90 mb-8">
+            <p className="text-lg leading-relaxed text-bone/90 mb-8">
               {t('landing.transparency.body')}
             </p>
           </div>
 
           <div className="md:col-span-6 flex items-center">
-            <div className="w-full bg-[#1A1614] p-8 font-mono text-sm">
-              <div className="text-[#F5EDDD]/40 text-xs uppercase tracking-wider mb-6">
+            <div className="w-full bg-ink p-8 font-mono text-sm">
+              <div className="text-bone/40 text-xs uppercase tracking-wider mb-6">
                 {t('landing.transparency.ledgerLabel')}
               </div>
               <div className="space-y-4">
                 {ledger.length === 0 ? (
-                  <p className="text-[#F5EDDD]/40 text-xs">
+                  <p className="text-bone/40 text-xs">
                     {t('landing.transparency.ledgerEmpty')}
                   </p>
                 ) : (
                   ledger.map((tx) => (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between gap-4 text-xs border-b border-[#F5EDDD]/10 pb-3"
+                      className="flex items-center justify-between gap-4 text-xs border-b border-bone/10 pb-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-[#B87333] shrink-0">{hhmm(tx.createdAt)}</span>
-                        <span className="text-[#F5EDDD]/50 shrink-0">{tx.fromLabel}</span>
-                        <span className="text-[#F5EDDD]/30 shrink-0">→</span>
+                        <span className="text-copper shrink-0">{hhmm(tx.createdAt)}</span>
+                        <span className="text-bone/50 shrink-0">{tx.fromLabel}</span>
+                        <span className="text-bone/30 shrink-0">→</span>
                         <span className="truncate">{tx.toLabel}</span>
                       </div>
-                      <span className="text-[#E8A33D] shrink-0">{vnd(tx.totalVnd)}</span>
+                      <span className="text-amber shrink-0">{vnd(tx.totalVnd)}</span>
                     </div>
                   ))
                 )}
               </div>
               {communityStats && communityStats.ledgerEntriesToday > ledger.length && (
-                <div className="text-[#F5EDDD]/40 text-xs pt-4">
+                <div className="text-bone/40 text-xs pt-4">
                   {t('landing.transparency.ledgerMore', {
                     count: communityStats.ledgerEntriesToday - ledger.length,
                   })}
@@ -312,32 +312,32 @@ export default function Landing() {
       </section>
 
       {/* ── COMMUNITY ─────────────────────────────── */}
-      <section className="bg-[#F5EDDD] text-[#1A1614]">
+      <section className="bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
           <div className="grid md:grid-cols-12 gap-12 items-center">
             <div className="md:col-span-7">
-              <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-6">
+              <div className="text-xs uppercase tracking-[0.25em] text-copper mb-6">
                 {t('landing.community.eyebrow')}
               </div>
-              <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8 text-[#6B1A1A]">
+              <h2 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-8 text-deep">
                 {t('landing.community.headingLine1')}
                 <br />
                 <span>{t('landing.community.headingEm')}</span>{' '}
                 {t('landing.community.headingRest')}
               </h2>
-              <p className="text-lg leading-relaxed text-[#1A1614]/70">
+              <p className="text-lg leading-relaxed text-ink/70">
                 {t('landing.community.body')}
               </p>
             </div>
 
             <div className="md:col-span-5">
-              <div className="border-l-4 border-[#C8302E] pl-8 py-4 space-y-8">
+              <div className="border-l-4 border-kteh pl-8 py-4 space-y-8">
                 {statsFigures.map((figure, i) => (
                   <div key={statLabels[i]?.label ?? i}>
-                    <div className="font-display text-5xl font-medium text-[#C8302E] mb-1">
+                    <div className="font-display text-5xl font-medium text-kteh mb-1">
                       {figure}
                     </div>
-                    <p className="text-sm text-[#1A1614]/70">{statLabels[i]?.label}</p>
+                    <p className="text-sm text-ink/70">{statLabels[i]?.label}</p>
                   </div>
                 ))}
               </div>
@@ -349,22 +349,22 @@ export default function Landing() {
       <div className="h-3 textile" />
 
       {/* ── INVITATION ────────────────────────────── */}
-      <section className="bg-[#1A1614] text-[#F5EDDD]">
+      <section className="bg-ink text-bone">
         <div className="px-8 lg:px-12 xl:px-16 py-32 text-center">
-          <div className="text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
+          <div className="text-xs uppercase tracking-[0.25em] text-copper mb-8">
             {t('landing.invitation.eyebrow')}
           </div>
           <h2 className="font-display text-5xl md:text-8xl font-medium leading-[0.95] tracking-tight mb-10 max-w-4xl mx-auto text-white">
             {t('landing.invitation.headingLine1')}
             <br />
-            <span className="italic text-[#E8A33D]">{t('landing.invitation.headingEm')}</span>
+            <span className="italic text-amber">{t('landing.invitation.headingEm')}</span>
           </h2>
-          <p className="text-lg text-[#F5EDDD]/70 max-w-3xl mb-12 mx-auto">
+          <p className="text-lg text-bone/70 max-w-3xl mb-12 mx-auto">
             {t('landing.invitation.body')}
           </p>
           <a
             href="#travel"
-            className="group bg-[#C8302E] hover:bg-[#A82826] text-[#F5EDDD] px-10 py-5 inline-flex items-center gap-3 transition text-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1614] focus-visible:ring-[#F5EDDD]"
+            className="group bg-kteh hover:bg-kteh-hover text-bone px-10 py-5 inline-flex items-center gap-3 transition text-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink focus-visible:ring-bone"
           >
             {t('landing.invitation.cta')}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
@@ -373,16 +373,16 @@ export default function Landing() {
       </section>
 
       {/* ── FOOTER ────────────────────────────────── */}
-      <footer className="border-t border-[#F5EDDD]/10 bg-[#1A1614] text-[#F5EDDD]/60">
+      <footer className="border-t border-bone/10 bg-ink text-bone/60">
         <div className="px-8 lg:px-12 xl:px-16 py-16 grid grid-cols-2 md:grid-cols-[1.8fr_0.6fr_0.6fr_1.5fr] gap-12 text-left items-start">
           <div>
-            <div className="font-display text-2xl text-[#F5EDDD] mb-3">KNĂ</div>
+            <div className="font-display text-2xl text-bone mb-3">KNĂ</div>
             <p className="text-sm leading-relaxed">{t('landing.footer.tagline')}</p>
           </div>
 
           {footerColumns.map((col, colIndex) => (
             <div key={col.heading}>
-              <div className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD] mb-4">
+              <div className="text-xs uppercase tracking-[0.2em] text-bone mb-4">
                 {col.heading}
               </div>
               <ul className="space-y-2 text-sm">
@@ -390,7 +390,7 @@ export default function Landing() {
                   <li key={item}>
                     <a
                       href={FOOTER_HREFS[colIndex][itemIndex]}
-                      className="hover:text-[#F5EDDD] transition"
+                      className="hover:text-bone transition"
                     >
                       {item}
                     </a>
@@ -401,13 +401,13 @@ export default function Landing() {
           ))}
 
           <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-[#F5EDDD] mb-4">
+            <div className="text-xs uppercase tracking-[0.2em] text-bone mb-4">
               {t('landing.footer.stayInTouch')}
             </div>
             <p className="text-sm mb-4 leading-relaxed">{t('landing.footer.newsletterBody')}</p>
             <a
               href="#community"
-              className="inline-flex items-center gap-2 text-sm text-[#E8A33D] underline underline-offset-4 hover:text-[#F5EDDD] transition"
+              className="inline-flex items-center gap-2 text-sm text-amber underline underline-offset-4 hover:text-bone transition"
             >
               {t('landing.footer.stayInTouchCta')}
               <ArrowRight className="w-3.5 h-3.5" />
@@ -415,8 +415,8 @@ export default function Landing() {
           </div>
         </div>
 
-        <div className="border-t border-[#F5EDDD]/10">
-          <div className="px-8 lg:px-12 xl:px-16 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-[#F5EDDD]/40">
+        <div className="border-t border-bone/10">
+          <div className="px-8 lg:px-12 xl:px-16 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-bone/40">
             <div>{t('landing.footer.copyright')}</div>
           </div>
         </div>

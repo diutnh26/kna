@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import { vi } from 'vitest';
 import { AuthProvider } from '../context/AuthProvider';
+import { EthnicityProvider } from '../context/EthnicityProvider';
 import { WalletProvider } from '../wallet/WalletProvider';
 import { api, ApiError } from '../lib/api';
 import '../i18n';
@@ -21,7 +22,9 @@ export function renderScreen(ui) {
   }
   return render(
     <WalletProvider>
-      <AuthProvider>{ui}</AuthProvider>
+      <AuthProvider>
+        <EthnicityProvider>{ui}</EthnicityProvider>
+      </AuthProvider>
     </WalletProvider>
   );
 }
