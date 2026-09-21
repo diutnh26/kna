@@ -332,7 +332,7 @@ describe('Account', () => {
       ],
     });
     renderScreen(<Account />);
-    expect(await screen.findByText(/Demo wallets \(Devnet\)/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Devnet wallets/i)).toBeInTheDocument();
     expect(await screen.findByText(/Demo mint history/i)).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText(/Minted longhouse stay/)).toBeInTheDocument();

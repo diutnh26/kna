@@ -68,6 +68,6 @@ describe('DemoWalletPanel', () => {
     });
     renderScreen(<DemoWalletPanel />);
     await waitFor(() => expect(settled).toBe(true));
-    await waitFor(() => expect(screen.queryByText(/Demo wallets/i)).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText(/Devnet wallets/i)).not.toBeInTheDocument());
   });
 });
