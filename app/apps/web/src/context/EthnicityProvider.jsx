@@ -69,6 +69,19 @@ export function EthnicityProvider({ children }) {
     (next) => {
       if (next === slug || !isKnownSlug(next) || pending.current) return;
 
+      // Back to the top, and instantly.
+      //
+      // This changes what the whole page is about, so leaving the reader
+      // halfway down means landing them in the middle of a profile they
+      // have not been introduced to — the phrasebook of a people whose
+      // name they have not seen yet.
+      //
+      // Instant rather than smooth: a smooth scroll from deep in the page
+      // takes long enough that the content swaps under the reader while
+      // they are still travelling. Scrolling first and transitioning after
+      // means the crossfade always plays over the top of the page.
+      window.scrollTo({ top: 0, behavior: 'auto' });
+
       const apply = () => {
         setSlug(next);
         setGeneration((g) => g + 1);

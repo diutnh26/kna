@@ -440,7 +440,10 @@
     ],
     "handoffHeading": "Not sure what you are looking at?",
     "handoffBody": "The assistant can explain a motif, a technique, or what a piece is traditionally for.",
-    "handoffCta": "Ask the assistant"
+    "handoffCta": "Ask the assistant",
+    "addToCart": "Add to basket",
+    "addMore": "Add another",
+    "added": "Added"
   },
   "community": {
     "eyebrow": "Community space",
@@ -824,5 +827,36 @@
   },
   "ethnicity": {
     "label": "Peoples"
+  },
+  "cart": {
+    "title": "Your basket",
+    "open": "Basket, {{count}} items",
+    "close": "Close basket",
+    "count": "{{count}} items",
+    "each": "each",
+    "emptyTitle": "Nothing gathered yet.",
+    "emptyBody": "Pieces you add from the marketplace collect here. Nothing is ordered until you say so.",
+    "splitNotice": "These pieces come from {{count}} makers. Each maker is paid through their own order, so this basket will be placed as {{count}} separate orders — one ledger entry each, credited correctly.",
+    "subtotalFor": "{{maker}} subtotal",
+    "total": "Total",
+    "toMakers": "To the makers",
+    "checkout": "Place order",
+    "ordersCount": "{{count}} orders",
+    "placing": "Placing…",
+    "paymentNote": "Payment is arranged directly with the coordinator after the order is confirmed. Nothing is charged here.",
+    "increase": "Add one",
+    "decrease": "Remove one",
+    "quantityLabel": "Quantity of {{title}}",
+    "remove": "Remove {{title}} from basket",
+    "maxStock": "All {{count}} available are in your basket.",
+    "orderError": "That order could not be placed.",
+    "doneTitle": "Order placed.",
+    "doneBody": "{{count}} orders are with their makers. You will hear from the coordinator about payment and shipping.",
+    "partialTitle": "Partly placed.",
+    "partialBody": "{{placed}} placed, {{failed}} could not be. What failed is still in your basket — nothing was lost.",
+    "orderPlaced": "Placed",
+    "orderFailed": "Not placed",
+    "viewOrders": "See your orders",
+    "keepBrowsing": "Keep browsing"
   }
 }

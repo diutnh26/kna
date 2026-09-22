@@ -139,28 +139,27 @@ export default function InteractiveMap() {
     const kteh = accent('--c-kteh', '#C8302E');
     const amber = accent('--c-amber', '#E8A33D');
 
-    // Only Ê Đê has a province outline: it is the one place the platform
-    // works across a whole province rather than from a single village. For
-    // the other four a shape would be an invention, so there is a marker
-    // and nothing else.
-    if (slug === 'ede') {
-      const province = L.polygon(DAK_LAK, {
+    // Every community now has its province drawn. Ê Đê keeps the
+    // post-merger shape here — this map shows the province as it is on
+    // today's administrative map, while the schematic beside it shows the
+    // pre-merger ground the platform actually works in. The two differing
+    // is the point, not an oversight.
+    const outline = slug === 'ede' ? DAK_LAK : site?.area;
+
+    if (outline) {
+      const province = L.polygon(outline, {
         color: kteh,
         weight: 2,
         fillColor: kteh,
         fillOpacity: 0.15,
       }).addTo(overlay);
 
-      // Frame the province rather than trusting a fixed zoom. Post-merger
-      // it is about 200km wide, reaching from Cambodia to the coast, and
-      // the zoom 8 that suited the old landlocked shape now cuts the coast
-      // off. Deriving the view from the polygon means the next boundary
-      // change reframes itself.
+      // Frame the province rather than trusting a fixed zoom. These range
+      // from Trà Vinh at about 2,300 km² to Đắk Lắk at 18,100, so no single
+      // zoom level suits them all — and deriving the view from the polygon
+      // means the next boundary change reframes itself.
       map.flyToBounds(province.getBounds(), { padding: [12, 12], duration: 0.8 });
     } else if (site) {
-      // A village is a point, so there are no bounds to fit. Zoom 11 holds
-      // the settlement and the valley around it, which is the scale at
-      // which "where is this" is actually answered.
       map.flyTo(site.coords, 11, { duration: 0.8 });
     }
 

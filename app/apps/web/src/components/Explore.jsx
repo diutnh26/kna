@@ -5,6 +5,8 @@ import Navbar from './Navbar';
 import EthnicitySwitcher from './EthnicitySwitcher';
 import ImageSlot from './ImageSlot';
 import VietnamMap from './VietnamMap';
+import Marquee from './Marquee';
+import AnimatedNumber from './AnimatedNumber';
 import { api } from '../lib/api';
 import ApiErrorNotice from './ApiErrorNotice';
 import { useEthnicity } from '../context/useEthnicity';
@@ -137,24 +139,24 @@ export default function Explore() {
             <div className="border-l-2 border-copper pl-8 space-y-6">
               {place?.households ? (
                 <div>
-                  <div className="font-display text-4xl font-medium text-copper">
-                    {place.households}+
+                  <div className="font-display text-4xl font-medium text-copper tabular-nums">
+                    <AnimatedNumber value={place.households} />+
                   </div>
                   <p className="text-sm text-bone/60">{t('explore.statHouseholds')}</p>
                 </div>
               ) : null}
               {place?.homestays ? (
                 <div>
-                  <div className="font-display text-4xl font-medium text-copper">
-                    {place.homestays}
+                  <div className="font-display text-4xl font-medium text-copper tabular-nums">
+                    <AnimatedNumber value={place.homestays} />
                   </div>
                   <p className="text-sm text-bone/60">{t('explore.statHomestays')}</p>
                 </div>
               ) : null}
               {archiveOpen && (
                 <div>
-                  <div className="font-display text-4xl font-medium text-copper">
-                    {stats ? stats.publishedEntries : '—'}
+                  <div className="font-display text-4xl font-medium text-copper tabular-nums">
+                    <AnimatedNumber value={stats?.publishedEntries ?? null} />
                   </div>
                   <p className="text-sm text-bone/60">{t('explore.statEntries')}</p>
                 </div>
@@ -173,7 +175,7 @@ export default function Explore() {
         {/* Between the opening and the traditions because everything after
             this point assumes you know where this is, and most readers do
             not. */}
-        <section className="border-t border-bone/10">
+        <section className="reveal-cinematic border-t border-bone/10">
           <div className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 grid md:grid-cols-12 gap-12 items-start">
             <div className="md:col-span-4">
               <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-8">
@@ -245,24 +247,33 @@ export default function Explore() {
               )}
             </div>
 
+            {/* Parallax. The text column holds still and the two map
+                frames drift against it at different rates, which is what
+                separates them into planes rather than one flat row. ~34px
+                and ~20px — past about 40 the illusion breaks and it just
+                looks like the layout is loose. */}
             <div className="md:col-span-8 grid sm:grid-cols-2 gap-8">
               {/* Two maps, two questions. The outline says where the place
                   is, as a shape, and needs nothing from the network; the
                   live map has the roads and towns and zooms out to the
                   country, and needs everything from it. Neither answers
                   for the other. */}
-              <div>
+              <div className="parallax-fore">
                 <VietnamMap />
               </div>
-              <Suspense fallback={<div className="w-full aspect-square rounded-sm bg-ink-raised" />}>
-                <InteractiveMap />
-              </Suspense>
+              <div className="parallax-back">
+                <Suspense
+                  fallback={<div className="breathe w-full aspect-square rounded-sm bg-ink-raised" />}
+                >
+                  <InteractiveMap />
+                </Suspense>
+              </div>
             </div>
           </div>
         </section>
 
         {/* ── TRADITIONS ────────────────────────────── */}
-        <section className="bg-bone text-ink">
+        <section className="reveal-cinematic bg-bone text-ink">
           <div className="px-8 lg:px-12 xl:px-16 py-24">
             <div className="max-w-4xl mb-16">
               <div className="text-xs uppercase tracking-[0.25em] text-kteh mb-6">
@@ -276,17 +287,26 @@ export default function Explore() {
               </h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-10">
+            {/* A marquee rather than a grid. Three tall portraits in three
+                equal columns forces each photograph into whatever shape the
+                column happens to be; drifting them keeps each at its 4:5
+                and makes the row read as a reel rather than a table.
+
+                It stops on hover and on focus, which is what makes it
+                readable — these cards carry paragraphs, not logos. */}
+            <Marquee itemWidth={340} gap={32} label={t('explore.pillarsEyebrow')}>
               {ethnicity.identity.map((item) => (
                 <article key={item.key} className="flex flex-col">
-                  <ImageSlot
-                    src={item.image.src}
-                    alt={item.image.alt[lang]}
-                    theme="light"
-                    ratio="aspect-[4/5]"
-                    label={t('explore.photoLabel', { name: item.title[lang] })}
-                    className="mb-4"
-                  />
+                  <div className="overflow-hidden mb-4">
+                    <ImageSlot
+                      src={item.image.src}
+                      alt={item.image.alt[lang]}
+                      theme="light"
+                      ratio="aspect-[4/5]"
+                      label={t('explore.photoLabel', { name: item.title[lang] })}
+                      className="camera-push"
+                    />
+                  </div>
 
                   {/* Author, licence, and — where it applies — the fact
                       that the photograph is of the right people in the
@@ -320,7 +340,7 @@ export default function Explore() {
                   <p className="text-sm text-ink/70 leading-relaxed flex-1">{item.body[lang]}</p>
                 </article>
               ))}
-            </div>
+            </Marquee>
           </div>
         </section>
 
@@ -462,7 +482,7 @@ export default function Explore() {
         </section>
 
         {/* ── LANGUAGE ──────────────────────────────── */}
-        <section className="bg-bone text-ink">
+        <section className="reveal-cinematic bg-bone text-ink">
           <div className="px-8 lg:px-12 xl:px-16 py-24 grid md:grid-cols-12 gap-12 items-start">
             <div className="md:col-span-6 order-2 md:order-1 space-y-3">
               {ethnicity.phrases.length === 0 ? (
@@ -564,7 +584,7 @@ export default function Explore() {
           </div>
           <a
             href="#travel"
-            className="group inline-flex items-center gap-3 bg-kteh hover:bg-kteh-hover px-8 py-4 transition"
+            className="group press glow-hover inline-flex items-center gap-3 bg-kteh hover:bg-kteh-hover px-8 py-4 transition"
           >
             {t('explore.handoffCta')}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />

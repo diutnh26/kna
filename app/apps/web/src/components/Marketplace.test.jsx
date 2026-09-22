@@ -19,12 +19,12 @@ describe('Marketplace', () => {
     vi.spyOn(api, 'communityStats').mockResolvedValue({ verifiedArtisans: 5, buonOnboarded: 4 });
   });
 
-  it('shows a piece that is still available, with a way to buy it', async () => {
+  it('shows a piece that is still available, with a way to add it', async () => {
     vi.spyOn(api, 'products').mockResolvedValue([aProduct({ stock: 6 })]);
     renderScreen(<Marketplace />);
 
     expect(await screen.findByRole('heading', { name: /Gùi carrying basket/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Buy$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Add to basket/i })).toBeInTheDocument();
     expect(screen.getByText(/6 available/)).toBeInTheDocument();
   });
 
@@ -36,7 +36,7 @@ describe('Marketplace', () => {
     expect(await screen.findByRole('heading', { name: /Gùi carrying basket/ })).toBeInTheDocument();
     // Marked, and not orderable.
     expect(screen.getAllByText(/Sold out/i).length).toBeGreaterThan(0);
-    expect(screen.queryByRole('button', { name: /^Buy$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Add to basket/i })).not.toBeInTheDocument();
   });
 
   it('does not call a sold-out piece "one of a kind"', async () => {

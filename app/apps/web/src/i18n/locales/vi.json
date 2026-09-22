@@ -440,7 +440,10 @@
     ],
     "handoffHeading": "Chưa rõ mình đang xem gì?",
     "handoffBody": "Trợ lý có thể giải thích một hoa văn, một kỹ thuật, hoặc công dụng truyền thống của một món đồ.",
-    "handoffCta": "Hỏi trợ lý"
+    "handoffCta": "Hỏi trợ lý",
+    "addToCart": "Thêm vào giỏ",
+    "addMore": "Thêm nữa",
+    "added": "Đã thêm"
   },
   "community": {
     "eyebrow": "Không gian cộng đồng",
@@ -824,5 +827,36 @@
   },
   "ethnicity": {
     "label": "Dân tộc"
+  },
+  "cart": {
+    "title": "Giỏ của bạn",
+    "open": "Giỏ hàng, {{count}} món",
+    "close": "Đóng giỏ",
+    "count": "{{count}} món",
+    "each": "mỗi món",
+    "emptyTitle": "Chưa có gì trong giỏ.",
+    "emptyBody": "Những món bạn thêm từ chợ sẽ nằm ở đây. Chưa đặt gì cho đến khi bạn quyết định.",
+    "splitNotice": "Các món này đến từ {{count}} nghệ nhân. Mỗi người được trả qua đơn riêng của họ, nên giỏ này sẽ thành {{count}} đơn tách biệt — mỗi đơn một dòng sổ cái, ghi công đúng người.",
+    "subtotalFor": "Tạm tính — {{maker}}",
+    "total": "Tổng cộng",
+    "toMakers": "Về tay nghệ nhân",
+    "checkout": "Đặt hàng",
+    "ordersCount": "{{count}} đơn",
+    "placing": "Đang đặt…",
+    "paymentNote": "Thanh toán thoả thuận trực tiếp với điều phối viên sau khi đơn được xác nhận. Không thu tiền ở đây.",
+    "increase": "Thêm một",
+    "decrease": "Bớt một",
+    "quantityLabel": "Số lượng {{title}}",
+    "remove": "Bỏ {{title}} khỏi giỏ",
+    "maxStock": "Cả {{count}} món còn lại đều đã trong giỏ.",
+    "orderError": "Không đặt được đơn này.",
+    "doneTitle": "Đã đặt hàng.",
+    "doneBody": "{{count}} đơn đã đến tay nghệ nhân. Điều phối viên sẽ liên hệ về thanh toán và giao hàng.",
+    "partialTitle": "Đặt được một phần.",
+    "partialBody": "{{placed}} đơn thành công, {{failed}} đơn không. Phần chưa đặt được vẫn nằm trong giỏ — không mất gì cả.",
+    "orderPlaced": "Đã đặt",
+    "orderFailed": "Chưa đặt",
+    "viewOrders": "Xem đơn của bạn",
+    "keepBrowsing": "Tiếp tục xem"
   }
 }

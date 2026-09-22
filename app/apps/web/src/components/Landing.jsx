@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Coins, Eye, Mountain, Users } from 'lucide-react';
 import Navbar from './Navbar';
+import AnimatedNumber from './AnimatedNumber';
 import { api } from '../lib/api';
 import longhouseImg from '../assets/longhouse.png';
 import cultureImg from '../assets/ede-culture.jpg';
@@ -80,10 +81,13 @@ export default function Landing() {
   // that one is 3 buôn, holding some 65 households, guides and makers
   // between them. Reporting the buôn keeps the landing page and the paper
   // saying the same thing, and the seed data carries three of them.
+  // A figure is either a number to count to or a literal. "90–95%" is a
+  // range, not a quantity, so it is not something that can be tallied
+  // toward — it renders as written.
   const statsFigures = [
-    '100%',
-    '90–95%',
-    communityStats ? `${communityStats.buonOnboarded}` : '—',
+    { value: 100, suffix: '%' },
+    { literal: '90–95%' },
+    { value: communityStats?.buonOnboarded ?? null },
   ];
 
   return (
@@ -109,25 +113,30 @@ export default function Landing() {
             <div className="flex flex-wrap gap-4">
               <a
                 href="#travel"
-                className="group bg-kteh hover:bg-kteh-hover text-bone px-8 py-4 inline-flex items-center gap-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink"
+                className="group press glow-hover bg-kteh hover:bg-kteh-hover text-bone px-8 py-4 inline-flex items-center gap-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink"
               >
                 {t('landing.hero.ctaPrimary')}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
               </a>
               <a
                 href="#community"
-                className="border border-ink/30 hover:border-ink/70 text-ink px-8 py-4 inline-flex items-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink"
+                className="press border border-ink/30 hover:border-ink/70 text-ink px-8 py-4 inline-flex items-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink"
               >
                 {t('landing.hero.ctaSecondary')}
               </a>
             </div>
           </div>
 
-          <div className="md:col-span-6 hidden md:block relative min-h-[480px]">
+          {/* The camera move. A 6% push-in across the whole scroll of the
+              hero — slow enough that nobody catches it happening, fast
+              enough that the frame feels alive rather than pasted on.
+              Media only: type that scales while it is being read is the
+              quickest way to make a page feel cheap. */}
+          <div className="md:col-span-6 hidden md:block relative min-h-[480px] overflow-hidden">
             <img
               src={longhouseImg}
               alt="Illustration of a traditional Ê Đê longhouse raised on stilts"
-              className="w-full h-full object-contain"
+              className="camera-push w-full h-full object-contain"
               style={{ mixBlendMode: 'multiply', opacity: 0.85 }}
             />
           </div>
@@ -137,7 +146,7 @@ export default function Landing() {
       <div className="h-3 textile" />
 
       {/* ── FOUR PILLARS ──────────────────────────── */}
-      <section className="bg-ink text-bone">
+      <section className="reveal-cinematic bg-ink text-bone">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
           <div className="mb-16 text-left">
             <div className="text-xs uppercase tracking-[0.25em] text-copper mb-6">
@@ -200,7 +209,7 @@ export default function Landing() {
       </section>
 
       {/* ── Ê ĐÊ CULTURE ──────────────────────────── */}
-      <section className="bg-bone text-ink">
+      <section className="reveal-cinematic bg-bone text-ink">
         <div className="grid md:grid-cols-2">
           <div className="relative overflow-hidden min-h-[400px]">
             <img
@@ -312,7 +321,7 @@ export default function Landing() {
       </section>
 
       {/* ── COMMUNITY ─────────────────────────────── */}
-      <section className="bg-bone text-ink">
+      <section className="reveal-cinematic bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-24">
           <div className="grid md:grid-cols-12 gap-12 items-center">
             <div className="md:col-span-7">
@@ -334,8 +343,13 @@ export default function Landing() {
               <div className="border-l-4 border-kteh pl-8 py-4 space-y-8">
                 {statsFigures.map((figure, i) => (
                   <div key={statLabels[i]?.label ?? i}>
-                    <div className="font-display text-5xl font-medium text-kteh mb-1">
-                      {figure}
+                    <div className="font-display text-5xl font-medium text-kteh mb-1 tabular-nums">
+                      {figure.literal ?? (
+                        <>
+                          <AnimatedNumber value={figure.value} />
+                          {figure.suffix}
+                        </>
+                      )}
                     </div>
                     <p className="text-sm text-ink/70">{statLabels[i]?.label}</p>
                   </div>
@@ -349,7 +363,7 @@ export default function Landing() {
       <div className="h-3 textile" />
 
       {/* ── INVITATION ────────────────────────────── */}
-      <section className="bg-ink text-bone">
+      <section className="reveal-cinematic bg-ink text-bone">
         <div className="px-8 lg:px-12 xl:px-16 py-32 text-center">
           <div className="text-xs uppercase tracking-[0.25em] text-copper mb-8">
             {t('landing.invitation.eyebrow')}

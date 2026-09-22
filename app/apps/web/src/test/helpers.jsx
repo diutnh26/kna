@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { vi } from 'vitest';
 import { AuthProvider } from '../context/AuthProvider';
 import { EthnicityProvider } from '../context/EthnicityProvider';
+import { CartProvider } from '../context/CartProvider';
 import { WalletProvider } from '../wallet/WalletProvider';
 import { api, ApiError } from '../lib/api';
 import '../i18n';
@@ -23,7 +24,9 @@ export function renderScreen(ui) {
   return render(
     <WalletProvider>
       <AuthProvider>
-        <EthnicityProvider>{ui}</EthnicityProvider>
+        <EthnicityProvider>
+          <CartProvider>{ui}</CartProvider>
+        </EthnicityProvider>
       </AuthProvider>
     </WalletProvider>
   );

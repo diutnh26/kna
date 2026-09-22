@@ -8,11 +8,13 @@ import {
   Search,
   ShoppingBag,
   Info,
+  Check,
 } from 'lucide-react';
 import Navbar from './Navbar';
 import ImageSlot from './ImageSlot';
-import { api, ApiError } from '../lib/api';
-import { useAuth } from '../context/useAuth';
+import AnimatedNumber from './AnimatedNumber';
+import { api } from '../lib/api';
+import { useCart } from '../context/useCart';
 import { useDebounced } from '../lib/useDebounced';
 import ApiErrorNotice from './ApiErrorNotice';
 
@@ -42,9 +44,10 @@ export default function Marketplace() {
   const [stats, setStats] = useState(null);
   const [loadState, setLoadState] = useState('loading'); // 'loading' | 'ready' | 'error'
 
-  // orders[productId] = { qty, status: 'idle'|'submitting'|'done'|'error', error }
-  const [orders, setOrders] = useState({});
-  const { isAuthenticated, token, openAuthModal } = useAuth();
+  // Which card last confirmed an add, so the pulse plays where the finger
+  // was rather than only on the badge in the corner.
+  const [justAdded, setJustAdded] = useState(null);
+  const { add, has } = useCart();
 
   // Deliberately doesn't flip back to 'loading' on every filter change —
   // the previous results stay on screen (stale-while-revalidate) until the
@@ -84,29 +87,13 @@ export default function Marketplace() {
     };
   }, []);
 
-  function qtyFor(product) {
-    return orders[product.id]?.qty ?? 1;
-  }
-
-  function setQty(product, qty) {
-    setOrders((o) => ({ ...o, [product.id]: { ...o[product.id], qty: Math.max(1, Math.min(qty, product.stock)) } }));
-  }
-
-  async function handleBuy(product) {
-    if (!isAuthenticated) {
-      openAuthModal();
-      return;
-    }
-    const qty = qtyFor(product);
-    setOrders((o) => ({ ...o, [product.id]: { ...o[product.id], qty, status: 'submitting', error: null } }));
-    try {
-      await api.createOrder({ items: [{ productId: product.id, quantity: qty }] }, token);
-      setOrders((o) => ({ ...o, [product.id]: { ...o[product.id], qty, status: 'done', error: null } }));
-      setProducts((ps) => ps.map((p) => (p.id === product.id ? { ...p, stock: p.stock - qty } : p)));
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : t('marketplace.orderError');
-      setOrders((o) => ({ ...o, [product.id]: { ...o[product.id], qty, status: 'error', error: message } }));
-    }
+  // Adding is local and instant — no request, no sign-in, nothing to fail.
+  // Identity is asked for once, at checkout, instead of at the first thing
+  // a person reaches for.
+  function handleAdd(product) {
+    add(product, 1);
+    setJustAdded(product.id);
+    setTimeout(() => setJustAdded((current) => (current === product.id ? null : current)), 640);
   }
 
   const shown = products;
@@ -137,14 +124,14 @@ export default function Marketplace() {
               <p className="text-sm text-bone/60">{t('marketplace.statArtisanShare')}</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-copper">
-                {stats ? stats.verifiedArtisans : '—'}
+              <div className="font-display text-4xl font-medium text-copper tabular-nums">
+                <AnimatedNumber value={stats?.verifiedArtisans ?? null} />
               </div>
               <p className="text-sm text-bone/60">{t('marketplace.statMakers')}</p>
             </div>
             <div>
-              <div className="font-display text-4xl font-medium text-copper">
-                {stats ? stats.buonOnboarded : '—'}
+              <div className="font-display text-4xl font-medium text-copper tabular-nums">
+                <AnimatedNumber value={stats?.buonOnboarded ?? null} />
               </div>
               <p className="text-sm text-bone/60">{t('marketplace.statBuon')}</p>
             </div>
@@ -153,7 +140,7 @@ export default function Marketplace() {
       </section>
 
       {/* ── CERTIFICATE EXPLAINER ─────────────────── */}
-      <section className="bg-bone text-ink">
+      <section className="reveal-cinematic bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-20 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-6">
             <div className="text-xs uppercase tracking-[0.25em] text-kteh mb-6">
@@ -269,23 +256,22 @@ export default function Marketplace() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {shown.map((p) => {
-                  const order = orders[p.id];
+                {shown.map((p, i) => {
                   const soldOut = p.stock <= 0;
+                  const inCart = has(p.id);
                   return (
                     <article
                       key={p.id}
-                      className={`group border transition flex flex-col ${
-                        soldOut
-                          ? 'border-bone/10'
-                          : 'border-bone/10 hover:border-bone/30'
+                      style={{ '--i': i }}
+                      className={`stagger-item group border flex flex-col ${
+                        soldOut ? 'border-bone/10' : 'card-lift border-bone/10 hover:border-bone/30'
                       }`}
                     >
-                      <div className="relative">
+                      <div className="relative overflow-hidden">
                         {/* Dim the photograph, not the words. A sold piece
                             still has a maker and a story worth reading —
                             it just cannot be bought. */}
-                        <div className={soldOut ? 'opacity-45' : ''}>
+                        <div className={`card-media ${soldOut ? 'opacity-45' : ''}`}>
                           <ImageSlot
                             src={p.imageUrl}
                             ratio="aspect-square"
@@ -354,41 +340,38 @@ export default function Marketplace() {
                               </div>
                             </div>
 
-                            {order?.status === 'done' ? (
-                              <span className="text-xs text-amber uppercase tracking-wider">
-                                {t('marketplace.ordered')}
-                              </span>
-                            ) : soldOut ? (
+                            {soldOut ? (
                               <span className="text-xs text-bone/40 uppercase tracking-wider">
                                 {t('marketplace.soldOut')}
                               </span>
                             ) : (
-                              <div className="flex items-center gap-3">
-                                <label className="sr-only" htmlFor={`qty-${p.id}`}>{t('marketplace.quantity')}</label>
-                                <input
-                                  id={`qty-${p.id}`}
-                                  type="number"
-                                  min={1}
-                                  max={p.stock}
-                                  value={qtyFor(p)}
-                                  onChange={(e) => setQty(p, Number(e.target.value))}
-                                  className="w-14 bg-transparent border border-bone/25 text-sm text-center py-2 focus:outline-none focus:border-bone/60"
-                                />
-                                <button
-                                  onClick={() => handleBuy(p)}
-                                  disabled={order?.status === 'submitting'}
-                                  className="group/btn inline-flex items-center gap-2 bg-kteh hover:bg-kteh-hover disabled:opacity-50 px-5 py-3 text-sm transition"
-                                >
+                              /* One control, one quantity. The stepper that
+                                 used to sit here duplicated the one in the
+                                 cart and made the card decide something the
+                                 buyer had not committed to yet. */
+                              <button
+                                onClick={() => handleAdd(p)}
+                                className={`press glow-hover inline-flex items-center gap-2 px-5 py-3 text-sm transition ${
+                                  justAdded === p.id ? 'added-pulse' : ''
+                                } ${
+                                  inCart
+                                    ? 'border border-amber/50 text-amber hover:bg-amber/10'
+                                    : 'bg-kteh hover:bg-kteh-hover'
+                                }`}
+                              >
+                                {justAdded === p.id ? (
+                                  <Check className="w-3.5 h-3.5" />
+                                ) : (
                                   <ShoppingBag className="w-3.5 h-3.5" />
-                                  {order?.status === 'submitting' ? t('marketplace.placing') : t('marketplace.buy')}
-                                </button>
-                              </div>
+                                )}
+                                {justAdded === p.id
+                                  ? t('marketplace.added')
+                                  : inCart
+                                    ? t('marketplace.addMore')
+                                    : t('marketplace.addToCart')}
+                              </button>
                             )}
                           </div>
-
-                          {order?.status === 'error' && (
-                            <p className="text-xs text-amber">{order.error}</p>
-                          )}
                         </div>
                       </div>
                     </article>
@@ -401,7 +384,7 @@ export default function Marketplace() {
       </section>
 
       {/* ── SHIPPING NOTE ─────────────────────────── */}
-      <section className="bg-bone text-ink">
+      <section className="reveal-cinematic bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-20">
           <div className="grid md:grid-cols-12 gap-12">
             <div className="md:col-span-4">

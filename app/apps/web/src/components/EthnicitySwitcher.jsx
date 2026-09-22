@@ -52,7 +52,7 @@ export default function EthnicitySwitcher({ theme = 'dark' }) {
     refs.current[next]?.focus();
   };
 
-  const bg = isDark ? 'bg-ink/95' : 'bg-bone/95';
+  const bg = isDark ? 'glass' : 'glass-light';
   const rule = isDark ? 'border-bone/10' : 'border-ink/10';
   const idle = isDark
     ? 'border-bone/20 text-bone/60 hover:text-bone hover:border-bone/50'
@@ -60,7 +60,7 @@ export default function EthnicitySwitcher({ theme = 'dark' }) {
 
   return (
     <div
-      className={`${bg} border-b ${rule} sticky top-[57px] z-40 backdrop-blur`}
+      className={`${bg} border-b ${rule} sticky top-[57px] z-40`}
       data-testid="ethnicity-switcher"
     >
       <div className="px-8 lg:px-12 xl:px-16 py-3 flex items-center gap-6">

@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import {
   MAINLAND,
-  DAK_LAK_PRE_MERGER,
   ETHNICITY_SITES,
   HOANG_SA,
   TRUONG_SA,
@@ -71,6 +70,7 @@ export default function VietnamMap() {
   const { t } = useTranslation();
   const { slug, select } = useEthnicity();
   const workArea = t('explore.map.workArea', { returnObjects: true });
+  const area = ETHNICITY_SITES[slug]?.area;
 
   return (
     <svg
@@ -103,16 +103,16 @@ export default function VietnamMap() {
         strokeLinejoin="round"
       />
 
-      {/* Đắk Lắk as it was before the 2025 merger with Phú Yên. Drawn only
-          while Ê Đê is selected: it is the one place the platform covers as
-          a province rather than as a village, and leaving it filled under
-          another profile would say the work is there when it is not.
+      {/* The province the selected community sits in. Filled rather than
+          outlined, because at this scale an unfilled boundary of a small
+          northern province is a squiggle nobody can find.
 
-          Deliberately not the current province the zoomable map draws: that
-          one reaches the coast, this one shows the ground actually covered. */}
-      {slug === 'ede' && (
+          For Ê Đê this is the pre-2025 province deliberately — not the one
+          the zoomable map draws, which reaches the coast after the merger
+          with Phú Yên. This is the ground actually covered. */}
+      {area && (
         <path
-          d={shape(DAK_LAK_PRE_MERGER)}
+          d={shape(area)}
           fill="var(--c-kteh)"
           stroke="var(--c-kteh)"
           strokeWidth="2"

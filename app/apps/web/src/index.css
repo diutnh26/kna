@@ -243,6 +243,543 @@
   animation-timing-function: ease;
 }
 
+/* ── Motion ────────────────────────────────────
+   Restrained on purpose. This is a heritage
+   archive, not a storefront promotion: movement
+   here is meant to make the page feel unhurried
+   and physical, never to draw attention to
+   itself. Nothing bounces, nothing spins, and
+   nothing moves more than about 16px.
+
+   All of it is CSS. framer-motion is roughly
+   35KB gzipped and would earn none of it for
+   what is, in the end, a set of fades and a
+   drawer.
+
+   Every block is wrapped in @supports or sits
+   behind a starting style, so a browser that
+   lacks the feature shows the finished state
+   rather than an empty page — the one failure
+   mode a reveal animation must never have. */
+
+/* Sections arriving as they are scrolled to.
+
+   Scroll-driven, so there is no IntersectionObserver, no scroll listener
+   and nothing running on the main thread. Where view() is unsupported the
+   rule never applies and content is simply visible, which is why opacity
+   is not set outside this block. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      /* Finishes well before the element is centred, so nobody is ever
+         reading text that is still moving. */
+      animation-range: entry 5% entry 45%;
+    }
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Grid items arriving in sequence rather than as a block.
+
+   Time-based rather than scroll-driven: a stagger needs each child to
+   start at a different moment, and a view() timeline is driven by one
+   shared scroll position. Items below the fold will have finished by the
+   time they are reached, which is harmless.
+
+   --i is set inline by the component. Capped at 8 so a long list does not
+   end with items waiting a second and a half to appear. */
+@media (prefers-reduced-motion: no-preference) {
+  .stagger-item {
+    animation: reveal-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(min(var(--i, 0), 8) * 55ms);
+  }
+}
+
+/* Panels that enter and leave the DOM.
+
+   @starting-style gives the browser a value to animate *from* on insert,
+   and transition-behavior: allow-discrete keeps the element displayed
+   through its exit transition. Together they replace the mount/unmount
+   timers this would otherwise need in JS. */
+.overlay-fade {
+  opacity: 1;
+  transition:
+    opacity 260ms ease,
+    display 260ms allow-discrete;
+}
+.overlay-fade[data-closed] {
+  opacity: 0;
+}
+@starting-style {
+  .overlay-fade {
+    opacity: 0;
+  }
+}
+
+.drawer-panel {
+  transform: translateX(0);
+  transition:
+    transform 340ms cubic-bezier(0.32, 0.72, 0, 1),
+    display 340ms allow-discrete;
+}
+.drawer-panel[data-closed] {
+  transform: translateX(100%);
+}
+@starting-style {
+  .drawer-panel {
+    transform: translateX(100%);
+  }
+}
+
+/* The cart count, when something lands in it. Scale only — a badge that
+   translates drags the eye off the thing that was just added. */
+@keyframes badge-bump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.badge-bump {
+  animation: badge-bump 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Confirmation on the button that was just pressed, so the feedback is
+   where the finger is rather than only in the corner of the screen. */
+@keyframes added-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-amber) 55%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+.added-pulse {
+  animation: added-pulse 620ms ease-out;
+}
+
+/* A row leaving the cart. Collapsing the height as well as fading means
+   the rows below rise into place instead of jumping up. */
+@keyframes row-remove {
+  from {
+    opacity: 1;
+    max-height: 200px;
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+.row-remove {
+  overflow: hidden;
+  animation: row-remove 280ms ease-in forwards;
+}
+
+/* Placeholder blocks while products load. A sweep rather than a pulse:
+   it reads as "arriving" instead of "broken". */
+@keyframes skeleton-sweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.skeleton {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--c-copper) 14%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.6s linear infinite;
+}
+
+/* Lift on hover for the product cards. Kept to 2px and paired with the
+   image scale below — enough to feel responsive, not enough to shift the
+   grid under the pointer. */
+@media (prefers-reduced-motion: no-preference) {
+  .card-lift {
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 260ms ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+  }
+  .card-lift .card-media {
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card-lift:hover .card-media {
+    transform: scale(1.03);
+  }
+}
+
+/* A whole screen arriving after a route change.
+
+   Slower and shorter than the section reveals: the page has just jumped to
+   the top, so the movement has to read as "this is the new page settling"
+   rather than as another thing sliding about. 10px, not 14.
+
+   Applied to a wrapper keyed on the route, so it replays on every
+   navigation rather than only on first mount. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    animation: page-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Digits still settling.
+
+   Dimmed and slightly tracked-out while a figure is scrambling, so it
+   reads as a number arriving rather than as a number that is wrong. The
+   component removes this the moment it lands. */
+.tallying {
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+}
+
+/* ── Horizontal rails ──────────────────────────
+   A row that scrolls sideways instead of wrapping.
+
+   scroll-snap so a card always comes to rest aligned, and scroll-padding
+   matching the page gutter so the snapped card lines up with the heading
+   above it rather than with the screen edge. */
+.rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* Room for the cards' hover lift, which would otherwise be clipped by
+     the scroll container. */
+  padding-block: 4px;
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+/* ── Infinite marquee ──────────────────────────
+   A row that scrolls itself, forever.
+
+   The track holds the same children twice and
+   translates exactly -50%, so the moment the first
+   copy leaves the frame the second is sitting
+   where it started and the loop is invisible. Any
+   other offset shows a seam.
+
+   width: max-content is what stops the flex track
+   being squeezed to the container and breaking
+   that 50% relationship.
+
+   These cards carry paragraphs, not logos, so the
+   track stops on hover and on keyboard focus.
+   Text that moves while it is being read is
+   hostile; text that moves until you reach for it
+   is an invitation. */
+.marquee {
+  overflow: hidden;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 60s) linear infinite;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* With motion off the loop stops and the row becomes an ordinary
+   horizontal scroller — the content is all still reachable, by drag or by
+   keyboard, it simply no longer moves on its own. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    overflow-x: auto;
+  }
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* The scrollbar is hidden, so something else has to say "there is more
+   this way". A soft fade at the trailing edge, dropped once the rail is
+   scrolled to its end. */
+.rail-frame {
+  position: relative;
+}
+.rail-frame::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 72px;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 260ms ease;
+  background: linear-gradient(to right, transparent, var(--rail-fade, #f5eddd));
+}
+.rail-frame[data-at-end]::after {
+  opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   CINEMATIC LAYER
+   Depth, glass and unhurried movement.
+
+   The brief was "luxury, Apple-minimal, cinematic".
+   Read here as restraint rather than spectacle:
+   longer easings, more air, materials that catch
+   light. This is a community heritage archive, and
+   an archive that behaves like a product launch
+   stops being believed. Nothing here draws
+   attention to itself; it only makes the page feel
+   deliberate.
+
+   All of it is scroll-driven or transition-based,
+   so nothing runs on the main thread and every
+   block degrades to a static, finished page.
+   ═══════════════════════════════════════════════ */
+
+/* One easing for the whole system. Apple's own curve family: slow to
+   commit, long to settle, no overshoot. */
+:root {
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Anchor links and rail paging glide rather than jump. Sits outside the
+   reduced-motion floor below, which already resets it to auto. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ── Cinematic reveal ──────────────────────────
+   The section reveal, deepened. Where .reveal
+   fades and lifts, this also lets the element
+   settle out of a shallow blur and a fractional
+   scale — the "rack focus" that reads as cinematic
+   without anything actually moving very far. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal-cinematic {
+      animation: reveal-cinematic linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+
+    /* Parallax. Three depths, all driven by the same timeline, so the
+       layers separate as the section crosses the viewport. Kept small:
+       past about 40px the illusion breaks and it just looks loose. */
+    .parallax-back {
+      animation: parallax-back linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+    .parallax-fore {
+      animation: parallax-fore linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+
+    /* The "camera move": a slow push-in as the frame crosses. Applied to
+       media, never to text — type that scales while being read is the
+       fastest way to make a page feel cheap. */
+    .camera-push {
+      animation: camera-push linear both;
+      animation-timeline: view();
+      animation-range: cover;
+      will-change: transform;
+    }
+  }
+}
+
+@keyframes reveal-cinematic {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.985);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes parallax-back {
+  from {
+    transform: translateY(-34px);
+  }
+  to {
+    transform: translateY(34px);
+  }
+}
+
+@keyframes parallax-fore {
+  from {
+    transform: translateY(20px);
+  }
+  to {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes camera-push {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* ── Glass ─────────────────────────────────────
+   Used only on things that float above content:
+   the navbar, the ethnicity bar, the cart. A
+   surface that is flush with the page has nothing
+   to be translucent against, and blurring it is
+   just a blurry rectangle.
+
+   The saturate() is what stops backdrop-blur going
+   grey and lifeless over a dark background. */
+.glass {
+  background-color: color-mix(in srgb, #1a1614 72%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-color: color-mix(in srgb, #f5eddd 12%, transparent);
+}
+.glass-light {
+  background-color: color-mix(in srgb, #f5eddd 72%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-color: color-mix(in srgb, #1a1614 10%, transparent);
+}
+
+/* Where backdrop-filter is missing the translucency alone would leave text
+   over moving content. Fall back to opaque. */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass {
+    background-color: #1a1614;
+  }
+  .glass-light {
+    background-color: #f5eddd;
+  }
+}
+
+/* ── Light ─────────────────────────────────────
+   A warm bloom that follows the accent colour, so
+   it re-tints with the ethnicity like everything
+   else. Hover only, and never on a whole card —
+   a page where everything glows reads as a game
+   menu. */
+@media (prefers-reduced-motion: no-preference) {
+  .glow-hover {
+    transition:
+      box-shadow 420ms var(--ease-cinematic),
+      transform 420ms var(--ease-cinematic);
+  }
+  .glow-hover:hover {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--c-amber) 28%, transparent),
+      0 8px 34px -8px color-mix(in srgb, var(--c-amber) 34%, transparent);
+  }
+  /* Presses settle back rather than snapping, which is most of what makes
+     a button feel expensive. */
+  .press:active {
+    transform: scale(0.985);
+  }
+  .press {
+    transition: transform 180ms var(--ease-glide);
+  }
+}
+
+/* ── Type ──────────────────────────────────────
+   Optical corrections that only matter at display
+   sizes: tighter tracking as the size goes up,
+   and old-style figures held back so numerals in
+   running text do not shout. */
+.font-display {
+  letter-spacing: -0.012em;
+}
+.page-title,
+.section-title {
+  letter-spacing: -0.022em;
+  /* Lets a long Vietnamese heading break at a sensible point rather than
+     leaving one word alone on the last line. */
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
+/* Hairlines. A 1px border at full strength reads as a box; at 8% it reads
+   as a fold in the paper, which is the Apple trick. */
+.hairline {
+  border-color: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+/* ── Loading ───────────────────────────────────
+   A slow breath rather than a spinner. A spinner
+   says "working"; this says "arriving", which is
+   the right register for an archive. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+.breathe {
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
 /* Accessibility floor.
 
    This also disarms the accent-colour interpolation and both switch
@@ -262,5 +799,19 @@
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+
+  /* The cinematic layer leans on blur and scale, neither of which is
+     covered by zeroing durations — a paused animation holds its `from`
+     frame, which here is a blurred, offset element. Clear them outright. */
+  .reveal-cinematic,
+  .parallax-back,
+  .parallax-fore,
+  .camera-push,
+  .breathe {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
 }

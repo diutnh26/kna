@@ -13,6 +13,8 @@ import AuthModal from './components/AuthModal';
 import DemoDataBanner from './components/DemoDataBanner';
 import { AuthProvider } from './context/AuthProvider';
 import { EthnicityProvider } from './context/EthnicityProvider';
+import { CartProvider } from './context/CartProvider';
+import CartDrawer from './components/CartDrawer';
 
 /**
  * Lightweight hash router for the KNĂ prototype.
@@ -76,11 +78,23 @@ export default function App() {
   return (
     <AuthProvider>
       <EthnicityProvider>
-        {/* Above everything: a demonstration ledger that does not say it is
-            one undermines the exact claim this platform is making. */}
-        <DemoDataBanner />
-        <Screen />
-        <AuthModal />
+        <CartProvider>
+          {/* Above everything: a demonstration ledger that does not say it
+              is one undermines the exact claim this platform is making. */}
+          <DemoDataBanner />
+          {/* Keyed on the route so the fade replays on every navigation
+              rather than only on first mount. Explore runs its own
+              crossfade inside this one when the ethnicity changes; the two
+              never fire together, because switching ethnicity does not
+              change the route. */}
+          <div key={path} className="page-enter">
+            <Screen />
+          </div>
+          {/* Outside <Screen> so a basket gathered in the marketplace is
+              still there while reading the archive. */}
+          <CartDrawer />
+          <AuthModal />
+        </CartProvider>
       </EthnicityProvider>
     </AuthProvider>
   );

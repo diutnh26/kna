@@ -413,7 +413,7 @@ export default function Travel() {
       </section>
 
       {/* ── WHERE THE MONEY GOES ──────────────────── */}
-      <section className="bg-bone text-ink">
+      <section className="reveal-cinematic bg-bone text-ink">
         <div className="px-8 lg:px-12 xl:px-16 py-24 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-5">
             <div className="text-xs uppercase tracking-[0.25em] text-kteh mb-6">
