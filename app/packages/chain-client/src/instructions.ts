@@ -117,6 +117,18 @@ export function buildGrantRoleIx(authority: PublicKey, wallet: PublicKey, role: 
   });
 }
 
+export function buildRevokeRoleIx(authority: PublicKey, wallet: PublicKey) {
+  return new TransactionInstruction({
+    programId: programId(),
+    keys: [
+      meta(authority, true, false),
+      meta(configPda()),
+      meta(roleGrantPda(wallet), false, true),
+    ],
+    data: anchorDiscriminator(IX.revokeRole),
+  });
+}
+
 export function buildGrantCoordinatorIx(authority: PublicKey, wallet: PublicKey) {
   return buildGrantRoleIx(authority, wallet, ROLE_COORDINATOR);
 }

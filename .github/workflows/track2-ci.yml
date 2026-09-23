@@ -77,6 +77,15 @@ jobs:
             -v "${{ github.workspace }}/app:/workspace/app" \
             -v "${{ github.workspace }}/scripts/ci-anchor-build.sh:/ci-anchor-build.sh:ro" \
             kna-anchor bash -lc "export PATH=/root/.avm/bin:/root/.local/share/solana/install/active_release/bin:/usr/local/cargo/bin:\$PATH && sed 's/\r$//' /ci-anchor-build.sh | bash"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Program integration tests (LiteSVM against the built .so)
+        working-directory: app
+        run: |
+          rm -f package-lock.json
+          npm install --ignore-scripts --no-audit --no-fund
+          npm run test:program
 
   secret-scan:
     runs-on: ubuntu-latest
