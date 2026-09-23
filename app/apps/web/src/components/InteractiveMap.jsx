@@ -2,7 +2,23 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { DAK_LAK, BUON_MA_THUOT } from '../lib/geography';
+import { DAK_LAK, BUON_MA_THUOT, ETHNICITY_SITES } from '../lib/geography';
+import { useEthnicity } from '../context/useEthnicity';
+
+/**
+ * Read an accent colour as it currently stands.
+ *
+ * Leaflet draws into a canvas with plain strings and cannot follow a CSS
+ * custom property the way an SVG attribute can, so the value is sampled at
+ * the moment the layer is built. That means these shapes step to the new
+ * palette rather than easing into it — acceptable, because the layers are
+ * being torn down and rebuilt on the same switch anyway.
+ */
+function accent(name, fallback) {
+  if (typeof getComputedStyle !== 'function') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
 
 /**
  * Đắk Lắk on a real map, beside the schematic that places it.
@@ -42,9 +58,16 @@ const MAX_ZOOM = 18;
 
 export default function InteractiveMap() {
   const { t } = useTranslation();
+  const { slug } = useEthnicity();
   const containerRef = useRef(null);
+  const mapRef = useRef(null);
+  const overlayRef = useRef(null);
   const [failed, setFailed] = useState(false);
 
+  // The map itself is built once. Switching ethnicity replaces the overlay
+  // in the effect below rather than tearing the whole thing down: a rebuilt
+  // Leaflet instance refetches every tile, which on venue wifi is a grey
+  // square for a second or two on every tab press.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return undefined;
@@ -87,31 +110,8 @@ export default function InteractiveMap() {
     });
     tiles.addTo(map);
 
-    const province = L.polygon(DAK_LAK, {
-      color: '#C8302E',
-      weight: 2,
-      fillColor: '#C8302E',
-      fillOpacity: 0.15,
-    }).addTo(map);
-
-    // Frame the province rather than trusting a fixed zoom. Post-merger it
-    // is about 200km wide, reaching from Cambodia to the coast, and the
-    // zoom 8 that suited the old landlocked shape now cuts the coast off.
-    // Deriving the view from the polygon means the next boundary change
-    // reframes itself.
-    map.fitBounds(province.getBounds(), { padding: [12, 12] });
-
-    // Night stroke rather than a bare saffron dot: the tiles under this are
-    // light, and saffron on near-white loses its edge.
-    L.circleMarker(BUON_MA_THUOT, {
-      radius: 6,
-      color: '#1A1614',
-      weight: 2,
-      fillColor: '#E8A33D',
-      fillOpacity: 1,
-    })
-      .addTo(map)
-      .bindTooltip(t('explore.map.buonMaThuot'), { direction: 'top', offset: [0, -8] });
+    mapRef.current = map;
+    overlayRef.current = L.layerGroup().addTo(map);
 
     // Leaflet measures the container on creation. Inside a grid column that
     // is still settling, that measurement can be short, which leaves a band
@@ -122,15 +122,68 @@ export default function InteractiveMap() {
     return () => {
       resize.disconnect();
       map.remove();
+      mapRef.current = null;
+      overlayRef.current = null;
     };
-  }, [t]);
+  }, []);
+
+  // What is drawn on top, and where the view sits. Rerun on every switch.
+  useEffect(() => {
+    const map = mapRef.current;
+    const overlay = overlayRef.current;
+    if (!map || !overlay) return;
+
+    overlay.clearLayers();
+
+    const site = ETHNICITY_SITES[slug];
+    const kteh = accent('--c-kteh', '#C8302E');
+    const amber = accent('--c-amber', '#E8A33D');
+
+    // Every community now has its province drawn. Ê Đê keeps the
+    // post-merger shape here — this map shows the province as it is on
+    // today's administrative map, while the schematic beside it shows the
+    // pre-merger ground the platform actually works in. The two differing
+    // is the point, not an oversight.
+    const outline = slug === 'ede' ? DAK_LAK : site?.area;
+
+    if (outline) {
+      const province = L.polygon(outline, {
+        color: kteh,
+        weight: 2,
+        fillColor: kteh,
+        fillOpacity: 0.15,
+      }).addTo(overlay);
+
+      // Frame the province rather than trusting a fixed zoom. These range
+      // from Trà Vinh at about 2,300 km² to Đắk Lắk at 18,100, so no single
+      // zoom level suits them all — and deriving the view from the polygon
+      // means the next boundary change reframes itself.
+      map.flyToBounds(province.getBounds(), { padding: [12, 12], duration: 0.8 });
+    } else if (site) {
+      map.flyTo(site.coords, 11, { duration: 0.8 });
+    }
+
+    if (site) {
+      // Night stroke rather than a bare saffron dot: the tiles under this
+      // are light, and saffron on near-white loses its edge.
+      L.circleMarker(site.coords, {
+        radius: 6,
+        color: '#1A1614',
+        weight: 2,
+        fillColor: amber,
+        fillOpacity: 1,
+      })
+        .addTo(overlay)
+        .bindTooltip(site.label, { direction: 'top', offset: [0, -8] });
+    }
+  }, [slug, t]);
 
   return (
     <div className="relative w-full aspect-square overflow-hidden rounded-sm">
-      <div ref={containerRef} className="absolute inset-0 bg-[#241F1C]" />
+      <div ref={containerRef} className="absolute inset-0 bg-ink-raised" />
       {failed && (
-        <div className="absolute inset-0 grid place-items-center bg-[#241F1C] px-6 text-center">
-          <p className="text-sm text-[#F5EDDD]/55 leading-relaxed max-w-xs">
+        <div className="absolute inset-0 grid place-items-center bg-ink-raised px-6 text-center">
+          <p className="text-sm text-bone/55 leading-relaxed max-w-xs">
             {t('explore.map.interactiveUnavailable')}
           </p>
         </div>

@@ -68,6 +68,181 @@ export const DAK_LAK_PRE_MERGER = [
 
 export const BUON_MA_THUOT = [12.68, 108.05];
 
+// ── Provincial outlines for the other four communities ──────────────
+//
+// Traced from published data rather than by hand, unlike the Đắk Lắk
+// shapes above: these are simplified from the pre-2025 provincial boundary
+// set in nguyenduy1133/Free-GIS-Data, which derives from the Vietnam
+// Administrative Units Reference Map. Douglas–Peucker down to 30 points
+// each — the same coarseness as the hand traces, and for the same reason:
+// enough to recognise the province, not enough to settle a border.
+//
+// Pre-2025 boundaries on purpose. Each community is described by the
+// district it was in when the research was written (Bắc Hà, Đồng Văn,
+// Phong Thổ, Trà Cú), and the 2025 mergers folded several of these
+// provinces into larger ones. Drawing today's map would put Lô Lô Chải
+// inside a Tuyên Quang that did not exist when the village was named a
+// Best Tourism Village.
+//
+// Pulling Đắk Lắk from the same source came out at 12.16–13.40°N,
+// 107.48–108.99°E against the hand trace's 12.20–13.30°N, 107.50–108.95°E
+// — close enough to trust the set. The hand trace is kept rather than
+// replaced, so the province KNĂ actually works in stays exactly as drawn.
+
+export const LAO_CAI = [
+  [22.843, 104.262],
+  [22.742, 104.267],
+  [22.613, 104.458],
+  [22.529, 104.413],
+  [22.485, 104.472],
+  [22.426, 104.465],
+  [22.349, 104.579],
+  [22.244, 104.55],
+  [22.22, 104.627],
+  [22.088, 104.561],
+  [22.199, 104.427],
+  [22.177, 104.383],
+  [21.948, 104.431],
+  [21.878, 104.354],
+  [21.941, 104.282],
+  [21.95, 104.212],
+  [21.89, 104.194],
+  [21.926, 103.998],
+  [22.14, 103.936],
+  [22.313, 103.765],
+  [22.393, 103.762],
+  [22.409, 103.603],
+  [22.471, 103.553],
+  [22.527, 103.594],
+  [22.597, 103.525],
+  [22.797, 103.638],
+  [22.508, 103.976],
+  [22.738, 104.047],
+  [22.814, 104.119],
+  [22.843, 104.262],
+];
+
+export const HA_GIANG = [
+  [23.384, 105.329],
+  [23.159, 105.57],
+  [23.008, 105.489],
+  [22.991, 105.373],
+  [22.881, 105.266],
+  [22.755, 105.468],
+  [22.628, 105.494],
+  [22.605, 105.314],
+  [22.696, 105.146],
+  [22.289, 105.045],
+  [22.351, 104.897],
+  [22.187, 104.895],
+  [22.167, 104.776],
+  [22.262, 104.715],
+  [22.291, 104.608],
+  [22.243, 104.551],
+  [22.349, 104.579],
+  [22.439, 104.454],
+  [22.531, 104.413],
+  [22.613, 104.458],
+  [22.711, 104.339],
+  [22.853, 104.574],
+  [22.824, 104.729],
+  [22.952, 104.864],
+  [23.125, 104.8],
+  [23.183, 104.91],
+  [23.151, 104.949],
+  [23.27, 105.08],
+  [23.264, 105.229],
+  [23.384, 105.329],
+];
+
+export const LAI_CHAU = [
+  [22.807, 103.333],
+  [22.579, 103.57],
+  [22.412, 103.601],
+  [22.409, 103.745],
+  [22.14, 103.936],
+  [21.968, 103.983],
+  [21.907, 103.885],
+  [21.771, 103.965],
+  [21.698, 103.915],
+  [21.826, 103.695],
+  [21.995, 103.648],
+  [22.031, 103.543],
+  [21.98, 103.474],
+  [22.157, 103.387],
+  [22.111, 103.286],
+  [22.04, 103.281],
+  [22.103, 103.1],
+  [22.028, 102.985],
+  [22.108, 102.924],
+  [22.088, 102.776],
+  [22.231, 102.736],
+  [22.256, 102.66],
+  [22.169, 102.672],
+  [22.257, 102.518],
+  [22.549, 102.319],
+  [22.781, 102.497],
+  [22.609, 102.86],
+  [22.485, 102.927],
+  [22.449, 103.072],
+  [22.807, 103.333],
+];
+
+export const TRA_VINH = [
+  [10.012, 106.33],
+  [9.922, 106.48],
+  [9.8, 106.596],
+  [9.745, 106.561],
+  [9.674, 106.578],
+  [9.611, 106.552],
+  [9.557, 106.498],
+  [9.528, 106.411],
+  [9.539, 106.403],
+  [9.529, 106.376],
+  [9.541, 106.379],
+  [9.58, 106.341],
+  [9.594, 106.314],
+  [9.584, 106.302],
+  [9.649, 106.211],
+  [9.778, 106.068],
+  [9.921, 105.952],
+  [9.906, 105.994],
+  [9.934, 106.018],
+  [9.944, 106.072],
+  [9.962, 106.083],
+  [9.94, 106.111],
+  [9.962, 106.13],
+  [10.025, 106.133],
+  [10.026, 106.191],
+  [10.005, 106.212],
+  [10.025, 106.23],
+  [10.045, 106.221],
+  [10.083, 106.239],
+  [10.012, 106.33],
+];
+
+
+// The four communities the platform reaches beyond Đắk Lắk, keyed by the
+// slug their profile in content/ethnicities carries.
+//
+// Each carries both a point and the province it sits in. The point is the
+// village; the outline is the province, and the two say different things —
+// a marker claims only where a settlement is, while a filled boundary is a
+// claim about where a border runs. Both are drawn because a reader who has
+// never placed Lũng Cú needs the province to find it by, and the village to
+// know what is actually being described.
+//
+// Coordinates are village-centre to about a kilometre, read off the places
+// named in the research report. Good enough to put the marker on the right
+// valley; not good enough to navigate by.
+export const ETHNICITY_SITES = {
+  ede: { coords: BUON_MA_THUOT, label: 'Buôn Ma Thuột', area: DAK_LAK_PRE_MERGER },
+  tay: { coords: [22.45, 104.35], label: 'Bản Liền', area: LAO_CAI },
+  lolo: { coords: [23.36, 105.31], label: 'Lô Lô Chải', area: HA_GIANG },
+  hmong: { coords: [22.47, 103.53], label: 'Sin Suối Hồ', area: LAI_CHAU },
+  khmer: { coords: [9.93, 106.34], label: 'Trà Vinh', area: TRA_VINH },
+};
+
 // Named islands rather than a scatter, so the clusters sit where the real
 // ones do. Not every feature in either group, which no map at this scale
 // shows.

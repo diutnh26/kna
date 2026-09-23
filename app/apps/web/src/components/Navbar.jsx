@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, X, UserRound } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import CartButton from './CartButton';
 import { useAuth } from '../context/useAuth';
 import WalletConnectButton from '../wallet/WalletConnect';
 
@@ -41,15 +42,18 @@ export default function Navbar({ active = '', theme = 'dark' }) {
     i18n.changeLanguage(i18n.resolvedLanguage === 'vi' ? 'en' : 'vi');
   }
 
-  const bg = isDark ? 'bg-[#1A1614]' : 'bg-[#F5EDDD]';
-  const text = isDark ? 'text-[#F5EDDD]' : 'text-[#1A1614]';
-  const muted = isDark ? 'text-[#F5EDDD]/70' : 'text-[#1A1614]/70';
-  const faint = isDark ? 'text-[#F5EDDD]/50' : 'text-[#1A1614]/50';
-  const rule = isDark ? 'border-[#F5EDDD]/10' : 'border-[#1A1614]/10';
-  const divider = isDark ? 'bg-[#F5EDDD]/20' : 'bg-[#1A1614]/20';
+  // Glass, not a solid bar. The navbar is the one element that sits over
+  // content the whole way down the page, so it is the one place
+  // translucency has something to be translucent against.
+  const bg = isDark ? 'glass' : 'glass-light';
+  const text = isDark ? 'text-bone' : 'text-ink';
+  const muted = isDark ? 'text-bone/70' : 'text-ink/70';
+  const faint = isDark ? 'text-bone/50' : 'text-ink/50';
+  const rule = isDark ? 'border-bone/10' : 'border-ink/10';
+  const divider = isDark ? 'bg-bone/20' : 'bg-ink/20';
   const btnBorder = isDark
-    ? 'border-[#F5EDDD]/30 hover:border-[#F5EDDD]/70'
-    : 'border-[#1A1614]/30 hover:border-[#1A1614]/70';
+    ? 'border-bone/30 hover:border-bone/70'
+    : 'border-ink/30 hover:border-ink/70';
 
   return (
     <header className={`${bg} ${text} border-b ${rule} sticky top-0 z-50`}>
@@ -74,12 +78,12 @@ export default function Navbar({ active = '', theme = 'dark' }) {
                   key={link.key}
                   href={link.href}
                   className={`relative transition ${
-                    isActive ? (isDark ? 'text-[#F5EDDD]' : 'text-[#1A1614]') : ''
-                  } ${isDark ? 'hover:text-[#F5EDDD]' : 'hover:text-[#1A1614]'}`}
+                    isActive ? (isDark ? 'text-bone' : 'text-ink') : ''
+                  } ${isDark ? 'hover:text-bone' : 'hover:text-ink'}`}
                 >
                   {link.label}
                   {isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-[#C8302E]" />
+                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-kteh" />
                   )}
                 </a>
               );
@@ -105,6 +109,7 @@ export default function Navbar({ active = '', theme = 'dark' }) {
                 <span className={`${muted} text-xs`}>
                   {t('auth.greeting', { name: user.fullName.split(' ')[0] })}
                 </span>
+                <CartButton theme={theme} />
                 <NotificationBell theme={theme} />
                 <a
                   href="#account"
@@ -122,12 +127,19 @@ export default function Navbar({ active = '', theme = 'dark' }) {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={openAuthModal}
-                className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
-              >
-                {t('nav.signIn')}
-              </button>
+              /* The cart works signed out — a basket is only asked to
+                 identify itself at checkout, which is where openAuthModal
+                 is called from. Hiding it until sign-in would mean losing
+                 whatever someone gathered on the way there. */
+              <div className="flex items-center gap-3">
+                <CartButton theme={theme} />
+                <button
+                  onClick={openAuthModal}
+                  className={`px-4 py-2 border ${btnBorder} transition text-xs uppercase tracking-wider`}
+                >
+                  {t('nav.signIn')}
+                </button>
+              </div>
             )}
           </div>
         </div>

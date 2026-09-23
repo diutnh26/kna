@@ -26,16 +26,16 @@ const dmy = (iso) =>
 
 /** Status pill colours, keyed by the value the API actually returns. */
 const STATUS_STYLE = {
-  PENDING: 'text-[#B87333] border-[#B87333]/40',
-  IN_REVIEW: 'text-[#B87333] border-[#B87333]/40',
-  DRAFT: 'text-[#F5EDDD]/40 border-[#F5EDDD]/20',
-  CONFIRMED: 'text-[#E8A33D] border-[#E8A33D]/40',
-  PAID: 'text-[#E8A33D] border-[#E8A33D]/40',
-  COMPLETED: 'text-[#8FA37B] border-[#8FA37B]/40',
-  FULFILLED: 'text-[#8FA37B] border-[#8FA37B]/40',
-  PUBLISHED: 'text-[#8FA37B] border-[#8FA37B]/40',
-  CANCELLED: 'text-[#F5EDDD]/40 border-[#F5EDDD]/20',
-  REJECTED: 'text-[#C8302E] border-[#C8302E]/50',
+  PENDING: 'text-copper border-copper/40',
+  IN_REVIEW: 'text-copper border-copper/40',
+  DRAFT: 'text-bone/40 border-bone/20',
+  CONFIRMED: 'text-amber border-amber/40',
+  PAID: 'text-amber border-amber/40',
+  COMPLETED: 'text-sage border-sage/40',
+  FULFILLED: 'text-sage border-sage/40',
+  PUBLISHED: 'text-sage border-sage/40',
+  CANCELLED: 'text-bone/40 border-bone/20',
+  REJECTED: 'text-kteh border-kteh/50',
 };
 
 const KIND_ICON = { booking: CalendarDays, order: ShoppingBag, contribution: FileText };
@@ -143,24 +143,24 @@ export default function Account() {
   });
 
   const field =
-    'w-full bg-transparent border border-[#F5EDDD]/25 px-4 py-3 text-sm focus:outline-none focus:border-[#F5EDDD]/60';
-  const legend = 'block text-xs uppercase tracking-[0.2em] text-[#B87333] mb-3';
+    'w-full bg-transparent border border-bone/25 px-4 py-3 text-sm focus:outline-none focus:border-bone/60';
+  const legend = 'block text-xs uppercase tracking-[0.2em] text-copper mb-3';
 
   return (
-    <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
+    <div className="min-h-screen bg-ink text-bone font-body antialiased">
       <Navbar active="account" theme="dark" />
 
       <section className="px-8 lg:px-12 xl:px-16 py-20 md:py-24 max-w-6xl">
-        <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-[#B87333] mb-8">
-          <span className="h-px w-12 bg-[#B87333]" />
+        <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-copper mb-8">
+          <span className="h-px w-12 bg-copper" />
           <span>{t('account.eyebrow')}</span>
         </div>
         <h1 className="font-display page-title font-medium leading-[1.05] tracking-tight mb-6">
           {t('account.title')}
         </h1>
-        <p className="text-lg text-[#F5EDDD]/70 max-w-2xl leading-relaxed">{t('account.intro')}</p>
+        <p className="text-lg text-bone/70 max-w-2xl leading-relaxed">{t('account.intro')}</p>
         {data && (
-          <p className="text-sm text-[#F5EDDD]/45 mt-6">
+          <p className="text-sm text-bone/45 mt-6">
             {t('account.memberSince', { date: dmy(data.user.memberSince) })}
           </p>
         )}
@@ -168,11 +168,11 @@ export default function Account() {
 
       {!isAuthenticated && (
         <section className="px-8 lg:px-12 xl:px-16 pb-24">
-          <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
+          <div className="border border-dashed border-bone/20 py-16 text-center">
             <p className="font-display text-2xl mb-4">{t('account.signInPrompt')}</p>
             <button
               onClick={openAuthModal}
-              className="bg-[#C8302E] hover:bg-[#A82826] px-6 py-3 text-sm uppercase tracking-wider transition"
+              className="bg-kteh hover:bg-kteh-hover px-6 py-3 text-sm uppercase tracking-wider transition"
             >
               {t('account.signIn')}
             </button>
@@ -189,7 +189,7 @@ export default function Account() {
       )}
 
       {isAuthenticated && loadState === 'loading' && (
-        <section className="px-8 lg:px-12 xl:px-16 pb-24 text-sm text-[#F5EDDD]/50">
+        <section className="px-8 lg:px-12 xl:px-16 pb-24 text-sm text-bone/50">
           {t('account.loading')}
         </section>
       )}
@@ -203,9 +203,9 @@ export default function Account() {
       {isAuthenticated && loadState === 'ready' && data && (
         <>
           {/* ── MONEY SUMMARY (role-aware) ──────────────────── */}
-          <section className="bg-[#F5EDDD] text-[#1A1614]">
+          <section className="bg-bone text-ink">
             <div className="px-8 lg:px-12 xl:px-16 py-20">
-              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-[#C8302E] mb-8">
+              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-kteh mb-8">
                 <Wallet className="w-4 h-4" />
                 {data.moneyView === 'staff'
                   ? t('account.staffEyebrow')
@@ -217,30 +217,30 @@ export default function Account() {
               {data.moneyView === 'staff' && data.staffMoney ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
                   <div>
-                    <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
+                    <div className="font-display price-lg font-medium text-deep mb-1">
                       {vnd(data.staffMoney.settledBookingsVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.staffSettled')}</p>
+                    <p className="text-sm text-ink/60">{t('account.staffSettled')}</p>
                   </div>
                   <div>
-                    <div className="font-display price-lg font-medium text-[#B87333] mb-1">
+                    <div className="font-display price-lg font-medium text-copper mb-1">
                       {vnd(data.staffMoney.toProvidersVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.staffToProviders')}</p>
+                    <p className="text-sm text-ink/60">{t('account.staffToProviders')}</p>
                   </div>
                   <div>
-                    <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
+                    <div className="font-display price-lg font-medium text-ink/70 mb-1">
                       {vnd(data.staffMoney.toFundVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.staffToFund')}</p>
+                    <p className="text-sm text-ink/60">{t('account.staffToFund')}</p>
                   </div>
                   <div>
                     <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
                       {data.staffMoney.paidWithDemo}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.staffDemoPaid')}</p>
+                    <p className="text-sm text-ink/60">{t('account.staffDemoPaid')}</p>
                     {data.staffMoney.awaitingPayment > 0 && (
-                      <p className="text-xs text-[#1A1614]/45 mt-1">
+                      <p className="text-xs text-ink/45 mt-1">
                         {t('account.staffAwaiting', { count: data.staffMoney.awaitingPayment })}
                       </p>
                     )}
@@ -249,30 +249,30 @@ export default function Account() {
               ) : data.moneyView === 'provider' && data.providerMoney ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
                   <div>
-                    <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
+                    <div className="font-display price-lg font-medium text-deep mb-1">
                       {vnd(data.providerMoney.earnedVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.providerEarned')}</p>
+                    <p className="text-sm text-ink/60">{t('account.providerEarned')}</p>
                   </div>
                   <div>
-                    <div className="font-display price-lg font-medium text-[#B87333] mb-1">
+                    <div className="font-display price-lg font-medium text-copper mb-1">
                       {vnd(data.providerMoney.fundVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.providerFund')}</p>
+                    <p className="text-sm text-ink/60">{t('account.providerFund')}</p>
                   </div>
                   <div>
-                    <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
+                    <div className="font-display price-lg font-medium text-ink/70 mb-1">
                       {vnd(data.providerMoney.platformVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.providerPlatform')}</p>
+                    <p className="text-sm text-ink/60">{t('account.providerPlatform')}</p>
                   </div>
                   <div>
                     <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
                       {data.providerMoney.bookings}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.providerBookings')}</p>
+                    <p className="text-sm text-ink/60">{t('account.providerBookings')}</p>
                     {data.providerMoney.pending > 0 && (
-                      <p className="text-xs text-[#1A1614]/45 mt-1">
+                      <p className="text-xs text-ink/45 mt-1">
                         {t('account.providerPending', { count: data.providerMoney.pending })}
                       </p>
                     )}
@@ -281,30 +281,30 @@ export default function Account() {
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
                   <div>
-                    <div className="font-display price-lg font-medium text-[#6B1A1A] mb-1">
+                    <div className="font-display price-lg font-medium text-deep mb-1">
                       {vnd(data.totals.spentVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.spent')}</p>
+                    <p className="text-sm text-ink/60">{t('account.spent')}</p>
                   </div>
                   <div>
-                    <div className="font-display price-lg font-medium text-[#B87333] mb-1">
+                    <div className="font-display price-lg font-medium text-copper mb-1">
                       {vnd(data.totals.toProvidersVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.toProviders')}</p>
+                    <p className="text-sm text-ink/60">{t('account.toProviders')}</p>
                   </div>
                   <div>
-                    <div className="font-display price-lg font-medium text-[#1A1614]/70 mb-1">
+                    <div className="font-display price-lg font-medium text-ink/70 mb-1">
                       {vnd(data.totals.toCommunityFundVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.toFund')}</p>
+                    <p className="text-sm text-ink/60">{t('account.toFund')}</p>
                   </div>
                   <div>
                     <div className="font-display price-lg font-medium text-[#4F5D3A] mb-1">
                       {vnd(data.totals.toOffsetProjectsVnd)}
                     </div>
-                    <p className="text-sm text-[#1A1614]/60">{t('account.toOffsets')}</p>
+                    <p className="text-sm text-ink/60">{t('account.toOffsets')}</p>
                     {data.totals.offsetKgCo2e > 0 && (
-                      <p className="text-xs text-[#1A1614]/45 mt-1">
+                      <p className="text-xs text-ink/45 mt-1">
                         {t('account.offsetKg', { count: data.totals.offsetKgCo2e })}
                       </p>
                     )}
@@ -317,7 +317,7 @@ export default function Account() {
                 </div>
               )}
 
-              <p className="text-xs text-[#1A1614]/50 leading-relaxed max-w-2xl">
+              <p className="text-xs text-ink/50 leading-relaxed max-w-2xl">
                 {data.moneyView === 'staff'
                   ? t('account.staffSettledOnly')
                   : data.moneyView === 'provider'
@@ -327,7 +327,7 @@ export default function Account() {
               {/* Guest spend still shown under provider/staff so personal trips are visible */}
               {(data.moneyView === 'provider' || data.moneyView === 'staff') &&
               data.totals.spentVnd > 0 ? (
-                <p className="text-xs text-[#1A1614]/45 mt-3">
+                <p className="text-xs text-ink/45 mt-3">
                   {t('account.alsoAsGuest', { amount: vnd(data.totals.spentVnd) })}
                 </p>
               ) : null}
@@ -361,7 +361,7 @@ export default function Account() {
                 readOnly
                 disabled
               />
-              <p className="text-xs text-[#F5EDDD]/40 mt-2 mb-6 leading-relaxed">
+              <p className="text-xs text-bone/40 mt-2 mb-6 leading-relaxed">
                 {t('account.emailFixed')}
               </p>
 
@@ -370,7 +370,7 @@ export default function Account() {
               </label>
               <select
                 id="locale"
-                className={`${field} mb-8 bg-[#1A1614]`}
+                className={`${field} mb-8 bg-ink`}
                 value={form.locale}
                 onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value }))}
               >
@@ -382,15 +382,15 @@ export default function Account() {
                 <button
                   type="submit"
                   disabled={profileState.busy}
-                  className="bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 px-6 py-3 text-sm uppercase tracking-wider transition"
+                  className="bg-kteh hover:bg-kteh-hover disabled:opacity-50 px-6 py-3 text-sm uppercase tracking-wider transition"
                 >
                   {profileState.busy ? t('account.saving') : t('account.save')}
                 </button>
                 {profileState.message && (
-                  <span className="text-sm text-[#8FA37B]">{profileState.message}</span>
+                  <span className="text-sm text-sage">{profileState.message}</span>
                 )}
                 {profileState.error && (
-                  <span className="text-sm text-[#E8A33D]">{profileState.error}</span>
+                  <span className="text-sm text-amber">{profileState.error}</span>
                 )}
               </div>
             </form>
@@ -399,7 +399,7 @@ export default function Account() {
               <h2 className="font-display text-3xl font-medium mb-4">
                 {t('account.passwordTitle')}
               </h2>
-              <p className="text-sm text-[#F5EDDD]/55 leading-relaxed mb-8">
+              <p className="text-sm text-bone/55 leading-relaxed mb-8">
                 {t('account.passwordNote')}
               </p>
 
@@ -431,14 +431,14 @@ export default function Account() {
                 <button
                   type="submit"
                   disabled={pwState.busy}
-                  className="border border-[#F5EDDD]/30 hover:border-[#F5EDDD]/70 disabled:opacity-50 px-6 py-3 text-sm uppercase tracking-wider transition"
+                  className="border border-bone/30 hover:border-bone/70 disabled:opacity-50 px-6 py-3 text-sm uppercase tracking-wider transition"
                 >
                   {pwState.busy ? t('account.changing') : t('account.changePassword')}
                 </button>
                 {pwState.message && (
-                  <span className="text-sm text-[#8FA37B]">{pwState.message}</span>
+                  <span className="text-sm text-sage">{pwState.message}</span>
                 )}
-                {pwState.error && <span className="text-sm text-[#E8A33D]">{pwState.error}</span>}
+                {pwState.error && <span className="text-sm text-amber">{pwState.error}</span>}
               </div>
             </form>
           </section>
@@ -465,8 +465,8 @@ export default function Account() {
                     onClick={() => setFilter(key)}
                     className={`px-4 py-2 text-xs uppercase tracking-wider border transition ${
                       filter === key
-                        ? 'bg-[#F5EDDD] text-[#1A1614] border-[#F5EDDD]'
-                        : 'border-[#F5EDDD]/25 hover:border-[#F5EDDD]/60'
+                        ? 'bg-bone text-ink border-bone'
+                        : 'border-bone/25 hover:border-bone/60'
                     }`}
                   >
                     {label}
@@ -476,17 +476,17 @@ export default function Account() {
             </div>
 
             {shown.length === 0 ? (
-              <div className="border border-dashed border-[#F5EDDD]/20 py-16 text-center">
+              <div className="border border-dashed border-bone/20 py-16 text-center">
                 <p className="font-display text-2xl mb-2">
                   {filter === 'offsets' ? t('account.offsetsNone') : t('account.activityEmpty')}
                 </p>
-                <p className="text-sm text-[#F5EDDD]/60">
+                <p className="text-sm text-bone/60">
                   {filter === 'offsets' ? t('account.offsetsNoneBody') : t('account.activityEmptyBody')}
                 </p>
                 {filter === 'offsets' && (
                   <a
                     href="#carbon"
-                    className="inline-block mt-4 text-sm text-[#E8A33D] underline underline-offset-4"
+                    className="inline-block mt-4 text-sm text-amber underline underline-offset-4"
                   >
                     {t('account.openTracker')}
                   </a>
@@ -500,7 +500,7 @@ export default function Account() {
                   return (
                     <article
                       key={`${row.kind}-${row.id}`}
-                      className="border border-[#F5EDDD]/15 p-6 flex flex-wrap items-start gap-6"
+                      className="border border-bone/15 p-6 flex flex-wrap items-start gap-6"
                     >
                       <ImageSlot
                         src={row.imageUrl}
@@ -512,8 +512,8 @@ export default function Account() {
 
                       <div className="flex-1 min-w-[260px]">
                         <div className="flex items-center gap-3 mb-2">
-                          <Icon className="w-3.5 h-3.5 text-[#B87333] shrink-0" />
-                          <span className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
+                          <Icon className="w-3.5 h-3.5 text-copper shrink-0" />
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-copper">
                             {t(`account.kind${row.kind[0].toUpperCase()}${row.kind.slice(1)}`)}
                           </span>
                           <span
@@ -528,19 +528,19 @@ export default function Account() {
                         </h3>
 
                         {row.kind === 'booking' && (
-                          <p className="text-sm text-[#E8A33D] mb-1">
+                          <p className="text-sm text-amber mb-1">
                             {t('account.arriving', { date: dmy(row.checkIn), count: row.nights })} ·{' '}
                             {t('account.guests', { count: row.guests })}
                           </p>
                         )}
                         {row.kind === 'order' && (
-                          <p className="text-sm text-[#F5EDDD]/60 mb-1">
+                          <p className="text-sm text-bone/60 mb-1">
                             {t('account.items', { count: row.itemCount })}
                           </p>
                         )}
 
                         {row.from && (
-                          <p className="text-xs text-[#F5EDDD]/45 flex items-center gap-1.5">
+                          <p className="text-xs text-bone/45 flex items-center gap-1.5">
                             <MapPin className="w-3 h-3 shrink-0" />
                             {t('account.from', { name: row.from })}
                             {row.buon ? ` · ${row.buon}` : ''}
@@ -548,12 +548,12 @@ export default function Account() {
                         )}
 
                         {row.kind === 'booking' && row.offset && (
-                          <div className="mt-3 border-l-2 border-[#8FA37B]/50 pl-3">
-                            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#8FA37B] mb-1">
+                          <div className="mt-3 border-l-2 border-sage/50 pl-3">
+                            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-sage mb-1">
                               <Sprout className="w-3 h-3 shrink-0" />
                               {t('account.offsetTitle')}
                             </div>
-                            <p className="text-sm text-[#F5EDDD]/70">
+                            <p className="text-sm text-bone/70">
                               {t('account.offsetLine', {
                                 kg: row.offset.kgCo2e.toLocaleString('vi-VN'),
                                 project: offsetProjectName(row.offset.projectId),
@@ -563,13 +563,13 @@ export default function Account() {
                                   and printing 0 ₫ beside them would read as
                                   a failed payment. */}
                               {row.offset.amountVnd > 0 && (
-                                <span className="text-[#F5EDDD]/45"> · {vnd(row.offset.amountVnd)}</span>
+                                <span className="text-bone/45"> · {vnd(row.offset.amountVnd)}</span>
                               )}
                             </p>
                             {/* The commitment to turn up and work is the part
                                 worth surfacing — it is a date in someone's
                                 calendar, not just a payment. */}
-                            <p className="text-xs text-[#F5EDDD]/50 mt-1">
+                            <p className="text-xs text-bone/50 mt-1">
                               {row.offset.mode === 'DONATE'
                                 ? t('account.offsetDonated')
                                 : row.offset.mode === 'IN_PERSON'
@@ -582,7 +582,7 @@ export default function Account() {
                                     })}
                             </p>
                             {row.status === 'PENDING' && (
-                              <p className="text-xs text-[#B87333] mt-1">
+                              <p className="text-xs text-copper mt-1">
                                 {t('account.offsetPending')}
                               </p>
                             )}
@@ -621,15 +621,15 @@ export default function Account() {
 
                         {row.kind === 'contribution' && (
                           <>
-                            <p className="text-xs text-[#F5EDDD]/45">
+                            <p className="text-xs text-bone/45">
                               {row.entryType} · {t('account.submittedOn', { date: dmy(row.at) })}
                             </p>
                             {row.moderationNote && (
-                              <p className="text-xs text-[#F5EDDD]/55 mt-2 flex items-start gap-1.5">
+                              <p className="text-xs text-bone/55 mt-2 flex items-start gap-1.5">
                                 {row.status === 'PUBLISHED' ? (
-                                  <Check className="w-3 h-3 shrink-0 mt-0.5 text-[#8FA37B]" />
+                                  <Check className="w-3 h-3 shrink-0 mt-0.5 text-sage" />
                                 ) : (
-                                  <X className="w-3 h-3 shrink-0 mt-0.5 text-[#C8302E]" />
+                                  <X className="w-3 h-3 shrink-0 mt-0.5 text-kteh" />
                                 )}
                                 {t('account.committeeNote', { note: row.moderationNote })}
                               </p>
@@ -640,15 +640,15 @@ export default function Account() {
 
                       {row.kind !== 'contribution' && (
                         <div className="text-right shrink-0">
-                          <div className="font-display price-sm text-[#E8A33D] leading-none mb-1">
+                          <div className="font-display price-sm text-amber leading-none mb-1">
                             {vnd(row.totalVnd)}
                           </div>
-                          <div className="text-[11px] text-[#F5EDDD]/45 leading-relaxed max-w-[15rem]">
+                          <div className="text-[11px] text-bone/45 leading-relaxed max-w-[15rem]">
                             {t('account.ofWhich', { provider: vnd(row.toProviderVnd) })}
                             {row.toCommunityFundVnd > 0 &&
                               t('account.andFund', { fund: vnd(row.toCommunityFundVnd) })}
                           </div>
-                          <div className="text-[11px] text-[#F5EDDD]/35 mt-1">
+                          <div className="text-[11px] text-bone/35 mt-1">
                             {t('account.placedOn', { date: dmy(row.at) })}
                           </div>
                         </div>

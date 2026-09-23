@@ -100,8 +100,8 @@ export default function AuthModal() {
   }
 
   const inputClass =
-    'w-full bg-transparent border border-[#F5EDDD]/25 px-3 py-2.5 text-sm text-[#F5EDDD] focus:outline-none focus:border-[#F5EDDD]/60 transition';
-  const labelClass = 'block text-xs uppercase tracking-wider text-[#F5EDDD]/50 mb-2';
+    'w-full bg-transparent border border-bone/25 px-3 py-2.5 text-sm text-bone focus:outline-none focus:border-bone/60 transition';
+  const labelClass = 'block text-xs uppercase tracking-wider text-bone/50 mb-2';
   const showVerify = verifySent || pendingVerifyNotice;
 
   return (
@@ -111,14 +111,14 @@ export default function AuthModal() {
       role="presentation"
     >
       <div
-        className="w-full max-w-sm bg-[#1A1614] border border-[#F5EDDD]/15 p-8 relative"
+        className="w-full max-w-sm bg-ink border border-bone/15 p-8 relative"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-[#F5EDDD]/50 hover:text-[#F5EDDD] transition"
+          className="absolute top-4 right-4 text-bone/50 hover:text-bone transition"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
@@ -126,33 +126,33 @@ export default function AuthModal() {
 
         {showVerify ? (
           <div className="space-y-4">
-            <h2 className="font-display text-xl text-[#F5EDDD]">{t('auth.verifyEmailTitle')}</h2>
-            <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">{t('auth.verifyEmailNotice')}</p>
-            {error && <p className="text-sm text-[#E8A33D]">{error}</p>}
+            <h2 className="font-display text-xl text-bone">{t('auth.verifyEmailTitle')}</h2>
+            <p className="text-sm text-bone/70 leading-relaxed">{t('auth.verifyEmailNotice')}</p>
+            {error && <p className="text-sm text-amber">{error}</p>}
             <button
               type="button"
               disabled={resending}
               onClick={handleResend}
-              className="w-full border border-[#F5EDDD]/25 hover:border-[#F5EDDD]/50 disabled:opacity-50 text-[#F5EDDD] py-3 text-sm uppercase tracking-wider transition"
+              className="w-full border border-bone/25 hover:border-bone/50 disabled:opacity-50 text-bone py-3 text-sm uppercase tracking-wider transition"
             >
               {resending ? t('auth.pleaseWait') : t('auth.resendVerification')}
             </button>
             <button
               type="button"
               onClick={handleClose}
-              className="w-full bg-[#C8302E] hover:bg-[#A82826] text-[#F5EDDD] py-3 text-sm uppercase tracking-wider transition"
+              className="w-full bg-kteh hover:bg-kteh-hover text-bone py-3 text-sm uppercase tracking-wider transition"
             >
               {t('auth.continueIntoApp')}
             </button>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-6 text-sm mb-8 border-b border-[#F5EDDD]/10">
+            <div className="flex items-center gap-6 text-sm mb-8 border-b border-bone/10">
               <button
                 type="button"
                 onClick={() => switchMode('login')}
                 className={`pb-3 -mb-px border-b-2 transition ${
-                  mode === 'login' ? 'border-[#C8302E] text-[#F5EDDD]' : 'border-transparent text-[#F5EDDD]/50'
+                  mode === 'login' ? 'border-kteh text-bone' : 'border-transparent text-bone/50'
                 }`}
               >
                 {t('auth.signIn')}
@@ -161,7 +161,7 @@ export default function AuthModal() {
                 type="button"
                 onClick={() => switchMode('signup')}
                 className={`pb-3 -mb-px border-b-2 transition ${
-                  mode === 'signup' ? 'border-[#C8302E] text-[#F5EDDD]' : 'border-transparent text-[#F5EDDD]/50'
+                  mode === 'signup' ? 'border-kteh text-bone' : 'border-transparent text-bone/50'
                 }`}
               >
                 {t('auth.createAccount')}
@@ -204,16 +204,16 @@ export default function AuthModal() {
                   className={inputClass}
                 />
                 {mode === 'signup' && (
-                  <p className="mt-1.5 text-[11px] text-[#F5EDDD]/40">{t('auth.passwordHint')}</p>
+                  <p className="mt-1.5 text-[11px] text-bone/40">{t('auth.passwordHint')}</p>
                 )}
               </div>
 
-              {error && <p className="text-sm text-[#E8A33D]">{error}</p>}
+              {error && <p className="text-sm text-amber">{error}</p>}
 
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-50 text-[#F5EDDD] py-3 text-sm uppercase tracking-wider transition"
+                className="w-full bg-kteh hover:bg-kteh-hover disabled:opacity-50 text-bone py-3 text-sm uppercase tracking-wider transition"
               >
                 {busy ? t('auth.pleaseWait') : mode === 'login' ? t('auth.submitSignIn') : t('auth.submitCreateAccount')}
               </button>
@@ -221,10 +221,10 @@ export default function AuthModal() {
 
             {GOOGLE_CLIENT_ID ? (
               <div className="mt-6 space-y-3">
-                <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-[#F5EDDD]/35">
-                  <span className="flex-1 h-px bg-[#F5EDDD]/15" />
+                <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-bone/35">
+                  <span className="flex-1 h-px bg-bone/15" />
                   {t('auth.or')}
-                  <span className="flex-1 h-px bg-[#F5EDDD]/15" />
+                  <span className="flex-1 h-px bg-bone/15" />
                 </div>
                 <div className="flex justify-center">
                   <GoogleLogin

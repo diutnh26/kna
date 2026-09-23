@@ -14,6 +14,9 @@ import AuthModal from './components/AuthModal';
 import DemoDataBanner from './components/DemoDataBanner';
 import DemoBanner from './components/DemoBanner';
 import { AuthProvider } from './context/AuthProvider';
+import { EthnicityProvider } from './context/EthnicityProvider';
+import { CartProvider } from './context/CartProvider';
+import CartDrawer from './components/CartDrawer';
 
 /**
  * Lightweight hash router for the KNĂ prototype.
@@ -62,21 +65,42 @@ function AppShell() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
+  // The route, with any query dropped. The ethnicity switcher writes its
+  // choice into the hash as `#explore?e=tay`, and ROUTES is an exact-match
+  // lookup — without this split every switch would fall through to Landing.
+  const path = hash.split('?')[0];
+
+  // Keyed on the route rather than the whole hash, so switching ethnicity
+  // leaves the reader where they were. It is a change of subject, not a
+  // change of page, and yanking them back to the top mid-read is the
+  // single most jarring thing the switch could do.
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [hash]);
+  }, [path]);
 
-  // Hash may include query (?verify=…) — route on the path segment only.
-  const routeKey = hash.includes('?') ? hash.slice(0, hash.indexOf('?')) : hash;
-  const Screen = ROUTES[routeKey] ?? Landing;
+  const Screen = ROUTES[path] ?? Landing;
   return (
     <AuthProvider>
-      {/* Above everything: a demonstration ledger that does not say it is
-          one undermines the exact claim this platform is making. */}
-      <DemoBanner />
-      <DemoDataBanner />
-      <Screen />
-      <AuthModal />
+      <EthnicityProvider>
+        <CartProvider>
+          {/* Above everything: a demonstration ledger that does not say it
+              is one undermines the exact claim this platform is making. */}
+          <DemoBanner />
+          <DemoDataBanner />
+          {/* Keyed on the route so the fade replays on every navigation
+              rather than only on first mount. Explore runs its own
+              crossfade inside this one when the ethnicity changes; the two
+              never fire together, because switching ethnicity does not
+              change the route. */}
+          <div key={path} className="page-enter">
+            <Screen />
+          </div>
+          {/* Outside <Screen> so a basket gathered in the marketplace is
+              still there while reading the archive. */}
+          <CartDrawer />
+          <AuthModal />
+        </CartProvider>
+      </EthnicityProvider>
     </AuthProvider>
   );
 }

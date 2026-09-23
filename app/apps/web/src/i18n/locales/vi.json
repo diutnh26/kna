@@ -244,12 +244,18 @@
       "gettingLabel": "Đường đến",
       "gettingValue": "Cách Thành phố Hồ Chí Minh 350 km đường bộ, cách bờ biển Nha Trang 190 km, hoặc 55 phút bay",
       "interactiveUnavailable": "Không tải được bản đồ. Bản đồ phác họa bên cạnh không cần kết nối mạng.",
-      "workArea": ["KNĂ hoạt động tại đây:","Đắk Lắk trước sáp nhập","năm 2025"],
+      "workArea": [
+        "KNĂ hoạt động tại đây:",
+        "Đắk Lắk trước sáp nhập",
+        "năm 2025"
+      ],
       "alt": "Bản đồ Việt Nam với tỉnh Đắk Lắk cũ được tô sáng ở Tây Nguyên, là địa bàn KNĂ hoạt động, Buôn Ma Thuột được đánh dấu bên trong, cùng quần đảo Hoàng Sa và Trường Sa trên Biển Đông.",
       "dakLak": "Đắk Lắk",
       "buonMaThuot": "Buôn Ma Thuột",
       "hoangSa": "Hoàng Sa",
-      "truongSa": "Trường Sa"
+      "truongSa": "Trường Sa",
+      "districtLabel": "Huyện / Xã",
+      "provinceLabel": "Tỉnh"
     },
     "pillarsEyebrow": "Nơi kho lưu trữ bắt đầu",
     "pillarsHeading": "Ba truyền thống mang phần lớn hiểu biết của người Ê Đê.",
@@ -298,7 +304,23 @@
     "phrasesAudio": "Âm thanh phát âm đã được thu nhưng chưa được lưu trữ trực tuyến.",
     "handoffHeading": "Đọc đã đủ. Sẵn sàng ghé thăm?",
     "handoffBody": "Mọi hộ gia đình trong kho lưu trữ này đều đón khách, dẫn tour hoặc bán hàng qua KNĂ.",
-    "handoffCta": "Xem các trải nghiệm"
+    "handoffCta": "Xem các trải nghiệm",
+    "pillarsHeadingFor": "{{count}} truyền thống mang phần lớn những gì người {{name}} biết.",
+    "statHouseholds": "hộ trong bản",
+    "statHomestays": "hộ làm lưu trú",
+    "experiencesEyebrow": "Có gì để làm",
+    "experiencesHeading": "Việc đồng áng và nghi lễ — tham gia, không phải đứng xem.",
+    "institutionsLabel": "Ai đã góp phần dựng nên",
+    "otherPlaces": "Cũng ở đây",
+    "archiveNotOpenTitle": "Kho lưu trữ chưa mở ở đây.",
+    "archiveNotOpenBody": "Toàn bộ nội dung phía trên được biên soạn từ nghiên cứu đã công bố. Kho lưu trữ chỉ chứa những gì cộng đồng đóng góp và Hội đồng đã duyệt; chưa có hộ người {{name}} nào tham gia — nên nó trống, không phải dang dở.",
+    "phrasesMissingTitle": "Chưa ghi nhận được lời chào.",
+    "phrasesMissingBody": "Nghiên cứu dựng nên hồ sơ này không có mẫu câu tiếng {{name}}. Thay vì phỏng đoán từ một ngôn ngữ gần, chỗ trống được giữ nguyên cho đến khi có người bản ngữ điền vào.",
+    "additionalPhrasesLabel": "Cũng có trong tư liệu",
+    "provenance": {
+      "community": "Do các hộ gia đình đóng góp, Hội đồng Quản trị Cộng đồng duyệt trước khi công bố.",
+      "research": "Biên soạn từ nghiên cứu đã công bố, chưa qua thẩm định của chính cộng đồng được mô tả."
+    }
   },
   "travel": {
     "eyebrow": "Trải nghiệm tại Đắk Lắk",
@@ -438,7 +460,10 @@
     ],
     "handoffHeading": "Chưa rõ mình đang xem gì?",
     "handoffBody": "Trợ lý có thể giải thích một hoa văn, một kỹ thuật, hoặc công dụng truyền thống của một món đồ.",
-    "handoffCta": "Hỏi trợ lý"
+    "handoffCta": "Hỏi trợ lý",
+    "addToCart": "Thêm vào giỏ",
+    "addMore": "Thêm nữa",
+    "added": "Đã thêm"
   },
   "community": {
     "eyebrow": "Không gian cộng đồng",
@@ -850,5 +875,39 @@
     "squadsPasteback": "Sau khi Squads execute vault transaction, dán lại chữ ký giao dịch vào KNĂ để API xác minh final PDA và cập nhật sổ công khai.",
     "publicLedger": "Sổ công khai",
     "verifyOnChain": "Xác minh on-chain"
+  },
+  "ethnicity": {
+    "label": "Dân tộc"
+  },
+  "cart": {
+    "title": "Giỏ của bạn",
+    "open": "Giỏ hàng, {{count}} món",
+    "close": "Đóng giỏ",
+    "count": "{{count}} món",
+    "each": "mỗi món",
+    "emptyTitle": "Chưa có gì trong giỏ.",
+    "emptyBody": "Những món bạn thêm từ chợ sẽ nằm ở đây. Chưa đặt gì cho đến khi bạn quyết định.",
+    "splitNotice": "Các món này đến từ {{count}} nghệ nhân. Mỗi người được trả qua đơn riêng của họ, nên giỏ này sẽ thành {{count}} đơn tách biệt — mỗi đơn một dòng sổ cái, ghi công đúng người.",
+    "subtotalFor": "Tạm tính — {{maker}}",
+    "total": "Tổng cộng",
+    "toMakers": "Về tay nghệ nhân",
+    "checkout": "Đặt hàng",
+    "ordersCount": "{{count}} đơn",
+    "placing": "Đang đặt…",
+    "paymentNote": "Thanh toán thoả thuận trực tiếp với điều phối viên sau khi đơn được xác nhận. Không thu tiền ở đây.",
+    "increase": "Thêm một",
+    "decrease": "Bớt một",
+    "quantityLabel": "Số lượng {{title}}",
+    "remove": "Bỏ {{title}} khỏi giỏ",
+    "maxStock": "Cả {{count}} món còn lại đều đã trong giỏ.",
+    "orderError": "Không đặt được đơn này.",
+    "doneTitle": "Đã đặt hàng.",
+    "doneBody": "{{count}} đơn đã đến tay nghệ nhân. Điều phối viên sẽ liên hệ về thanh toán và giao hàng.",
+    "partialTitle": "Đặt được một phần.",
+    "partialBody": "{{placed}} đơn thành công, {{failed}} đơn không. Phần chưa đặt được vẫn nằm trong giỏ — không mất gì cả.",
+    "orderPlaced": "Đã đặt",
+    "orderFailed": "Chưa đặt",
+    "viewOrders": "Xem đơn của bạn",
+    "keepBrowsing": "Tiếp tục xem"
   }
 }

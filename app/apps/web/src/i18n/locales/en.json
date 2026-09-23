@@ -244,12 +244,18 @@
       "gettingLabel": "Getting there",
       "gettingValue": "350 km from Ho Chi Minh City by road, 190 km from the coast at Nha Trang, or a 55-minute flight",
       "interactiveUnavailable": "The map could not be loaded. The outline beside this one needs no connection.",
-      "workArea": ["KNĂ works here:","Đắk Lắk as it was before","the 2025 merger"],
+      "workArea": [
+        "KNĂ works here:",
+        "Đắk Lắk as it was before",
+        "the 2025 merger"
+      ],
       "alt": "Map of Vietnam with the former Đắk Lắk province highlighted in the Central Highlands, the area KNĂ works in, Buôn Ma Thuột marked within it, and the Hoàng Sa and Trường Sa archipelagos marked in the East Sea.",
       "dakLak": "Đắk Lắk",
       "buonMaThuot": "Buôn Ma Thuột",
       "hoangSa": "Hoàng Sa",
-      "truongSa": "Trường Sa"
+      "truongSa": "Trường Sa",
+      "districtLabel": "District",
+      "provinceLabel": "Province"
     },
     "pillarsEyebrow": "Where the archive begins",
     "pillarsHeading": "Three traditions carry most of what the Ê Đê know.",
@@ -298,7 +304,23 @@
     "phrasesAudio": "Pronunciation audio is recorded but not yet hosted.",
     "handoffHeading": "Read enough. Ready to visit?",
     "handoffBody": "Every household in this archive also hosts, guides, or sells through KNĂ.",
-    "handoffCta": "See experiences"
+    "handoffCta": "See experiences",
+    "pillarsHeadingFor": "{{count}} traditions carry most of what the {{name}} know.",
+    "statHouseholds": "households in the village",
+    "statHomestays": "households taking guests",
+    "experiencesEyebrow": "What there is to do",
+    "experiencesHeading": "Work and ceremony, joined rather than watched.",
+    "institutionsLabel": "Who helped build this",
+    "otherPlaces": "Also here",
+    "archiveNotOpenTitle": "The archive is not open here yet.",
+    "archiveNotOpenBody": "Everything above was compiled from published research. The archive holds only what a community has contributed and the Committee has reviewed, and no {{name}} household has been onboarded yet — so it is empty rather than unfinished.",
+    "phrasesMissingTitle": "No greetings recorded yet.",
+    "phrasesMissingBody": "The research this profile is built from carries no {{name}} phrases. Rather than approximate them from a related language, the gap is left open until a speaker fills it.",
+    "additionalPhrasesLabel": "Also in the record",
+    "provenance": {
+      "community": "Contributed by households and reviewed by the Community Governance Committee before publication.",
+      "research": "Compiled from published research, not yet reviewed by the community it describes."
+    }
   },
   "travel": {
     "eyebrow": "Experiences in Đắk Lắk",
@@ -438,7 +460,10 @@
     ],
     "handoffHeading": "Not sure what you are looking at?",
     "handoffBody": "The assistant can explain a motif, a technique, or what a piece is traditionally for.",
-    "handoffCta": "Ask the assistant"
+    "handoffCta": "Ask the assistant",
+    "addToCart": "Add to basket",
+    "addMore": "Add another",
+    "added": "Added"
   },
   "community": {
     "eyebrow": "Community space",
@@ -850,5 +875,39 @@
     "squadsPasteback": "After Squads executes the vault transaction, paste the executed transaction signature back into KNĂ so the API can verify the final PDA and update the public ledger.",
     "publicLedger": "Public ledger",
     "verifyOnChain": "Verify on-chain"
+  },
+  "ethnicity": {
+    "label": "Peoples"
+  },
+  "cart": {
+    "title": "Your basket",
+    "open": "Basket, {{count}} items",
+    "close": "Close basket",
+    "count": "{{count}} items",
+    "each": "each",
+    "emptyTitle": "Nothing gathered yet.",
+    "emptyBody": "Pieces you add from the marketplace collect here. Nothing is ordered until you say so.",
+    "splitNotice": "These pieces come from {{count}} makers. Each maker is paid through their own order, so this basket will be placed as {{count}} separate orders — one ledger entry each, credited correctly.",
+    "subtotalFor": "{{maker}} subtotal",
+    "total": "Total",
+    "toMakers": "To the makers",
+    "checkout": "Place order",
+    "ordersCount": "{{count}} orders",
+    "placing": "Placing…",
+    "paymentNote": "Payment is arranged directly with the coordinator after the order is confirmed. Nothing is charged here.",
+    "increase": "Add one",
+    "decrease": "Remove one",
+    "quantityLabel": "Quantity of {{title}}",
+    "remove": "Remove {{title}} from basket",
+    "maxStock": "All {{count}} available are in your basket.",
+    "orderError": "That order could not be placed.",
+    "doneTitle": "Order placed.",
+    "doneBody": "{{count}} orders are with their makers. You will hear from the coordinator about payment and shipping.",
+    "partialTitle": "Partly placed.",
+    "partialBody": "{{placed}} placed, {{failed}} could not be. What failed is still in your basket — nothing was lost.",
+    "orderPlaced": "Placed",
+    "orderFailed": "Not placed",
+    "viewOrders": "See your orders",
+    "keepBrowsing": "Keep browsing"
   }
 }
