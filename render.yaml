@@ -79,6 +79,13 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      # Gemini API key for the assistant (aistudio.google.com). Optional:
+      # without it the assistant runs in the approved-answers-only mode.
+      # With it, remember the corpus must be embedded by the same model the
+      # server queries with — run `npm run ai:sync` against the production
+      # DATABASE_URL once after enabling it.
+      - key: GEMINI_API_KEY
+        sync: false
       # Full origin, written out rather than wired with fromService.
       #
       # `fromService … property: host` looked tidier but resolved to the bare

@@ -117,4 +117,73 @@ export const api = {
   decisions: () => request('/community/decisions'),
   committee: () => request('/community/committee'),
   communityStats: () => request('/community/stats'),
+
+  // The assistant. `chatHealth` tells the screen what it may promise —
+  // full answers, or approved-answers-only while the model host is down.
+  chatHealth: () => request('/chat/health'),
+  flagAnswer: (payload, token) => request('/chat/flag', { method: 'POST', body: payload, token }),
+  assistantFlags: (token) => request('/chat/flags', { token }),
+  resolveFlag: (id, payload, token) =>
+    request(`/chat/flags/${id}/resolve`, { method: 'POST', body: payload, token }),
 };
+
+/**
+ * Asks the assistant and streams the reply.
+ *
+ * Not part of `api` because it is not a JSON request/response: the server
+ * answers over server-sent events so the visitor watches the answer being
+ * written instead of a spinner. Contract, in order:
+ *
+ *   onToken(t)  tier B only, as the model writes
+ *   onDone(d)   always — and d.answer is AUTHORITATIVE. A draft that
+ *               fails the server's grounding check streams tokens and is
+ *               then replaced by a refusal, so the caller must render
+ *               d.answer, never its own accumulation.
+ *   onError(e)  {code: "busy" | "failed"}
+ */
+export async function chatStream({ message, sessionId, locale, onToken, onDone, onError, signal }) {
+  const res = await fetch(`${API_URL}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, sessionId, locale }),
+    signal,
+  });
+
+  if (!res.ok || !res.body) {
+    const isJson = res.headers.get('content-type')?.includes('application/json');
+    const data = isJson ? await res.json().catch(() => null) : null;
+    throw new ApiError(data?.error || `Request failed (${res.status})`, res.status);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  const handle = (block) => {
+    const event = /event: (\w+)/.exec(block)?.[1];
+    const dataLine = block.split('\n').find((line) => line.startsWith('data: '));
+    if (!event || !dataLine) return;
+    let data;
+    try {
+      data = JSON.parse(dataLine.slice(6));
+    } catch {
+      return; // A block we cannot read is not a reason to drop the stream.
+    }
+    if (event === 'token') onToken?.(data.t);
+    else if (event === 'done') onDone?.(data);
+    else if (event === 'error') onError?.(data);
+  };
+
+  // SSE blocks are separated by a blank line, and a network chunk can end
+  // mid-block — hold the tail until its terminator arrives.
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let boundary;
+    while ((boundary = buffer.indexOf('\n\n')) !== -1) {
+      handle(buffer.slice(0, boundary));
+      buffer = buffer.slice(boundary + 2);
+    }
+  }
+}

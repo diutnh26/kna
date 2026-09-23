@@ -574,6 +574,259 @@ export async function populate(prisma: PrismaClient) {
     ],
   });
 
+  // ── Knowledge cards ──────────────────────────────────────────────────
+  // The assistant's corpus. The first four are the scripted replies the
+  // Assistant screen shipped with, promoted word-for-word from the locale
+  // files into moderated content — they were already elder-checked prose,
+  // just stored in the wrong place for anything but a fixed script. The
+  // rest restate platform facts recorded elsewhere in this repo (fee
+  // split, booking flow, moderation). Nothing here says anything about Ê
+  // Đê culture that the reviewed script did not already say.
+  await prisma.knowledgeCard.createMany({
+    data: [
+      {
+        topic: "etiquette",
+        sortOrder: 0,
+        question: "How do I greet an elder?",
+        questionVi: "Tôi nên chào người lớn tuổi thế nào?",
+        answer:
+          "Let the elder speak first. A short reply and a slight bow of the head is enough — Ê Đê greeting is not effusive, and a long enthusiastic introduction can read as pushy.\n\nIf you want a phrase, “Hê drei” works at any hour. “Bơni” is thank you.\n\nOne thing visitors often get wrong: in a matrilineal household the eldest woman is usually the person to address, even when a man greets you at the ladder.",
+        answerVi:
+          "Hãy để người lớn tuổi lên tiếng trước. Một câu đáp ngắn và hơi cúi đầu là đủ — cách chào của người Ê Đê không ồn ào, và một màn tự giới thiệu dài dòng, hào hứng có thể bị xem là suồng sã.\n\nNếu bạn muốn một câu cụ thể, “Hê drei” dùng được vào bất cứ giờ nào. “Bơni” là cảm ơn.\n\nMột điều du khách hay nhầm: trong gia đình mẫu hệ, người cần chào thường là người phụ nữ lớn tuổi nhất, kể cả khi ra đón bạn ở cầu thang là một người đàn ông.",
+        href: "#explore",
+        attributedTo: "Reviewed script · community archive",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "etiquette",
+        sortOrder: 1,
+        question: "What can I photograph?",
+        questionVi: "Tôi được chụp ảnh những gì?",
+        answer:
+          "Most of daily life is fine to photograph if you ask first. Three things to avoid:\n\n• The ancestor shelf inside a longhouse. Not photographed, generally not discussed with visitors either.\n• Funeral gongs or a funeral in progress.\n• Children, without a parent present.\n\nCeremonies vary by household. If you booked through KNĂ, the house rule on your booking card tells you what that particular family has agreed to.",
+        answerVi:
+          "Phần lớn sinh hoạt thường ngày đều có thể chụp, miễn là bạn xin phép trước. Có ba điều nên tránh:\n\n• Bàn thờ tổ tiên bên trong nhà dài. Không chụp, và thường cũng không bàn tới với khách.\n• Cồng chiêng tang lễ hoặc một đám tang đang diễn ra.\n• Trẻ em, khi không có cha mẹ ở đó.\n\nNghi lễ mỗi nhà mỗi khác. Nếu bạn đặt qua KNĂ, phần nếp nhà ghi trên phiếu đặt chỗ sẽ cho biết gia đình đó đã đồng ý những gì.",
+        href: "#explore",
+        attributedTo: "Reviewed script · community archive",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "logistics",
+        sortOrder: 2,
+        question: "Plan me three days",
+        questionVi: "Lên giúp tôi lịch trình ba ngày",
+        answer:
+          "Here is a shape that works for a first visit, low travel, one buôn per day:\n\nDay 1 — Arrive Buôn Ma Thuột, afternoon at Buôn Akô Dhông. Short walk, meet your host, eat with the household. Stay the night.\n\nDay 2 — Morning loom session with Amí Lan in Buôn Trấp. Afternoon free. Evening gong ensemble in Buôn Đôn if the harvest calendar has a date open.\n\nDay 3 — Forest edge walk with Y Wik, then the coffee co-op in the afternoon. Depart evening.\n\nWant me to check which dates actually have availability?",
+        answerVi:
+          "Đây là một khung phù hợp cho lần đầu ghé thăm, ít di chuyển, mỗi ngày một buôn:\n\nNgày 1 — Đến Buôn Ma Thuột, chiều ghé Buôn Akô Dhông. Đi bộ một quãng ngắn, gặp chủ nhà, ăn cùng gia đình. Nghỉ lại qua đêm.\n\nNgày 2 — Sáng học dệt cùng Amí Lan ở Buôn Trấp. Chiều tự do. Tối xem đội cồng chiêng ở Buôn Đôn nếu lịch mùa vụ còn ngày trống.\n\nNgày 3 — Đi bộ ven rừng cùng Y Wik, chiều ghé hợp tác xã cà phê. Tối khởi hành về.\n\nBạn có muốn tôi kiểm tra xem những ngày nào thực sự còn chỗ không?",
+        href: "#travel",
+        attributedTo: "Reviewed script · community archive",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "culture",
+        sortOrder: 3,
+        question: "What is Cồng Chiêng?",
+        questionVi: "Cồng Chiêng là gì?",
+        answer:
+          "A set of tuned gongs, and the practice around them. UNESCO recognised the Space of Gong Culture in the Central Highlands in 2005.\n\nWhat matters more than the recognition: the gongs are not performed for an audience in the ordinary sense. A set is tuned to a family and played at births, harvests, and funerals. Listeners in the buôn can hear which occasion is being marked.\n\nThat is why KNĂ lists ceremony evenings only when the village is holding one anyway, rather than scheduling them for visitors.",
+        answerVi:
+          "Là một bộ cồng chiêng đã được chỉnh âm, và toàn bộ tập tục xoay quanh nó. UNESCO đã công nhận Không gian Văn hoá Cồng chiêng Tây Nguyên vào năm 2005.\n\nĐiều quan trọng hơn cả sự công nhận ấy: cồng chiêng không được tấu lên để biểu diễn cho khán giả theo nghĩa thông thường. Mỗi bộ được chỉnh riêng cho một gia đình và được đánh trong lễ sinh, mùa gặt và tang lễ. Người trong buôn nghe là biết đang đánh cho dịp nào.\n\nĐó là lý do KNĂ chỉ đăng các buổi lễ khi làng vốn đã tổ chức, chứ không sắp lịch riêng cho du khách.",
+        href: "#explore",
+        attributedTo: "Reviewed script · community archive",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "language",
+        sortOrder: 4,
+        question: "How do I say thank you in Ê Đê?",
+        questionVi: "Cảm ơn bằng tiếng Ê Đê nói thế nào?",
+        answer:
+          "“Bơni” is thank you, said with a slight bow of the head.\n\nA few more from the phrasebook: “Hê drei” is hello, used at any hour. “Kâo bi mơak” — I am glad to be here — is offered when entering a house. “Kâo lui” — I am leaving now — is said at the ladder, not at the gate.",
+        answerVi:
+          "“Bơni” là cảm ơn, nói kèm một cái cúi đầu nhẹ.\n\nThêm vài câu từ sổ tay: “Hê drei” là xin chào, dùng vào bất cứ giờ nào. “Kâo bi mơak” — tôi rất vui được ở đây — nói khi bước vào nhà. “Kâo lui” — tôi xin phép về — nói ở chân cầu thang, không phải ở cổng.",
+        href: "#explore",
+        attributedTo: "Phrasebook · Committee decision of April 2026",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "platform",
+        sortOrder: 5,
+        question: "Where does my money actually go?",
+        questionVi: "Tiền của tôi thực sự đi về đâu?",
+        answer:
+          "Of every booking, 90% goes to the household that hosts you, 3% to the Community Fund, and 7% runs the platform. Marketplace orders split 95% to the artisan and 5% to the marketplace.\n\nEvery split is published, per transaction, on the public ledger in the Community space — you can check your own booking there.",
+        answerVi:
+          "Trong mỗi lượt đặt chỗ, 90% về thẳng hộ gia đình đón bạn, 3% vào Quỹ Cộng đồng, và 7% vận hành nền tảng. Đơn hàng thủ công chia 95% cho nghệ nhân và 5% cho chợ.\n\nTừng khoản chia đều được công khai, theo từng giao dịch, trên sổ cái minh bạch ở mục Cộng đồng — bạn có thể tự kiểm tra lượt đặt của mình ở đó.",
+        href: "#community",
+        attributedTo: "Platform records · public ledger",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "platform",
+        sortOrder: 6,
+        question: "How does my booking get confirmed?",
+        questionVi: "Lượt đặt chỗ của tôi được xác nhận thế nào?",
+        answer:
+          "A booking stays pending until a KNĂ coordinator has confirmed the dates with the household — a person checks, not an algorithm.\n\nDuring the pilot nothing is charged online: payment is arranged with the household directly and the coordinator records it. You will see the booking move from pending to confirmed in your account.",
+        answerVi:
+          "Lượt đặt chỗ ở trạng thái chờ cho đến khi điều phối viên KNĂ xác nhận ngày với hộ gia đình — một con người kiểm tra, không phải thuật toán.\n\nTrong giai đoạn thí điểm, không khoản nào bị trừ trực tuyến: tiền được thu xếp trực tiếp với gia đình và điều phối viên ghi nhận lại. Bạn sẽ thấy lượt đặt chuyển từ chờ sang đã xác nhận trong tài khoản.",
+        href: "#travel",
+        attributedTo: "Platform records",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "platform",
+        sortOrder: 7,
+        question: "Who decides what appears in the cultural archive?",
+        questionVi: "Ai quyết định nội dung nào được đưa vào kho lưu trữ văn hoá?",
+        answer:
+          "The Community Governance Committee. Nothing reaches the public archive until a Committee member reviews it and moves it to published, and refusals are recorded with their reason.\n\nThe Committee decided in April 2026 that everyday language is open to publish, while ceremonial and clan-specific speech stays with the households it belongs to.",
+        answerVi:
+          "Hội đồng Quản trị Cộng đồng. Không nội dung nào ra kho lưu trữ công khai trước khi một thành viên Hội đồng xem xét và duyệt đăng, và mỗi lần từ chối đều được ghi lại kèm lý do.\n\nTháng 4/2026, Hội đồng quyết định: ngôn ngữ đời thường được phép công bố, còn lời nói nghi lễ và riêng của dòng họ thì ở lại với các gia đình sở hữu chúng.",
+        href: "#community",
+        attributedTo: "Committee minutes · April 2026",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "platform",
+        sortOrder: 8,
+        question: "What is the KNĂ project (Business Model)?",
+        questionVi: "Dự án KNĂ cung cấp những gì?",
+        answer:
+          "KNĂ is a digital platform offering 5 features: Digital Cultural Heritage Archive, Travel booking (verified local experiences directly with no middlemen), Community Marketplace (authentic handmade products), Community Forum, and an AI Travel Assistant.",
+        answerVi:
+          "KNĂ là nền tảng kỹ thuật số cung cấp 5 tính năng: Lưu trữ di sản văn hóa, Đặt tour du lịch trực tiếp, Chợ cộng đồng mua bán đồ thủ công, Diễn đàn chia sẻ kinh nghiệm, và Trợ lý du lịch AI.",
+        href: "#about",
+        attributedTo: "NEXUS Project Report",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "platform",
+        sortOrder: 9,
+        question: "What are the innovations of the KNĂ platform?",
+        questionVi: "Những điểm đổi mới (Innovation) của KNĂ là gì?",
+        answer:
+          "KNĂ uses a Regenerative Circular Model with four mechanisms: Community Ownership (giving the Ê Đê community decision-making power), Blockchain Revenue Tracking (transparent transaction tracking via 'Proof of Impact'), an AI-personalized Carbon Footprint Tracker, and a virtuous loop where booking revenue funds community initiatives.",
+        answerVi:
+          "KNĂ sử dụng Mô hình Tuần hoàn Tái tạo với 4 cơ chế: Quyền làm chủ của cộng đồng Ê Đê, Theo dõi doanh thu minh bạch qua Blockchain (Proof of Impact), Theo dõi dấu chân carbon bằng AI, và tạo ra một vòng lặp có ích (doanh thu quay lại phục vụ cộng đồng).",
+        href: "#about",
+        attributedTo: "NEXUS Project Report",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "platform",
+        sortOrder: 10,
+        question: "What is the market size of KNĂ?",
+        questionVi: "Quy mô thị trường (Market Size) của KNĂ?",
+        answer:
+          "Our Total Addressable Market (TAM) in Dak Lak is about 2.1 to 2.4 trillion VND per year. Our Serviceable Available Market (SAM) for eco and cultural tourism is 210 to 360 billion VND. Our Serviceable Obtainable Market (SOM) for our first year in 3 pilot villages is estimated at 3 to 5 billion VND in transaction value.",
+        answerVi:
+          "Tổng thị trường (TAM) tại Đắk Lắk đạt 2.1 - 2.4 nghìn tỷ VNĐ/năm. Thị trường khả dụng (SAM) khoảng 210 - 360 tỷ VNĐ. Mục tiêu thực tế trong năm đầu (SOM) cho 3 làng thí điểm dự kiến đạt giá trị giao dịch 3 - 5 tỷ VNĐ.",
+        href: "#about",
+        attributedTo: "NEXUS Project Report",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "culture",
+        sortOrder: 11,
+        question: "How does the Ê Đê matrilineal system work?",
+        questionVi: "Chế độ mẫu hệ của người Ê Đê có đặc điểm gì?",
+        answer:
+          "The Ê Đê follow a matrilineal system where the mother is the head of the family, and children take their mother's surname. Daughters inherit the property and the longhouse. In marriage, it is the young woman's family who initiates the proposal to the young man's family, and the groom's family sets the bride price.",
+        answerVi:
+          "Người Ê Đê theo chế độ mẫu hệ, người mẹ làm chủ gia đình, của cải và nhà cửa truyền cho con gái. Con gái mang họ mẹ. Trong hôn nhân, nhà gái chủ động đi 'hỏi chồng' và nhà trai đưa ra yêu cầu thách cưới.",
+        href: "#explore",
+        attributedTo: "Community archive · Cultural guide",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "culture",
+        sortOrder: 12,
+        question: "What is Ê Đê epic literature (Khan)?",
+        questionVi: "Sử thi (Khan) của người Ê Đê là gì?",
+        answer:
+          "Ê Đê literature features 'Klei duê' (rhyming speech) and 'Khan' (epics) such as the epic of Đam San and Xinh Nhã. These epics are typically sung or chanted in the longhouses, reflecting the community's desire for freedom and human beauty.",
+        answerVi:
+          "Lời nói vần (Klei duê) là nghệ thuật ngôn từ độc đáo. Đặc biệt, Sử thi (Khan) như Đam San, Xinh Nhã thường được hát kể (diễn xướng) trong nhà dài, phản ánh khát vọng tự do và vẻ đẹp con người Ê Đê.",
+        href: "#explore",
+        attributedTo: "Community archive · Cultural guide",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "culture",
+        sortOrder: 13,
+        question: "What are the features of an Ê Đê longhouse?",
+        questionVi: "Kiến trúc nhà dài của người Ê Đê có gì đặc biệt?",
+        answer:
+          "The longhouse is a stilt house shaped like a long boat, accommodating an extended matrilineal family. A key feature is the carved wooden staircase, often depicting a crescent moon and breasts, symbolizing prosperity and the matriarch's authority.",
+        answerVi:
+          "Nhà dài là nhà sàn mang hình dáng con thuyền, nơi sinh sống của đại gia đình mẫu hệ. Cầu thang thường được đẽo gọt chạm khắc hình vầng trăng khuyết và bầu ngực, thể hiện sự no ấm và quyền uy của người phụ nữ.",
+        href: "#explore",
+        attributedTo: "Community archive · Cultural guide",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "culture",
+        sortOrder: 14,
+        question: "What is the Pthi atau (grave-abandonment) ceremony?",
+        questionVi: "Lễ Bỏ mả (Pthi atau) là gì?",
+        answer:
+          "Unlike the Kinh people who hold annual death anniversaries, the Ê Đê bid a final farewell to the deceased in the 'Pthi atau' (grave-abandonment ceremony). It is a major festival with gong music and dancing, after which there are no more yearly anniversaries.",
+        answerVi:
+          "Khác với người Kinh có đám giỗ hàng năm, người Ê Đê tiễn biệt người chết một lần duy nhất vào Lễ Bỏ mả (Pthi atau). Đây là một ngày hội lớn của cả buôn với tiếng cồng chiêng và múa hát. Sau lễ này, gia đình sẽ không còn tổ chức cúng giỗ nữa.",
+        href: "#explore",
+        attributedTo: "Community archive · Cultural guide",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      },
+      {
+        topic: "culture",
+        sortOrder: 15,
+        question: "What is unique about Ê Đê cuisine?",
+        questionVi: "Văn hóa ẩm thực Ê Đê có gì đặc trưng?",
+        answer:
+          "Ê Đê cuisine blends spicy, sour, and bitter flavors using natural herbs and spices. Signature ingredients include bitter eggplant, sour bamboo shoots, and papaya. Meals are seen as a time for close family connection.",
+        answerVi:
+          "Ẩm thực Ê Đê kết hợp tinh tế giữa vị cay, chua và đắng từ các loại lá và gia vị tự nhiên. Đặc trưng với các món như cà đắng, măng chua, đu đủ xào. Người Ê Đê coi bữa ăn là nơi giao tiếp thân mật của gia đình.",
+        href: "#explore",
+        attributedTo: "Community archive · Cultural guide",
+        moderationStatus: "PUBLISHED",
+        moderatedById: chair.id,
+        moderatedAt: new Date("2026-06-10"),
+      }
+    ],
+  });
+
   console.log("Dataset loaded:", {
     providers: 10,
     listings: listings.length,
@@ -583,5 +836,6 @@ export async function populate(prisma: PrismaClient) {
     decisions: 4,
     archiveEntries: "6 published, 2 in review, 1 refused",
     phrases: 5,
+    knowledgeCards: 16,
   });
 }

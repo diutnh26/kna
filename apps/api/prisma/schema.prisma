@@ -55,6 +55,11 @@ model User {
   contributedEntries ArchiveEntry[] @relation("ArchiveContributor")
   moderatedEntries   ArchiveEntry[] @relation("ArchiveModerator")
   notifications      Notification[]
+
+  contributedCards KnowledgeCard[] @relation("CardContributor")
+  moderatedCards   KnowledgeCard[] @relation("CardModerator")
+  reportedFlags    AssistantFlag[] @relation("FlagReporter")
+  resolvedFlags    AssistantFlag[] @relation("FlagResolver")
 }
 
 /**
@@ -363,4 +368,165 @@ model Phrase {
   sortOrder        Int      @default(0)
   moderationStatus String   @default("IN_REVIEW")
   createdAt        DateTime @default(now())
+}
+
+// ── The assistant ─────────────────────────────────────────
+
+/**
+ * A single thing the assistant is allowed to say.
+ *
+ * Separate from ArchiveEntry because they hold different kinds of thing.
+ * An ArchiveEntry indexes *media* — a 14-minute recording, a 40-frame
+ * photo essay — and its `meta` column is a caption, not prose. Embedding
+ * that produces a knowledge base of library spine labels. A card is the
+ * prose: one question, one answer, short enough for an elder to check in
+ * a sitting.
+ *
+ * Bilingual in one row rather than two rows with a locale column, because
+ * the Committee reviews one thing. Approving an answer in Vietnamese and
+ * leaving the English unreviewed is exactly the gap this model exists to
+ * close, and a nullable second language would permit it.
+ *
+ * Moderated on the same path as everything else: nothing here reaches a
+ * visitor without a Committee member moving it to PUBLISHED.
+ */
+model KnowledgeCard {
+  id         String @id @default(cuid())
+  // "etiquette" | "culture" | "language" | "logistics" | "platform"
+  // CHECK-constrained, like every other enum-shaped column here.
+  topic      String
+  // The question this card answers, in the visitor's own words. This is
+  // what a question is matched against for a verbatim answer, so it is
+  // phrased as someone would actually ask it.
+  question   String
+  questionVi String
+  answer     String
+  answerVi   String
+  // Where the reader should go to see this for themselves — "#explore",
+  // "#travel". An answer that cannot be checked is an assertion.
+  href       String?
+  // Free-text attribution: which elder, which session, which decision.
+  // Not a foreign key: most of these predate the platform.
+  attributedTo String?
+  sortOrder  Int    @default(0)
+
+  moderationStatus String   @default("IN_REVIEW")
+  createdAt        DateTime @default(now())
+
+  contributedById String?
+  contributedBy   User?     @relation("CardContributor", fields: [contributedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  moderatedById   String?
+  moderatedBy     User?     @relation("CardModerator", fields: [moderatedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  moderatedAt     DateTime?
+  moderationNote  String?
+
+  @@index([moderationStatus, topic])
+}
+
+/**
+ * One embedded passage, derived from a published source.
+ *
+ * Derived, never authored. Every row is reproducible from a KnowledgeCard,
+ * ArchiveEntry, Phrase or Listing by re-running the sync — which is what
+ * makes it safe for the sync to delete anything whose source is no longer
+ * published. That reconciliation is the mechanism behind "it cites, or it
+ * declines": withdrawn content stops being retrievable because the row
+ * stops existing, not because something remembered to clean up.
+ *
+ * `embedding` is raw little-endian float32, not pgvector. The reasoning is
+ * in src/ai/vector.ts — briefly: a few hundred short cards are searched
+ * exactly, faster than an approximate index, and the extension is absent
+ * from both CI's Postgres image and the portable Windows build used for
+ * development.
+ */
+model KnowledgeDocument {
+  id         String @id @default(cuid())
+  // "KnowledgeCard" | "ArchiveEntry" | "Phrase" | "Listing"
+  sourceType String
+  sourceId   String
+  // "en" | "vi" — a document is embedded once per language it exists in,
+  // so the passage handed to the model is already in the reader's language.
+  locale     String
+  // "QUESTION" matches what someone asked against what a card answers, and
+  // drives the verbatim tier. "PASSAGE" is the body, retrieved as evidence.
+  // Kept apart because they want different thresholds: a near-identical
+  // question is grounds for answering verbatim, a topically related
+  // passage is only grounds for quoting.
+  kind       String
+
+  title    String
+  content  String
+  metadata Json    @default("{}")
+  href     String?
+
+  embedding Bytes
+  // Which model produced this vector, and how wide it is. Cosine between
+  // two different embedding spaces returns a number, just not a meaningful
+  // one — so retrieval filters on these rather than trusting that whoever
+  // changed AI_EMBED_MODEL remembered to re-run the sync.
+  model String
+  dim   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One row per source per language per kind, so the sync can upsert.
+  @@unique([sourceType, sourceId, locale, kind])
+  @@index([locale, kind])
+}
+
+/**
+ * A reader saying the assistant got something wrong.
+ *
+ * Guardrail four, in the shipped copy, is "the community can correct it —
+ * corrections go into the archive, not into a private model". This table
+ * is where that promise becomes a queue somebody can work through.
+ *
+ * The question and answer are copied in rather than referenced. The card
+ * behind an answer is going to be edited — that is the entire point of
+ * flagging it — and a report that mutates into agreeing with the fix is
+ * not a record of anything.
+ */
+// One row per question the archive could not answer (tier C or D).
+// This is the assistant's own to-do list for the content team: the
+// questions visitors actually asked, unanswered, newest first. Adding the
+// missing knowledge (a card, a document in data/, an archive entry) and
+// re-running the sync is what closes a gap.
+model AssistantGap {
+  id        String   @id @default(cuid())
+  question  String
+  locale    String
+  // "C" (declined) or "D" (answered from general knowledge, labelled).
+  tier      String
+  createdAt DateTime @default(now())
+}
+
+model AssistantFlag {
+  id       String @id @default(cuid())
+  question String
+  answer   String
+  // "A" | "B" | "C" — which tier produced it. A complaint about a verbatim
+  // approved answer is a content problem; the same complaint about a
+  // generated one may be a retrieval problem. Different queues in practice.
+  tier     String
+  // The card and passage IDs cited, so a reviewer can go straight to them.
+  sourceIds Json @default("[]")
+  reason    String?
+
+  // Nullable: a visitor who has not signed in is exactly the person most
+  // likely to be told something wrong, and requiring an account to report
+  // it would filter out the reports worth having.
+  reportedById String?
+  reportedBy   User?   @relation("FlagReporter", fields: [reportedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  // "OPEN" | "ACTIONED" | "DISMISSED" — CHECK-constrained.
+  status     String    @default("OPEN")
+  resolvedById String?
+  resolvedBy   User?   @relation("FlagResolver", fields: [resolvedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  resolvedAt   DateTime?
+  resolutionNote String?
+
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
 }

@@ -234,7 +234,11 @@
       "gettingLabel": "Đường đến",
       "gettingValue": "Cách Thành phố Hồ Chí Minh 350 km đường bộ, cách bờ biển Nha Trang 190 km, hoặc 55 phút bay",
       "interactiveUnavailable": "Không tải được bản đồ. Bản đồ phác họa bên cạnh không cần kết nối mạng.",
-      "workArea": ["KNĂ hoạt động tại đây:","Đắk Lắk trước sáp nhập","năm 2025"],
+      "workArea": [
+        "KNĂ hoạt động tại đây:",
+        "Đắk Lắk trước sáp nhập",
+        "năm 2025"
+      ],
       "alt": "Bản đồ Việt Nam với tỉnh Đắk Lắk cũ được tô sáng ở Tây Nguyên, là địa bàn KNĂ hoạt động, Buôn Ma Thuột được đánh dấu bên trong, cùng quần đảo Hoàng Sa và Trường Sa trên Biển Đông.",
       "dakLak": "Đắk Lắk",
       "buonMaThuot": "Buôn Ma Thuột",
@@ -490,7 +494,6 @@
     "eyebrow": "Trợ lý du lịch",
     "title": "Hãy hỏi những câu khó xử ở đây, đừng để đến trước cửa nhà.",
     "intro": "Phần lớn du khách gây mất lòng một cách vô tình, chỉ vì không ai nói cho họ biết. Trợ lý được xây dựng trên kho lưu trữ của cộng đồng và sẽ nói thẳng với bạn điều gì là phù hợp.",
-    "prototypeNote": "Đây là bản thử nghiệm. Hiện tại câu trả lời lấy từ một kịch bản cố định, và chỉ bốn câu hỏi gợi ý bên dưới là đã được kết nối.",
     "opening": [
       "Tôi là trợ lý của KNĂ. Tôi có thể giúp bạn lên lộ trình, giải thích những gì bạn sắp thấy, hoặc chỉ cho bạn cách ứng xử ở một nơi để bạn không vô tình làm mất lòng ai.",
       "Những điều tôi nói về phong tục Ê Đê đều lấy từ kho lưu trữ của cộng đồng, đã được các già làng thẩm định. Nếu tôi chưa được cho biết điều gì, tôi sẽ nói vậy thay vì đoán."
@@ -515,7 +518,7 @@
       }
     ],
     "fallback": "Điều đó chưa có trong kho lưu trữ của cộng đồng, nên tôi không muốn đoán bừa.\n\nChủ nhà của bạn là người phù hợp hơn để hỏi, và việc hỏi thường được đón nhận. Nếu đó là điều cộng đồng cho rằng du khách nên biết, nó có thể được gửi lên Hội đồng Quản trị để đưa vào kho lưu trữ.",
-    "fallbackNote": "Mọi câu khác bạn gõ vào sẽ nhận được câu trả lời “tôi không biết” của trợ lý, và điều đó là có chủ ý. Bạn cứ thử xem.",
+    "fallbackNote": "Khi kho lưu trữ đã duyệt chưa có thông tin, trợ lý sẽ từ chối thay vì đoán — điều đó là cố ý. Mỗi câu trả lời đều ghi rõ nguồn, và điều gì sai có thể báo lên Hội đồng.",
     "assistantName": "Trợ lý KNĂ",
     "archiveBacked": "Dựa trên kho lưu trữ",
     "inputPlaceholder": "Hỏi về phong tục, một địa điểm, hoặc chuyến đi của bạn",
@@ -544,7 +547,18 @@
     "handoffBody": "Trợ lý có thể ước tính giúp bạn, hoặc bạn tự tính trong Hành trình Carbon.",
     "handoffCta": "Mở công cụ theo dõi",
     "guardrailsBody": "Một mô hình trả lời chắc nịch về phong tục Ê Đê mà không dẫn nguồn chỉ là cách lan truyền một hiểu biết sai nhanh hơn. Bốn nguyên tắc này là ràng buộc thiết kế, không phải tuỳ chọn.",
-    "inputLabel": "Hỏi trợ lý"
+    "inputLabel": "Hỏi trợ lý",
+    "statusChecking": "Đang kiểm tra trợ lý có thể làm gì lúc này…",
+    "statusLive": "Câu trả lời lấy từ kho lưu trữ đã được Hội đồng duyệt, kèm nguồn. Khi kho chưa có thông tin, trợ lý sẽ nói thẳng thay vì đoán.",
+    "statusCurated": "Mô hình ngôn ngữ đang tắt, nên trợ lý chỉ trả lời bằng các câu đã được Hội đồng duyệt và từ chối phần còn lại. Không câu nào là máy tự sinh.",
+    "busy": "Đang có vài người cùng hỏi trợ lý — bạn thử lại sau một lát nhé.",
+    "failed": "Có lỗi từ phía chúng tôi. Câu hỏi của bạn không mất — hãy hỏi lại.",
+    "tierA": "Câu trả lời đã được Hội đồng duyệt",
+    "tierB": "Tổng hợp từ nguồn có trích dẫn",
+    "tierD": "Kiến thức chung — không thuộc kho tư liệu đã duyệt",
+    "flag": "Báo cho Hội đồng",
+    "flagged": "Đã báo — cảm ơn bạn",
+    "flagTitle": "Báo cho Hội đồng Quản trị rằng câu trả lời này sai hoặc thiếu"
   },
   "carbon": {
     "eyebrow": "Theo dõi carbon",
@@ -764,7 +778,8 @@
       "ORDER_AWAITING_SETTLEMENT": "Đơn mua {{piece}} của {{maker}} đang chờ ghi nhận thanh toán.",
       "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) đang chờ Hội đồng duyệt.",
       "ARCHIVE_PUBLISHED": "{{title}} đã được đăng vào kho lưu trữ.",
-      "ARCHIVE_REJECTED": "{{title}} không được đăng. {{note}}"
+      "ARCHIVE_REJECTED": "{{title}} không được đăng. {{note}}",
+      "ASSISTANT_FLAGGED": "Một vị khách đã báo lỗi một câu trả lời của trợ lý: “{{question}}”"
     }
   }
 }

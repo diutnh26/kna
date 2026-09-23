@@ -12,9 +12,16 @@
     "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:demo": "tsx prisma/demo.ts"
+    "db:demo": "tsx prisma/demo.ts",
+    "ai:sync": "tsx src/scripts/syncKnowledgeBase.ts",
+    "ai:calibrate": "tsx src/scripts/calibrateThresholds.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/core": "^1.2.9",
+    "@langchain/google-genai": "^2.3.0",
+    "@langchain/langgraph": "^1.4.14",
+    "@langchain/ollama": "^1.3.0",
     "@prisma/client": "^6.2.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -22,6 +29,8 @@
     "express": "^4.21.2",
     "express-rate-limit": "^8.6.2",
     "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.12.2",
+    "pdf-parse": "^2.4.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {

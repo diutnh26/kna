@@ -12,6 +12,7 @@
   "scripts": {
     "dev:web": "npm run dev --workspace apps/web",
     "dev:api": "npm run dev --workspace apps/api",
+    "dev:chatbot-test": "npm run dev --workspace apps/local-chatbot-test",
     "build:web": "npm run build --workspace apps/web",
     "build:api": "npm run build --workspace apps/api",
     "lint:web": "npm run lint --workspace apps/web",
@@ -20,6 +21,8 @@
     "db:generate": "npm run db:generate --workspace apps/api",
     "db:migrate": "npm run db:migrate --workspace apps/api",
     "db:seed": "npm run db:seed --workspace apps/api",
-    "db:demo": "npm run db:demo --workspace apps/api"
+    "db:demo": "npm run db:demo --workspace apps/api",
+    "ai:sync": "npm run ai:sync --workspace apps/api",
+    "ai:calibrate": "npm run ai:calibrate --workspace apps/api"
   }
 }

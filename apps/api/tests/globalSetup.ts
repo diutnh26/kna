@@ -1,3 +1,8 @@
+// Loads apps/api/.env the same way dev and the scripts do. dotenv never
+// overrides variables that are already set, so CI's explicit env wins there
+// and the developer's .env wins here — including a TEST_DATABASE_URL that
+// points at a portable Postgres on a non-default port.
+import "dotenv/config";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 

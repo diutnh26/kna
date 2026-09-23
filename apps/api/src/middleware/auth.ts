@@ -67,6 +67,37 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
 }
 
 /**
+ * Attaches the account if a valid token is present, and stays quiet if not.
+ *
+ * For routes that serve everyone but record *who*, when they happen to
+ * know — the assistant's flag endpoint being the case in point: a visitor
+ * reporting a wrong answer should not be turned away for lacking an
+ * account, and a signed-in elder's report should carry their name.
+ * Deliberately the same checks as requireAuth (version included), so a
+ * revoked token cannot keep attributing actions to its old account; it
+ * just downgrades to anonymous instead of failing the request.
+ */
+export async function identify(req: AuthedRequest, _res: Response, next: NextFunction) {
+  const header = req.headers.authorization;
+  const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
+  if (!token) return next();
+
+  try {
+    const claim = jwt.verify(token, JWT_SECRET) as { id: string; tokenVersion?: number };
+    const user = await prisma.user.findUnique({
+      where: { id: claim.id },
+      select: { id: true, role: true, tokenVersion: true },
+    });
+    if (user && (claim.tokenVersion ?? 0) === user.tokenVersion) {
+      req.user = { id: user.id, role: user.role };
+    }
+  } catch {
+    // An unreadable token on an optional-identity route is anonymity, not an error.
+  }
+  next();
+}
+
+/**
  * Ends every existing session for an account.
  *
  * Call this wherever authority changes — granting or withdrawing a

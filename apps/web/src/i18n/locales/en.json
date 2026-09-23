@@ -234,7 +234,11 @@
       "gettingLabel": "Getting there",
       "gettingValue": "350 km from Ho Chi Minh City by road, 190 km from the coast at Nha Trang, or a 55-minute flight",
       "interactiveUnavailable": "The map could not be loaded. The outline beside this one needs no connection.",
-      "workArea": ["KNĂ works here:","Đắk Lắk as it was before","the 2025 merger"],
+      "workArea": [
+        "KNĂ works here:",
+        "Đắk Lắk as it was before",
+        "the 2025 merger"
+      ],
       "alt": "Map of Vietnam with the former Đắk Lắk province highlighted in the Central Highlands, the area KNĂ works in, Buôn Ma Thuột marked within it, and the Hoàng Sa and Trường Sa archipelagos marked in the East Sea.",
       "dakLak": "Đắk Lắk",
       "buonMaThuot": "Buôn Ma Thuột",
@@ -490,7 +494,6 @@
     "eyebrow": "Travel assistant",
     "title": "Ask the awkward questions here, not at the door.",
     "intro": "Most visitors cause offence by accident, because nobody told them. The assistant is trained on the community archive and will tell you plainly what is expected.",
-    "prototypeNote": "This is a prototype. Answers come from a fixed script for now, and the four suggested questions are the ones wired up.",
     "opening": [
       "I'm the KNĂ assistant. I can help you plan a route, explain what you'll see, or tell you how to behave somewhere so you don't cause offence without meaning to.",
       "What I say about Ê Đê custom comes from the community archive, reviewed by elders. If I have not been told something, I will say so rather than guess."
@@ -515,7 +518,7 @@
       }
     ],
     "fallback": "I don't have that in the community archive yet, so I'd rather not guess.\n\nYour host is the better person to ask, and asking is usually welcome. If it's something the community thinks visitors should know, it can be submitted to the Governance Committee for the archive.",
-    "fallbackNote": "Anything else you type will get the assistant’s “I don’t know” answer, which is deliberate. Try it.",
+    "fallbackNote": "When the reviewed archive does not cover a question, the assistant declines instead of guessing — that is deliberate. Every answer shows where it came from, and anything wrong can be reported to the Committee.",
     "assistantName": "KNĂ assistant",
     "archiveBacked": "Archive-backed",
     "inputPlaceholder": "Ask about custom, a place, or your trip",
@@ -544,7 +547,18 @@
     "handoffBody": "The assistant can estimate it, or you can do it yourself in the Carbon Journey.",
     "handoffCta": "Open the tracker",
     "guardrailsBody": "A model that answers confidently about Ê Đê custom without a source is just a faster way to spread a wrong idea. These four rules are design constraints, not settings.",
-    "inputLabel": "Ask the assistant"
+    "inputLabel": "Ask the assistant",
+    "statusChecking": "Checking what the assistant can do right now…",
+    "statusLive": "Answers come from the Committee-reviewed archive, with sources shown. When the archive does not cover a question, the assistant says so instead of guessing.",
+    "statusCurated": "The language model is offline right now, so the assistant answers only with Committee-approved replies and declines everything else. Nothing it says is generated.",
+    "busy": "A few people are talking to the assistant at once — try again in a moment.",
+    "failed": "Something went wrong on our end. Your question was not lost — ask it again.",
+    "tierA": "Committee-approved answer",
+    "tierB": "Composed from cited sources",
+    "tierD": "General knowledge — not from the reviewed archive",
+    "flag": "Report to the Committee",
+    "flagged": "Reported — thank you",
+    "flagTitle": "Tell the Governance Committee this answer is wrong or incomplete"
   },
   "carbon": {
     "eyebrow": "Carbon tracker",
@@ -764,7 +778,8 @@
       "ORDER_AWAITING_SETTLEMENT": "An order for {{piece}} by {{maker}} is waiting to be settled.",
       "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) is waiting for the Committee.",
       "ARCHIVE_PUBLISHED": "{{title}} has been published to the archive.",
-      "ARCHIVE_REJECTED": "{{title}} was not published. {{note}}"
+      "ARCHIVE_REJECTED": "{{title}} was not published. {{note}}",
+      "ASSISTANT_FLAGGED": "A visitor reported an assistant answer: “{{question}}”"
     }
   }
 }

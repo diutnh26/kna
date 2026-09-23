@@ -29,7 +29,8 @@ export type NotificationType =
   // to whoever has to act
   | "BOOKING_AWAITING_DECISION"
   | "ORDER_AWAITING_SETTLEMENT"
-  | "ARCHIVE_AWAITING_REVIEW";
+  | "ARCHIVE_AWAITING_REVIEW"
+  | "ASSISTANT_FLAGGED";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 

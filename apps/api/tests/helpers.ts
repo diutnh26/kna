@@ -8,6 +8,9 @@ export const PASSWORD = "test-password";
 /** Wipes every table, in foreign-key-safe order. */
 export async function resetDb() {
   await prisma.notification.deleteMany();
+  await prisma.assistantFlag.deleteMany();
+  await prisma.knowledgeDocument.deleteMany();
+  await prisma.knowledgeCard.deleteMany();
   await prisma.ledgerEntry.deleteMany();
   await prisma.orderItem.deleteMany();
   // Before Booking: OffsetContribution holds a NoAction foreign key to it,

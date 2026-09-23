@@ -31,6 +31,15 @@ npm run dev:api       # http://localhost:4000
 npm run dev:web       # http://localhost:5173, in a second terminal
 ```
 
+For the AI assistant, put a `GEMINI_API_KEY` (aistudio.google.com) in
+`apps/api/.env`, then `npm run ai:sync` to embed the knowledge base.
+**Hướng dẫn test chatbot từng bước (tiếng Việt): [`docs/test-chatbot.md`](docs/test-chatbot.md)** —
+details in [`apps/api/src/ai/README.md`](apps/api/src/ai/README.md), and a
+standalone local test bench in
+[`apps/local-chatbot-test/README-TEST.md`](apps/local-chatbot-test/README-TEST.md)
+(`npm run dev:chatbot-test` → http://localhost:4100). Without a key the
+assistant still runs, serving Committee-approved answers only.
+
 Demo accounts all use the password `changeme123` — `guest@example.kna`,
 `ami.hbia@example.kna` (host and Committee chair),
 `coordinator@example.kna`.

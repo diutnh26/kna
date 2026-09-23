@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
@@ -9,16 +9,39 @@ import {
   Camera,
   Route,
   AlertCircle,
+  Flag,
+  Check,
 } from 'lucide-react';
 import Navbar from './Navbar';
+import { api, chatStream } from '../lib/api';
+import { useAuth } from '../context/useAuth';
 
+/**
+ * One id per browser, so the assistant can hold a conversation — it is the
+ * server-side memory thread. localStorage can be unavailable (private
+ * windows, cleared site data); a fresh id per visit is the graceful floor.
+ */
+function sessionId() {
+  try {
+    const existing = localStorage.getItem('kna.assistant.session');
+    if (existing) return existing;
+    const fresh = crypto.randomUUID();
+    localStorage.setItem('kna.assistant.session', fresh);
+    return fresh;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
 
 export default function Assistant() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { token } = useAuth();
+  const locale = i18n.language?.startsWith('vi') ? 'vi' : 'en';
 
-  // The scripted replies live in the locale files, so the assistant
-  // answers in the language the visitor is reading. Icons stay in code —
-  // they are not content — and are paired with the prompts by position.
+  // The prompts stay in the locale files — they are the labels of the four
+  // suggested questions. Their canned `reply` fields are no longer read:
+  // the same texts now live in the moderated KnowledgeCard table, and the
+  // server returns them verbatim when a question matches (tier A).
   const PROMPT_ICONS = [Handshake, Camera, Route, BookOpen];
   const prompts = t('assistant.prompts', { returnObjects: true }).map((p, i) => ({
     ...p,
@@ -30,25 +53,134 @@ export default function Assistant() {
     text,
     quiet: i > 0,
   }));
+
   const [messages, setMessages] = useState(opening);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
+  // null while checking; then { model: boolean } from /chat/health. Decides
+  // the notice under the title: full answers, or approved-answers only.
+  const [health, setHealth] = useState(null);
   const endRef = useRef(null);
+  const abortRef = useRef(null);
+  const session = useMemo(() => sessionId(), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .chatHealth()
+      .then((h) => !cancelled && setHealth(h))
+      .catch(() => !cancelled && setHealth({ model: false, documents: { en: 0, vi: 0 } }));
+    return () => {
+      cancelled = true;
+      abortRef.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages, thinking]);
 
-  const send = (text, reply) => {
-    if (!text.trim()) return;
-    setMessages((m) => [...m, { role: 'user', text }]);
-    setInput('');
-    setThinking(true);
-    setTimeout(() => {
-      setMessages((m) => [...m, { role: 'assistant', text: reply ?? t('assistant.fallback') }]);
-      setThinking(false);
-    }, 700);
-  };
+  const send = useCallback(
+    async (text) => {
+      const question = text.trim();
+      if (!question || thinking) return;
+
+      setMessages((m) => [...m, { role: 'user', text: question }]);
+      setInput('');
+      setThinking(true);
+
+      const abort = new AbortController();
+      abortRef.current = abort;
+
+      // The draft grows token by token; `done` then replaces it wholesale.
+      // The replacement matters: a draft that fails the server's grounding
+      // check streams first and is refused after, and what the visitor
+      // keeps must be the refusal, not the draft.
+      let draft = '';
+      const showDraft = () => {
+        // The [#n] markers are the server's internal grounding notation;
+        // the final answer arrives without them, so the live draft hides
+        // them too — including a marker still half-typed at the tail.
+        const visible = draft.replace(/\s*\[#\d+\]/g, '').replace(/\s*\[#?\d*$/, '');
+        setMessages((m) => {
+          const copy = m.slice();
+          const last = copy[copy.length - 1];
+          if (last?.streaming) copy[copy.length - 1] = { ...last, text: visible };
+          else copy.push({ role: 'assistant', streaming: true, text: visible });
+          return copy;
+        });
+      };
+
+      try {
+        await chatStream({
+          message: question,
+          sessionId: session,
+          locale,
+          signal: abort.signal,
+          onToken: (tok) => {
+            draft += tok;
+            showDraft();
+          },
+          onDone: (done) => {
+            setMessages((m) => [
+              ...m.filter((msg) => !msg.streaming),
+              {
+                role: 'assistant',
+                text: done.answer,
+                tier: done.tier,
+                sources: done.sources ?? [],
+                question,
+              },
+            ]);
+          },
+          onError: (err) => {
+            setMessages((m) => [
+              ...m.filter((msg) => !msg.streaming),
+              {
+                role: 'assistant',
+                text: err.code === 'busy' ? t('assistant.busy') : t('assistant.failed'),
+                quiet: true,
+              },
+            ]);
+          },
+        });
+      } catch {
+        if (!abort.signal.aborted) {
+          setMessages((m) => [
+            ...m.filter((msg) => !msg.streaming),
+            { role: 'assistant', text: t('assistant.failed'), quiet: true },
+          ]);
+        }
+      } finally {
+        setThinking(false);
+      }
+    },
+    [thinking, session, locale, t]
+  );
+
+  /** Guardrail four, as a button: the reader can hand an answer to the Committee. */
+  const flag = useCallback(
+    async (index) => {
+      const message = messages[index];
+      if (!message || message.flagged) return;
+      try {
+        await api.flagAnswer(
+          {
+            question: message.question ?? '',
+            answer: message.text,
+            tier: message.tier ?? 'B',
+            sourceIds: (message.sources ?? []).map((s) => s.sourceId),
+          },
+          token ?? undefined
+        );
+        setMessages((m) => m.map((msg, i) => (i === index ? { ...msg, flagged: true } : msg)));
+      } catch {
+        // A failed report should not interrupt the conversation; the
+        // button simply stays available to try again.
+      }
+    },
+    [messages, token]
+  );
 
   return (
     <div className="min-h-screen bg-[#1A1614] text-[#F5EDDD] font-body antialiased">
@@ -76,7 +208,11 @@ export default function Assistant() {
           <div className="border border-[#F5EDDD]/15 p-6 flex gap-4">
             <AlertCircle className="w-4 h-4 text-[#B87333] shrink-0 mt-0.5" />
             <p className="text-sm text-[#F5EDDD]/70 leading-relaxed">
-              {t('assistant.prototypeNote')}
+              {health === null
+                ? t('assistant.statusChecking')
+                : health.model
+                ? t('assistant.statusLive')
+                : t('assistant.statusCurated')}
             </p>
           </div>
         </div>
@@ -95,8 +231,9 @@ export default function Assistant() {
               {prompts.map((p) => (
                 <button
                   key={p.label}
-                  onClick={() => send(p.label, p.reply)}
-                  className="group w-full text-left border border-[#F5EDDD]/15 hover:border-[#F5EDDD]/40 p-5 flex items-start gap-4 transition"
+                  onClick={() => send(p.label)}
+                  disabled={thinking}
+                  className="group w-full text-left border border-[#F5EDDD]/15 hover:border-[#F5EDDD]/40 disabled:opacity-50 p-5 flex items-start gap-4 transition"
                 >
                   <p.icon className="w-4 h-4 text-[#B87333] shrink-0 mt-0.5" />
                   <span className="text-sm leading-relaxed flex-1">{p.label}</span>
@@ -127,16 +264,72 @@ export default function Assistant() {
                   key={i}
                   className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div
-                    className={`max-w-[80%] px-5 py-4 text-sm leading-relaxed whitespace-pre-line ${
-                      m.role === 'user'
-                        ? 'bg-[#C8302E] text-[#F5EDDD]'
-                        : m.quiet
-                        ? 'border border-[#F5EDDD]/12 text-[#F5EDDD]/55'
-                        : 'bg-[#F5EDDD]/[0.06] text-[#F5EDDD]/85'
-                    }`}
-                  >
-                    {m.text}
+                  <div className="max-w-[80%]">
+                    <div
+                      className={`px-5 py-4 text-sm leading-relaxed whitespace-pre-line ${
+                        m.role === 'user'
+                          ? 'bg-[#C8302E] text-[#F5EDDD]'
+                          : m.quiet
+                          ? 'border border-[#F5EDDD]/12 text-[#F5EDDD]/55'
+                          : 'bg-[#F5EDDD]/[0.06] text-[#F5EDDD]/85'
+                      }`}
+                    >
+                      {m.text}
+                    </div>
+
+                    {/* A tier D answer came from the model's general
+                        knowledge, not the reviewed archive — the label IS
+                        the honesty, so it must be impossible to miss. */}
+                    {m.role === 'assistant' && m.tier === 'D' && (
+                      <div className="mt-2 px-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-[#F5EDDD]/45">
+                          {t('assistant.tierD')}
+                        </span>
+                        <button
+                          onClick={() => flag(i)}
+                          disabled={m.flagged}
+                          className="inline-flex items-center gap-1.5 text-[11px] text-[#F5EDDD]/45 hover:text-[#C8302E] disabled:text-[#B87333] transition"
+                          title={t('assistant.flagTitle')}
+                        >
+                          {m.flagged ? <Check className="w-3 h-3" /> : <Flag className="w-3 h-3" />}
+                          {m.flagged ? t('assistant.flagged') : t('assistant.flag')}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Where the answer came from, and the door to correct it.
+                        Only real answers (tier A and B) carry either — an
+                        opening line or a refusal has no source to show and
+                        nothing to report. */}
+                    {m.role === 'assistant' && (m.tier === 'A' || m.tier === 'B') && (
+                      <div className="mt-2 px-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-[#B87333]">
+                          {m.tier === 'A' ? t('assistant.tierA') : t('assistant.tierB')}
+                        </span>
+                        {(m.sources ?? []).map((s) => (
+                          <a
+                            key={s.id}
+                            href={s.href || '#explore'}
+                            className="text-[11px] text-[#F5EDDD]/45 hover:text-[#F5EDDD]/80 underline decoration-[#B87333]/40 underline-offset-2 transition"
+                          >
+                            {s.title}
+                          </a>
+                        ))}
+                        <button
+                          onClick={() => flag(i)}
+                          disabled={m.flagged}
+                          className="inline-flex items-center gap-1.5 text-[11px] text-[#F5EDDD]/45 hover:text-[#C8302E] disabled:text-[#B87333] transition"
+                          title={t('assistant.flagTitle')}
+                        >
+                          {m.flagged ? (
+                            <Check className="w-3 h-3" />
+                          ) : (
+                            <Flag className="w-3 h-3" />
+                          )}
+                          {m.flagged ? t('assistant.flagged') : t('assistant.flag')}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -167,13 +360,17 @@ export default function Assistant() {
                 id="ask"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && send(input)}
+                onKeyDown={(e) => {
+                  // Enter inside a Vietnamese IME composition commits the
+                  // character; it must not send the message.
+                  if (e.key === 'Enter' && !e.nativeEvent.isComposing) send(input);
+                }}
                 placeholder={t('assistant.inputPlaceholder')}
                 className="flex-1 bg-transparent px-3 py-3 text-sm focus:outline-none placeholder:text-[#F5EDDD]/35"
               />
               <button
                 onClick={() => send(input)}
-                disabled={!input.trim()}
+                disabled={!input.trim() || thinking}
                 className="bg-[#C8302E] hover:bg-[#A82826] disabled:opacity-30 disabled:cursor-not-allowed px-5 py-3 transition"
                 aria-label={t('assistant.send')}
               >
