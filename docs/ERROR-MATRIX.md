@@ -3,7 +3,7 @@
 Every guard in `app/programs/kna-trust-layer/src/lib.rs`, the test that proves
 it, and what the operator sees today. Tests live in
 `app/packages/chain-client/program-tests/` — `trust-layer.test.ts` and
-`settlement.test.ts`, LiteSVM against the built `.so` — unless marked *Rust unit*.
+`booking.test.ts`, LiteSVM against the built `.so` — unless marked *Rust unit*.
 
 Run them: `.\scripts\program-tests.ps1` on Windows, or
 `anchor build && npm run test:program` (from `app/`) on Linux/macOS. CI runs
@@ -23,11 +23,14 @@ Anchor numbers custom errors from 6000; Phantom shows them as
 | 6004 | 0x1774 | `SplitMismatch` | `validate_split` in `submit_attestation`: parts do not sum to the total, or platform / community share is not floor(total × bps / 10 000) | parts not summing; marketplace split 5% / 0%; 3,750 ₫ rounded (263 / 113) rejected while floored (262 / 112) passes; *Rust unit* `rejects_bad_split`, `rejects_parts_not_summing_to_total`, `rejects_overflow_sum` |
 | 6005 | 0x1775 | `InvalidState` | `finalize_attestation` on a non-PENDING attestation; `cancel_pending` on a non-PENDING attestation; `acknowledge_receipt` with a mismatched ledger hash | finalize after cancel; cancel after finalize |
 | 6006 | 0x1776 | `AlreadyExists` | Never raised. Replays are stopped by Anchor `init` instead (below). | — |
-| 6007 | 0x1777 | `Overflow` | `validate_split` bps multiplication (unreachable: u64 × u16 fits in u128); `settle_split` VND → token-unit conversion and treasury totals | *Rust unit* `booking_split_1m_vnd`, `floor_split_small_total`, `zero_total_ok` cover the split arithmetic |
-| 6008 | 0x1778 | `InvalidTokenAccount` | `initialize_treasury`: escrow not owned by the treasury PDA. `settle_split`: an escrow other than the treasury's, a Community Fund account not owned by the committee vault, a platform account not owned by the platform wallet, or an account that is not an initialized SPL token account | escrow owned by someone else; fund destination redirected to the provider; platform destination redirected; another escrow |
-| 6009 | 0x1779 | `InvalidMint` | `settle_split`: a destination holding a different token, or a mint other than the treasury's | provider account of another mint |
+| 6007 | 0x1777 | `Overflow` | `validate_split` bps multiplication (unreachable: u64 × u16 fits in u128); `pay_booking` VND → token-unit conversion | *Rust unit* `booking_split_1m_vnd`, `floor_split_small_total`, `zero_total_ok` cover the split arithmetic |
+| 6008 | 0x1778 | `InvalidTokenAccount` | `pay_booking`: a payer account not owned by the payer, a provider account not owned by the booked provider's fixed wallet, a Community Fund or platform account not owned by the configured wallet, or not an initialized SPL token account | provider, Community Fund and platform destinations each redirected to the guest's own account |
+| 6009 | 0x1779 | `InvalidMint` | `initialize_payment_config`: not an SPL mint. `pay_booking`: any token account of another mint | — (covered by the same account checks as 6008) |
+| 6010 | 0x177a | `InvalidDates` | `create_booking` with check-out on or before check-in; `cancel_booking` on or after check-in | check-out equal to check-in; cancelling after check-in |
+| 6011 | 0x177b | `NotPayableYet` | `pay_booking` before the check-out date; `mark_unpaid` before the check-out date | paying one second before check-out; marking unpaid before check-out |
+| 6012 | 0x177c | `NotProvider` | `create_booking` whose host account lacks the PROVIDER flag | booking with a guest-only account as host |
 
-`settle_split` also raises `Paused`, `Unauthorized` (settler without the coordinator role) and `RoleRevoked`; `initialize_treasury` raises `Unauthorized` for anyone but the coordinator authority. All proven in `settlement.test.ts`.
+`register_account`, `set_account_flags`, `create_booking`, `mark_unpaid` and `cancel_booking` also raise `Unauthorized` / `RoleRevoked` for anything but the platform's coordinator-role key, and `register_account` raises `InvalidRole` for unknown flags. `pay_booking` raises `Unauthorized` for any payer other than the guest's paying wallet, `InvalidState` once paid or cancelled, and `Paused`. All proven in `booking.test.ts`.
 
 ## Anchor and runtime guards
 
@@ -38,10 +41,12 @@ Anchor numbers custom errors from 6000; Phantom shows them as
 | `init` on the final PDA `["final", hash(ledgerId)]` | Double settlement: finalizing twice, by the same or another signer | member finalizes, then the vault's finalize fails (`already in use`) and the first finalization stands |
 | Role PDA must exist (`AccountNotInitialized`, 3012) | A wallet with no grant submitting | submit by a wallet with no grant |
 | Optional `committee_role` + vault check | Vault path works without a role grant; nobody else can use it | finalize by the vault with no role account; outsider on the same path gets `Unauthorized` |
-| Final PDA must exist (`AccountNotInitialized`) | Paying out an attestation the committee has not finalized, or one that was withdrawn | settle while only pending; settle after cancel |
-| `init` on the settlement PDA `["settlement", hash(ledgerId)]` | Double payout | second settle fails (`already in use`) and balances are unchanged |
-| Token program rejects the transfer | Paying out more than escrow holds | underfunded escrow: whole transaction fails, no record, no partial transfer |
-| Amounts read from the final PDA | Paying anything other than the notarized split | settle pays exactly 900,000 / 30,000 / 70,000 VND (× 1,000 units) for a 1,000,000 VND booking |
+| `init` on `["account", hash(userId)]` and `["wallet", wallet]` | An account getting a second wallet, or a wallet being registered to a second account | both attempts fail (`already in use`) |
+| `set_payment_wallet` needs the fixed wallet's and the new wallet's signatures | Pointing an account's payments at a wallet its owner does not control | another key as the identity fails (`Unauthorized`); link and unlink with both keys |
+| `init` on `["booking", hash(bookingId)]` | Recording a booking twice | second create fails (`already in use`) |
+| Amounts and payee read from the booking record | Paying anyone or anything other than the booked split | pay moves exactly 900,000 / 30,000 / 70,000 VND (× 1,000 units) to provider, Community Fund and platform |
+| Status BOOKED/UNPAID → PAID | Paying twice, or paying a cancelled booking | second pay and pay-after-cancel fail (`InvalidState`) |
+| Token program rejects the transfer | Paying more than the wallet holds | underfunded wallet: whole transaction fails, booking stays BOOKED |
 
 ## What the operator sees
 
@@ -59,13 +64,16 @@ devnet measurement:
 
 | Instruction | Max CU |
 |---|---|
-| `settle_split` (3 token CPIs) | 29,578 |
+| `register_account` (2 accounts) | 44,108 |
+| `create_booking` | 37,619 |
+| `pay_booking` (3 token CPIs) | 21,908 |
 | `submit_attestation` | 20,663 |
 | `finalize_attestation` (committee member) | 20,512 |
 | `grant_role` | 18,922 |
 | `finalize_attestation` (vault) | 13,911 |
-| `initialize_treasury` | 10,932 |
+| `initialize_payment_config` | 11,814 |
 | `initialize_config` | 9,133 |
 | `cancel_pending` | 8,542 |
 | `revoke_role` | 5,785 |
+| `set_payment_wallet` | 4,170 |
 | `set_paused` | 3,808 |

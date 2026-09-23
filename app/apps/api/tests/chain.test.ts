@@ -44,7 +44,6 @@ vi.mock("../src/chain/gateway", () => ({
 }));
 
 vi.mock("../src/chain/demo-token", () => ({
-  fundEscrow: vi.fn(),
   loadMint: () => null,
   loadFunder: () => null,
   assertDemoNetwork: vi.fn(),
@@ -172,8 +171,6 @@ describe("chain verifier routes", () => {
       .send({ finalizeTxSig: REAL_SIG });
     expect(res.status).toBe(200);
     expect(res.body.state).toBe("FINALIZED");
-    // Finalize stands even when the payout cannot run (no settler key here).
-    expect(res.body.settlement).toMatchObject({ ok: false, error: expect.stringMatching(/not configured/i) });
     const row = await prisma.ledgerAttestation.findUnique({ where: { ledgerEntryId: ledgerId } });
     expect(row?.finalPda).toBe(expectedPda);
     expect(row?.finalizeTxSig).toBe(REAL_SIG);
@@ -416,53 +413,6 @@ describe("chain verifier routes", () => {
         .send({ cancelTxSig: CANCEL_SIG, reason: "submitted in error" });
       expect(finalized.status).toBe(409);
       expect(verifyCancel).not.toHaveBeenCalled();
-    });
-  });
-
-  // settle_split retry route. The payout itself runs against LiteSVM in
-  // packages/chain-client/program-tests/settlement.test.ts.
-  describe("settlement retry (settle_split)", () => {
-    const settle = (id: string, token = coordinatorToken) =>
-      request(app).post(`/chain/ledger/${id}/settle`).set("Authorization", `Bearer ${token}`);
-
-    it("is refused to a guest", async () => {
-      const guestToken = (
-        await request(app).post("/auth/login").send({ email: "guest2@chain.kna", password: PASSWORD })
-      ).body.token;
-      expect((await settle(ledgerId, guestToken)).status).toBe(403);
-    });
-
-    it("only settles a finalized attestation", async () => {
-      await prisma.ledgerAttestation.update({
-        where: { ledgerEntryId: ledgerId },
-        data: { state: "AWAITING_COMMITTEE" },
-      });
-      const res = await settle(ledgerId);
-      expect(res.status).toBe(409);
-      expect(res.body.error).toMatch(/finalized/i);
-    });
-
-    it("says plainly when settlement is not configured, and audits the refusal", async () => {
-      await prisma.ledgerAttestation.update({
-        where: { ledgerEntryId: ledgerId },
-        data: { state: "FINALIZED" },
-      });
-      const res = await settle(ledgerId);
-      expect(res.status).toBe(503);
-      expect(res.body.error).toMatch(/not configured/i);
-      expect(
-        await prisma.chainAuditLog.count({ where: { ledgerEntryId: ledgerId, action: "SETTLE_REJECTED" } })
-      ).toBeGreaterThan(0);
-    });
-
-    it("never settles twice", async () => {
-      await prisma.ledgerAttestation.update({
-        where: { ledgerEntryId: ledgerId },
-        data: { settleTxSig: "6".repeat(88) },
-      });
-      const res = await settle(ledgerId);
-      expect(res.status).toBe(409);
-      expect(res.body.error).toMatch(/already settled/i);
     });
   });
 });

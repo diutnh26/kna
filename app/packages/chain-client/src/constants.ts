@@ -12,6 +12,14 @@ export const ATTESTATION_PENDING = 0;
 export const ATTESTATION_FINALIZED = 1;
 export const ATTESTATION_CANCELLED = 2;
 
+export const ACCOUNT_FLAG_GUEST = 1;
+export const ACCOUNT_FLAG_PROVIDER = 2;
+
+export const BOOKING_BOOKED = 0;
+export const BOOKING_PAID = 1;
+export const BOOKING_UNPAID = 2;
+export const BOOKING_CANCELLED = 3;
+
 export type SolanaCluster = "devnet" | "localnet" | "mainnet-beta";
 
 export function assertDevnetCluster(cluster: string): void {

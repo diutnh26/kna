@@ -49,7 +49,7 @@ services:
         value: kna-t2-web-or0d.onrender.com
       - key: PAYMENT_PROVIDER
         value: vietqr
-      # Solana devnet: attestation, committee finalize, settle_split.
+      # Solana devnet: accounts, bookings, pay_booking, attestation.
       - key: SOLANA_ENABLED
         value: "true"
       - key: SOLANA_CLUSTER
@@ -71,9 +71,11 @@ services:
         sync: false
       - key: DEMO_MINT # dKNA mint (secrets/.env.demo-token)
         sync: false
-      - key: DEMO_FUNDER_KEYPAIR_B58 # dKNA mint authority; funds the escrow
+      - key: DEMO_FUNDER_KEYPAIR_B58 # dKNA mint authority: top-ups and the demo faucet
         sync: false
-      - key: KNA_SETTLER_KEYPAIR_B58 # optional; signs settle_split (defaults to the funder)
+      - key: KNA_REGISTRAR_KEYPAIR_B58 # coordinator-role key: registers accounts, records bookings, pays fees
+        sync: false
+      - key: WALLET_ENCRYPTION_KEY # 32 random bytes, base64; encrypts platform-held wallet keys
         sync: false
       - key: DEMO_PROVIDER_WALLET # fallback payout wallet for providers without Phantom
         sync: false

@@ -4,15 +4,12 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import {
-  createMintToInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
-import { fetchTreasury } from "@kna/chain-client";
 import { loadChainConfig } from "./config";
 
 /** 1 dKNA = 1,000 VND; mint uses 6 decimals. */
@@ -165,55 +162,4 @@ export function assertDemoNetwork(rpcUrl: string, cluster: string) {
   if (lower.includes("mainnet")) {
     throw new Error("demoDisburse refused: mainnet RPC URL");
   }
-}
-
-export interface FundEscrowInput {
-  id: string;
-  totalVnd: number;
-}
-
-/**
- * The guest's payment, represented on devnet: mints the booking's total, as
- * dKNA, into the treasury escrow owned by the KNĂ program. Nothing reaches a
- * wallet here — the program pays the escrow out with settle_split once the
- * committee has finalized the attestation, for exactly the notarized split.
- *
- * No-ops (returns []) when DEMO_MINT / the funder key are unset or the
- * treasury has not been initialised. Devnet and localnet only.
- */
-export async function fundEscrow(booking: FundEscrowInput): Promise<string[]> {
-  const mint = loadMint();
-  const funder = loadFunder();
-  if (!mint || !funder) return [];
-
-  const chain = loadChainConfig();
-  assertDemoNetwork(chain.rpcUrl, chain.cluster);
-  const connection = new Connection(chain.rpcUrl, {
-    commitment: "confirmed",
-    confirmTransactionInitialTimeout: 60_000,
-  });
-
-  const treasury = await fetchTreasury(connection);
-  if (!treasury) {
-    console.warn("[demo-token] treasury not initialised — escrow not funded for", booking.id);
-    return [];
-  }
-  if (treasury.mint !== mint.toBase58()) {
-    throw new Error("DEMO_MINT does not match the treasury mint");
-  }
-
-  const amount = BigInt(booking.totalVnd) * treasury.unitsPerVnd;
-  if (amount <= 0n) return [];
-
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
-  const tx = new Transaction({ feePayer: funder.publicKey, blockhash, lastValidBlockHeight }).add(
-    createMintToInstruction(mint, new PublicKey(treasury.vault), funder.publicKey, amount, [], TOKEN_PROGRAM_ID)
-  );
-  const sig = await connection.sendTransaction(tx, [funder], {
-    skipPreflight: false,
-    preflightCommitment: "confirmed",
-  });
-  await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
-  console.info(`[demo-token] escrow funded for ${booking.id} → ${sig}`);
-  return [sig];
 }

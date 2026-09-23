@@ -4,7 +4,6 @@ import { requireAuth, requireCoordinator, type AuthedRequest } from "../middlewa
 import { getPaymentGateway } from "../payments/gateway";
 import { VietQRGateway } from "../payments/vietqr-gateway";
 import { syncTransaction } from "../payments/vietqr-token";
-import { fundEscrow } from "../chain/demo-token";
 import { notify } from "../lib/notify";
 import { enqueueLedgerSettledOutbox } from "../chain/outbox";
 
@@ -76,14 +75,7 @@ async function markBookingPaid(bookingId: string, paidBy: PaidBy, expectedAmount
     return booking;
   }
 
-  // The payment enters escrow on devnet. Nobody is paid here: the program
-  // pays the escrow out (settle_split) once the committee finalizes.
-  let demoTxSigs: string[] = [];
-  try {
-    demoTxSigs = await fundEscrow({ id: booking.id, totalVnd: booking.totalVnd });
-  } catch (err) {
-    console.error("[payments] fundEscrow failed:", err);
-  }
+  const demoTxSigs: string[] = [];
 
   const updated = await prisma.booking.update({
     where: { id: booking.id },

@@ -3,7 +3,6 @@ import { prisma } from "../lib/prisma";
 import { loadChainConfig } from "./config";
 import { getChainGateway } from "./gateway";
 import { LedgerNotAttestableError, recomputeAndVerifySettled } from "./outbox";
-import { settleAfterFinalize } from "./settle";
 
 const MAX_ATTEMPTS = 8;
 
@@ -83,9 +82,6 @@ export async function processOutboxRow(rowId: string) {
           data: { status: "FINALIZED", leaseUntil: null, lastError: null },
         }),
       ]);
-      // Finalized through Squads without anyone pasting the signature back:
-      // the worker is what notices, so it also pays out.
-      await settleAfterFinalize(entry.id, null);
       return;
     }
 

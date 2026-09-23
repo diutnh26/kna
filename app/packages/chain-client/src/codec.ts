@@ -17,8 +17,15 @@ export const IX = {
   acknowledgeReceipt: "acknowledge_receipt",
   publishArchiveProof: "publish_archive_proof",
   revokeArchiveProof: "revoke_archive_proof",
-  initializeTreasury: "initialize_treasury",
-  settleSplit: "settle_split",
+  initializePaymentConfig: "initialize_payment_config",
+  updatePaymentWallets: "update_payment_wallets",
+  registerAccount: "register_account",
+  setAccountFlags: "set_account_flags",
+  setPaymentWallet: "set_payment_wallet",
+  createBooking: "create_booking",
+  payBooking: "pay_booking",
+  markUnpaid: "mark_unpaid",
+  cancelBooking: "cancel_booking",
 } as const;
 
 export function encodeU64(n: number | bigint): Buffer {

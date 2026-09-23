@@ -18,6 +18,15 @@ export function hashProviderLabel(label: string): string {
   return bytesToHex(sha256(new TextEncoder().encode(`${DOMAIN}:provider:${label}`)));
 }
 
+/** An account's on-chain identity: a hash of its KNĂ user id, never PII. */
+export function hashUserId(userId: string): string {
+  return bytesToHex(sha256(new TextEncoder().encode(`${DOMAIN}:user:${userId}`)));
+}
+
+export function hashBookingId(bookingId: string): string {
+  return bytesToHex(sha256(new TextEncoder().encode(`${DOMAIN}:booking:${bookingId}`)));
+}
+
 export function hashLedgerId(ledgerId: string): string {
   return bytesToHex(sha256(new TextEncoder().encode(`${DOMAIN}:ledger:${ledgerId}`)));
 }

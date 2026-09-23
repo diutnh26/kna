@@ -140,38 +140,130 @@
       "args": []
     },
     {
-      "name": "initialize_treasury",
-      "discriminator": [124, 186, 211, 195, 85, 165, 129, 166],
+      "name": "initialize_payment_config",
+      "discriminator": [38, 187, 7, 244, 201, 111, 164, 182],
       "accounts": [
         { "name": "authority", "writable": true, "signer": true },
         { "name": "config" },
-        { "name": "treasury", "writable": true },
+        { "name": "payment_config", "writable": true },
         { "name": "mint" },
-        { "name": "vault" },
         { "name": "system_program" }
       ],
       "args": [
         { "name": "platform_wallet", "type": "pubkey" },
+        { "name": "community_wallet", "type": "pubkey" },
         { "name": "units_per_vnd", "type": "u64" }
       ]
     },
     {
-      "name": "settle_split",
-      "discriminator": [3, 170, 152, 217, 94, 9, 9, 213],
+      "name": "update_payment_wallets",
+      "discriminator": [66, 5, 159, 232, 31, 2, 12, 39],
       "accounts": [
-        { "name": "settler", "writable": true, "signer": true },
+        { "name": "authority", "signer": true },
         { "name": "config" },
-        { "name": "settler_role" },
-        { "name": "treasury", "writable": true },
-        { "name": "final_attestation" },
-        { "name": "settlement_record", "writable": true },
-        { "name": "vault", "writable": true },
+        { "name": "payment_config", "writable": true }
+      ],
+      "args": [
+        { "name": "platform_wallet", "type": "pubkey" },
+        { "name": "community_wallet", "type": "pubkey" }
+      ]
+    },
+    {
+      "name": "register_account",
+      "discriminator": [10, 16, 177, 35, 242, 85, 227, 143],
+      "accounts": [
+        { "name": "registrar", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "registrar_role" },
+        { "name": "wallet", "signer": true },
+        { "name": "account_record", "writable": true },
+        { "name": "wallet_record", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": [
+        { "name": "user_hash", "type": {"array": ["u8", 32]} },
+        { "name": "flags", "type": "u8" }
+      ]
+    },
+    {
+      "name": "set_account_flags",
+      "discriminator": [84, 93, 18, 86, 153, 99, 95, 248],
+      "accounts": [
+        { "name": "registrar", "signer": true },
+        { "name": "registrar_role" },
+        { "name": "account_record", "writable": true }
+      ],
+      "args": [
+        { "name": "flags", "type": "u8" }
+      ]
+    },
+    {
+      "name": "set_payment_wallet",
+      "discriminator": [211, 195, 191, 19, 245, 221, 140, 196],
+      "accounts": [
+        { "name": "wallet", "signer": true },
+        { "name": "payment_wallet", "signer": true },
+        { "name": "account_record", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_booking",
+      "discriminator": [19, 223, 181, 90, 124, 206, 73, 169],
+      "accounts": [
+        { "name": "registrar", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "registrar_role" },
+        { "name": "guest_account" },
+        { "name": "provider_account" },
+        { "name": "booking", "writable": true },
+        { "name": "system_program" }
+      ],
+      "args": [
+        { "name": "booking_hash", "type": {"array": ["u8", 32]} },
+        { "name": "check_in", "type": "i64" },
+        { "name": "check_out", "type": "i64" },
+        { "name": "total_vnd", "type": "u64" },
+        { "name": "platform_vnd", "type": "u64" },
+        { "name": "community_vnd", "type": "u64" },
+        { "name": "provider_vnd", "type": "u64" }
+      ]
+    },
+    {
+      "name": "pay_booking",
+      "discriminator": [54, 54, 209, 34, 11, 24, 35, 45],
+      "accounts": [
+        { "name": "payer", "signer": true },
+        { "name": "config" },
+        { "name": "payment_config" },
+        { "name": "booking", "writable": true },
+        { "name": "guest_account" },
         { "name": "mint" },
+        { "name": "payer_token", "writable": true },
         { "name": "provider_token", "writable": true },
         { "name": "community_token", "writable": true },
         { "name": "platform_token", "writable": true },
-        { "name": "token_program" },
-        { "name": "system_program" }
+        { "name": "token_program" }
+      ],
+      "args": []
+    },
+    {
+      "name": "mark_unpaid",
+      "discriminator": [12, 145, 212, 148, 219, 133, 143, 51],
+      "accounts": [
+        { "name": "registrar", "signer": true },
+        { "name": "registrar_role" },
+        { "name": "booking", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_booking",
+      "discriminator": [139, 162, 116, 202, 78, 140, 139, 90],
+      "accounts": [
+        { "name": "registrar", "signer": true },
+        { "name": "registrar_role" },
+        { "name": "booking", "writable": true }
       ],
       "args": []
     }
@@ -183,8 +275,10 @@
     { "name": "FinalAttestation", "discriminator": [204, 58, 26, 243, 72, 12, 252, 142] },
     { "name": "GuestReceipt", "discriminator": [166, 38, 66, 81, 251, 214, 110, 213] },
     { "name": "ArchiveProof", "discriminator": [178, 137, 163, 94, 105, 76, 224, 241] },
-    { "name": "Treasury", "discriminator": [238, 239, 123, 238, 89, 1, 168, 253] },
-    { "name": "SettlementRecord", "discriminator": [172, 159, 67, 74, 96, 85, 37, 205] }
+    { "name": "PaymentConfig", "discriminator": [252, 166, 185, 239, 186, 79, 212, 152] },
+    { "name": "AccountRecord", "discriminator": [16, 241, 122, 20, 132, 106, 127, 115] },
+    { "name": "WalletRecord", "discriminator": [146, 10, 246, 18, 155, 66, 81, 49] },
+    { "name": "BookingRecord", "discriminator": [7, 59, 248, 48, 36, 101, 141, 98] }
   ],
   "events": [
     { "name": "ConfigInitialized" },
@@ -198,8 +292,13 @@
     { "name": "ReceiptAcknowledged" },
     { "name": "ArchiveProofPublished" },
     { "name": "ArchiveProofRevoked" },
-    { "name": "TreasuryInitialized" },
-    { "name": "SplitSettled" }
+    { "name": "PaymentConfigSet" },
+    { "name": "AccountRegistered" },
+    { "name": "AccountFlagsSet" },
+    { "name": "PaymentWalletSet" },
+    { "name": "BookingCreated" },
+    { "name": "BookingPaid" },
+    { "name": "BookingStatusChanged" }
   ],
   "errors": [
     { "code": 6000, "name": "Unauthorized", "msg": "Unauthorized" },
@@ -211,7 +310,10 @@
     { "code": 6006, "name": "AlreadyExists", "msg": "Attestation already exists" },
     { "code": 6007, "name": "Overflow", "msg": "Arithmetic overflow" },
     { "code": 6008, "name": "InvalidTokenAccount", "msg": "Token account is not the expected one" },
-    { "code": 6009, "name": "InvalidMint", "msg": "Mint is not the treasury mint" }
+    { "code": 6009, "name": "InvalidMint", "msg": "Mint is not the payment mint" },
+    { "code": 6010, "name": "InvalidDates", "msg": "Check-out must be after check-in, and cancellation before check-in" },
+    { "code": 6011, "name": "NotPayableYet", "msg": "Payment opens on the check-out date" },
+    { "code": 6012, "name": "NotProvider", "msg": "The host account is not a registered provider" }
   ],
   "types": [],
   "deployed": {

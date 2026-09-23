@@ -5,4 +5,4 @@ export * from "./codec";
 export * from "./instructions";
 export * from "./accounts";
 export * from "./verify";
-export * from "./settlement";
+export * from "./booking";

@@ -6,12 +6,7 @@ import { VietQRGateway, buildPaymentRef } from "../src/payments/vietqr-gateway";
 import { prisma } from "../src/lib/prisma";
 import { app, makeListing, makeProvider, makeUser, PASSWORD, resetDb, soon } from "./helpers";
 
-const { fundEscrow } = vi.hoisted(() => ({
-  fundEscrow: vi.fn(),
-}));
-
 vi.mock("../src/chain/demo-token", () => ({
-  fundEscrow,
   fetchDemoTokenBalances: vi.fn().mockResolvedValue(null),
 }));
 
@@ -154,11 +149,6 @@ describe("POST /payments/webhook integration", () => {
     await prisma.$disconnect();
   });
 
-  beforeEach(() => {
-    fundEscrow.mockReset();
-    fundEscrow.mockResolvedValue(["sig1", "sig2", "sig3"]);
-  });
-
   async function seedBooking(paymentRef: string, totalVnd = 500_000) {
     return prisma.booking.create({
       data: {
@@ -187,7 +177,7 @@ describe("POST /payments/webhook integration", () => {
       .send(signed.raw);
   }
 
-  it("marks the booking PAID and returns demo tx signatures", async () => {
+  it("marks the booking PAID", async () => {
     const ref = "TWRTCKPAID0001";
     await seedBooking(ref);
 
@@ -195,22 +185,17 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
-    expect(res.body.demoTxSigs).toEqual(["sig1", "sig2", "sig3"]);
-    expect(fundEscrow).toHaveBeenCalledTimes(1);
-    // The whole payment goes into escrow; the split is paid out on-chain later.
-    expect(fundEscrow).toHaveBeenCalledWith({ id: expect.any(String), totalVnd: 500_000 });
 
     const row = await prisma.booking.findFirstOrThrow({ where: { paymentRef: ref } });
     expect(row.paymentStatus).toBe("PAID");
     expect(row.status).toBe("CONFIRMED");
-    expect(JSON.parse(row.demoTxSigs!)).toEqual(["sig1", "sig2", "sig3"]);
     // Decided by the bank's webhook: a trace, with no person behind it.
     expect(row.decidedVia).toBe("PAYMENT_WEBHOOK");
     expect(row.decidedById).toBeNull();
     expect(row.decidedAt).not.toBeNull();
   });
 
-  it("disburses only once when the same paymentRef is posted twice", async () => {
+  it("records the payment once when the same paymentRef is posted twice", async () => {
     const ref = "TWRTCKATOMIC01";
     await seedBooking(ref);
     const body = { paymentRef: ref, status: "PAID", amountVnd: 500_000 };
@@ -220,8 +205,8 @@ describe("POST /payments/webhook integration", () => {
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
-    expect(fundEscrow).toHaveBeenCalledTimes(1);
-    expect(second.body.demoTxSigs).toEqual(["sig1", "sig2", "sig3"]);
+    const row = await prisma.booking.findFirstOrThrow({ where: { paymentRef: ref } });
+    expect(row.paymentStatus).toBe("PAID");
   });
 
   it("rejects a webhook whose amount does not match the booking", async () => {
@@ -232,7 +217,6 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/does not match/i);
-    expect(fundEscrow).not.toHaveBeenCalled();
     const row = await prisma.booking.findFirstOrThrow({ where: { paymentRef: ref } });
     expect(row.paymentStatus).toBe("AWAITING_PAYMENT");
   });
@@ -248,7 +232,6 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(401);
     expect(res.body.error).toMatch(/authentication/i);
-    expect(fundEscrow).not.toHaveBeenCalled();
   });
 
   it("ignores a FAILED webhook without minting", async () => {
@@ -259,7 +242,6 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ ok: true, ignored: true, status: "FAILED" });
-    expect(fundEscrow).not.toHaveBeenCalled();
     const row = await prisma.booking.findFirstOrThrow({ where: { paymentRef: ref } });
     expect(row.paymentStatus).toBe("AWAITING_PAYMENT");
   });
@@ -275,7 +257,6 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.paymentStatus).toBe("PAID");
-    expect(res.body.demoTxSigs).toEqual(["sig1", "sig2", "sig3"]);
   });
 
   it("serves demo history without auth and without a guest email", async () => {
@@ -287,10 +268,14 @@ describe("POST /payments/webhook integration", () => {
     }
   });
 
-  it("includes explorer links for a booking that was minted", async () => {
+  it("includes explorer links for a booking's on-chain transactions", async () => {
     const ref = "TWRTCKHISTORY01";
     await seedBooking(ref);
     await postWebhook({ paymentRef: ref, status: "PAID", amountVnd: 500_000 });
+    await prisma.booking.updateMany({
+      where: { paymentRef: ref },
+      data: { demoTxSigs: JSON.stringify(["sig1", "sig2", "sig3"]) },
+    });
 
     const res = await request(app).get("/payments/demo-history");
     const item = res.body.items.find((row: { paymentRef: string }) => row.paymentRef === ref);

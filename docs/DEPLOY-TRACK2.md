@@ -10,30 +10,31 @@ Do the steps in order. Steps 1–3 need the keys in `secrets/`; nothing here is 
 |---|---|---|
 | `secrets/deploy-keypair.json` | Upgrade authority and config authority (`FfNV…u6J`) | steps 1, 2 |
 | `DEMO_MINT` | The dKNA mint (from `secrets/.env.demo-token`) | step 2, Render |
-| `DEMO_FUNDER_KEYPAIR_B58` | dKNA mint authority; funds the escrow on payment | step 2, Render |
-| `KNA_SETTLER_KEYPAIR_B58` | Optional. Signs `settle_split`; defaults to the funder key | step 2, Render |
+| `DEMO_FUNDER_KEYPAIR_B58` | dKNA mint authority: top-ups and the demo faucet | Render |
+| `KNA_REGISTRAR_KEYPAIR_B58` | The platform's coordinator-role key: registers accounts, records bookings, pays network fees | step 2, Render |
+| `WALLET_ENCRYPTION_KEY` | 32 random bytes (base64) that encrypt the platform-held wallet keys | Render |
 
-The deploy wallet needs devnet SOL for the upgrade buffer (about twice the program size in rent, refunded afterwards). Check with the dry run below.
+The deploy wallet needs devnet SOL for the upgrade buffer (about twice the program size in rent, refunded afterwards), and the registrar needs devnet SOL for the fees and rent it pays. Check with the dry run below.
 
 ## 1. Build, test and upgrade the program
 
 ```powershell
-.\scripts\program-tests.ps1          # anchor build + 37 LiteSVM tests
+.\scripts\program-tests.ps1          # anchor build + LiteSVM tests
 .\scripts\upgrade-devnet.ps1 -DryRun  # checks authority, sizes, balance
 .\scripts\upgrade-devnet.ps1          # extends if needed, then upgrades in place
 ```
 
-The upgrade keeps the program ID, so existing config, roles and attestations stay valid. `settle_split` only adds new accounts (`Treasury`, `SettlementRecord`); no existing account layout changed, and the existing error codes 6000–6007 keep their numbers.
+The upgrade keeps the program ID, so existing config, roles and attestations stay valid. The new instructions only add accounts (`PaymentConfig`, `AccountRecord`, `WalletRecord`, `BookingRecord`); no existing account layout changed, and the existing error codes 6000–6007 keep their numbers.
 
-## 2. Set up the treasury (once)
+## 2. Payment config and registrar (once)
 
-From `app/apps/api`, with `DEMO_MINT` and `DEMO_FUNDER_KEYPAIR_B58` (or `KNA_SETTLER_KEYPAIR_B58`) in the environment:
+From `app/apps/api`, with `DEMO_MINT` and `KNA_REGISTRAR_KEYPAIR_B58` in the environment:
 
 ```powershell
-npx tsx src/scripts/setup-treasury.ts
+npx tsx src/scripts/setup-payments.ts
 ```
 
-It is idempotent. It creates the escrow token account (the dKNA account owned by the treasury PDA), runs `initialize_treasury` (1 VND = 1,000 dKNA base units) and grants the coordinator role to the settler key. Set `KNA_PLATFORM_WALLET` first if platform fees should not go to the deploy wallet.
+It is idempotent. It runs `initialize_payment_config` (dKNA, 1 VND = 1,000 base units, platform wallet 7%, Community Fund 3%) and grants the coordinator role to the registrar. Set `KNA_PLATFORM_WALLET` / `KNA_COMMUNITY_FUND_WALLET` first to override the defaults (deploy wallet / committee vault).
 
 ## 3. Render
 
@@ -50,18 +51,19 @@ Live hosts: `https://kna-t2-api-or0d.onrender.com` and `https://kna-t2-web-or0d.
 
 ```mermaid
 sequenceDiagram
-  participant G as Guest (VND)
+  participant U as Guest
   participant A as KNĂ API
   participant P as KNĂ program
   participant T as SPL Token
-  G->>A: pays by VietQR
-  A->>T: mint booking total into escrow
-  A->>P: coordinator submits attestation
-  P-->>P: committee finalizes (Squads 2-of-3)
-  A->>P: settle_split
-  P->>T: CPI transfer 90% to provider
-  P->>T: CPI transfer 3% to Community Fund
-  P->>T: CPI transfer 7% to platform
+  U->>A: signs up (Google / email)
+  A->>P: register_account (one fixed wallet)
+  U->>A: tops up (VietQR to dKNA) or uses the faucet
+  U->>A: books a room (confirmed instantly)
+  A->>P: create_booking (dates, 7 / 3 / 90 split)
+  U->>A: taps Pay on the check-out date
+  A->>P: pay_booking signed by the guest wallet
+  P->>T: 90% provider, 3% Community Fund, 7% platform
+  A->>P: attestation, finalized by the committee (Squads)
 ```
 
-The payout amounts come from the finalized attestation, not from the API. A `SettlementRecord` per ledger entry prevents a second payout. If the automatic payout after finalize fails, for example because the provider has no linked wallet, a coordinator can retry it with `POST /chain/ledger/:id/settle`.
+The amounts and the provider's wallet come from the on-chain booking record, not from the API. A booking can be paid once, only from the check-out date, and only from the guest's paying wallet (their fixed wallet, or a Phantom wallet they linked).

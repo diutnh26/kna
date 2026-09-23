@@ -15,6 +15,16 @@ pub const ATTESTATION_PENDING: u8 = 0;
 pub const ATTESTATION_FINALIZED: u8 = 1;
 pub const ATTESTATION_CANCELLED: u8 = 2;
 
+/// AccountRecord.flags. Every registered account can book (GUEST); PROVIDER
+/// accounts can also be paid for a booking.
+pub const ACCOUNT_FLAG_GUEST: u8 = 1;
+pub const ACCOUNT_FLAG_PROVIDER: u8 = 2;
+
+pub const BOOKING_BOOKED: u8 = 0;
+pub const BOOKING_PAID: u8 = 1;
+pub const BOOKING_UNPAID: u8 = 2;
+pub const BOOKING_CANCELLED: u8 = 3;
+
 /// SPL Token program. Token CPIs are encoded by hand (TransferChecked) rather
 /// than through anchor-spl, which would pull a large dependency tree into a
 /// build pinned to rustc 1.84.
@@ -268,12 +278,12 @@ pub mod kna_trust_layer {
         Ok(())
     }
 
-    /// One-time setup of the settlement escrow: the dKNA mint, the escrow
-    /// token account (owned by the treasury PDA), the platform's wallet and
-    /// how many token base units stand for one VND.
-    pub fn initialize_treasury(
-        ctx: Context<InitializeTreasury>,
+    /// The dKNA payment rail: which mint, how many base units make one VND,
+    /// and the platform and Community Fund wallets that receive their share.
+    pub fn initialize_payment_config(
+        ctx: Context<InitializePaymentConfig>,
         platform_wallet: Pubkey,
+        community_wallet: Pubkey,
         units_per_vnd: u64,
     ) -> Result<()> {
         require_keys_eq!(
@@ -283,111 +293,261 @@ pub mod kna_trust_layer {
         );
         require!(units_per_vnd > 0, KnaError::InvalidMint);
         let decimals = read_mint_decimals(&ctx.accounts.mint)?;
-        let (vault_mint, vault_owner) = read_token_account(&ctx.accounts.vault)?;
-        require_keys_eq!(vault_mint, ctx.accounts.mint.key(), KnaError::InvalidMint);
-        require_keys_eq!(
-            vault_owner,
-            ctx.accounts.treasury.key(),
-            KnaError::InvalidTokenAccount
-        );
-
-        let treasury = &mut ctx.accounts.treasury;
-        treasury.mint = ctx.accounts.mint.key();
-        treasury.vault = ctx.accounts.vault.key();
-        treasury.platform_wallet = platform_wallet;
-        treasury.units_per_vnd = units_per_vnd;
-        treasury.decimals = decimals;
-        treasury.settled_count = 0;
-        treasury.settled_total_vnd = 0;
-        treasury.bump = ctx.bumps.treasury;
-        emit!(TreasuryInitialized {
-            mint: treasury.mint,
-            vault: treasury.vault,
+        let pc = &mut ctx.accounts.payment_config;
+        pc.mint = ctx.accounts.mint.key();
+        pc.decimals = decimals;
+        pc.units_per_vnd = units_per_vnd;
+        pc.platform_wallet = platform_wallet;
+        pc.community_wallet = community_wallet;
+        pc.bump = ctx.bumps.payment_config;
+        emit!(PaymentConfigSet {
+            mint: pc.mint,
             platform_wallet,
+            community_wallet,
             units_per_vnd,
         });
         Ok(())
     }
 
-    /// Pays out a finalized attestation from escrow: three CPI transfers into
-    /// SPL Token for exactly the amounts the committee finalized — provider,
-    /// Community Fund (the committee vault) and platform. A SettlementRecord
-    /// PDA per ledger entry makes a second settlement impossible.
-    pub fn settle_split(ctx: Context<SettleSplit>) -> Result<()> {
-        require!(!ctx.accounts.config.paused, KnaError::Paused);
-        let role = &ctx.accounts.settler_role;
-        require!(!role.revoked, KnaError::RoleRevoked);
-        require!(role.role == ROLE_COORDINATOR, KnaError::Unauthorized);
-        require_keys_eq!(role.wallet, ctx.accounts.settler.key(), KnaError::Unauthorized);
+    pub fn update_payment_wallets(
+        ctx: Context<UpdatePaymentConfig>,
+        platform_wallet: Pubkey,
+        community_wallet: Pubkey,
+    ) -> Result<()> {
+        require_keys_eq!(
+            ctx.accounts.authority.key(),
+            ctx.accounts.config.coordinator_authority,
+            KnaError::Unauthorized
+        );
+        let pc = &mut ctx.accounts.payment_config;
+        pc.platform_wallet = platform_wallet;
+        pc.community_wallet = community_wallet;
+        emit!(PaymentConfigSet {
+            mint: pc.mint,
+            platform_wallet,
+            community_wallet,
+            units_per_vnd: pc.units_per_vnd,
+        });
+        Ok(())
+    }
 
-        let treasury = &ctx.accounts.treasury;
-        let (provider_mint, _) = read_token_account(&ctx.accounts.provider_token)?;
+    /// Binds one KNĂ account to one wallet, for good. Two records are created
+    /// with `init` — by account and by wallet — so neither an account nor a
+    /// wallet can ever be registered twice. The wallet signs (it proves the
+    /// key exists); a coordinator-role registrar pays and vouches for the
+    /// account. Only a hash of the account id goes on-chain.
+    pub fn register_account(
+        ctx: Context<RegisterAccount>,
+        user_hash: [u8; 32],
+        flags: u8,
+    ) -> Result<()> {
+        require!(!ctx.accounts.config.paused, KnaError::Paused);
+        assert_registrar(&ctx.accounts.registrar_role, &ctx.accounts.registrar)?;
+        require!(valid_flags(flags), KnaError::InvalidRole);
+        let now = Clock::get()?.unix_timestamp;
+        let wallet = ctx.accounts.wallet.key();
+
+        let account = &mut ctx.accounts.account_record;
+        account.user_hash = user_hash;
+        account.wallet = wallet;
+        account.payment_wallet = wallet;
+        account.flags = flags;
+        account.registered_at = now;
+        account.bump = ctx.bumps.account_record;
+
+        let by_wallet = &mut ctx.accounts.wallet_record;
+        by_wallet.wallet = wallet;
+        by_wallet.user_hash = user_hash;
+        by_wallet.bump = ctx.bumps.wallet_record;
+
+        emit!(AccountRegistered {
+            user_hash,
+            wallet,
+            flags,
+            registered_at: now,
+        });
+        Ok(())
+    }
+
+    /// E.g. a guest who becomes a homestay provider.
+    pub fn set_account_flags(ctx: Context<SetAccountFlags>, flags: u8) -> Result<()> {
+        assert_registrar(&ctx.accounts.registrar_role, &ctx.accounts.registrar)?;
+        require!(valid_flags(flags), KnaError::InvalidRole);
+        let account = &mut ctx.accounts.account_record;
+        account.flags = flags;
+        emit!(AccountFlagsSet {
+            user_hash: account.user_hash,
+            flags,
+        });
+        Ok(())
+    }
+
+    /// Which wallet pays this account's bookings: its own fixed wallet, or a
+    /// wallet the user brings (Phantom). Both sign, so nobody can point an
+    /// account at a wallet they do not control. Passing the account's own
+    /// wallet as `payment_wallet` unlinks.
+    pub fn set_payment_wallet(ctx: Context<SetPaymentWallet>) -> Result<()> {
+        let account = &mut ctx.accounts.account_record;
+        account.payment_wallet = ctx.accounts.payment_wallet.key();
+        emit!(PaymentWalletSet {
+            user_hash: account.user_hash,
+            wallet: account.wallet,
+            payment_wallet: account.payment_wallet,
+        });
+        Ok(())
+    }
+
+    /// Records a confirmed booking: who stays, who hosts (a registered
+    /// provider, whose fixed wallet is the payee), the dates, and the split
+    /// of the total — which must be the 7 / 3 / 90 schedule.
+    #[allow(clippy::too_many_arguments)]
+    pub fn create_booking(
+        ctx: Context<CreateBooking>,
+        booking_hash: [u8; 32],
+        check_in: i64,
+        check_out: i64,
+        total_vnd: u64,
+        platform_vnd: u64,
+        community_vnd: u64,
+        provider_vnd: u64,
+    ) -> Result<()> {
+        require!(!ctx.accounts.config.paused, KnaError::Paused);
+        assert_registrar(&ctx.accounts.registrar_role, &ctx.accounts.registrar)?;
+        require!(
+            ctx.accounts.provider_account.flags & ACCOUNT_FLAG_PROVIDER != 0,
+            KnaError::NotProvider
+        );
+        require!(check_out > check_in, KnaError::InvalidDates);
+        validate_split(
+            total_vnd,
+            platform_vnd,
+            community_vnd,
+            provider_vnd,
+            ctx.accounts.config.platform_fee_bps,
+            ctx.accounts.config.community_fee_bps,
+        )?;
+        let now = Clock::get()?.unix_timestamp;
+        let booking = &mut ctx.accounts.booking;
+        booking.booking_hash = booking_hash;
+        booking.guest_user_hash = ctx.accounts.guest_account.user_hash;
+        booking.provider_user_hash = ctx.accounts.provider_account.user_hash;
+        booking.provider_wallet = ctx.accounts.provider_account.wallet;
+        booking.check_in = check_in;
+        booking.check_out = check_out;
+        booking.total_vnd = total_vnd;
+        booking.platform_vnd = platform_vnd;
+        booking.community_vnd = community_vnd;
+        booking.provider_vnd = provider_vnd;
+        booking.status = BOOKING_BOOKED;
+        booking.paid_by = Pubkey::default();
+        booking.paid_at = 0;
+        booking.created_at = now;
+        booking.bump = ctx.bumps.booking;
+        emit!(BookingCreated {
+            booking_hash,
+            guest_user_hash: booking.guest_user_hash,
+            provider_wallet: booking.provider_wallet,
+            check_in,
+            check_out,
+            total_vnd,
+        });
+        Ok(())
+    }
+
+    /// Payment at check-out, from the guest's paying wallet: three CPI
+    /// transfers into SPL Token for the booked split — 90% to the provider's
+    /// fixed wallet, 3% to the Community Fund, 7% to the platform. Only on or
+    /// after the check-out date, only once.
+    pub fn pay_booking(ctx: Context<PayBooking>) -> Result<()> {
+        require!(!ctx.accounts.config.paused, KnaError::Paused);
+        let booking = &ctx.accounts.booking;
+        require!(
+            booking.status == BOOKING_BOOKED || booking.status == BOOKING_UNPAID,
+            KnaError::InvalidState
+        );
+        require_keys_eq!(
+            ctx.accounts.payer.key(),
+            ctx.accounts.guest_account.payment_wallet,
+            KnaError::Unauthorized
+        );
+        let now = Clock::get()?.unix_timestamp;
+        require!(now >= booking.check_out, KnaError::NotPayableYet);
+
+        let pc = &ctx.accounts.payment_config;
+        let (payer_mint, payer_owner) = read_token_account(&ctx.accounts.payer_token)?;
+        let (provider_mint, provider_owner) = read_token_account(&ctx.accounts.provider_token)?;
         let (community_mint, community_owner) = read_token_account(&ctx.accounts.community_token)?;
         let (platform_mint, platform_owner) = read_token_account(&ctx.accounts.platform_token)?;
-        require_keys_eq!(provider_mint, treasury.mint, KnaError::InvalidMint);
-        require_keys_eq!(community_mint, treasury.mint, KnaError::InvalidMint);
-        require_keys_eq!(platform_mint, treasury.mint, KnaError::InvalidMint);
-        require_keys_eq!(
-            community_owner,
-            ctx.accounts.config.committee_vault,
-            KnaError::InvalidTokenAccount
-        );
-        require_keys_eq!(platform_owner, treasury.platform_wallet, KnaError::InvalidTokenAccount);
+        for mint in [payer_mint, provider_mint, community_mint, platform_mint] {
+            require_keys_eq!(mint, pc.mint, KnaError::InvalidMint);
+        }
+        require_keys_eq!(payer_owner, ctx.accounts.payer.key(), KnaError::InvalidTokenAccount);
+        require_keys_eq!(provider_owner, booking.provider_wallet, KnaError::InvalidTokenAccount);
+        require_keys_eq!(community_owner, pc.community_wallet, KnaError::InvalidTokenAccount);
+        require_keys_eq!(platform_owner, pc.platform_wallet, KnaError::InvalidTokenAccount);
 
-        let fin = &ctx.accounts.final_attestation;
-        let units = treasury.units_per_vnd;
+        let units = pc.units_per_vnd;
         let to_units = |vnd: u64| vnd.checked_mul(units).ok_or(error!(KnaError::Overflow));
         let transfers = [
-            (&ctx.accounts.provider_token, to_units(fin.provider_vnd)?),
-            (&ctx.accounts.community_token, to_units(fin.community_vnd)?),
-            (&ctx.accounts.platform_token, to_units(fin.platform_vnd)?),
+            (&ctx.accounts.provider_token, to_units(booking.provider_vnd)?),
+            (&ctx.accounts.community_token, to_units(booking.community_vnd)?),
+            (&ctx.accounts.platform_token, to_units(booking.platform_vnd)?),
         ];
-
-        let bump = [treasury.bump];
-        let seeds: &[&[u8]] = &[b"treasury", &bump];
         for (destination, amount) in transfers {
             if amount == 0 {
                 continue;
             }
             transfer_checked(
                 &ctx.accounts.token_program,
-                &ctx.accounts.vault,
+                &ctx.accounts.payer_token,
                 &ctx.accounts.mint,
                 destination,
-                &ctx.accounts.treasury.to_account_info(),
+                &ctx.accounts.payer.to_account_info(),
                 amount,
-                treasury.decimals,
-                seeds,
+                pc.decimals,
+                &[],
             )?;
         }
 
-        let settled_at = Clock::get()?.unix_timestamp;
-        let record = &mut ctx.accounts.settlement_record;
-        record.ledger_id_hash = fin.ledger_id_hash;
-        record.provider_token = ctx.accounts.provider_token.key();
-        record.provider_vnd = fin.provider_vnd;
-        record.community_vnd = fin.community_vnd;
-        record.platform_vnd = fin.platform_vnd;
-        record.units_per_vnd = units;
-        record.settled_at = settled_at;
-        record.settled_by = ctx.accounts.settler.key();
-        record.bump = ctx.bumps.settlement_record;
+        let booking = &mut ctx.accounts.booking;
+        booking.status = BOOKING_PAID;
+        booking.paid_by = ctx.accounts.payer.key();
+        booking.paid_at = now;
+        emit!(BookingPaid {
+            booking_hash: booking.booking_hash,
+            paid_by: booking.paid_by,
+            provider_vnd: booking.provider_vnd,
+            community_vnd: booking.community_vnd,
+            platform_vnd: booking.platform_vnd,
+            paid_at: now,
+        });
+        Ok(())
+    }
 
-        let treasury = &mut ctx.accounts.treasury;
-        treasury.settled_count = treasury.settled_count.checked_add(1).ok_or(KnaError::Overflow)?;
-        treasury.settled_total_vnd = treasury
-            .settled_total_vnd
-            .checked_add(fin.total_vnd)
-            .ok_or(KnaError::Overflow)?;
+    /// Past check-out and still unpaid: recorded as UNPAID (it stays payable).
+    pub fn mark_unpaid(ctx: Context<UpdateBooking>) -> Result<()> {
+        assert_registrar(&ctx.accounts.registrar_role, &ctx.accounts.registrar)?;
+        let booking = &mut ctx.accounts.booking;
+        require!(booking.status == BOOKING_BOOKED, KnaError::InvalidState);
+        require!(Clock::get()?.unix_timestamp >= booking.check_out, KnaError::NotPayableYet);
+        booking.status = BOOKING_UNPAID;
+        emit!(BookingStatusChanged {
+            booking_hash: booking.booking_hash,
+            status: BOOKING_UNPAID,
+        });
+        Ok(())
+    }
 
-        emit!(SplitSettled {
-            ledger_id_hash: fin.ledger_id_hash,
-            provider_token: record.provider_token,
-            provider_vnd: fin.provider_vnd,
-            community_vnd: fin.community_vnd,
-            platform_vnd: fin.platform_vnd,
-            settled_by: record.settled_by,
-            settled_at,
+    /// Cancelled before check-in; nothing was paid.
+    pub fn cancel_booking(ctx: Context<UpdateBooking>) -> Result<()> {
+        assert_registrar(&ctx.accounts.registrar_role, &ctx.accounts.registrar)?;
+        let booking = &mut ctx.accounts.booking;
+        require!(booking.status == BOOKING_BOOKED, KnaError::InvalidState);
+        require!(Clock::get()?.unix_timestamp < booking.check_in, KnaError::InvalidDates);
+        booking.status = BOOKING_CANCELLED;
+        emit!(BookingStatusChanged {
+            booking_hash: booking.booking_hash,
+            status: BOOKING_CANCELLED,
         });
         Ok(())
     }
@@ -423,6 +583,18 @@ fn assert_committee_or_vault(
     require!(role.role == ROLE_COMMITTEE, KnaError::Unauthorized);
     require_keys_eq!(role.wallet, signer, KnaError::Unauthorized);
     Ok(())
+}
+
+/// The registrar is the platform's coordinator-role key.
+fn assert_registrar(role: &Account<RoleGrant>, signer: &Signer) -> Result<()> {
+    require!(!role.revoked, KnaError::RoleRevoked);
+    require!(role.role == ROLE_COORDINATOR, KnaError::Unauthorized);
+    require_keys_eq!(role.wallet, signer.key(), KnaError::Unauthorized);
+    Ok(())
+}
+
+fn valid_flags(flags: u8) -> bool {
+    flags != 0 && flags & !(ACCOUNT_FLAG_GUEST | ACCOUNT_FLAG_PROVIDER) == 0
 }
 
 fn validate_split(
@@ -475,7 +647,7 @@ fn read_mint_decimals(account: &AccountInfo) -> Result<u8> {
     Ok(data[44])
 }
 
-/// CPI: SPL Token TransferChecked, signed by the treasury PDA.
+/// CPI: SPL Token TransferChecked. `signer_seeds` is empty when a wallet signs.
 #[allow(clippy::too_many_arguments)]
 fn transfer_checked<'info>(
     token_program: &AccountInfo<'info>,
@@ -485,7 +657,7 @@ fn transfer_checked<'info>(
     authority: &AccountInfo<'info>,
     amount: u64,
     decimals: u8,
-    signer_seeds: &[&[u8]],
+    signer_seeds: &[&[&[u8]]],
 ) -> Result<()> {
     use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
     let mut data = Vec::with_capacity(10);
@@ -505,7 +677,7 @@ fn transfer_checked<'info>(
     anchor_lang::solana_program::program::invoke_signed(
         &ix,
         &[from.clone(), mint.clone(), to.clone(), authority.clone(), token_program.clone()],
-        &[signer_seeds],
+        signer_seeds,
     )?;
     Ok(())
 }
@@ -673,7 +845,7 @@ pub struct RevokeArchiveProof<'info> {
 }
 
 #[derive(Accounts)]
-pub struct InitializeTreasury<'info> {
+pub struct InitializePaymentConfig<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(seeds = [b"config"], bump = config.bump)]
@@ -681,87 +853,191 @@ pub struct InitializeTreasury<'info> {
     #[account(
         init,
         payer = authority,
-        space = 8 + Treasury::INIT_SPACE,
-        seeds = [b"treasury"],
+        space = 8 + PaymentConfig::INIT_SPACE,
+        seeds = [b"payment_config"],
         bump
     )]
-    pub treasury: Account<'info, Treasury>,
+    pub payment_config: Account<'info, PaymentConfig>,
     /// CHECK: validated as an initialized SPL mint in the handler.
     pub mint: UncheckedAccount<'info>,
-    /// CHECK: validated as a token account of `mint` owned by the treasury PDA.
-    pub vault: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct SettleSplit<'info> {
-    #[account(mut)]
-    pub settler: Signer<'info>,
+pub struct UpdatePaymentConfig<'info> {
+    pub authority: Signer<'info>,
     #[account(seeds = [b"config"], bump = config.bump)]
     pub config: Account<'info, Config>,
-    #[account(seeds = [b"role", settler.key().as_ref()], bump = settler_role.bump)]
-    pub settler_role: Account<'info, RoleGrant>,
-    #[account(mut, seeds = [b"treasury"], bump = treasury.bump)]
-    pub treasury: Account<'info, Treasury>,
-    #[account(
-        seeds = [b"final", final_attestation.ledger_id_hash.as_ref()],
-        bump = final_attestation.bump
-    )]
-    pub final_attestation: Account<'info, FinalAttestation>,
+    #[account(mut, seeds = [b"payment_config"], bump = payment_config.bump)]
+    pub payment_config: Account<'info, PaymentConfig>,
+}
+
+#[derive(Accounts)]
+#[instruction(user_hash: [u8; 32])]
+pub struct RegisterAccount<'info> {
+    #[account(mut)]
+    pub registrar: Signer<'info>,
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
+    #[account(seeds = [b"role", registrar.key().as_ref()], bump = registrar_role.bump)]
+    pub registrar_role: Account<'info, RoleGrant>,
+    pub wallet: Signer<'info>,
     #[account(
         init,
-        payer = settler,
-        space = 8 + SettlementRecord::INIT_SPACE,
-        seeds = [b"settlement", final_attestation.ledger_id_hash.as_ref()],
+        payer = registrar,
+        space = 8 + AccountRecord::INIT_SPACE,
+        seeds = [b"account", user_hash.as_ref()],
         bump
     )]
-    pub settlement_record: Account<'info, SettlementRecord>,
-    /// CHECK: must be the treasury's escrow token account.
-    #[account(mut, address = treasury.vault @ KnaError::InvalidTokenAccount)]
-    pub vault: UncheckedAccount<'info>,
-    /// CHECK: must be the treasury's mint.
-    #[account(address = treasury.mint @ KnaError::InvalidMint)]
+    pub account_record: Account<'info, AccountRecord>,
+    #[account(
+        init,
+        payer = registrar,
+        space = 8 + WalletRecord::INIT_SPACE,
+        seeds = [b"wallet", wallet.key().as_ref()],
+        bump
+    )]
+    pub wallet_record: Account<'info, WalletRecord>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct SetAccountFlags<'info> {
+    pub registrar: Signer<'info>,
+    #[account(seeds = [b"role", registrar.key().as_ref()], bump = registrar_role.bump)]
+    pub registrar_role: Account<'info, RoleGrant>,
+    #[account(mut, seeds = [b"account", account_record.user_hash.as_ref()], bump = account_record.bump)]
+    pub account_record: Account<'info, AccountRecord>,
+}
+
+#[derive(Accounts)]
+pub struct SetPaymentWallet<'info> {
+    pub wallet: Signer<'info>,
+    pub payment_wallet: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"account", account_record.user_hash.as_ref()],
+        bump = account_record.bump,
+        constraint = account_record.wallet == wallet.key() @ KnaError::Unauthorized
+    )]
+    pub account_record: Account<'info, AccountRecord>,
+}
+
+#[derive(Accounts)]
+#[instruction(booking_hash: [u8; 32])]
+pub struct CreateBooking<'info> {
+    #[account(mut)]
+    pub registrar: Signer<'info>,
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
+    #[account(seeds = [b"role", registrar.key().as_ref()], bump = registrar_role.bump)]
+    pub registrar_role: Account<'info, RoleGrant>,
+    #[account(seeds = [b"account", guest_account.user_hash.as_ref()], bump = guest_account.bump)]
+    pub guest_account: Account<'info, AccountRecord>,
+    #[account(seeds = [b"account", provider_account.user_hash.as_ref()], bump = provider_account.bump)]
+    pub provider_account: Account<'info, AccountRecord>,
+    #[account(
+        init,
+        payer = registrar,
+        space = 8 + BookingRecord::INIT_SPACE,
+        seeds = [b"booking", booking_hash.as_ref()],
+        bump
+    )]
+    pub booking: Account<'info, BookingRecord>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct PayBooking<'info> {
+    pub payer: Signer<'info>,
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
+    #[account(seeds = [b"payment_config"], bump = payment_config.bump)]
+    pub payment_config: Account<'info, PaymentConfig>,
+    #[account(mut, seeds = [b"booking", booking.booking_hash.as_ref()], bump = booking.bump)]
+    pub booking: Account<'info, BookingRecord>,
+    #[account(seeds = [b"account", booking.guest_user_hash.as_ref()], bump = guest_account.bump)]
+    pub guest_account: Account<'info, AccountRecord>,
+    /// CHECK: must be the payment config's mint.
+    #[account(address = payment_config.mint @ KnaError::InvalidMint)]
     pub mint: UncheckedAccount<'info>,
-    /// CHECK: token account of `mint`; the provider is identified off-chain,
-    /// so the coordinator role that signs this vouches for it.
+    /// CHECK: token account of `mint` owned by the payer.
+    #[account(mut)]
+    pub payer_token: UncheckedAccount<'info>,
+    /// CHECK: token account of `mint` owned by booking.provider_wallet.
     #[account(mut)]
     pub provider_token: UncheckedAccount<'info>,
-    /// CHECK: token account of `mint` owned by config.committee_vault.
+    /// CHECK: token account of `mint` owned by payment_config.community_wallet.
     #[account(mut)]
     pub community_token: UncheckedAccount<'info>,
-    /// CHECK: token account of `mint` owned by treasury.platform_wallet.
+    /// CHECK: token account of `mint` owned by payment_config.platform_wallet.
     #[account(mut)]
     pub platform_token: UncheckedAccount<'info>,
     /// CHECK: the SPL Token program.
     #[account(address = TOKEN_PROGRAM_ID)]
     pub token_program: UncheckedAccount<'info>,
-    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateBooking<'info> {
+    pub registrar: Signer<'info>,
+    #[account(seeds = [b"role", registrar.key().as_ref()], bump = registrar_role.bump)]
+    pub registrar_role: Account<'info, RoleGrant>,
+    #[account(mut, seeds = [b"booking", booking.booking_hash.as_ref()], bump = booking.bump)]
+    pub booking: Account<'info, BookingRecord>,
 }
 
 #[account]
 #[derive(InitSpace)]
-pub struct Treasury {
+pub struct PaymentConfig {
     pub mint: Pubkey,
-    pub vault: Pubkey,
-    pub platform_wallet: Pubkey,
-    pub units_per_vnd: u64,
     pub decimals: u8,
-    pub settled_count: u64,
-    pub settled_total_vnd: u64,
+    pub units_per_vnd: u64,
+    pub platform_wallet: Pubkey,
+    pub community_wallet: Pubkey,
+    pub bump: u8,
+}
+
+/// One KNĂ account ↔ one fixed wallet. `payment_wallet` is the wallet that
+/// pays its bookings: the fixed wallet itself unless the user linked another.
+#[account]
+#[derive(InitSpace)]
+pub struct AccountRecord {
+    pub user_hash: [u8; 32],
+    pub wallet: Pubkey,
+    pub payment_wallet: Pubkey,
+    pub flags: u8,
+    pub registered_at: i64,
+    pub bump: u8,
+}
+
+/// Reverse lookup (wallet → account), and the guarantee a wallet is
+/// registered to one account only.
+#[account]
+#[derive(InitSpace)]
+pub struct WalletRecord {
+    pub wallet: Pubkey,
+    pub user_hash: [u8; 32],
     pub bump: u8,
 }
 
 #[account]
 #[derive(InitSpace)]
-pub struct SettlementRecord {
-    pub ledger_id_hash: [u8; 32],
-    pub provider_token: Pubkey,
-    pub provider_vnd: u64,
-    pub community_vnd: u64,
+pub struct BookingRecord {
+    pub booking_hash: [u8; 32],
+    pub guest_user_hash: [u8; 32],
+    pub provider_user_hash: [u8; 32],
+    pub provider_wallet: Pubkey,
+    pub check_in: i64,
+    pub check_out: i64,
+    pub total_vnd: u64,
     pub platform_vnd: u64,
-    pub units_per_vnd: u64,
-    pub settled_at: i64,
-    pub settled_by: Pubkey,
+    pub community_vnd: u64,
+    pub provider_vnd: u64,
+    pub status: u8,
+    pub paid_by: Pubkey,
+    pub paid_at: i64,
+    pub created_at: i64,
     pub bump: u8,
 }
 
@@ -914,22 +1190,58 @@ pub struct ArchiveProofRevoked {
 }
 
 #[event]
-pub struct TreasuryInitialized {
+pub struct PaymentConfigSet {
     pub mint: Pubkey,
-    pub vault: Pubkey,
     pub platform_wallet: Pubkey,
+    pub community_wallet: Pubkey,
     pub units_per_vnd: u64,
 }
 
 #[event]
-pub struct SplitSettled {
-    pub ledger_id_hash: [u8; 32],
-    pub provider_token: Pubkey,
+pub struct AccountRegistered {
+    pub user_hash: [u8; 32],
+    pub wallet: Pubkey,
+    pub flags: u8,
+    pub registered_at: i64,
+}
+
+#[event]
+pub struct AccountFlagsSet {
+    pub user_hash: [u8; 32],
+    pub flags: u8,
+}
+
+#[event]
+pub struct PaymentWalletSet {
+    pub user_hash: [u8; 32],
+    pub wallet: Pubkey,
+    pub payment_wallet: Pubkey,
+}
+
+#[event]
+pub struct BookingCreated {
+    pub booking_hash: [u8; 32],
+    pub guest_user_hash: [u8; 32],
+    pub provider_wallet: Pubkey,
+    pub check_in: i64,
+    pub check_out: i64,
+    pub total_vnd: u64,
+}
+
+#[event]
+pub struct BookingPaid {
+    pub booking_hash: [u8; 32],
+    pub paid_by: Pubkey,
     pub provider_vnd: u64,
     pub community_vnd: u64,
     pub platform_vnd: u64,
-    pub settled_by: Pubkey,
-    pub settled_at: i64,
+    pub paid_at: i64,
+}
+
+#[event]
+pub struct BookingStatusChanged {
+    pub booking_hash: [u8; 32],
+    pub status: u8,
 }
 
 #[error_code]
@@ -952,10 +1264,17 @@ pub enum KnaError {
     Overflow,
     // Appended: Anchor numbers errors by position, and 6000–6007 are
     // already relied on by clients and docs/ERROR-MATRIX.md.
+    // 6008 onwards: payments and bookings.
     #[msg("Token account is not the expected one")]
     InvalidTokenAccount,
-    #[msg("Mint is not the treasury mint")]
+    #[msg("Mint is not the payment mint")]
     InvalidMint,
+    #[msg("Check-out must be after check-in, and cancellation before check-in")]
+    InvalidDates,
+    #[msg("Payment opens on the check-out date")]
+    NotPayableYet,
+    #[msg("The host account is not a registered provider")]
+    NotProvider,
 }
 
 #[cfg(test)]

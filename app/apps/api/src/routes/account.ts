@@ -18,28 +18,21 @@ type AttestationProof = {
   state: string;
   pendingTxSig: string | null;
   finalizeTxSig: string | null;
-  settleTxSig: string | null;
 } | null;
 
 /**
  * The proof half of a booking's impact receipt: which ledger row carries it,
- * how far its attestation has got, whether it has been paid out, and an
- * Explorer link only for a real, verified signature (the payout first, then
- * finalize, then the pending submit).
+ * how far its attestation has got, and an Explorer link only for a real,
+ * verified signature (finalize first, else the pending submit).
  */
 function proofOf(entry: { id: string; attestation: AttestationProof } | undefined) {
   if (!entry) return null;
-  const sig = [
-    entry.attestation?.settleTxSig,
-    entry.attestation?.finalizeTxSig,
-    entry.attestation?.pendingTxSig,
-  ].find(
+  const sig = [entry.attestation?.finalizeTxSig, entry.attestation?.pendingTxSig].find(
     (s): s is string => Boolean(s) && !isLikelyFakeSignature(s!)
   );
   return {
     ledgerEntryId: entry.id,
     state: entry.attestation?.state ?? null,
-    settled: Boolean(entry.attestation?.settleTxSig),
     explorerUrl: sig ? explorerTxUrl(loadChainConfig().cluster, sig) : null,
   };
 }
@@ -350,7 +343,7 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
           select: {
             id: true,
             attestation: {
-              select: { state: true, pendingTxSig: true, finalizeTxSig: true, settleTxSig: true },
+              select: { state: true, pendingTxSig: true, finalizeTxSig: true },
             },
           },
         },
