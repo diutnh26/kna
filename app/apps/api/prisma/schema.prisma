@@ -65,6 +65,7 @@ model User {
   notifications      Notification[]
   walletLink         WalletLink?
   wallet             Wallet?
+  topUps             TopUp[]
   refreshTokens      RefreshToken[]
 }
 
@@ -222,6 +223,10 @@ model Booking {
   // create_booking on devnet
   onchainTx       String?
   onchainError    String?
+  // pay_booking on devnet (check-out), and how far the payment reminders
+  // have got: 0 none, 1 due sent, 2 overdue sent, 3 auto-charge attempted.
+  payTx           String?
+  reminderStage   Int       @default(0)
   // Who moved it out of PENDING, when, and by which path: COORDINATOR (the
   // decision route), PAYMENT_VERIFY (a coordinator syncing the bank) or
   // PAYMENT_WEBHOOK (no user). A money decision always leaves a trace.
@@ -440,6 +445,24 @@ model Wallet {
   registeredTx    String?
   registeredAt    DateTime?
   registerError   String?
+}
+
+/// dKNA credited to an account's fixed wallet: a VietQR top-up (VND paid,
+/// then minted) or the demo faucet (devnet only, rate-limited).
+model TopUp {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  source     String    // "VIETQR" | "FAUCET"
+  amountVnd  Int
+  paymentRef String?   @unique
+  status     String    @default("AWAITING_PAYMENT") // AWAITING_PAYMENT | PAID | CREDITED | FAILED
+  mintTx     String?
+  error      String?
+  createdAt  DateTime  @default(now())
+  paidAt     DateTime?
+
+  @@index([userId, createdAt])
 }
 
 /// A wallet the user brings (Phantom). When `isDefault`, it pays their

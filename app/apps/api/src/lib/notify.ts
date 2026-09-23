@@ -24,6 +24,12 @@ export type NotificationType =
   | "ORDER_CANCELLED"
   | "ARCHIVE_PUBLISHED"
   | "ARCHIVE_REJECTED"
+  | "PAYMENT_DUE"
+  | "PAYMENT_OVERDUE"
+  | "BOOKING_PAID"
+  | "TOPUP_CREDITED"
+  // to the guest, the household and coordinators
+  | "BOOKING_UNPAID"
   // to the household whose listing was booked
   | "BOOKING_RECEIVED"
   // to whoever has to act

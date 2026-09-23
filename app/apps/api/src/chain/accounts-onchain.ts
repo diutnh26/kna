@@ -4,7 +4,10 @@ import {
   ACCOUNT_FLAG_GUEST,
   ACCOUNT_FLAG_PROVIDER,
   buildRegisterAccountIx,
+  buildSubmitAttestationIx,
   fetchAccountRecord,
+  recordedAtUnixFromIso,
+  type LedgerAttestationPayload,
 } from "@kna/chain-client";
 import { prisma } from "../lib/prisma";
 import { getChainGateway } from "./gateway";
@@ -74,3 +77,39 @@ export async function registerAccountOnChain(userId: string) {
     data: { registeredTx: sig, registeredAt: new Date(), registerError: null },
   });
 }
+
+/**
+ * After a booking is paid: the registrar (a coordinator-role key) submits
+ * its attestation, so the committee has something to finalize without a
+ * coordinator opening Phantom. Verified on-chain like any submission.
+ */
+export async function submitAttestationAsRegistrar(opts: {
+  ledgerEntryId: string;
+  providerLabel: string;
+  payload: LedgerAttestationPayload;
+}) {
+  const registrar = loadRegistrar();
+  const gateway = getChainGateway();
+  const connection = gateway.connection();
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ feePayer: registrar.publicKey, blockhash, lastValidBlockHeight }).add(
+    buildSubmitAttestationIx({
+      coordinator: registrar.publicKey,
+      ledgerId: opts.ledgerEntryId,
+      providerLabel: opts.providerLabel,
+      payload: opts.payload,
+      recordedAtUnix: recordedAtUnixFromIso(opts.payload.recordedAtIso),
+    })
+  );
+  const sig = await connection.sendTransaction(tx, [registrar], { preflightCommitment: "confirmed" });
+  await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+  return gateway.verifyPendingSubmission({
+    ledgerEntryId: opts.ledgerEntryId,
+    pendingTxSig: sig,
+    providerLabel: opts.providerLabel,
+    payload: opts.payload,
+    expectedCoordinator: registrar.publicKey.toBase58(),
+  });
+}
+
+export const canAutoSubmit = () => Boolean(process.env.KNA_REGISTRAR_KEYPAIR_B58?.trim());

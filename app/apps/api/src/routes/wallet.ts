@@ -11,6 +11,8 @@ import { explorerAccountUrl, explorerTxUrl } from "@kna/chain-client";
 import { Connection } from "@solana/web3.js";
 import { provisionAndRegister } from "../chain/wallets";
 import { loadMint, readAtaBalance } from "../chain/demo-token";
+import { getPaymentGateway } from "../payments/gateway";
+import { creditTopUp } from "../lib/topups";
 
 export const walletRouter = Router();
 
@@ -192,4 +194,76 @@ walletRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
     return res.json(null);
   }
   res.json(link);
+});
+
+// ── Funding the wallet ──────────────────────────────────────────────────
+// Payment at check-out comes out of the guest's wallet, so the wallet has to
+// hold dKNA first: pay VND by VietQR and the same amount is minted to the
+// wallet, or (devnet only) take a daily grant from the demo faucet.
+
+const topUpSchema = z.object({ amountVnd: z.number().int().min(10_000).max(50_000_000) });
+
+walletRouter.post("/topup", requireAuth, async (req: AuthedRequest, res) => {
+  const parsed = topUpSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "amountVnd must be between 10,000 and 50,000,000." });
+  }
+  const topUp = await prisma.topUp.create({
+    data: { userId: req.user!.id, source: "VIETQR", amountVnd: parsed.data.amountVnd },
+  });
+  const payment = await getPaymentGateway().createIntent({
+    reference: topUp.id,
+    amountVnd: topUp.amountVnd,
+    description: "KNĂ wallet top-up",
+  });
+  const updated = await prisma.topUp.update({
+    where: { id: topUp.id },
+    data: { paymentRef: payment.paymentRef ?? null },
+  });
+  res.status(201).json({ topUp: updated, payment });
+});
+
+const FAUCET_VND = Number(process.env.FAUCET_AMOUNT_VND ?? 2_000_000);
+const FAUCET_EVERY_MS = 24 * 3_600_000;
+
+walletRouter.post("/faucet", requireAuth, async (req: AuthedRequest, res) => {
+  const config = loadChainConfig();
+  if (config.cluster !== "devnet" && config.cluster !== "localnet") {
+    return res.status(403).json({ error: "The demo faucet exists on devnet only." });
+  }
+  if (!loadMint()) {
+    return res.status(503).json({ error: "The demo faucet is not configured." });
+  }
+  const recent = await prisma.topUp.findFirst({
+    where: { userId: req.user!.id, source: "FAUCET", createdAt: { gte: new Date(Date.now() - FAUCET_EVERY_MS) } },
+  });
+  if (recent) {
+    return res.status(429).json({
+      error: "The demo faucet gives once a day.",
+      nextAt: new Date(recent.createdAt.getTime() + FAUCET_EVERY_MS),
+    });
+  }
+  const topUp = await prisma.topUp.create({
+    data: { userId: req.user!.id, source: "FAUCET", amountVnd: FAUCET_VND, status: "PAID", paidAt: new Date() },
+  });
+  try {
+    res.status(201).json(await creditTopUp(topUp.id));
+  } catch (err) {
+    res.status(502).json({ error: err instanceof Error ? err.message : "Mint failed", topUpId: topUp.id });
+  }
+});
+
+walletRouter.get("/topups", requireAuth, async (req: AuthedRequest, res) => {
+  const config = loadChainConfig();
+  const rows = await prisma.topUp.findMany({
+    where: { userId: req.user!.id },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+  res.json(
+    rows.map((t) => ({
+      ...t,
+      explorer: t.mintTx ? explorerTxUrl(config.cluster, t.mintTx) : null,
+    }))
+  );
 });

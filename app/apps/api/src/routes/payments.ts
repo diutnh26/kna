@@ -6,12 +6,14 @@ import { VietQRGateway } from "../payments/vietqr-gateway";
 import { syncTransaction } from "../payments/vietqr-token";
 import { notify } from "../lib/notify";
 import { enqueueLedgerSettledOutbox } from "../chain/outbox";
+import { markTopUpPaid } from "../lib/topups";
 
 export const paymentsRouter = Router();
 
 type PaidTarget =
   | { kind: "booking"; id: string }
-  | { kind: "order"; id: string };
+  | { kind: "order"; id: string }
+  | { kind: "topup"; id: string };
 
 async function findByPaymentRef(paymentRef: string): Promise<PaidTarget | null> {
   const booking = await prisma.booking.findFirst({
@@ -25,6 +27,9 @@ async function findByPaymentRef(paymentRef: string): Promise<PaidTarget | null> 
     select: { id: true },
   });
   if (order) return { kind: "order", id: order.id };
+
+  const topUp = await prisma.topUp.findUnique({ where: { paymentRef }, select: { id: true } });
+  if (topUp) return { kind: "topup", id: topUp.id };
 
   return null;
 }
@@ -159,6 +164,10 @@ async function applyPaid(paymentRef: string, paidBy: PaidBy, expectedAmountVnd?:
   if (target.kind === "booking") {
     const booking = await markBookingPaid(target.id, paidBy, expectedAmountVnd);
     return { ok: true as const, kind: "booking" as const, booking };
+  }
+  if (target.kind === "topup") {
+    const topUp = await markTopUpPaid(target.id, expectedAmountVnd);
+    return { ok: true as const, kind: "topup" as const, topUp };
   }
   const order = await markOrderPaid(target.id, paidBy, expectedAmountVnd);
   return { ok: true as const, kind: "order" as const, order };

@@ -4,12 +4,16 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import {
+  createAssociatedTokenAccountIdempotentInstruction,
+  createMintToInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import bs58 from "bs58";
+import { Transaction } from "@solana/web3.js";
+import { fetchPaymentConfig } from "@kna/chain-client";
 import { loadChainConfig } from "./config";
 
 /** 1 dKNA = 1,000 VND; mint uses 6 decimals. */
@@ -162,4 +166,41 @@ export function assertDemoNetwork(rpcUrl: string, cluster: string) {
   if (lower.includes("mainnet")) {
     throw new Error("demoDisburse refused: mainnet RPC URL");
   }
+}
+
+/**
+ * Mint dKNA into a wallet (creating its token account if needed), for a
+ * VietQR top-up or the demo faucet. The funder is the mint authority.
+ * The VND → base-unit rate comes from the on-chain payment config.
+ */
+export async function mintDknaTo(owner: PublicKey, amountVnd: number): Promise<string> {
+  const mint = loadMint();
+  const funder = loadFunder();
+  if (!mint || !funder) throw new Error("dKNA minting is not configured (DEMO_MINT / funder key)");
+  const chain = loadChainConfig();
+  assertDemoNetwork(chain.rpcUrl, chain.cluster);
+  const connection = new Connection(chain.rpcUrl, {
+    commitment: "confirmed",
+    confirmTransactionInitialTimeout: 60_000,
+  });
+  const pc = await fetchPaymentConfig(connection);
+  if (pc && pc.mint !== mint.toBase58()) throw new Error("DEMO_MINT does not match the payment config mint");
+  const unitsPerVnd = pc?.unitsPerVnd ?? 1_000n;
+
+  const ata = getAssociatedTokenAddressSync(mint, owner, true, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ feePayer: funder.publicKey, blockhash, lastValidBlockHeight }).add(
+    createAssociatedTokenAccountIdempotentInstruction(
+      funder.publicKey,
+      ata,
+      owner,
+      mint,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    ),
+    createMintToInstruction(mint, ata, funder.publicKey, BigInt(amountVnd) * unitsPerVnd, [], TOKEN_PROGRAM_ID)
+  );
+  const sig = await connection.sendTransaction(tx, [funder], { preflightCommitment: "confirmed" });
+  await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+  return sig;
 }

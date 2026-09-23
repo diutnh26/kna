@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 import { loadChainConfig } from "./config";
 import { getChainGateway } from "./gateway";
 import { LedgerNotAttestableError, recomputeAndVerifySettled } from "./outbox";
-import { registerAccountOnChain } from "./accounts-onchain";
+import { canAutoSubmit, registerAccountOnChain, submitAttestationAsRegistrar } from "./accounts-onchain";
 import { NotReadyError, cancelBookingOnChain, recordBookingOnChain } from "./bookings-onchain";
 
 const MAX_ATTEMPTS = 8;
@@ -180,6 +180,51 @@ export async function processOutboxRow(rowId: string) {
         prisma.chainOutbox.update({
           where: { id: row.id },
           data: { status: "AWAITING_COMMITTEE", leaseUntil: null, lastError: null },
+        }),
+      ]);
+      return;
+    }
+
+    // Nothing on-chain yet. The payment is verified, so the registrar
+    // submits the attestation itself; without a registrar key configured,
+    // keep waiting for a coordinator to submit with Phantom.
+    if (canAutoSubmit()) {
+      const verified = await submitAttestationAsRegistrar({
+        ledgerEntryId: entry.id,
+        providerLabel: entry.toLabel,
+        payload: rebuilt,
+      });
+      await prisma.$transaction([
+        prisma.ledgerAttestation.upsert({
+          where: { ledgerEntryId: entry.id },
+          create: {
+            ledgerEntryId: entry.id,
+            payloadHash: hash,
+            pendingPda: verified.pendingPda,
+            pendingTxSig: verified.pendingTxSig,
+            state: "AWAITING_COMMITTEE",
+            verifiedAt: new Date(),
+          },
+          update: {
+            payloadHash: hash,
+            pendingPda: verified.pendingPda,
+            pendingTxSig: verified.pendingTxSig,
+            state: "AWAITING_COMMITTEE",
+            lastError: null,
+            verifiedAt: new Date(),
+          },
+        }),
+        prisma.chainOutbox.update({
+          where: { id: row.id },
+          data: { status: "AWAITING_COMMITTEE", leaseUntil: null, lastError: null },
+        }),
+        prisma.chainAuditLog.create({
+          data: {
+            actorUserId: null,
+            action: "SUBMIT_ATTESTATION",
+            ledgerEntryId: entry.id,
+            detail: `${verified.pendingTxSig} · registrar`,
+          },
         }),
       ]);
       return;

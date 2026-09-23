@@ -14,6 +14,20 @@ import {
   releaseDays,
 } from "../lib/availability";
 import { enqueueBookingCancel, enqueueBookingRecord } from "../chain/bookings-onchain-queue";
+import {
+  PAYABLE_STATUSES,
+  completePayment,
+  hasUnpaidBooking,
+  payWithPlatformWallet,
+  paymentOpen,
+} from "../lib/checkout";
+import {
+  PaymentError,
+  confirmPhantomPayment,
+  payingBalanceVnd,
+  payingWallet,
+  preparePhantomPayment,
+} from "../chain/payments-onchain";
 
 export const bookingsRouter = Router();
 
@@ -74,6 +88,22 @@ bookingsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
   const checkOut = addDays(checkIn, days);
   const totalVnd = perNight ? listing.priceVnd * nights * units : listing.priceVnd * guests;
   const { platformFeeVnd, communityFundVnd, providerPayoutVnd } = splitBooking(totalVnd);
+
+  // A guest who still owes for a stay settles it before booking another.
+  if (await hasUnpaidBooking(req.user!.id)) {
+    return res.status(409).json({ error: "Please pay your unpaid stay before booking another." });
+  }
+  // Payment comes from the guest's wallet at check-out: check now that it
+  // can cover the stay (a check, not a hold). Skipped when the dKNA rail is
+  // not configured, or the balance cannot be read right now.
+  const balance = await payingBalanceVnd(req.user!.id);
+  if (balance !== null && balance < totalVnd) {
+    return res.status(402).json({
+      error: "Your wallet does not hold enough dKNA for this stay yet. Top up first.",
+      requiredVnd: totalVnd,
+      balanceVnd: balance,
+    });
+  }
 
   let booking;
   try {
@@ -147,6 +177,62 @@ bookingsRouter.get("/mine", requireAuth, async (req: AuthedRequest, res) => {
     orderBy: { createdAt: "desc" },
   });
   res.json(bookings);
+});
+
+/**
+ * Pay at check-out. From the check-out date (Vietnam time), the guest pays
+ * the booked split from their paying wallet: the platform signs with the
+ * fixed wallet it holds; a linked Phantom gets a transaction to sign, then
+ * /pay/confirm. Nothing is paid until the booking record on-chain says so.
+ */
+bookingsRouter.post("/:id/pay", requireAuth, async (req: AuthedRequest, res) => {
+  const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
+  if (!booking || booking.guestId !== req.user!.id) {
+    return res.status(404).json({ error: "That booking is not on your account." });
+  }
+  if (!PAYABLE_STATUSES.includes(booking.status)) {
+    return res.status(409).json({ error: "This booking is not awaiting payment.", status: booking.status });
+  }
+  if (!paymentOpen(booking.checkOut)) {
+    return res.status(409).json({
+      error: `Payment opens on your check-out date, ${booking.checkOut?.toISOString().slice(0, 10)}.`,
+    });
+  }
+  if (!booking.onchainTx) {
+    return res.status(409).json({ error: "This booking is still being recorded on-chain. Try again shortly." });
+  }
+  try {
+    const wallet = await payingWallet(req.user!.id);
+    if (!wallet.custodial) {
+      const transactionBase64 = await preparePhantomPayment(booking.id, wallet.pubkey);
+      return res.json({ needsSignature: true, wallet: wallet.pubkey.toBase58(), transactionBase64 });
+    }
+    const payTx = await payWithPlatformWallet(booking.id, req.user!.id, "GUEST");
+    res.json(await prisma.booking.findUnique({ where: { id: booking.id } }).then((b) => ({ ...b, payTx })));
+  } catch (err) {
+    if (err instanceof PaymentError) return res.status(err.status).json({ error: err.message });
+    throw err;
+  }
+});
+
+bookingsRouter.post("/:id/pay/confirm", requireAuth, async (req: AuthedRequest, res) => {
+  const signature = typeof req.body?.signature === "string" ? req.body.signature : "";
+  const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
+  if (!booking || booking.guestId !== req.user!.id) {
+    return res.status(404).json({ error: "That booking is not on your account." });
+  }
+  if (!PAYABLE_STATUSES.includes(booking.status)) {
+    return res.status(409).json({ error: "This booking is not awaiting payment.", status: booking.status });
+  }
+  try {
+    const wallet = await payingWallet(req.user!.id);
+    await confirmPhantomPayment(booking.id, wallet.pubkey, signature);
+    await completePayment(booking.id, signature, req.user!.id, "PHANTOM");
+    res.json(await prisma.booking.findUnique({ where: { id: booking.id } }));
+  } catch (err) {
+    if (err instanceof PaymentError) return res.status(err.status).json({ error: err.message });
+    throw err;
+  }
 });
 
 /**

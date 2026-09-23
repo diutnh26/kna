@@ -10,8 +10,10 @@ export async function resetDb() {
   await prisma.notification.deleteMany();
   await prisma.ledgerAttestation.deleteMany();
   await prisma.chainOutbox.deleteMany();
+  await prisma.chainAuditLog.deleteMany();
   await prisma.walletLink.deleteMany();
   await prisma.wallet.deleteMany();
+  await prisma.topUp.deleteMany();
   await prisma.chainEntityRef.deleteMany();
   await prisma.ledgerEntry.deleteMany();
   await prisma.orderItem.deleteMany();
