@@ -34,7 +34,7 @@ describe('DemoTxHistory', () => {
 
   it('links the mint to Solana Explorer', async () => {
     renderScreen(<DemoTxHistory />);
-    const link = await screen.findByRole('link', { name: /View demo tx on Explorer/i });
+    const link = await screen.findByRole('link', { name: /View on Explorer/i });
     expect(link).toHaveAttribute(
       'href',
       'https://explorer.solana.com/tx/sigexplorer1?cluster=devnet'

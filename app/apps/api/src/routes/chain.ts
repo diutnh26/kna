@@ -20,6 +20,7 @@ import { getChainGateway } from "../chain/gateway";
 import { loadChainConfig } from "../chain/config";
 import { LedgerNotAttestableError, recomputeAndVerifySettled } from "../chain/outbox";
 import { fetchDemoTokenBalances } from "../chain/demo-token";
+import { SettlementError, settleAfterFinalize, settleLedgerEntry } from "../chain/settle";
 
 export const chainRouter = Router();
 
@@ -129,6 +130,7 @@ chainRouter.get("/ledger/:id", async (req, res) => {
       pending: verifiedExplorer(config.cluster, attestation.pendingTxSig),
       finalize: verifiedExplorer(config.cluster, attestation.finalizeTxSig),
       cancel: verifiedExplorer(config.cluster, attestation.cancelTxSig),
+      settle: verifiedExplorer(config.cluster, attestation.settleTxSig),
       pendingPda: attestation.pendingPda
         ? explorerAccountUrl(config.cluster, attestation.pendingPda)
         : null,
@@ -341,11 +343,38 @@ chainRouter.post(
         data: { status: "FINALIZED", lastError: null },
       });
       await audit(req.user!.id, "FINALIZE_ATTESTATION", entry.id, verified.finalizeTxSig);
-      res.json(jsonAttestation(updated));
+      // Finalized is final; paying it out is a separate step that may fail
+      // (and be retried) without undoing it.
+      const settlement = await settleAfterFinalize(entry.id, req.user!.id);
+      res.json({ ...jsonAttestation(updated), settlement });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Finalize verification failed";
       await audit(req.user!.id, "FINALIZE_REJECTED", entry.id, message);
       return res.status(400).json({ error: message });
+    }
+  }
+);
+
+// ── Settlement ───────────────────────────────────────────────────────
+// Retry for settle_split when the automatic payout after finalize failed
+// (unfunded escrow, provider without a wallet, RPC trouble).
+
+chainRouter.post(
+  "/ledger/:id/settle",
+  requireAuth,
+  requireCoordinator,
+  async (req: AuthedRequest, res) => {
+    if (!getChainGateway().isEnabled()) {
+      return res.status(503).json({ error: "Solana trust layer is disabled." });
+    }
+    try {
+      const updated = await settleLedgerEntry(req.params.id, req.user!.id);
+      res.json(jsonAttestation(updated));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Settlement failed";
+      const status = err instanceof SettlementError ? err.status : 500;
+      await audit(req.user!.id, "SETTLE_REJECTED", req.params.id, message);
+      res.status(status).json({ error: message });
     }
   }
 );

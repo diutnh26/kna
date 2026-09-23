@@ -6,12 +6,12 @@ import { VietQRGateway, buildPaymentRef } from "../src/payments/vietqr-gateway";
 import { prisma } from "../src/lib/prisma";
 import { app, makeListing, makeProvider, makeUser, PASSWORD, resetDb, soon } from "./helpers";
 
-const { demoDisburse } = vi.hoisted(() => ({
-  demoDisburse: vi.fn(),
+const { fundEscrow } = vi.hoisted(() => ({
+  fundEscrow: vi.fn(),
 }));
 
 vi.mock("../src/chain/demo-token", () => ({
-  demoDisburse,
+  fundEscrow,
   fetchDemoTokenBalances: vi.fn().mockResolvedValue(null),
 }));
 
@@ -155,8 +155,8 @@ describe("POST /payments/webhook integration", () => {
   });
 
   beforeEach(() => {
-    demoDisburse.mockReset();
-    demoDisburse.mockResolvedValue(["sig1", "sig2", "sig3"]);
+    fundEscrow.mockReset();
+    fundEscrow.mockResolvedValue(["sig1", "sig2", "sig3"]);
   });
 
   async function seedBooking(paymentRef: string, totalVnd = 500_000) {
@@ -196,7 +196,9 @@ describe("POST /payments/webhook integration", () => {
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(res.body.demoTxSigs).toEqual(["sig1", "sig2", "sig3"]);
-    expect(demoDisburse).toHaveBeenCalledTimes(1);
+    expect(fundEscrow).toHaveBeenCalledTimes(1);
+    // The whole payment goes into escrow; the split is paid out on-chain later.
+    expect(fundEscrow).toHaveBeenCalledWith({ id: expect.any(String), totalVnd: 500_000 });
 
     const row = await prisma.booking.findFirstOrThrow({ where: { paymentRef: ref } });
     expect(row.paymentStatus).toBe("PAID");
@@ -218,7 +220,7 @@ describe("POST /payments/webhook integration", () => {
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
-    expect(demoDisburse).toHaveBeenCalledTimes(1);
+    expect(fundEscrow).toHaveBeenCalledTimes(1);
     expect(second.body.demoTxSigs).toEqual(["sig1", "sig2", "sig3"]);
   });
 
@@ -230,7 +232,7 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/does not match/i);
-    expect(demoDisburse).not.toHaveBeenCalled();
+    expect(fundEscrow).not.toHaveBeenCalled();
     const row = await prisma.booking.findFirstOrThrow({ where: { paymentRef: ref } });
     expect(row.paymentStatus).toBe("AWAITING_PAYMENT");
   });
@@ -246,7 +248,7 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(401);
     expect(res.body.error).toMatch(/authentication/i);
-    expect(demoDisburse).not.toHaveBeenCalled();
+    expect(fundEscrow).not.toHaveBeenCalled();
   });
 
   it("ignores a FAILED webhook without minting", async () => {
@@ -257,7 +259,7 @@ describe("POST /payments/webhook integration", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ ok: true, ignored: true, status: "FAILED" });
-    expect(demoDisburse).not.toHaveBeenCalled();
+    expect(fundEscrow).not.toHaveBeenCalled();
     const row = await prisma.booking.findFirstOrThrow({ where: { paymentRef: ref } });
     expect(row.paymentStatus).toBe("AWAITING_PAYMENT");
   });

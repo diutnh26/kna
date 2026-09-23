@@ -218,8 +218,8 @@ describe('Travel', () => {
     pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
-    expect(await screen.findByText(/Demo tokens sent to linked wallets/i)).toBeInTheDocument();
-    const link = screen.getByRole('link', { name: /View demo tx on Explorer/i });
+    expect(await screen.findByText(/dKNA moved on Solana devnet/i)).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /View on Explorer ·/i });
     expect(link).toHaveAttribute('href', expect.stringContaining('explorer.solana.com/tx/sigexplorer1'));
   });
 
@@ -246,7 +246,7 @@ describe('Travel', () => {
     pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
-    expect(await screen.findByText(/No demo mint/i)).toBeInTheDocument();
+    expect(await screen.findByText(/No devnet escrow/i)).toBeInTheDocument();
   });
 
 });

@@ -4,7 +4,6 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import {
-  createAssociatedTokenAccountIdempotentInstruction,
   createMintToInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
@@ -13,6 +12,7 @@ import {
 } from "@solana/spl-token";
 import { Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
+import { fetchTreasury } from "@kna/chain-client";
 import { loadChainConfig } from "./config";
 
 /** 1 dKNA = 1,000 VND; mint uses 6 decimals. */
@@ -21,7 +21,6 @@ export const DEMO_TOKEN_DECIMALS = 6;
 export const DEMO_TOKEN_SYMBOL = "dKNA";
 const VND_PER_DKNA = DEMO_VND_PER_DKNA;
 const DECIMALS = DEMO_TOKEN_DECIMALS;
-const RECEIPT_TOKENS = 1n * 10n ** BigInt(DECIMALS);
 
 export type DemoTokenBalance = {
   pubkey: string;
@@ -136,13 +135,7 @@ export async function fetchDemoTokenBalances(wallets: {
   };
 }
 
-function vndToRawAmount(vnd: number): bigint {
-  const whole = Math.floor(vnd / VND_PER_DKNA);
-  if (whole <= 0) return 0n;
-  return BigInt(whole) * 10n ** BigInt(DECIMALS);
-}
-
-function loadFunder(): Keypair | null {
+export function loadFunder(): Keypair | null {
   const raw = process.env.DEMO_FUNDER_KEYPAIR_B58?.trim();
   if (!raw) return null;
   try {
@@ -153,7 +146,7 @@ function loadFunder(): Keypair | null {
   }
 }
 
-function loadMint(): PublicKey | null {
+export function loadMint(): PublicKey | null {
   const raw = process.env.DEMO_MINT?.trim();
   if (!raw) return null;
   try {
@@ -164,7 +157,7 @@ function loadMint(): PublicKey | null {
   }
 }
 
-function assertDemoNetwork(rpcUrl: string, cluster: string) {
+export function assertDemoNetwork(rpcUrl: string, cluster: string) {
   if (cluster === "mainnet-beta" || cluster === "mainnet") {
     throw new Error("demoDisburse refused: mainnet cluster");
   }
@@ -174,21 +167,21 @@ function assertDemoNetwork(rpcUrl: string, cluster: string) {
   }
 }
 
-export interface DemoDisburseInput {
+export interface FundEscrowInput {
   id: string;
-  providerPayoutVnd: number;
-  communityFundVnd: number;
-  guestWallet?: string | null;
-  providerWallet?: string | null;
+  totalVnd: number;
 }
 
 /**
- * Approach A hackathon helper: mint demo SPL tokens on Solana devnet after
- * a VietQR payment is marked PAID. No-ops when DEMO_MINT / funder key are unset.
+ * The guest's payment, represented on devnet: mints the booking's total, as
+ * dKNA, into the treasury escrow owned by the KNĂ program. Nothing reaches a
+ * wallet here — the program pays the escrow out with settle_split once the
+ * committee has finalized the attestation, for exactly the notarized split.
  *
- * Does NOT call the KNĂ attestation program or Squads.
+ * No-ops (returns []) when DEMO_MINT / the funder key are unset or the
+ * treasury has not been initialised. Devnet and localnet only.
  */
-export async function demoDisburse(booking: DemoDisburseInput): Promise<string[]> {
+export async function fundEscrow(booking: FundEscrowInput): Promise<string[]> {
   const mint = loadMint();
   const funder = loadFunder();
   if (!mint || !funder) return [];
@@ -200,91 +193,27 @@ export async function demoDisburse(booking: DemoDisburseInput): Promise<string[]
     confirmTransactionInitialTimeout: 60_000,
   });
 
-  const recipients: { wallet: PublicKey; amount: bigint; label: string }[] = [];
-
-  if (booking.providerWallet) {
-    const amount = vndToRawAmount(booking.providerPayoutVnd);
-    if (amount > 0n) {
-      recipients.push({
-        wallet: new PublicKey(booking.providerWallet),
-        amount,
-        label: "provider",
-      });
-    }
-  }
-
-  if (chain.committeeVault) {
-    const amount = vndToRawAmount(booking.communityFundVnd);
-    if (amount > 0n) {
-      recipients.push({
-        wallet: new PublicKey(chain.committeeVault),
-        amount,
-        label: "community",
-      });
-    }
-  }
-
-  if (booking.guestWallet) {
-    recipients.push({
-      wallet: new PublicKey(booking.guestWallet),
-      amount: RECEIPT_TOKENS,
-      label: "guest-receipt",
-    });
-  }
-
-  if (recipients.length === 0) {
-    console.info("[demo-token] no linked wallets — nothing to mint for", booking.id);
+  const treasury = await fetchTreasury(connection);
+  if (!treasury) {
+    console.warn("[demo-token] treasury not initialised — escrow not funded for", booking.id);
     return [];
   }
-
-  const signatures: string[] = [];
-
-  for (const recipient of recipients) {
-    const ata = getAssociatedTokenAddressSync(
-      mint,
-      recipient.wallet,
-      true,
-      TOKEN_PROGRAM_ID,
-      ASSOCIATED_TOKEN_PROGRAM_ID
-    );
-
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
-    const tx = new Transaction({
-      feePayer: funder.publicKey,
-      blockhash,
-      lastValidBlockHeight,
-    });
-
-    tx.add(
-      createAssociatedTokenAccountIdempotentInstruction(
-        funder.publicKey,
-        ata,
-        recipient.wallet,
-        mint,
-        TOKEN_PROGRAM_ID,
-        ASSOCIATED_TOKEN_PROGRAM_ID
-      ),
-      createMintToInstruction(
-        mint,
-        ata,
-        funder.publicKey,
-        recipient.amount,
-        [],
-        TOKEN_PROGRAM_ID
-      )
-    );
-
-    const sig = await connection.sendTransaction(tx, [funder], {
-      skipPreflight: false,
-      preflightCommitment: "confirmed",
-    });
-    await connection.confirmTransaction(
-      { signature: sig, blockhash, lastValidBlockHeight },
-      "confirmed"
-    );
-    console.info(`[demo-token] minted ${recipient.label} → ${sig}`);
-    signatures.push(sig);
+  if (treasury.mint !== mint.toBase58()) {
+    throw new Error("DEMO_MINT does not match the treasury mint");
   }
 
-  return signatures;
+  const amount = BigInt(booking.totalVnd) * treasury.unitsPerVnd;
+  if (amount <= 0n) return [];
+
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ feePayer: funder.publicKey, blockhash, lastValidBlockHeight }).add(
+    createMintToInstruction(mint, new PublicKey(treasury.vault), funder.publicKey, amount, [], TOKEN_PROGRAM_ID)
+  );
+  const sig = await connection.sendTransaction(tx, [funder], {
+    skipPreflight: false,
+    preflightCommitment: "confirmed",
+  });
+  await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+  console.info(`[demo-token] escrow funded for ${booking.id} → ${sig}`);
+  return [sig];
 }

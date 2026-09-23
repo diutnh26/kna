@@ -385,10 +385,10 @@
     "payRef": "Nội dung chuyển khoản",
     "payAmount": "Số tiền",
     "payInstructions": "Quét QR hoặc chuyển khoản đúng nội dung trên. Demo token trên Solana devnet được mint sau khi xác nhận — không phải tiền thật.",
-    "demoTokensSent": "Đã gửi demo token tới ví đã liên kết (devnet).",
-    "demoTokensPending": "Đang chờ xác nhận thanh toán… sau đó mới mint demo token.",
-    "demoTokensSkipped": "Đã xác nhận thanh toán. Chưa mint demo (link Phantom ở Account, hoặc cấu hình DEMO_MINT).",
-    "viewDemoTx": "Xem giao dịch demo trên Explorer"
+    "demoTokensSent": "dKNA đã chuyển trên Solana devnet: giữ trong ký quỹ, rồi chương trình KNĂ chi trả khi hội đồng hoàn tất.",
+    "demoTokensPending": "Đang chờ xác nhận thanh toán… sau đó khoản thanh toán được giữ trong ký quỹ trên devnet.",
+    "demoTokensSkipped": "Đã xác nhận thanh toán. Chưa có ký quỹ devnet (chưa cấu hình DEMO_MINT hoặc treasury).",
+    "viewDemoTx": "Xem trên Explorer"
   },
   "marketplace": {
     "eyebrow": "Chợ cộng đồng",
@@ -743,7 +743,7 @@
     "staffAwaiting_other": "{{count}} đang chờ thanh toán VietQR",
     "staffSettledOnly": "Toàn nền tảng, chỉ booking đã xác nhận. Lịch sử mint demo nằm ở panel phía trên.",
     "alsoAsGuest": "Với tư cách khách bạn cũng đã chi {{amount}}.",
-    "demoSplitHint": "Demo mint trên Devnet: {{provider}} → provider · {{fund}} → quỹ cộng đồng (+ 1 dKNA biên nhận khách).",
+    "demoSplitHint": "Chi trả trên devnet bằng settle_split: {{provider}} → nhà cung cấp · {{fund}} → quỹ cộng đồng.",
     "detailsTitle": "Thông tin của bạn",
     "fullName": "Họ và tên",
     "email": "Email",
@@ -843,6 +843,7 @@
     "proofAfterConfirm": "Bằng chứng được ghi lên Solana sau khi xác nhận.",
     "proofAwaitingCommittee": "Bằng chứng đã gửi lên Solana, đang chờ hội đồng cộng đồng.",
     "proofFinalized": "Bằng chứng đã được hội đồng cộng đồng hoàn tất trên Solana.",
+    "proofSettled": "Đã chi trả trên Solana bởi chương trình KNĂ: ba lần chuyển token khớp với khoản phân chia này.",
     "proofWithdrawn": "Bằng chứng trên chuỗi đã được điều phối viên rút lại."
   },
   "wallet": {
@@ -871,7 +872,7 @@
     "demoDisclaimer": "Demo token — không phải thanh toán thật. Chỉ Devnet.",
     "demoRate": "1 {{symbol}} ≈ {{rate}} VND (tỷ giá demo).",
     "demoHistoryTitle": "Lịch sử mint demo",
-    "demoHistoryIntro": "Booking VietQR đã mint dKNA trên Devnet — cùng một danh sách cho mọi role.",
+    "demoHistoryIntro": "Booking có khoản thanh toán đã chuyển dKNA trên devnet (nạp ký quỹ và chi trả của chương trình) — cùng một danh sách cho mọi role.",
     "demoHistoryLoading": "Đang tải giao dịch demo…",
     "demoHistoryEmpty": "Chưa có mint demo nào. Hoàn tất thanh toán một booking để thấy lịch sử ở đây.",
     "demoHistoryError": "Không tải được lịch sử demo.",

@@ -385,10 +385,10 @@
     "payRef": "Transfer content",
     "payAmount": "Amount",
     "payInstructions": "Scan the QR or transfer with the exact content above. Demo tokens on Solana devnet mint after payment is confirmed — not real money.",
-    "demoTokensSent": "Demo tokens sent to linked wallets (devnet).",
-    "demoTokensPending": "Waiting for payment confirmation… demo mint follows.",
-    "demoTokensSkipped": "Payment confirmed. No demo mint (link Phantom on Account, or set DEMO_MINT).",
-    "viewDemoTx": "View demo tx on Explorer"
+    "demoTokensSent": "dKNA moved on Solana devnet: held in escrow, then paid out by the KNĂ program once the committee finalizes.",
+    "demoTokensPending": "Waiting for payment confirmation… then the payment is held in escrow on devnet.",
+    "demoTokensSkipped": "Payment confirmed. No devnet escrow (DEMO_MINT or the treasury is not set up).",
+    "viewDemoTx": "View on Explorer"
   },
   "marketplace": {
     "eyebrow": "Community Marketplace",
@@ -743,7 +743,7 @@
     "staffAwaiting_other": "{{count}} awaiting VietQR payment",
     "staffSettledOnly": "Platform-wide confirmed bookings. Demo mint history is in the panel above.",
     "alsoAsGuest": "As a guest yourself you have also spent {{amount}}.",
-    "demoSplitHint": "Demo mint split on Devnet: {{provider}} → provider · {{fund}} → community fund (+ 1 dKNA guest receipt).",
+    "demoSplitHint": "Paid out on devnet by settle_split: {{provider}} → provider · {{fund}} → community fund.",
     "detailsTitle": "Your details",
     "fullName": "Name",
     "email": "Email",
@@ -843,6 +843,7 @@
     "proofAfterConfirm": "Its proof is recorded on Solana after confirmation.",
     "proofAwaitingCommittee": "Proof submitted on Solana, awaiting the community committee.",
     "proofFinalized": "Proof finalized on Solana by the community committee.",
+    "proofSettled": "Paid out on Solana by the KNĂ program: three token transfers matching this split.",
     "proofWithdrawn": "Its on-chain proof was withdrawn by a coordinator."
   },
   "wallet": {
@@ -871,7 +872,7 @@
     "demoDisclaimer": "Demo token — not real payment. Devnet only.",
     "demoRate": "1 {{symbol}} ≈ {{rate}} VND (demo rate).",
     "demoHistoryTitle": "Demo mint history",
-    "demoHistoryIntro": "VietQR bookings that minted dKNA on Devnet — same list for every role.",
+    "demoHistoryIntro": "Bookings whose payment moved dKNA on devnet (escrow deposit and program payout) — same list for every role.",
     "demoHistoryLoading": "Loading demo transactions…",
     "demoHistoryEmpty": "No paid demo mints yet. Complete a booking payment to see history here.",
     "demoHistoryError": "Could not load demo history.",

@@ -9,7 +9,7 @@ const pct = (part, total) => (total > 0 ? Math.round((part / total) * 100) : 0);
  * ledger shows, for this one booking.
  *
  * `status` is the booking's money state (awaiting | confirmed | cancelled);
- * `proof` is the attestation, when there is one ({ state, explorerUrl }).
+ * `proof` is the attestation, when there is one ({ state, settled, explorerUrl }).
  */
 export default function ImpactReceipt({
   totalVnd,
@@ -28,8 +28,9 @@ export default function ImpactReceipt({
     { key: 'platform', label: t('receipt.toPlatform'), amount: platformFeeVnd },
   ];
 
-  const proofText =
-    proof?.state === 'FINALIZED'
+  const proofText = proof?.settled
+    ? t('receipt.proofSettled')
+    : proof?.state === 'FINALIZED'
       ? t('receipt.proofFinalized')
       : proof?.state === 'AWAITING_COMMITTEE'
         ? t('receipt.proofAwaitingCommittee')

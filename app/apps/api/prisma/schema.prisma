@@ -452,6 +452,11 @@ model LedgerAttestation {
   // pending PDA stays, so the same ledger entry cannot be attested again.
   cancelTxSig    String?
   cancelReason   String?
+  // settle_split: the finalized split paid out of the treasury escrow in
+  // three SPL token transfers. settleError holds the last failure, if any.
+  settleTxSig    String?
+  settledAt      DateTime?
+  settleError    String?
   slot           BigInt?
   state          String      @default("PENDING_SIGNATURE")
   lastError      String?

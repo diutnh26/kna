@@ -296,7 +296,7 @@ describe('Account', () => {
       { ...activity[0], demoTxSigs: ['sig1abcdef'] },
     ]);
     renderScreen(<Account />);
-    const link = await screen.findByRole('link', { name: /View demo tx on Explorer/i });
+    const link = await screen.findByRole('link', { name: /View on Explorer ·/i });
     expect(link).toHaveAttribute('href', expect.stringContaining('explorer.solana.com/tx/sig1abcdef'));
   });
 

@@ -4,7 +4,7 @@ import { requireAuth, requireCoordinator, type AuthedRequest } from "../middlewa
 import { getPaymentGateway } from "../payments/gateway";
 import { VietQRGateway } from "../payments/vietqr-gateway";
 import { syncTransaction } from "../payments/vietqr-token";
-import { demoDisburse } from "../chain/demo-token";
+import { fundEscrow } from "../chain/demo-token";
 import { notify } from "../lib/notify";
 import { enqueueLedgerSettledOutbox } from "../chain/outbox";
 
@@ -76,27 +76,13 @@ async function markBookingPaid(bookingId: string, paidBy: PaidBy, expectedAmount
     return booking;
   }
 
-  const guestLink = await prisma.walletLink.findUnique({
-    where: { userId: booking.guestId },
-  });
-  const providerLink = await prisma.walletLink.findUnique({
-    where: { userId: booking.listing.provider.userId },
-  });
-
+  // The payment enters escrow on devnet. Nobody is paid here: the program
+  // pays the escrow out (settle_split) once the committee finalizes.
   let demoTxSigs: string[] = [];
   try {
-    demoTxSigs = await demoDisburse({
-      id: booking.id,
-      providerPayoutVnd: booking.providerPayoutVnd,
-      communityFundVnd: booking.communityFundVnd,
-      // Prefer linked Phantom; fall back to hackathon DEMO_* wallets so the
-      // panel balances move even when a demo account has not linked yet.
-      guestWallet: guestLink?.pubkey ?? process.env.DEMO_GUEST_WALLET?.trim() ?? null,
-      providerWallet:
-        providerLink?.pubkey ?? process.env.DEMO_PROVIDER_WALLET?.trim() ?? null,
-    });
+    demoTxSigs = await fundEscrow({ id: booking.id, totalVnd: booking.totalVnd });
   } catch (err) {
-    console.error("[payments] demoDisburse failed:", err);
+    console.error("[payments] fundEscrow failed:", err);
   }
 
   const updated = await prisma.booking.update({

@@ -38,6 +38,18 @@ describe('ImpactReceipt', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', expect.stringContaining('explorer.solana.com'));
   });
 
+  it('says when the program has paid the split out', async () => {
+    await i18n.changeLanguage('en');
+    render(
+      <ImpactReceipt
+        {...split}
+        status="confirmed"
+        proof={{ state: 'FINALIZED', settled: true, explorerUrl: 'https://explorer.solana.com/tx/s?cluster=devnet' }}
+      />
+    );
+    expect(screen.getByText(/Paid out on Solana by the KNĂ program/)).toBeInTheDocument();
+  });
+
   it('says plainly that a cancelled booking moved no money, and claims no proof', async () => {
     await i18n.changeLanguage('en');
     render(<ImpactReceipt {...split} status="cancelled" />);
