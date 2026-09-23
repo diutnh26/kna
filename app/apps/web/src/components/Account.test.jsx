@@ -300,42 +300,35 @@ describe('Account', () => {
     expect(link).toHaveAttribute('href', expect.stringContaining('explorer.solana.com/tx/sig1abcdef'));
   });
 
-  it('renders the shared demo wallet panel and mint history', async () => {
+  it("shows the account's own wallet and its stays, with Pay on the check-out date", async () => {
     signIn();
-    vi.spyOn(api, 'chainStatus').mockResolvedValue({
-      demoToken: {
-        mint: 'MintPubkey111',
-        disclaimer: 'Demo token — not real payment. Devnet only.',
-        wallets: { guest: 'GuestPubkey111' },
-        explorer: { guest: 'https://explorer.solana.com/address/GuestPubkey111?cluster=devnet' },
-        balances: {
-          symbol: 'dKNA',
-          vndPerToken: 1000,
-          guest: { uiAmount: 2, symbol: 'dKNA', approxVnd: 2000 },
-        },
+    vi.spyOn(api, 'walletAccount').mockResolvedValue({
+      address: 'Fixed1111111111111111111111111111111111111',
+      explorer: 'https://explorer.solana.com/address/Fixed1111111111111111111111111111111111111?cluster=devnet',
+      registered: true,
+      linked: null,
+      paymentWallet: 'Fixed1111111111111111111111111111111111111',
+      balance: { uiAmount: 1500, approxVnd: 1_500_000 },
+    });
+    vi.spyOn(api, 'walletTopUps').mockResolvedValue([]);
+    const today = new Date(Date.now() + 7 * 3_600_000).toISOString().slice(0, 10);
+    vi.spyOn(api, 'myBookings').mockResolvedValue([
+      {
+        id: 'bk1',
+        status: 'CONFIRMED',
+        checkIn: '2026-01-01T00:00:00.000Z',
+        checkOut: `${today}T00:00:00.000Z`,
+        rooms: 1,
+        totalVnd: 500_000,
+        listing: { title: 'Longhouse stay' },
       },
-    });
-    vi.spyOn(api, 'demoHistory').mockResolvedValue({
-      items: [
-        {
-          id: 'hist1',
-          at: '2026-09-21T04:30:57.000Z',
-          title: 'Minted longhouse stay',
-          guestName: 'Demo Traveler',
-          providerName: "Amí H'Bia",
-          totalVnd: 500_000,
-          providerPayoutVnd: 450_000,
-          communityFundVnd: 15_000,
-          demoTxSigs: ['sigexplorer1'],
-          explorer: ['https://explorer.solana.com/tx/sigexplorer1?cluster=devnet'],
-        },
-      ],
-    });
+    ]);
     renderScreen(<Account />);
-    expect(await screen.findByText(/Devnet wallets/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Demo mint history/i)).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText(/Minted longhouse stay/)).toBeInTheDocument();
+    expect(await screen.findByText('Fixed1111111111111111111111111111111111111')).toBeInTheDocument();
+    expect(screen.getByText(/Registered on Solana devnet/i)).toBeInTheDocument();
+    expect(await screen.findByText('Longhouse stay')).toBeInTheDocument();
+    // Check-out is today in Vietnam: Pay is open.
+    expect(screen.getByRole('button', { name: /Pay now/i })).toBeEnabled();
   });
 
 });

@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Travel from './Travel';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
 import { renderScreen, signIn, aListing } from '../test/helpers';
 
 /**
@@ -26,6 +26,7 @@ describe('Travel', () => {
   beforeEach(() => {
     vi.spyOn(api, 'listings').mockResolvedValue([aListing()]);
     vi.spyOn(api, 'chainStatus').mockResolvedValue({ demoToken: null });
+    vi.spyOn(api, 'listingAvailability').mockRejectedValue(new Error('not mocked'));
   });
 
   it('renders a listing from the API, not a hardcoded array', async () => {
@@ -62,45 +63,7 @@ describe('Travel', () => {
     expect(screen.queryByText(/Could not send that booking/)).not.toBeInTheDocument();
   });
 
-  it('sends a booking with the quantity the guest chose', async () => {
-    signIn();
-    vi.spyOn(api, 'createBooking').mockResolvedValue({
-      id: 'b1',
-      status: 'PENDING',
-      payment: { provider: 'manual', status: 'AWAITING_PAYMENT', instructions: 'A KNĂ coordinator will confirm your dates.' },
-    });
 
-    renderScreen(<Travel />);
-    await screen.findByRole('heading', { name: /Two nights/ });
-
-    const qty = screen.getByLabelText(/Nights/i);
-    fireEvent.change(qty, { target: { value: '3' } });
-    const checkIn = pickArrivalDate();
-    await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
-
-    await waitFor(() => expect(api.createBooking).toHaveBeenCalled());
-    const [payload] = api.createBooking.mock.calls[0];
-    // "per night" listing: the number chosen is nights, and guests is 1.
-    expect(payload).toMatchObject({ listingId: 'l1', nights: 3, guests: 1, checkIn });
-  });
-
-  it("shows the server's payment instruction verbatim, not UI-invented reassurance", async () => {
-    signIn();
-    const instructions =
-      'A KNĂ coordinator will confirm your dates with the household and arrange payment directly with you. Nothing is charged through this site.';
-    vi.spyOn(api, 'createBooking').mockResolvedValue({
-      id: 'b1',
-      status: 'PENDING',
-      payment: { provider: 'manual', status: 'AWAITING_PAYMENT', instructions },
-    });
-
-    renderScreen(<Travel />);
-    await screen.findByRole('heading', { name: /Two nights/ });
-    pickArrivalDate();
-    await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
-
-    expect(await screen.findByText(instructions)).toBeInTheDocument();
-  });
 
   it('surfaces the server error message rather than a generic one', async () => {
     signIn();
@@ -166,51 +129,37 @@ describe('Travel', () => {
     expect(price.parentElement.contains(date)).toBe(false);
   });
 
-  it('shows the VietQR image returned by the booking', async () => {
+
+
+
+
+  it('sends a stay with the nights and guests the guest chose', async () => {
     signIn();
-    vi.spyOn(api, 'createBooking').mockResolvedValue({
-      id: 'b1',
-      status: 'PENDING',
-      paymentRef: 'TWRTCKQR1',
-      payment: {
-        provider: 'vietqr',
-        status: 'AWAITING_PAYMENT',
-        qrUrl: 'https://img.vietqr.io/image/TCB-1-compact2.png?amount=500000',
-        paymentRef: 'TWRTCKQR1',
-        amountVnd: 500_000,
-        instructions: 'Transfer with the reference.',
-      },
-    });
-    vi.spyOn(api, 'paymentStatus').mockResolvedValue({
-      paymentStatus: 'AWAITING_PAYMENT',
-      demoTxSigs: [],
-    });
+    vi.spyOn(api, 'createBooking').mockResolvedValue({ id: 'b1', status: 'CONFIRMED', checkOut: '2026-11-04' });
 
     renderScreen(<Travel />);
     await screen.findByRole('heading', { name: /Two nights/ });
-    pickArrivalDate();
+
+    fireEvent.change(screen.getByLabelText(/Nights/i), { target: { value: '3' } });
+    const checkIn = pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
-    const qr = await screen.findByRole('img', { name: /Pay with bank QR/i });
-    expect(qr).toHaveAttribute('src', expect.stringContaining('vietqr.io'));
+    await waitFor(() => expect(api.createBooking).toHaveBeenCalled());
+    const [payload] = api.createBooking.mock.calls[0];
+    // A stay: the number is nights, and the guests decide how many rooms.
+    expect(payload).toMatchObject({ listingId: 'l1', nights: 3, guests: 2, checkIn });
   });
 
-  it('shows explorer links once the payment poll reports demo signatures', async () => {
+  it('confirms at once and says payment is taken on the check-out date', async () => {
     signIn();
     vi.spyOn(api, 'createBooking').mockResolvedValue({
       id: 'b1',
-      status: 'PENDING',
-      paymentRef: 'TWRTCKPOLL1',
-      payment: {
-        provider: 'vietqr',
-        status: 'AWAITING_PAYMENT',
-        qrUrl: 'https://img.vietqr.io/image/TCB-1.png',
-        paymentRef: 'TWRTCKPOLL1',
-      },
-    });
-    vi.spyOn(api, 'paymentStatus').mockResolvedValue({
-      paymentStatus: 'PAID',
-      demoTxSigs: ['sigexplorer1'],
+      status: 'CONFIRMED',
+      checkOut: '2026-11-04T00:00:00.000Z',
+      totalVnd: 500_000,
+      providerPayoutVnd: 450_000,
+      communityFundVnd: 15_000,
+      platformFeeVnd: 35_000,
     });
 
     renderScreen(<Travel />);
@@ -218,35 +167,43 @@ describe('Travel', () => {
     pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
-    expect(await screen.findByText(/dKNA moved on Solana devnet/i)).toBeInTheDocument();
-    const link = screen.getByRole('link', { name: /View on Explorer ·/i });
-    expect(link).toHaveAttribute('href', expect.stringContaining('explorer.solana.com/tx/sigexplorer1'));
+    expect(await screen.findByText(/^Confirmed$/i)).toBeInTheDocument();
+    expect(screen.getByText(/You pay from your wallet on your check-out date, 2026-11-04/)).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: /QR/i })).not.toBeInTheDocument();
   });
 
-  it('says the mint was skipped when payment is confirmed without signatures', async () => {
+  it('points to a top-up when the wallet cannot cover the stay', async () => {
     signIn();
-    vi.spyOn(api, 'createBooking').mockResolvedValue({
-      id: 'b1',
-      status: 'PENDING',
-      paymentRef: 'TWRTCKSKIP1',
-      payment: {
-        provider: 'vietqr',
-        status: 'AWAITING_PAYMENT',
-        qrUrl: 'https://img.vietqr.io/image/TCB-1.png',
-        paymentRef: 'TWRTCKSKIP1',
-      },
-    });
-    vi.spyOn(api, 'paymentStatus').mockResolvedValue({
-      paymentStatus: 'PAID',
-      demoTxSigs: [],
-    });
+    vi.spyOn(api, 'createBooking').mockRejectedValue(
+      new ApiError('Your wallet does not hold enough dKNA for this stay yet. Top up first.', 402)
+    );
 
     renderScreen(<Travel />);
     await screen.findByRole('heading', { name: /Two nights/ });
     pickArrivalDate();
     await userEvent.click(screen.getByRole('button', { name: /^Book$/ }));
 
-    expect(await screen.findByText(/No devnet escrow/i)).toBeInTheDocument();
+    expect(await screen.findByText(/does not hold enough dKNA/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Top up your wallet/i })).toHaveAttribute('href', '#account');
+  });
+
+  it('shows how many rooms are left for the chosen dates, or which night is full', async () => {
+    signIn();
+    const available = vi.spyOn(api, 'listingAvailability');
+    renderScreen(<Travel />);
+    await screen.findByRole('heading', { name: /Two nights/ });
+
+    available.mockImplementation(async (_id, from) => ({
+      days: [{ date: from, capacity: 2, booked: 1, available: 1 }],
+    }));
+    pickArrivalDate();
+    expect(await screen.findByText(/1 room left for these dates/i)).toBeInTheDocument();
+
+    available.mockImplementation(async (_id, from) => ({
+      days: [{ date: from, capacity: 2, booked: 2, available: 0 }],
+    }));
+    fireEvent.change(screen.getByLabelText(/Arrival date/i), { target: { value: '2027-01-15' } });
+    expect(await screen.findByText(/2027-01-15 is fully booked/i)).toBeInTheDocument();
   });
 
 });

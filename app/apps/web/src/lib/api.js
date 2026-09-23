@@ -104,14 +104,20 @@ export const api = {
 
   listings: (params) => request(`/listings${query(params)}`),
   listing: (id) => request(`/listings/${id}`),
+  listingAvailability: (id, from, to) => request(`/listings/${id}/availability${query({ from, to })}`),
   products: (params) => request(`/products${query(params)}`),
 
   createBooking: (payload) => request('/bookings', { method: 'POST', body: payload }),
   myBookings: () => request('/bookings/mine'),
-  pendingBookings: () => request('/bookings/pending'),
-  decideBooking: (id, payload) =>
-    request(`/bookings/${id}/decision`, { method: 'POST', body: payload }),
+  cancelBooking: (id) => request(`/bookings/${id}/cancel`, { method: 'POST' }),
+  // Payment at check-out, from the guest's wallet. A linked Phantom gets
+  // { needsSignature, transactionBase64 } back, signs it, then confirms.
+  payBooking: (id) => request(`/bookings/${id}/pay`, { method: 'POST' }),
+  confirmBookingPayment: (id, signature) =>
+    request(`/bookings/${id}/pay/confirm`, { method: 'POST', body: { signature } }),
   providerDashboard: () => request('/providers/me'),
+  setAvailability: (listingId, body) =>
+    request(`/providers/me/listings/${listingId}/availability`, { method: 'PUT', body }),
 
   // A person's own account: who they are, and everything they have done
   // here as one timeline rather than three lists.
@@ -175,6 +181,18 @@ export const api = {
   walletChallenge: () => request('/wallet/challenge', { method: 'POST' }),
   walletLink: (body) => request('/wallet/link', { method: 'POST', body }),
   walletMe: () => request('/wallet/me'),
+  // The account's fixed wallet, its funding, and which wallet pays.
+  walletAccount: () => request('/wallet/account'),
+  walletTopUp: (amountVnd) => request('/wallet/topup', { method: 'POST', body: { amountVnd } }),
+  walletFaucet: () => request('/wallet/faucet', { method: 'POST' }),
+  walletTopUps: () => request('/wallet/topups'),
+  paymentWalletPrepare: () => request('/wallet/payment-wallet/prepare', { method: 'POST' }),
+  paymentWalletConfirm: (signature) =>
+    request('/wallet/payment-wallet/confirm', { method: 'POST', body: { signature } }),
+  paymentWalletReset: () => request('/wallet/payment-wallet/reset', { method: 'POST' }),
+
+  traceWallet: (address) => request(`/trace/wallet/${encodeURIComponent(address)}`),
+  traceBooking: (id) => request(`/trace/booking/${encodeURIComponent(id)}`),
 
   paymentStatus: (ref) => request(`/payments/status/${encodeURIComponent(ref)}`),
   verifyPayment: (ref) =>

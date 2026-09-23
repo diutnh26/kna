@@ -215,9 +215,10 @@
     "noBookings": "Chưa có đơn đặt nào.",
     "statusPending": "Đang chờ xác nhận",
     "statusConfirmed": "Đã xác nhận",
-    "statusCompleted": "Đã hoàn thành",
+    "statusCompleted": "Đã thanh toán",
     "statusCancelled": "Đã từ chối",
-    "decisionError": "Không ghi nhận được. Vui lòng thử lại."
+    "decisionError": "Không ghi nhận được. Vui lòng thử lại.",
+    "statusUnpaid": "Chưa thanh toán"
   },
   "demo": {
     "label": "Dữ liệu minh hoạ.",
@@ -388,7 +389,18 @@
     "demoTokensSent": "dKNA đã chuyển trên Solana devnet: giữ trong ký quỹ, rồi chương trình KNĂ chi trả khi hội đồng hoàn tất.",
     "demoTokensPending": "Đang chờ xác nhận thanh toán… sau đó khoản thanh toán được giữ trong ký quỹ trên devnet.",
     "demoTokensSkipped": "Đã xác nhận thanh toán. Chưa có ký quỹ devnet (chưa cấu hình DEMO_MINT hoặc treasury).",
-    "viewDemoTx": "Xem trên Explorer"
+    "viewDemoTx": "Xem trên Explorer",
+    "confirmedNow": "Đã xác nhận",
+    "guestsLabel": "Số khách",
+    "roomsLeft_one": "Còn {{count}} phòng cho những ngày này",
+    "roomsLeft_other": "Còn {{count}} phòng cho những ngày này",
+    "seatsLeft_one": "Còn {{count}} chỗ",
+    "seatsLeft_other": "Còn {{count}} chỗ",
+    "dayClosed": "{{date}} chưa mở để đặt.",
+    "dayFull": "{{date}} đã kín chỗ.",
+    "payOnCheckout": "Ngày của bạn đã được giữ. Bạn thanh toán từ ví vào ngày trả phòng, {{date}}.",
+    "seeTrips": "Xem chuyến đi",
+    "topUpLink": "Nạp tiền vào ví"
   },
   "marketplace": {
     "eyebrow": "Chợ cộng đồng",
@@ -827,7 +839,12 @@
       "ORDER_AWAITING_SETTLEMENT": "Đơn mua {{piece}} của {{maker}} đang chờ ghi nhận thanh toán.",
       "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) đang chờ Hội đồng duyệt.",
       "ARCHIVE_PUBLISHED": "{{title}} đã được đăng vào kho lưu trữ.",
-      "ARCHIVE_REJECTED": "{{title}} không được đăng. {{note}}"
+      "ARCHIVE_REJECTED": "{{title}} không được đăng. {{note}}",
+      "PAYMENT_DUE": "Hôm nay là ngày trả phòng tại {{listing}}. Hãy thanh toán {{amount}} ₫ từ ví của bạn.",
+      "PAYMENT_OVERDUE": "{{listing}} vẫn chưa được thanh toán. Cuối ngày hôm nay hệ thống sẽ trừ vào ví KNĂ của bạn.",
+      "BOOKING_PAID": "{{listing}} ({{date}}) đã được thanh toán: {{amount}} ₫, trên Solana devnet.",
+      "BOOKING_UNPAID": "{{listing}} ({{date}}) chưa thanh toán được sau khi trả phòng.",
+      "TOPUP_CREDITED": "Đã cộng {{amount}} ₫ bằng dKNA vào ví của bạn."
     }
   },
   "receipt": {
@@ -845,6 +862,120 @@
     "proofFinalized": "Bằng chứng đã được hội đồng cộng đồng hoàn tất trên Solana.",
     "proofSettled": "Đã chi trả trên Solana bởi chương trình KNĂ: ba lần chuyển token khớp với khoản phân chia này.",
     "proofWithdrawn": "Bằng chứng trên chuỗi đã được điều phối viên rút lại."
+  },
+  "walletCard": {
+    "title": "Ví của bạn",
+    "copy": "Sao chép địa chỉ",
+    "trace": "Tra cứu ví này",
+    "registered": "Đã đăng ký trên Solana devnet",
+    "registering": "Đang đăng ký trên Solana devnet…",
+    "balance": "{{amount}} dKNA trong {{wallet}}",
+    "balanceUnknown": "Chưa đọc được số dư",
+    "explainer": "Địa chỉ này là của bạn vĩnh viễn: được tạo khi bạn đăng ký, và chương trình KNĂ nhận biết tài khoản của bạn qua nó. Vào ngày trả phòng, bạn thanh toán từ ví này — 90% cho chủ nhà, 3% vào Quỹ cộng đồng, 7% cho KNĂ — và mọi lần chuyển đều công khai trên Solana devnet. 1 dKNA = 1.000 ₫.",
+    "topUpLabel": "Nạp tiền bằng chuyển khoản (VietQR)",
+    "topUp": "Nạp tiền",
+    "topUpQr": "Mã VietQR để nạp tiền",
+    "topUpQrHint": "Chuyển khoản với nội dung {{ref}}. Ví được cộng ngay khi ngân hàng xác nhận.",
+    "faucetLabel": "Vòi demo (devnet)",
+    "faucet": "Nhận dKNA demo",
+    "faucetHint": "Trị giá 2.000.000 ₫, mỗi ngày một lần. Token devnet, không phải tiền thật.",
+    "faucetDone": "Đã gửi dKNA demo vào ví của bạn.",
+    "payerLabel": "Ví dùng để thanh toán",
+    "payingFrom": "Đặt chỗ được thanh toán từ {{wallet}} ({{kind}}).",
+    "fixedWallet": "ví KNĂ của bạn",
+    "usePhantom": "Thanh toán từ Phantom ({{wallet}})",
+    "useFixed": "Thanh toán lại từ ví KNĂ",
+    "payerPhantom": "Từ nay đặt chỗ sẽ được thanh toán từ Phantom.",
+    "payerFixed": "Từ nay đặt chỗ sẽ được thanh toán từ ví KNĂ.",
+    "topUpRow": "Nạp tiền",
+    "faucetRow": "Vòi demo",
+    "topUpStatus": {
+      "AWAITING_PAYMENT": "chờ chuyển khoản",
+      "PAID": "đã nhận, đang cộng",
+      "CREDITED": "đã cộng",
+      "FAILED": "thất bại"
+    },
+    "loadError": "Không tải được ví của bạn.",
+    "actionError": "Thao tác không thành công."
+  },
+  "trips": {
+    "title": "Chuyến đi của bạn",
+    "empty": "Bạn chưa đặt chỗ nào.",
+    "dates": "{{checkIn}} đến {{checkOut}}",
+    "rooms_one": "{{count}} phòng",
+    "rooms_other": "{{count}} phòng",
+    "payOpens": "Thanh toán mở vào ngày trả phòng, {{date}}.",
+    "unpaidNote": "Chưa thanh toán sau khi trả phòng. Vui lòng thanh toán — bạn chưa thể đặt chỗ mới cho đến khi thanh toán.",
+    "trace": "Tra cứu trên Solana",
+    "pay": "Thanh toán",
+    "paying": "Đang thanh toán…",
+    "cancel": "Huỷ",
+    "topUpHint": "Hãy nạp tiền vào ví ở trên rồi thanh toán.",
+    "actionError": "Thao tác không thành công.",
+    "status": {
+      "PENDING": "Đã yêu cầu",
+      "CONFIRMED": "Đã đặt",
+      "COMPLETED": "Đã thanh toán",
+      "UNPAID": "Chưa thanh toán",
+      "CANCELLED": "Đã huỷ"
+    }
+  },
+  "calendar": {
+    "title": "Lịch của bạn",
+    "intro": "Mở những ngày bạn có thể đón khách. Khách đặt ngày đã mở ngay lập tức — không cần duyệt — và phòng đã đặt được khoá để không ai khác lấy được.",
+    "rooms_one": "{{count}} phòng",
+    "rooms_other": "{{count}} phòng",
+    "seats_one": "{{count}} chỗ",
+    "seats_other": "{{count}} chỗ",
+    "next30": "30 ngày tới",
+    "dayTitle": "{{date}}: còn {{available}}/{{capacity}}",
+    "closedDay": "{{date}}: đóng",
+    "legend": "Mỗi ngày hiển thị số còn trống. Xanh: đang mở. Đỏ: đã kín. Xám: đóng.",
+    "from": "Từ",
+    "to": "Đến",
+    "open": "Mở những ngày này",
+    "close": "Đóng những ngày này",
+    "error": "Không cập nhật được lịch."
+  },
+  "trace": {
+    "title": "Tra cứu",
+    "intro": "Mỗi ví KNĂ có một địa chỉ công khai, và mỗi lần đặt chỗ, thanh toán là một giao dịch của chương trình KNĂ trên Solana devnet. Tra cứu bằng địa chỉ ví hoặc mã đặt chỗ.",
+    "placeholder": "Địa chỉ ví hoặc mã đặt chỗ",
+    "search": "Tra cứu",
+    "error": "Không tìm thấy.",
+    "total": "Tổng",
+    "toProvider": "Cho chủ nhà (90%)",
+    "toFund": "Vào Quỹ cộng đồng (3%)",
+    "toPlatform": "Cho KNĂ (7%)",
+    "wallets": "Các ví",
+    "wallet": {
+      "guest": "Khách",
+      "provider": "Chủ nhà",
+      "communityFund": "Quỹ cộng đồng",
+      "platform": "KNĂ"
+    },
+    "transactions": "Giao dịch",
+    "tx": {
+      "recorded": "Ghi nhận đặt chỗ",
+      "paid": "Thanh toán khi trả phòng",
+      "attested": "Chứng thực",
+      "finalized": "Hội đồng hoàn tất"
+    },
+    "matches": "Bản ghi trên chuỗi ({{status}}) khớp với sổ cái công khai.",
+    "mismatch": "Bản ghi trên chuỗi không khớp với sổ cái công khai.",
+    "notOnchain": "Chưa có trên chuỗi.",
+    "role": {
+      "account": "Tài khoản KNĂ",
+      "provider": "Chủ nhà",
+      "community-fund": "Quỹ cộng đồng",
+      "platform": "Nền tảng KNĂ",
+      "unknown": "Không phải ví KNĂ"
+    },
+    "registered": "đã đăng ký với chương trình KNĂ",
+    "notRegistered": "chưa đăng ký với chương trình KNĂ",
+    "recent": "Giao dịch gần đây",
+    "none": "Chưa có giao dịch.",
+    "failed": "thất bại"
   },
   "wallet": {
     "connect": "Kết nối ví",

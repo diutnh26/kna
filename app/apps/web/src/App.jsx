@@ -10,6 +10,7 @@ import Community from './components/Community';
 import Review from './components/Review';
 import Dashboard from './components/Dashboard';
 import Account from './components/Account';
+import Trace from './components/Trace';
 import AuthModal from './components/AuthModal';
 import DemoDataBanner from './components/DemoDataBanner';
 import DemoBanner from './components/DemoBanner';
@@ -52,6 +53,7 @@ const ROUTES = {
   '#review': Review,
   '#dashboard': Dashboard,
   '#account': Account,
+  '#trace': Trace,
 };
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';

@@ -215,9 +215,10 @@
     "noBookings": "No bookings yet.",
     "statusPending": "Awaiting confirmation",
     "statusConfirmed": "Confirmed",
-    "statusCompleted": "Completed",
+    "statusCompleted": "Paid",
     "statusCancelled": "Declined",
-    "decisionError": "Could not record that. Try again."
+    "decisionError": "Could not record that. Try again.",
+    "statusUnpaid": "Unpaid"
   },
   "demo": {
     "label": "Demonstration data.",
@@ -388,7 +389,18 @@
     "demoTokensSent": "dKNA moved on Solana devnet: held in escrow, then paid out by the KNĂ program once the committee finalizes.",
     "demoTokensPending": "Waiting for payment confirmation… then the payment is held in escrow on devnet.",
     "demoTokensSkipped": "Payment confirmed. No devnet escrow (DEMO_MINT or the treasury is not set up).",
-    "viewDemoTx": "View on Explorer"
+    "viewDemoTx": "View on Explorer",
+    "confirmedNow": "Confirmed",
+    "guestsLabel": "Guests",
+    "roomsLeft_one": "{{count}} room left for these dates",
+    "roomsLeft_other": "{{count}} rooms left for these dates",
+    "seatsLeft_one": "{{count}} seat left",
+    "seatsLeft_other": "{{count}} seats left",
+    "dayClosed": "{{date}} is not open for booking.",
+    "dayFull": "{{date}} is fully booked.",
+    "payOnCheckout": "Your dates are held. You pay from your wallet on your check-out date, {{date}}.",
+    "seeTrips": "See your stays",
+    "topUpLink": "Top up your wallet"
   },
   "marketplace": {
     "eyebrow": "Community Marketplace",
@@ -827,7 +839,12 @@
       "ORDER_AWAITING_SETTLEMENT": "An order for {{piece}} by {{maker}} is waiting to be settled.",
       "ARCHIVE_AWAITING_REVIEW": "{{title}} ({{type}}) is waiting for the Committee.",
       "ARCHIVE_PUBLISHED": "{{title}} has been published to the archive.",
-      "ARCHIVE_REJECTED": "{{title}} was not published. {{note}}"
+      "ARCHIVE_REJECTED": "{{title}} was not published. {{note}}",
+      "PAYMENT_DUE": "Today is check-out for {{listing}}. Pay {{amount}} ₫ from your wallet.",
+      "PAYMENT_OVERDUE": "{{listing}} is still unpaid. It will be charged to your KNĂ wallet at the end of today.",
+      "BOOKING_PAID": "{{listing}} ({{date}}) is paid: {{amount}} ₫, on Solana devnet.",
+      "BOOKING_UNPAID": "{{listing}} ({{date}}) could not be paid after check-out.",
+      "TOPUP_CREDITED": "{{amount}} ₫ in dKNA has been added to your wallet."
     }
   },
   "receipt": {
@@ -845,6 +862,120 @@
     "proofFinalized": "Proof finalized on Solana by the community committee.",
     "proofSettled": "Paid out on Solana by the KNĂ program: three token transfers matching this split.",
     "proofWithdrawn": "Its on-chain proof was withdrawn by a coordinator."
+  },
+  "walletCard": {
+    "title": "Your wallet",
+    "copy": "Copy address",
+    "trace": "Trace this wallet",
+    "registered": "Registered on Solana devnet",
+    "registering": "Being registered on Solana devnet…",
+    "balance": "{{amount}} dKNA in {{wallet}}",
+    "balanceUnknown": "Balance unavailable",
+    "explainer": "This address is yours for good: it was made when you signed up, and it is how the KNĂ program knows your account. On your check-out date you pay from it — 90% goes to your host, 3% to the Community Fund, 7% to KNĂ — and every transfer is public on Solana devnet. 1 dKNA = 1,000 ₫.",
+    "topUpLabel": "Top up by bank transfer (VietQR)",
+    "topUp": "Top up",
+    "topUpQr": "VietQR code for your top-up",
+    "topUpQrHint": "Transfer with reference {{ref}}. Your wallet is credited as soon as the bank confirms.",
+    "faucetLabel": "Demo faucet (devnet)",
+    "faucet": "Get demo dKNA",
+    "faucetHint": "2,000,000 ₫ worth, once a day. Devnet tokens, not real money.",
+    "faucetDone": "Demo dKNA sent to your wallet.",
+    "payerLabel": "Which wallet pays",
+    "payingFrom": "Bookings are paid from {{wallet}} ({{kind}}).",
+    "fixedWallet": "your KNĂ wallet",
+    "usePhantom": "Pay from Phantom ({{wallet}}) instead",
+    "useFixed": "Pay from my KNĂ wallet again",
+    "payerPhantom": "Your bookings will now be paid from Phantom.",
+    "payerFixed": "Your bookings will now be paid from your KNĂ wallet.",
+    "topUpRow": "Top-up",
+    "faucetRow": "Faucet",
+    "topUpStatus": {
+      "AWAITING_PAYMENT": "awaiting transfer",
+      "PAID": "paid, crediting",
+      "CREDITED": "credited",
+      "FAILED": "failed"
+    },
+    "loadError": "Could not load your wallet.",
+    "actionError": "That did not go through."
+  },
+  "trips": {
+    "title": "Your stays",
+    "empty": "No stays booked yet.",
+    "dates": "{{checkIn}} → {{checkOut}}",
+    "rooms_one": "{{count}} room",
+    "rooms_other": "{{count}} rooms",
+    "payOpens": "Payment opens on your check-out date, {{date}}.",
+    "unpaidNote": "Unpaid after check-out. Please pay — you cannot book again until you do.",
+    "trace": "Trace on Solana",
+    "pay": "Pay now",
+    "paying": "Paying…",
+    "cancel": "Cancel",
+    "topUpHint": "Top up your wallet above, then pay.",
+    "actionError": "That did not go through.",
+    "status": {
+      "PENDING": "Requested",
+      "CONFIRMED": "Booked",
+      "COMPLETED": "Paid",
+      "UNPAID": "Unpaid",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "calendar": {
+    "title": "Your calendar",
+    "intro": "Open the days you can host. Guests book open days instantly — there is no approval step — and booked rooms are locked so nobody else can take them.",
+    "rooms_one": "{{count}} room",
+    "rooms_other": "{{count}} rooms",
+    "seats_one": "{{count}} seat",
+    "seats_other": "{{count}} seats",
+    "next30": "The next 30 days",
+    "dayTitle": "{{date}}: {{available}} of {{capacity}} free",
+    "closedDay": "{{date}}: closed",
+    "legend": "Each day shows what is still free. Green: open. Red: fully booked. Grey: closed.",
+    "from": "From",
+    "to": "To",
+    "open": "Open these days",
+    "close": "Close these days",
+    "error": "Could not update the calendar."
+  },
+  "trace": {
+    "title": "Trace",
+    "intro": "Every KNĂ wallet has one public address, and every booking and payment is a transaction of the KNĂ program on Solana devnet. Look up a wallet address or a booking reference.",
+    "placeholder": "Wallet address or booking reference",
+    "search": "Trace",
+    "error": "Nothing found.",
+    "total": "Total",
+    "toProvider": "To the host (90%)",
+    "toFund": "To the Community Fund (3%)",
+    "toPlatform": "To KNĂ (7%)",
+    "wallets": "Wallets",
+    "wallet": {
+      "guest": "Guest",
+      "provider": "Host",
+      "communityFund": "Community Fund",
+      "platform": "KNĂ"
+    },
+    "transactions": "Transactions",
+    "tx": {
+      "recorded": "Booking recorded",
+      "paid": "Paid at check-out",
+      "attested": "Attested",
+      "finalized": "Finalized by committee"
+    },
+    "matches": "The on-chain record ({{status}}) matches the public ledger.",
+    "mismatch": "The on-chain record does not match the public ledger.",
+    "notOnchain": "Not on-chain yet.",
+    "role": {
+      "account": "KNĂ account",
+      "provider": "Host",
+      "community-fund": "Community Fund",
+      "platform": "KNĂ platform",
+      "unknown": "Not a KNĂ wallet"
+    },
+    "registered": "registered with the KNĂ program",
+    "notRegistered": "not registered with the KNĂ program",
+    "recent": "Recent transactions",
+    "none": "No transactions yet.",
+    "failed": "failed"
   },
   "wallet": {
     "connect": "Connect wallet",

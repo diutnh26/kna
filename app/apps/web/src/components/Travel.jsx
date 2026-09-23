@@ -50,6 +50,50 @@ const FILTER_KEYS = {
 
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 
+/**
+ * What is left for the chosen dates: the fewest rooms (or seats) free on any
+ * of the nights, or the first night that is closed or full. The server
+ * decides at booking time; this only saves a guest a wasted request.
+ */
+function AvailabilityHint({ listingId, checkIn, days, units, perNight }) {
+  const { t } = useTranslation();
+  const [state, setState] = useState(null);
+  useEffect(() => {
+    if (!checkIn || days < 1) return undefined;
+    let cancelled = false;
+    const last = new Date(new Date(`${checkIn}T00:00:00Z`).getTime() + (days - 1) * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    api
+      .listingAvailability(listingId, checkIn, last)
+      .then((res) => {
+        if (cancelled) return;
+        const byDate = Object.fromEntries(res.days.map((d) => [d.date, d.available]));
+        let min = Infinity;
+        for (let i = 0; i < days; i++) {
+          const date = new Date(new Date(`${checkIn}T00:00:00Z`).getTime() + i * 86_400_000).toISOString().slice(0, 10);
+          if (!(date in byDate)) return setState({ kind: 'closed', date });
+          if (byDate[date] < units) return setState({ kind: 'full', date, left: byDate[date] });
+          min = Math.min(min, byDate[date]);
+        }
+        setState({ kind: 'ok', left: min });
+      })
+      .catch(() => !cancelled && setState(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [listingId, checkIn, days, units]);
+
+  if (!checkIn || !state) return null;
+  if (state.kind === 'closed') return <p className="text-xs text-kteh">{t('travel.dayClosed', { date: state.date })}</p>;
+  if (state.kind === 'full') return <p className="text-xs text-kteh">{t('travel.dayFull', { date: state.date })}</p>;
+  return (
+    <p className="text-xs text-sage">
+      {perNight ? t('travel.roomsLeft', { count: state.left }) : t('travel.seatsLeft', { count: state.left })}
+    </p>
+  );
+}
+
 export default function Travel() {
   const { t } = useTranslation();
   const split = t('travel.split', { returnObjects: true });
@@ -98,60 +142,20 @@ export default function Travel() {
     };
   }, [category, buon, debouncedSearch]);
 
-  // Poll payment + demo mint status after booking when we have a paymentRef.
-  useEffect(() => {
-    const pending = Object.entries(bookings).filter(
-      ([, b]) =>
-        b?.status === 'done' &&
-        b.paymentRef &&
-        b.paymentStatus !== 'PAID' &&
-        !(b.demoTxSigs?.length)
-    );
-    if (pending.length === 0) return undefined;
-
-    let cancelled = false;
-    const tick = async () => {
-      for (const [listingId, b] of pending) {
-        try {
-          const st = await api.paymentStatus(b.paymentRef);
-          if (cancelled) return;
-          if (st.paymentStatus === 'PAID' || (st.demoTxSigs && st.demoTxSigs.length)) {
-            setBookings((prev) => ({
-              ...prev,
-              [listingId]: {
-                ...prev[listingId],
-                paymentStatus: st.paymentStatus,
-                demoTxSigs: st.demoTxSigs ?? [],
-              },
-            }));
-          }
-        } catch {
-          /* ignore transient poll errors */
-        }
-      }
-    };
-
-    tick();
-    const id = setInterval(tick, 5000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-    // Re-subscribe when the set of refs awaiting payment changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    Object.entries(bookings)
-      .filter(([, b]) => b?.status === 'done' && b.paymentRef && b.paymentStatus !== 'PAID')
-      .map(([, b]) => b.paymentRef)
-      .join(','),
-  ]);
-
   function qtyFor(listing) {
     return bookings[listing.id]?.qty ?? 1;
   }
 
   function setQty(listing, qty) {
     setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty: Math.max(1, qty) } }));
+  }
+
+  function guestsFor(listing) {
+    return bookings[listing.id]?.guests ?? 2;
+  }
+
+  function setGuests(listing, guests) {
+    setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], guests: Math.max(1, guests) } }));
   }
 
   function checkInFor(listing) {
@@ -185,7 +189,7 @@ export default function Travel() {
     try {
       const created = await api.createBooking({
         listingId: listing.id,
-        guests: perNight ? 1 : qty,
+        guests: perNight ? guestsFor(listing) : qty,
         nights: perNight ? qty : 1,
         checkIn,
       });
@@ -202,22 +206,17 @@ export default function Travel() {
           providerPayoutVnd: created.providerPayoutVnd,
           communityFundVnd: created.communityFundVnd,
           platformFeeVnd: created.platformFeeVnd,
-          paymentRef: created.paymentRef ?? created.payment?.paymentRef,
-          payment: created.payment,
-          demoTxSigs: (() => {
-            if (!created.demoTxSigs) return [];
-            if (Array.isArray(created.demoTxSigs)) return created.demoTxSigs;
-            try {
-              return JSON.parse(created.demoTxSigs);
-            } catch {
-              return [];
-            }
-          })(),
+          checkOut: String(created.checkOut ?? '').slice(0, 10),
+          rooms: created.rooms,
         },
       }));
     } catch (err) {
       const message = err instanceof ApiError ? err.message : t('travel.bookingError');
-      setBookings((b) => ({ ...b, [listing.id]: { ...b[listing.id], qty, status: 'error', error: message } }));
+      const needsTopUp = err instanceof ApiError && err.status === 402;
+      setBookings((b) => ({
+        ...b,
+        [listing.id]: { ...b[listing.id], qty, status: 'error', error: message, needsTopUp },
+      }));
     }
   }
 
@@ -414,8 +413,8 @@ export default function Travel() {
 
                           <div>
                             {booking?.status === 'done' ? (
-                              <span className="text-xs text-amber uppercase tracking-wider">
-                                {t('travel.requested')}
+                              <span className="text-xs text-sage uppercase tracking-wider">
+                                {t('travel.confirmedNow')}
                               </span>
                             ) : (
                               <div className="space-y-3">
@@ -429,6 +428,26 @@ export default function Travel() {
                                   value={checkInFor(l)}
                                   onChange={(e) => setCheckIn(l, e.target.value)}
                                   className="w-full bg-transparent border border-bone/25 text-sm py-2 px-3 focus:outline-none focus:border-bone/60 [color-scheme:dark]"
+                                />
+                                {perNight && (
+                                  <label className="flex items-center justify-between gap-3 text-xs text-bone/60">
+                                    {t('travel.guestsLabel')}
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      max={20}
+                                      value={guestsFor(l)}
+                                      onChange={(e) => setGuests(l, Number(e.target.value))}
+                                      className="w-16 bg-transparent border border-bone/25 text-sm text-center py-1.5"
+                                    />
+                                  </label>
+                                )}
+                                <AvailabilityHint
+                                  listingId={l.id}
+                                  checkIn={checkInFor(l)}
+                                  days={perNight ? qtyFor(l) : 1}
+                                  units={perNight ? Math.ceil(guestsFor(l) / (l.maxGuestsPerRoom ?? 2)) : qtyFor(l)}
+                                  perNight={perNight}
                                 />
                                 <div className="flex items-stretch gap-3">
                                   <label className="sr-only" htmlFor={`qty-${l.id}`}>
@@ -463,85 +482,27 @@ export default function Travel() {
                               communityFundVnd={booking.communityFundVnd}
                               platformFeeVnd={booking.platformFeeVnd}
                               provider={l.provider.displayName}
-                              status={booking.paymentStatus === 'PAID' ? 'confirmed' : 'awaiting'}
+                              status="awaiting"
                               compact
                             />
                           )}
-                          {booking?.status === 'done' && booking.payment && (
-                            <div className="space-y-3 text-xs text-bone/70">
-                              {booking.payment.qrUrl ? (
-                                <div className="space-y-2">
-                                  <p className="uppercase tracking-wider text-amber">
-                                    {t('travel.payQrTitle')}
-                                  </p>
-                                  <img
-                                    src={booking.payment.qrUrl}
-                                    alt={t('travel.payQrTitle')}
-                                    className="w-40 h-40 bg-white p-1"
-                                  />
-                                  <dl className="space-y-1 text-bone/60">
-                                    <div className="flex justify-between gap-2">
-                                      <dt>{t('travel.payBankName')}</dt>
-                                      <dd className="font-mono">
-                                        {booking.payment.bankId ?? 'TCB'}
-                                      </dd>
-                                    </div>
-                                    {booking.payment.bankAccount ? (
-                                      <div className="flex justify-between gap-2">
-                                        <dt>{t('travel.payAccount')}</dt>
-                                        <dd className="font-mono">{booking.payment.bankAccount}</dd>
-                                      </div>
-                                    ) : null}
-                                    {booking.paymentRef || booking.payment.paymentRef ? (
-                                      <div className="flex justify-between gap-2">
-                                        <dt>{t('travel.payRef')}</dt>
-                                        <dd className="font-mono">
-                                          {booking.paymentRef ?? booking.payment.paymentRef}
-                                        </dd>
-                                      </div>
-                                    ) : null}
-                                    {booking.payment.amountVnd ? (
-                                      <div className="flex justify-between gap-2">
-                                        <dt>{t('travel.payAmount')}</dt>
-                                        <dd className="font-mono text-amber">
-                                          {vnd(booking.payment.amountVnd)}
-                                        </dd>
-                                      </div>
-                                    ) : null}
-                                  </dl>
-                                  <p className="text-bone/45 leading-relaxed">
-                                    {t('travel.payInstructions')}
-                                  </p>
-                                </div>
-                              ) : (
-                                <p className="text-bone/50 leading-relaxed">
-                                  {booking.payment.instructions}
-                                </p>
-                              )}
-                              {booking.demoTxSigs?.length ? (
-                                <div className="border border-sage/40 p-2 space-y-1 text-sage">
-                                  <p>{t('travel.demoTokensSent')}</p>
-                                  {booking.demoTxSigs.slice(0, 3).map((sig) => (
-                                    <a
-                                      key={sig}
-                                      href={`https://explorer.solana.com/tx/${sig}?cluster=devnet`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="block underline font-mono text-[10px] break-all"
-                                    >
-                                      {t('travel.viewDemoTx')} · {String(sig).slice(0, 8)}…
-                                    </a>
-                                  ))}
-                                </div>
-                              ) : booking.paymentStatus === 'PAID' ? (
-                                <p className="text-bone/45">{t('travel.demoTokensSkipped')}</p>
-                              ) : booking.payment.qrUrl ? (
-                                <p className="text-bone/40">{t('travel.demoTokensPending')}</p>
-                              ) : null}
-                            </div>
+                          {booking?.status === 'done' && (
+                            <p className="text-xs text-bone/60 leading-relaxed">
+                              {t('travel.payOnCheckout', { date: booking.checkOut })}{' '}
+                              <a href="#account" className="underline text-amber">
+                                {t('travel.seeTrips')}
+                              </a>
+                            </p>
                           )}
                           {booking?.status === 'error' && (
-                            <p className="text-xs text-amber">{booking.error}</p>
+                            <p className="text-xs text-amber">
+                              {booking.error}{' '}
+                              {booking.needsTopUp && (
+                                <a href="#account" className="underline">
+                                  {t('travel.topUpLink')}
+                                </a>
+                              )}
+                            </p>
                           )}
                         </div>
                       </div>

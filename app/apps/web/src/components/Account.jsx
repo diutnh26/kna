@@ -16,8 +16,8 @@ import ImageSlot from './ImageSlot';
 import ApiErrorNotice from './ApiErrorNotice';
 import { api, ApiError } from '../lib/api';
 import { useAuth } from '../context/useAuth';
-import { GuestReceiptPanel } from '../wallet/AttestationPanel';
-import DemoWalletPanel from './DemoWalletPanel';
+import WalletCard from './WalletCard';
+import MyTrips from './MyTrips';
 import DemoTxHistory from './DemoTxHistory';
 import ImpactReceipt from './ImpactReceipt';
 
@@ -183,8 +183,8 @@ export default function Account() {
 
       {isAuthenticated && loadState === 'ready' && (
         <section className="px-8 lg:px-12 xl:px-16 pb-12 max-w-6xl space-y-5">
-          <GuestReceiptPanel />
-          <DemoWalletPanel />
+          <WalletCard />
+          <MyTrips />
           <DemoTxHistory />
         </section>
       )}
