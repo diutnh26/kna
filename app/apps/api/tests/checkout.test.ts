@@ -260,6 +260,17 @@ describe("payment at check-out", () => {
         ).status
       ).toBe(201);
     });
+
+    it("never marks UNPAID a stay that could not reach the chain", async () => {
+      const { runCheckoutJobOnce, vnToday } = await import("../src/lib/checkout");
+      const b = await stayCheckedOut(2, false);
+      await prisma.booking.update({ where: { id: b.id }, data: { reminderStage: 2 } });
+      await runCheckoutJobOnce(new Date(vnToday().getTime() + 3_600_000));
+      const after = await prisma.booking.findUniqueOrThrow({ where: { id: b.id } });
+      expect(after.status).toBe("CONFIRMED");
+      expect(after.reminderStage).toBe(2);
+      expect(chain.payFromPlatformWallet).not.toHaveBeenCalled();
+    });
   });
 
   describe("funding the wallet", () => {

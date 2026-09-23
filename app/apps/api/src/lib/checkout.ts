@@ -124,6 +124,13 @@ export async function runCheckoutJobOnce(now = new Date()) {
     }
 
     if (b.reminderStage < 3 && today.getTime() >= checkOut.getTime() + 2 * DAY_MS) {
+      // A stay that never reached the chain could not have been paid there:
+      // that is the platform's gap, not the guest's debt. Leave it for a
+      // coordinator rather than marking the guest UNPAID.
+      if (!b.onchainTx) {
+        console.warn("[checkout] not charging, never recorded on-chain:", b.id);
+        continue;
+      }
       await prisma.booking.update({ where: { id: b.id }, data: { reminderStage: 3 } });
       let charged = false;
       try {
