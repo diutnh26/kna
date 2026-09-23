@@ -447,6 +447,11 @@ model LedgerAttestation {
   finalPda       String?
   pendingTxSig   String?
   finalizeTxSig  String?
+  // Set when the coordinator withdraws the attestation before the committee
+  // finalizes it (cancel_pending). CANCELLED is terminal on-chain: the
+  // pending PDA stays, so the same ledger entry cannot be attested again.
+  cancelTxSig    String?
+  cancelReason   String?
   slot           BigInt?
   state          String      @default("PENDING_SIGNATURE")
   lastError      String?

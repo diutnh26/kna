@@ -159,6 +159,10 @@ export const api = {
     request(`/chain/ledger/${id}/submit`, { method: 'POST', body }),
   chainFinalize: (id, body) =>
     request(`/chain/ledger/${id}/finalize`, { method: 'POST', body }),
+  chainCancelPrepare: (id, body) =>
+    request(`/chain/ledger/${id}/cancel/prepare`, { method: 'POST', body }),
+  chainCancel: (id, body) =>
+    request(`/chain/ledger/${id}/cancel`, { method: 'POST', body }),
   chainRetry: (id) => request(`/chain/ledger/${id}/retry`, { method: 'POST' }),
   chainReconcile: (id) =>
     request(`/chain/ledger/${id}/reconcile`, { method: 'POST' }),

@@ -2,6 +2,7 @@ import { Router, type Response } from "express";
 import { z } from "zod";
 import { PublicKey } from "@solana/web3.js";
 import {
+  ATTESTATION_CANCELLED,
   explorerAccountUrl,
   explorerTxUrl,
   finalPdaFromLedgerId,
@@ -127,6 +128,7 @@ chainRouter.get("/ledger/:id", async (req, res) => {
     explorer: {
       pending: verifiedExplorer(config.cluster, attestation.pendingTxSig),
       finalize: verifiedExplorer(config.cluster, attestation.finalizeTxSig),
+      cancel: verifiedExplorer(config.cluster, attestation.cancelTxSig),
       pendingPda: attestation.pendingPda
         ? explorerAccountUrl(config.cluster, attestation.pendingPda)
         : null,
@@ -348,6 +350,114 @@ chainRouter.post(
   }
 );
 
+// ── Withdrawal ───────────────────────────────────────────────────────
+// A coordinator can withdraw an attestation they submitted in error, while
+// it still awaits the committee (cancel_pending). Deliberately not gated on
+// the ledger row still being settled: withdrawing is the escape hatch for a
+// row that should never have gone on-chain. It is terminal — the pending PDA
+// stays, so the entry cannot be attested again.
+
+async function awaitingCommitteeOr409(ledgerEntryId: string, res: Response) {
+  const attestation = await prisma.ledgerAttestation.findUnique({ where: { ledgerEntryId } });
+  if (!attestation || attestation.state !== "AWAITING_COMMITTEE") {
+    res.status(409).json({
+      error: "Only an attestation awaiting the committee can be withdrawn.",
+      state: attestation?.state ?? null,
+    });
+    return null;
+  }
+  return attestation;
+}
+
+chainRouter.post(
+  "/ledger/:id/cancel/prepare",
+  requireAuth,
+  requireCoordinator,
+  async (req: AuthedRequest, res) => {
+    const gateway = getChainGateway();
+    if (!gateway.isEnabled()) {
+      return res.status(503).json({ error: "Solana trust layer is disabled." });
+    }
+    const body = z
+      .object({ coordinatorPubkey: z.string().min(32).max(64) })
+      .safeParse(req.body ?? {});
+    if (!body.success) {
+      return res.status(400).json({ error: "coordinatorPubkey is required." });
+    }
+    try {
+      new PublicKey(body.data.coordinatorPubkey);
+    } catch {
+      return res.status(400).json({ error: "Invalid coordinatorPubkey." });
+    }
+    if (!(await awaitingCommitteeOr409(req.params.id, res))) return;
+
+    const prepared = await gateway.prepareCancelTransaction({
+      ledgerEntryId: req.params.id,
+      coordinatorPubkey: body.data.coordinatorPubkey,
+    });
+    await audit(req.user!.id, "PREPARE_CANCEL", req.params.id, body.data.coordinatorPubkey);
+    res.json(prepared);
+  }
+);
+
+const cancelSchema = z.object({
+  cancelTxSig: z.string().min(64),
+  reason: z.string().trim().min(3).max(280),
+});
+
+chainRouter.post(
+  "/ledger/:id/cancel",
+  requireAuth,
+  requireCoordinator,
+  async (req: AuthedRequest, res) => {
+    const gateway = getChainGateway();
+    if (!gateway.isEnabled()) {
+      return res.status(503).json({ error: "Solana trust layer is disabled." });
+    }
+    const parsed = cancelSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "cancelTxSig and a reason are required." });
+    }
+    if (isLikelyFakeSignature(parsed.data.cancelTxSig)) {
+      return res.status(400).json({ error: "Fake/mock signatures are rejected." });
+    }
+    if (!(await awaitingCommitteeOr409(req.params.id, res))) return;
+
+    try {
+      const verified = await gateway.verifyCancel({
+        ledgerEntryId: req.params.id,
+        cancelTxSig: parsed.data.cancelTxSig,
+      });
+      const updated = await prisma.ledgerAttestation.update({
+        where: { ledgerEntryId: req.params.id },
+        data: {
+          state: "CANCELLED",
+          cancelTxSig: verified.cancelTxSig,
+          cancelReason: parsed.data.reason,
+          slot: BigInt(verified.slot),
+          verifiedAt: new Date(verified.verifiedAt),
+          lastError: null,
+        },
+      });
+      await prisma.chainOutbox.updateMany({
+        where: { idempotencyKey: `ledger:${req.params.id}:settled` },
+        data: { status: "CANCELLED", leaseUntil: null, lastError: null },
+      });
+      await audit(
+        req.user!.id,
+        "CANCEL_ATTESTATION",
+        req.params.id,
+        `${verified.cancelTxSig} · ${parsed.data.reason}`
+      );
+      res.json(jsonAttestation(updated));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Cancel verification failed";
+      await audit(req.user!.id, "CANCEL_REJECTED", req.params.id, message);
+      return res.status(400).json({ error: message });
+    }
+  }
+);
+
 chainRouter.post(
   "/ledger/:id/reconcile",
   requireAuth,
@@ -368,6 +478,8 @@ chainRouter.post(
       });
       let state = "PENDING_SIGNATURE";
       if (result.hasFinal) state = "FINALIZED";
+      // A cancelled pending PDA still exists; it must not read as awaiting.
+      else if (result.pendingStatus === ATTESTATION_CANCELLED) state = "CANCELLED";
       else if (result.hasPending) state = "AWAITING_COMMITTEE";
 
       const updated = await prisma.ledgerAttestation.upsert({

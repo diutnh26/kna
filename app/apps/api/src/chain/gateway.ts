@@ -4,9 +4,11 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import {
+  ATTESTATION_CANCELLED,
   assertFinalMatchesPayload,
   assertPendingMatchesPayload,
   assertProgramDeployed,
+  buildCancelPendingIx,
   buildSubmitAttestationIx,
   buildFinalizeAttestationIx,
   confirmSignature,
@@ -151,6 +153,53 @@ export class ChainGateway {
       pendingTxSig: opts.pendingTxSig,
       payloadHash: contentHashFromPayload(opts.payload),
       slot,
+      verifiedAt: new Date().toISOString(),
+    };
+  }
+
+  /** An unsigned cancel_pending transaction for the coordinator to sign in Phantom. */
+  async prepareCancelTransaction(opts: { ledgerEntryId: string; coordinatorPubkey: string }) {
+    if (!this.isEnabled()) {
+      throw new Error("Solana trust layer is disabled");
+    }
+    const connection = this.connection();
+    await assertProgramDeployed(connection);
+    const coordinator = new PublicKey(opts.coordinatorPubkey);
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+    const transaction = new Transaction({
+      feePayer: coordinator,
+      blockhash,
+      lastValidBlockHeight,
+    }).add(buildCancelPendingIx(coordinator, opts.ledgerEntryId));
+    return {
+      ledgerEntryId: opts.ledgerEntryId,
+      pendingPda: pendingPdaFromLedgerId(opts.ledgerEntryId).toBase58(),
+      transactionBase64: serializeTransactionBase64(transaction),
+      recentBlockhash: blockhash,
+      lastValidBlockHeight,
+      programId: this.config.programId,
+      cluster: this.config.cluster,
+    };
+  }
+
+  /** Confirmed on RPC and the pending PDA now reads CANCELLED — nothing less. */
+  async verifyCancel(opts: { ledgerEntryId: string; cancelTxSig: string }) {
+    if (isLikelyFakeSignature(opts.cancelTxSig)) {
+      throw new Error("Rejected fake/mock transaction signature");
+    }
+    const connection = this.connection();
+    await confirmSignature(connection, opts.cancelTxSig, "confirmed");
+    const pending = await fetchPendingAttestation(connection, opts.ledgerEntryId);
+    if (!pending) {
+      throw new Error("Pending attestation PDA not found after confirmed tx");
+    }
+    if (pending.account.status !== ATTESTATION_CANCELLED) {
+      throw new Error("Pending attestation is not cancelled on-chain");
+    }
+    return {
+      pendingPda: pending.address,
+      cancelTxSig: opts.cancelTxSig,
+      slot: await connection.getSlot("confirmed"),
       verifiedAt: new Date().toISOString(),
     };
   }

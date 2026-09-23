@@ -11,11 +11,14 @@ const FAKE_FINALIZE = `devnet_${"B".repeat(80)}`;
 
 // vi.hoisted runs before any imports, so these vi.fn() refs are available
 // inside the vi.mock factory below (which is also hoisted).
-const { verifyPendingSubmission, verifyFinalize, fetchDemoTokenBalances } = vi.hoisted(() => ({
-  verifyPendingSubmission: vi.fn(),
-  verifyFinalize: vi.fn(),
-  fetchDemoTokenBalances: vi.fn(),
-}));
+const { verifyPendingSubmission, verifyFinalize, verifyCancel, fetchDemoTokenBalances } = vi.hoisted(
+  () => ({
+    verifyPendingSubmission: vi.fn(),
+    verifyFinalize: vi.fn(),
+    verifyCancel: vi.fn(),
+    fetchDemoTokenBalances: vi.fn(),
+  })
+);
 
 // Module-level mock: Vitest hoists this before any import of the gateway
 // module, so the route's local binding receives the mock from the start.
@@ -34,6 +37,7 @@ vi.mock("../src/chain/gateway", () => ({
     }),
     verifyPendingSubmission,
     verifyFinalize,
+    verifyCancel,
   }),
   resetChainGatewayForTests: vi.fn(),
   ChainGateway: class {},
@@ -275,6 +279,138 @@ describe("chain verifier routes", () => {
       expect(
         await prisma.chainOutbox.count({ where: { idempotencyKey: `ledger:${ledgerId}:settled` } })
       ).toBe(1);
+    });
+  });
+
+  // cancel_pending: the coordinator withdraws an attestation that still
+  // awaits the committee. Verified on RPC like submit and finalize.
+  describe("withdrawal (cancel_pending)", () => {
+    let cancelLedgerId: string;
+    const CANCEL_SIG = `${"5".repeat(88)}`;
+
+    beforeAll(async () => {
+      const guest = await makeUser("guest2@chain.kna", "GUEST");
+      const listing = await prisma.listing.findFirstOrThrow();
+      const booking = await prisma.booking.create({
+        data: {
+          guestId: guest.id,
+          listingId: listing.id,
+          guests: 1,
+          nights: 1,
+          checkIn: new Date("2026-10-02"),
+          status: "CONFIRMED",
+          totalVnd: 1_000_000,
+          platformFeeVnd: 70_000,
+          communityFundVnd: 30_000,
+          providerPayoutVnd: 900_000,
+        },
+      });
+      cancelLedgerId = (
+        await prisma.ledgerEntry.create({
+          data: {
+            bookingId: booking.id,
+            fromLabel: "Guest",
+            toLabel: "Ho Gia Demo",
+            totalVnd: 1_000_000,
+            platformFeeVnd: 70_000,
+            communityFundVnd: 30_000,
+          },
+        })
+      ).id;
+      await prisma.ledgerAttestation.create({
+        data: { ledgerEntryId: cancelLedgerId, payloadHash: "h", state: "AWAITING_COMMITTEE" },
+      });
+      await prisma.chainOutbox.create({
+        data: {
+          eventType: "LEDGER_SETTLED",
+          idempotencyKey: `ledger:${cancelLedgerId}:settled`,
+          payload: { ledgerEntryId: cancelLedgerId, payloadHash: "h" },
+          status: "AWAITING_COMMITTEE",
+        },
+      });
+    });
+
+    beforeEach(() => {
+      verifyCancel.mockReset();
+    });
+
+    const cancel = (body: Record<string, unknown>, token = coordinatorToken) =>
+      request(app)
+        .post(`/chain/ledger/${cancelLedgerId}/cancel`)
+        .set("Authorization", `Bearer ${token}`)
+        .send(body);
+
+    it("is refused to a guest", async () => {
+      const guestToken = (
+        await request(app).post("/auth/login").send({ email: "guest2@chain.kna", password: PASSWORD })
+      ).body.token;
+      const res = await cancel({ cancelTxSig: CANCEL_SIG, reason: "submitted in error" }, guestToken);
+      expect(res.status).toBe(403);
+    });
+
+    it("requires a reason and rejects fake signatures before any RPC work", async () => {
+      expect((await cancel({ cancelTxSig: CANCEL_SIG })).status).toBe(400);
+      expect((await cancel({ cancelTxSig: FAKE_SUBMIT, reason: "submitted in error" })).status).toBe(400);
+      expect(verifyCancel).not.toHaveBeenCalled();
+    });
+
+    it("keeps the attestation awaiting when on-chain verification fails", async () => {
+      verifyCancel.mockRejectedValue(new Error("Pending attestation is not cancelled on-chain"));
+      const res = await cancel({ cancelTxSig: CANCEL_SIG, reason: "submitted in error" });
+      expect(res.status).toBe(400);
+      const row = await prisma.ledgerAttestation.findUniqueOrThrow({
+        where: { ledgerEntryId: cancelLedgerId },
+      });
+      expect(row.state).toBe("AWAITING_COMMITTEE");
+      expect(
+        await prisma.chainAuditLog.count({
+          where: { ledgerEntryId: cancelLedgerId, action: "CANCEL_REJECTED" },
+        })
+      ).toBe(1);
+    });
+
+    it("marks it CANCELLED, stops the outbox and records who and why, once verified", async () => {
+      verifyCancel.mockResolvedValue({
+        pendingPda: "pda",
+        cancelTxSig: CANCEL_SIG,
+        slot: 321,
+        verifiedAt: "2026-09-23T00:00:00.000Z",
+      });
+      const res = await cancel({ cancelTxSig: CANCEL_SIG, reason: "submitted in error" });
+      expect(res.status).toBe(200);
+      expect(res.body.state).toBe("CANCELLED");
+
+      const row = await prisma.ledgerAttestation.findUniqueOrThrow({
+        where: { ledgerEntryId: cancelLedgerId },
+      });
+      expect(row.cancelTxSig).toBe(CANCEL_SIG);
+      expect(row.cancelReason).toBe("submitted in error");
+      const outbox = await prisma.chainOutbox.findUniqueOrThrow({
+        where: { idempotencyKey: `ledger:${cancelLedgerId}:settled` },
+      });
+      expect(outbox.status).toBe("CANCELLED");
+
+      const coordinator = await prisma.user.findUniqueOrThrow({ where: { email: "coord@chain.kna" } });
+      const audit = await prisma.chainAuditLog.findFirstOrThrow({
+        where: { ledgerEntryId: cancelLedgerId, action: "CANCEL_ATTESTATION" },
+      });
+      expect(audit.actorUserId).toBe(coordinator.id);
+      expect(audit.detail).toContain("submitted in error");
+    });
+
+    it("refuses to withdraw again, or anything not awaiting the committee", async () => {
+      const again = await cancel({ cancelTxSig: CANCEL_SIG, reason: "submitted in error" });
+      expect(again.status).toBe(409);
+      await prisma.ledgerAttestation.update({
+        where: { ledgerEntryId: ledgerId },
+        data: { state: "FINALIZED" },
+      });
+      const finalized = await request(app)
+        .post(`/chain/ledger/${ledgerId}/cancel`)
+        .set("Authorization", `Bearer ${coordinatorToken}`)
+        .send({ cancelTxSig: CANCEL_SIG, reason: "submitted in error" });
+      expect(finalized.status).toBe(409);
+      expect(verifyCancel).not.toHaveBeenCalled();
     });
   });
 });

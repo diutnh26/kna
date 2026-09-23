@@ -4,7 +4,14 @@ import { api } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import { useWallet } from './WalletProvider';
 
-/** Coordinator submits a real Phantom-signed submit_attestation tx on devnet. */
+// Once a pending PDA exists on-chain, submitting again can only fail
+// (the program's `init` refuses it), so the button goes away.
+const SUBMITTED_STATES = ['AWAITING_COMMITTEE', 'FINALIZED', 'CANCELLED'];
+
+/**
+ * Coordinator submits a real Phantom-signed submit_attestation tx on devnet,
+ * and can withdraw it (cancel_pending) while it still awaits the committee.
+ */
 export default function AttestationPanel({ ledgerEntryId }) {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
@@ -12,6 +19,8 @@ export default function AttestationPanel({ ledgerEntryId }) {
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [reason, setReason] = useState('');
 
   useEffect(() => {
     if (!ledgerEntryId) return;
@@ -25,13 +34,7 @@ export default function AttestationPanel({ ledgerEntryId }) {
     setBusy(true);
     setError('');
     try {
-      if (!connected || !pubkey) {
-        await connect();
-      }
-      const coordinatorPubkey = window.solana?.publicKey?.toString?.() || pubkey;
-      if (!coordinatorPubkey) {
-        throw new Error(t('wallet.connectRequired'));
-      }
+      const coordinatorPubkey = await currentPubkey();
       const prepared = await api.chainPrepare(ledgerEntryId, { coordinatorPubkey });
       const pendingTxSig = await signAndSendTransaction(prepared.transactionBase64);
       await api.chainSubmit(ledgerEntryId, { pendingTxSig, coordinatorPubkey });
@@ -43,9 +46,41 @@ export default function AttestationPanel({ ledgerEntryId }) {
     }
   }
 
+  async function currentPubkey() {
+    if (!connected || !pubkey) {
+      await connect();
+    }
+    const coordinatorPubkey = window.solana?.publicKey?.toString?.() || pubkey;
+    if (!coordinatorPubkey) {
+      throw new Error(t('wallet.connectRequired'));
+    }
+    return coordinatorPubkey;
+  }
+
+  async function withdraw(event) {
+    event.preventDefault();
+    if (!isAuthenticated || reason.trim().length < 3) return;
+    setBusy(true);
+    setError('');
+    try {
+      const coordinatorPubkey = await currentPubkey();
+      const prepared = await api.chainCancelPrepare(ledgerEntryId, { coordinatorPubkey });
+      const cancelTxSig = await signAndSendTransaction(prepared.transactionBase64);
+      await api.chainCancel(ledgerEntryId, { cancelTxSig, reason: reason.trim() });
+      setStatus(await api.chainLedger(ledgerEntryId));
+      setWithdrawing(false);
+      setReason('');
+    } catch (err) {
+      setError(err.message ?? t('wallet.attestError'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!ledgerEntryId) return null;
 
-  const explorer = status?.explorer?.pending || status?.explorer?.pendingPda;
+  const explorer =
+    status?.explorer?.cancel || status?.explorer?.pending || status?.explorer?.pendingPda;
 
   return (
     <div className="mt-3 border border-amber/20 p-3 text-xs space-y-2">
@@ -69,7 +104,10 @@ export default function AttestationPanel({ ledgerEntryId }) {
       ) : (
         <div className="text-bone/60">{t('wallet.noAttestation')}</div>
       )}
-      {status?.state !== 'FINALIZED' ? (
+      {status?.state === 'CANCELLED' && status.cancelReason ? (
+        <p className="text-bone/60">{t('wallet.withdrawnNote', { reason: status.cancelReason })}</p>
+      ) : null}
+      {!SUBMITTED_STATES.includes(status?.state) ? (
         <button
           type="button"
           disabled={busy}
@@ -78,6 +116,52 @@ export default function AttestationPanel({ ledgerEntryId }) {
         >
           {busy ? t('wallet.submitting') : t('wallet.submitAttestation')}
         </button>
+      ) : null}
+      {status?.state === 'AWAITING_COMMITTEE' && !withdrawing ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => setWithdrawing(true)}
+          className="border border-kteh/40 px-2 py-1 uppercase tracking-wider disabled:opacity-50"
+        >
+          {t('wallet.withdrawAttestation')}
+        </button>
+      ) : null}
+      {status?.state === 'AWAITING_COMMITTEE' && withdrawing ? (
+        <form onSubmit={withdraw} className="space-y-2">
+          <label className="block space-y-1">
+            <span className="text-bone/70">{t('wallet.withdrawReasonLabel')}</span>
+            <input
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              minLength={3}
+              maxLength={280}
+              required
+              className="w-full bg-transparent border border-bone/20 px-2 py-1"
+            />
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={busy || reason.trim().length < 3}
+              className="border border-kteh/40 px-2 py-1 uppercase tracking-wider disabled:opacity-50"
+            >
+              {busy ? t('wallet.withdrawing') : t('wallet.withdrawConfirm')}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setWithdrawing(false);
+                setReason('');
+              }}
+              className="px-2 py-1 uppercase tracking-wider text-bone/60"
+            >
+              {t('wallet.withdrawCancel')}
+            </button>
+          </div>
+        </form>
       ) : null}
       {error ? <p className="text-kteh">{error}</p> : null}
     </div>

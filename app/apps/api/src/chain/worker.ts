@@ -1,3 +1,4 @@
+import { ATTESTATION_CANCELLED } from "@kna/chain-client";
 import { prisma } from "../lib/prisma";
 import { loadChainConfig } from "./config";
 import { getChainGateway } from "./gateway";
@@ -79,6 +80,26 @@ export async function processOutboxRow(rowId: string) {
         prisma.chainOutbox.update({
           where: { id: row.id },
           data: { status: "FINALIZED", leaseUntil: null, lastError: null },
+        }),
+      ]);
+      return;
+    }
+
+    // Withdrawn by the coordinator (cancel_pending): terminal, stop polling.
+    if (reconciled.pendingStatus === ATTESTATION_CANCELLED) {
+      await prisma.$transaction([
+        prisma.ledgerAttestation.update({
+          where: { ledgerEntryId: entry.id },
+          data: {
+            pendingPda: reconciled.pendingPda,
+            state: "CANCELLED",
+            lastError: null,
+            verifiedAt: new Date(),
+          },
+        }),
+        prisma.chainOutbox.update({
+          where: { id: row.id },
+          data: { status: "CANCELLED", leaseUntil: null, lastError: null },
         }),
       ]);
       return;
