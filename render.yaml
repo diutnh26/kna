@@ -2,7 +2,9 @@
 #
 # This branch (track2/full-package) is a separate product from `main`: its own
 # services, its own database, never merged into main's staging. Service names
-# carry a `t2` so they cannot collide with main's kna-api / kna-web. (The
+# carry a `t2` so they cannot collide with main's kna-api / kna-web. Render
+# created them with an `-or0d` suffix, so the live hosts (used below) are
+# kna-t2-api-or0d.onrender.com and kna-t2-web-or0d.onrender.com. (The
 # app/render.yaml beside the code is the snapshot of main's Blueprint and is
 # not used for this deployment.)
 #
@@ -40,11 +42,11 @@ services:
       - key: COOKIE_SAMESITE
         value: none
       - key: CORS_ORIGIN
-        value: https://kna-t2-web.onrender.com
+        value: https://kna-t2-web-or0d.onrender.com
       - key: PUBLIC_BASE_URL
-        value: https://kna-t2-web.onrender.com
+        value: https://kna-t2-web-or0d.onrender.com
       - key: WALLET_LINK_DOMAIN
-        value: kna-t2-web.onrender.com
+        value: kna-t2-web-or0d.onrender.com
       - key: PAYMENT_PROVIDER
         value: vietqr
       # Solana devnet: attestation, committee finalize, settle_split.
@@ -111,7 +113,7 @@ services:
         value: "24"
       # Baked in at build time: a change needs a rebuild, not a restart.
       - key: VITE_API_URL
-        value: https://kna-t2-api.onrender.com
+        value: https://kna-t2-api-or0d.onrender.com
       - key: VITE_GOOGLE_CLIENT_ID
         sync: false
     routes:

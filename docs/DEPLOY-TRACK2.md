@@ -42,7 +42,7 @@ It is idempotent. It creates the escrow token account (the dKNA account owned by
 3. Fill every `sync: false` variable in the dashboard: the database strings, a fresh `JWT_SECRET`, the dKNA keys, and the VietQR, SMTP and Google values.
 4. Deploy. The API build runs `prisma migrate deploy` against the new database.
 
-If the services get different hostnames, update `CORS_ORIGIN`, `PUBLIC_BASE_URL`, `WALLET_LINK_DOMAIN` and `VITE_API_URL` to match.
+Live hosts: `https://kna-t2-api-or0d.onrender.com` and `https://kna-t2-web-or0d.onrender.com` (Render added the `-or0d` suffix). If they ever change, update `CORS_ORIGIN`, `PUBLIC_BASE_URL`, `WALLET_LINK_DOMAIN` and `VITE_API_URL` to match.
 
 `COOKIE_SAMESITE=none` is required on Render: the web and API are on two `*.onrender.com` hosts, which browsers treat as different sites, so `Lax` session cookies would be dropped. On a single custom domain, set it back to `lax`.
 
