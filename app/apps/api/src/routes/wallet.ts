@@ -7,12 +7,14 @@ import { PublicKey } from "@solana/web3.js";
 import { prisma } from "../lib/prisma";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
 import { loadChainConfig } from "../chain/config";
-import { explorerAccountUrl, explorerTxUrl } from "@kna/chain-client";
+import { confirmSignature, explorerAccountUrl, explorerTxUrl } from "@kna/chain-client";
 import { Connection } from "@solana/web3.js";
 import { provisionAndRegister } from "../chain/wallets";
 import { loadMint, readAtaBalance } from "../chain/demo-token";
 import { getPaymentGateway } from "../payments/gateway";
 import { creditTopUp } from "../lib/topups";
+import { onchainPaymentWallet, preparePaymentWallet, resetPaymentWallet } from "../chain/accounts-onchain";
+import { getChainGateway } from "../chain/gateway";
 
 export const walletRouter = Router();
 
@@ -266,4 +268,56 @@ walletRouter.get("/topups", requireAuth, async (req: AuthedRequest, res) => {
       explorer: t.mintTx ? explorerTxUrl(config.cluster, t.mintTx) : null,
     }))
   );
+});
+
+// ── Which wallet pays ───────────────────────────────────────────────────
+// The fixed wallet never changes; a linked Phantom can be made the wallet
+// that pays bookings (set_payment_wallet, signed by both).
+
+walletRouter.post("/payment-wallet/prepare", requireAuth, async (req: AuthedRequest, res) => {
+  const link = await prisma.walletLink.findUnique({ where: { userId: req.user!.id } });
+  if (!link || link.pubkey.startsWith("pending:")) {
+    return res.status(409).json({ error: "Link your Phantom wallet first." });
+  }
+  try {
+    const transactionBase64 = await preparePaymentWallet(req.user!.id, new PublicKey(link.pubkey));
+    res.json({ wallet: link.pubkey, transactionBase64 });
+  } catch (err) {
+    res.status(409).json({ error: err instanceof Error ? err.message : "Could not prepare the change." });
+  }
+});
+
+walletRouter.post("/payment-wallet/confirm", requireAuth, async (req: AuthedRequest, res) => {
+  const signature = typeof req.body?.signature === "string" ? req.body.signature : "";
+  const link = await prisma.walletLink.findUnique({ where: { userId: req.user!.id } });
+  if (!link || link.pubkey.startsWith("pending:")) {
+    return res.status(409).json({ error: "Link your Phantom wallet first." });
+  }
+  try {
+    await confirmSignature(getChainGateway().connection(), signature, "confirmed");
+    if ((await onchainPaymentWallet(req.user!.id)) !== link.pubkey) {
+      return res.status(400).json({ error: "The account on-chain does not name this wallet as its payer." });
+    }
+  } catch (err) {
+    return res.status(400).json({ error: err instanceof Error ? err.message : "Could not verify the change." });
+  }
+  await prisma.walletLink.update({
+    where: { userId: req.user!.id },
+    data: { isDefault: true, paymentWalletTx: signature },
+  });
+  res.json({ paymentWallet: link.pubkey });
+});
+
+walletRouter.post("/payment-wallet/reset", requireAuth, async (req: AuthedRequest, res) => {
+  try {
+    const signature = await resetPaymentWallet(req.user!.id);
+    await prisma.walletLink.updateMany({
+      where: { userId: req.user!.id },
+      data: { isDefault: false, paymentWalletTx: signature },
+    });
+    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { userId: req.user!.id } });
+    res.json({ paymentWallet: wallet.pubkey });
+  } catch (err) {
+    res.status(409).json({ error: err instanceof Error ? err.message : "Could not switch back." });
+  }
 });

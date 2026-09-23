@@ -1,9 +1,10 @@
-import { Keypair, Transaction } from "@solana/web3.js";
+import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
 import {
   ACCOUNT_FLAG_GUEST,
   ACCOUNT_FLAG_PROVIDER,
   buildRegisterAccountIx,
+  buildSetPaymentWalletIx,
   buildSubmitAttestationIx,
   fetchAccountRecord,
   recordedAtUnixFromIso,
@@ -113,3 +114,43 @@ export async function submitAttestationAsRegistrar(opts: {
 }
 
 export const canAutoSubmit = () => Boolean(process.env.KNA_REGISTRAR_KEYPAIR_B58?.trim());
+
+/**
+ * set_payment_wallet: pay this account's bookings from a linked Phantom.
+ * The registrar (fee payer) and the account's fixed wallet sign here; the
+ * browser adds Phantom's signature. `phantom === fixed wallet` unlinks, and
+ * then the server holds every key it needs and sends it itself.
+ */
+export async function preparePaymentWallet(userId: string, phantom: PublicKey) {
+  const connection = getChainGateway().connection();
+  if (!(await fetchAccountRecord(connection, userId))) {
+    throw new Error("This account is still being registered on-chain. Try again shortly.");
+  }
+  const registrar = loadRegistrar();
+  const fixed = await loadWalletKeypair(userId);
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ feePayer: registrar.publicKey, blockhash, lastValidBlockHeight }).add(
+    buildSetPaymentWalletIx({ wallet: fixed.publicKey, paymentWallet: phantom, userId })
+  );
+  tx.partialSign(registrar, fixed);
+  return tx.serialize({ requireAllSignatures: false }).toString("base64");
+}
+
+export async function resetPaymentWallet(userId: string) {
+  const connection = getChainGateway().connection();
+  const registrar = loadRegistrar();
+  const fixed = await loadWalletKeypair(userId);
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ feePayer: registrar.publicKey, blockhash, lastValidBlockHeight }).add(
+    buildSetPaymentWalletIx({ wallet: fixed.publicKey, paymentWallet: fixed.publicKey, userId })
+  );
+  const sig = await connection.sendTransaction(tx, [registrar, fixed], { preflightCommitment: "confirmed" });
+  await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+  return sig;
+}
+
+/** The account's paying wallet as the chain has it. */
+export async function onchainPaymentWallet(userId: string) {
+  const record = await fetchAccountRecord(getChainGateway().connection(), userId);
+  return record?.paymentWallet ?? null;
+}

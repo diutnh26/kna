@@ -15,6 +15,7 @@ import { offsetsRouter } from "./routes/offsets";
 import { notificationsRouter } from "./routes/notifications";
 import { chainRouter } from "./routes/chain";
 import { walletRouter } from "./routes/wallet";
+import { traceRouter } from "./routes/trace";
 import { paymentsRouter } from "./routes/payments";
 
 /**
@@ -55,6 +56,7 @@ export function createApp() {
   app.use("/notifications", notificationsRouter);
   app.use("/chain", chainRouter);
   app.use("/wallet", walletRouter);
+  app.use("/trace", traceRouter);
   app.use("/payments", paymentsRouter);
 
   app.use((req, res) => {
