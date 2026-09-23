@@ -1,0 +1,130 @@
+# Render Blueprint — KNĂ Track 2, deployed on its own.
+#
+# This branch (track2/full-package) is a separate product from `main`: its own
+# services, its own database, never merged into main's staging. Service names
+# carry a `t2` so they cannot collide with main's kna-api / kna-web. (The
+# app/render.yaml beside the code is the snapshot of main's Blueprint and is
+# not used for this deployment.)
+#
+# Walkthrough, secrets and the devnet setup: docs/DEPLOY-TRACK2.md
+
+services:
+  # ── API ────────────────────────────────────────────────────────────
+  - type: web
+    name: kna-t2-api
+    runtime: node
+    plan: free
+    region: singapore
+    branch: track2/full-package
+    rootDir: app
+    # Same install workaround as main's Blueprint (Windows-made lockfile vs a
+    # Linux builder), plus the chain-client build the API imports.
+    buildCommand: >-
+      rm -rf node_modules package-lock.json &&
+      npm install --include=dev &&
+      npm run build:chain-client &&
+      npm run db:generate &&
+      node apps/api/scripts/check-db-env.mjs &&
+      npx prisma migrate deploy --schema apps/api/prisma/schema.prisma &&
+      npm run build:api
+    startCommand: node apps/api/dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      # Web and API are on two *.onrender.com hosts: cross-site, because
+      # onrender.com is a public suffix. SameSite=None or the browser drops
+      # the session cookies on every call.
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: CORS_ORIGIN
+        value: https://kna-t2-web.onrender.com
+      - key: PUBLIC_BASE_URL
+        value: https://kna-t2-web.onrender.com
+      - key: WALLET_LINK_DOMAIN
+        value: kna-t2-web.onrender.com
+      - key: PAYMENT_PROVIDER
+        value: vietqr
+      # Solana devnet: attestation, committee finalize, settle_split.
+      - key: SOLANA_ENABLED
+        value: "true"
+      - key: SOLANA_CLUSTER
+        value: devnet
+      - key: KNA_TRUST_PROGRAM_ID
+        value: 2Ft67fV4Zn747zYiKneYPwUH9ZZGKFFt1rT5KUq9JK6f
+      - key: KNA_COMMITTEE_VAULT
+        value: 3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42
+      - key: CHAIN_WORKER_ENABLED
+        value: "true"
+      # Set in the dashboard — never committed.
+      - key: DATABASE_URL # Neon pooled string, ?sslmode=require
+        sync: false
+      - key: DIRECT_DATABASE_URL # Neon direct string, for migrations
+        sync: false
+      - key: JWT_SECRET # 32+ random characters
+        sync: false
+      - key: SOLANA_RPC_URL # optional; defaults to the public devnet RPC
+        sync: false
+      - key: DEMO_MINT # dKNA mint (secrets/.env.demo-token)
+        sync: false
+      - key: DEMO_FUNDER_KEYPAIR_B58 # dKNA mint authority; funds the escrow
+        sync: false
+      - key: KNA_SETTLER_KEYPAIR_B58 # optional; signs settle_split (defaults to the funder)
+        sync: false
+      - key: DEMO_PROVIDER_WALLET # fallback payout wallet for providers without Phantom
+        sync: false
+      - key: PAYMENT_BANK_ACCOUNT
+        sync: false
+      - key: PAYMENT_BANK_ID
+        sync: false
+      - key: PAYMENT_WEBHOOK_SECRET
+        sync: false
+      - key: VIETQR_USERNAME
+        sync: false
+      - key: VIETQR_PASSWORD
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+  # ── Frontend ───────────────────────────────────────────────────────
+  - type: web
+    name: kna-t2-web
+    runtime: static
+    branch: track2/full-package
+    rootDir: app
+    buildCommand: rm -rf node_modules package-lock.json && npm install --include=dev && npm run build:web
+    staticPublishPath: apps/web/dist
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Baked in at build time: a change needs a rebuild, not a restart.
+      - key: VITE_API_URL
+        value: https://kna-t2-api.onrender.com
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

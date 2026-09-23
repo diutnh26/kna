@@ -10,8 +10,18 @@ export interface AuthedRequest extends Request {
 const JWT_SECRET = process.env.JWT_SECRET ?? "dev-only-change-me";
 const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL ?? "15m";
 const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? "30");
+/**
+ * `lax` when web and API share a site (Docker, a custom domain). `none` when
+ * they are on different sites — e.g. two *.onrender.com hosts, which are
+ * cross-site because onrender.com is a public suffix — or the browser drops
+ * the session cookies on every API call. `none` requires Secure; CORS
+ * (credentials only for CORS_ORIGIN) is what then guards the endpoints.
+ */
+const COOKIE_SAMESITE: "lax" | "none" = process.env.COOKIE_SAMESITE === "none" ? "none" : "lax";
 const COOKIE_SECURE =
-  process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production";
+  COOKIE_SAMESITE === "none" ||
+  process.env.COOKIE_SECURE === "true" ||
+  process.env.NODE_ENV === "production";
 
 export const ACCESS_COOKIE = "access_token";
 export const REFRESH_COOKIE = "refresh_token";
@@ -28,7 +38,7 @@ export function cookieOptions(maxAgeMs: number) {
   return {
     httpOnly: true,
     secure: COOKIE_SECURE,
-    sameSite: "lax" as const,
+    sameSite: COOKIE_SAMESITE,
     path: "/",
     maxAge: maxAgeMs,
   };
@@ -57,8 +67,9 @@ export function setAuthCookies(res: Response, accessJwt: string, refreshRaw: str
 }
 
 export function clearAuthCookies(res: Response) {
-  res.clearCookie(ACCESS_COOKIE, { httpOnly: true, secure: COOKIE_SECURE, sameSite: "lax", path: "/" });
-  res.clearCookie(REFRESH_COOKIE, { httpOnly: true, secure: COOKIE_SECURE, sameSite: "lax", path: "/" });
+  const opts = { httpOnly: true, secure: COOKIE_SECURE, sameSite: COOKIE_SAMESITE, path: "/" };
+  res.clearCookie(ACCESS_COOKIE, opts);
+  res.clearCookie(REFRESH_COOKIE, opts);
 }
 
 /**
