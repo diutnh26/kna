@@ -11,6 +11,7 @@ secrets/*.json
 secrets/*-keypair.json
 secrets/.env*
 !.gitkeep
+!secrets/.env.smtp.example
 .env
 .env.local
 .env.*.local

@@ -7,6 +7,7 @@
 #
 # Demo token + Solana: fill secrets/.env.demo-token (from setup-demo-mint-from-deploy.ts)
 # and secrets/.env.solana — both are gitignored.
+# SMTP: copy secrets/.env.smtp.example → secrets/.env.smtp (gitignored).
 
 name: kna-local
 
@@ -38,6 +39,8 @@ services:
         required: false
       - path: secrets/.env.demo-token
         required: false
+      - path: secrets/.env.smtp
+        required: false
     environment:
       NODE_ENV: production
       PORT: "4000"
@@ -50,11 +53,7 @@ services:
       REFRESH_TOKEN_TTL_DAYS: "30"
       COOKIE_SECURE: "false"
       GOOGLE_CLIENT_ID: 840514969559-4i7tgpbjpmppmaj7kfe9af3h71j162tk.apps.googleusercontent.com
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: "587"
-      SMTP_USERNAME: thinhdowarks@gmail.com
-      SMTP_PASSWORD: "vtot rftw nvoj xzib"
-      SMTP_FROM: thinhdowarks@gmail.com
+      # SMTP_* comes from secrets/.env.smtp (gitignored) — see secrets/.env.smtp.example
       PAYMENT_PROVIDER: vietqr
       PAYMENT_BANK_ACCOUNT: "8798311204"
       PAYMENT_BANK_ID: TCB
