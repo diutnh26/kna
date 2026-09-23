@@ -327,6 +327,11 @@ model LedgerEntry {
   platformFeeVnd   Int
   communityFundVnd Int
   createdAt        DateTime @default(now())
+  // The ledger is append-only: a row that no longer stands (declined booking,
+  // cancelled order, withdrawn offset) is voided, never deleted.
+  voidedAt         DateTime?
+  voidReason       String?
+  voidedById       String?
 
   attestation LedgerAttestation?
 }

@@ -35,11 +35,24 @@ export function payloadHash(entry: Parameters<typeof buildPayloadFromLedger>[0])
   return contentHashFromPayload(buildPayloadFromLedger(entry));
 }
 
+/**
+ * Only booking rows can be attested. The program's validate_split enforces
+ * the booking split (7% platform, 3% community fund); a marketplace row
+ * (5% / 0%) or an offset row (0% / 0%) would fail on-chain with
+ * SplitMismatch. Supporting them needs a per-kind split in the program and
+ * a redeploy, so until then they stay off the attestation queue.
+ */
+export function isAttestable(entry: { bookingId: string | null; voidedAt?: Date | null }) {
+  return entry.bookingId !== null && !entry.voidedAt;
+}
+
+export class LedgerNotAttestableError extends Error {}
+
 export async function enqueueLedgerSettledOutbox(tx: Prisma.TransactionClient, ledgerEntryId: string) {
   if (process.env.SOLANA_ENABLED !== "true") return;
 
   const entry = await tx.ledgerEntry.findUnique({ where: { id: ledgerEntryId } });
-  if (!entry) return;
+  if (!entry || !isAttestable(entry)) return;
 
   const hash = payloadHash(entry);
   await tx.chainOutbox.upsert({
@@ -69,7 +82,10 @@ export async function recomputeAndVerifySettled(ledgerEntryId: string) {
     where: { id: ledgerEntryId, AND: [SETTLED_LEDGER_WHERE] },
   });
   if (!entry) {
-    throw new Error("Ledger entry is not settled");
+    throw new LedgerNotAttestableError("Ledger entry is not settled");
+  }
+  if (!isAttestable(entry)) {
+    throw new LedgerNotAttestableError("Only booking ledger entries can be attested on-chain");
   }
   return { entry, hash: payloadHash(entry), payload: buildPayloadFromLedger(entry) };
 }

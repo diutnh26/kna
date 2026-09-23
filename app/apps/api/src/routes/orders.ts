@@ -5,6 +5,7 @@ import { splitOrder } from "../lib/fees";
 import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
 import { coordinatorIds, notify, notifyAll } from "../lib/notify";
 import { enqueueLedgerSettledOutbox } from "../chain/outbox";
+import { voidLedgerEntries } from "../lib/ledger";
 import { getPaymentGateway } from "../payments/gateway";
 
 export const ordersRouter = Router();
@@ -228,7 +229,7 @@ ordersRouter.post(
             data: { stock: { increment: item.quantity } },
           });
         }
-        await tx.ledgerEntry.deleteMany({ where: { orderId: order.id } });
+        await voidLedgerEntries(tx, { orderId: order.id }, "order cancelled", req.user!.id);
       } else {
         const ledger = await tx.ledgerEntry.findFirst({ where: { orderId: order.id } });
         if (ledger) {

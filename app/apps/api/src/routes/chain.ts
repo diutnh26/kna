@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Response } from "express";
 import { z } from "zod";
 import { PublicKey } from "@solana/web3.js";
 import {
@@ -17,10 +17,23 @@ import {
 } from "../middleware/auth";
 import { getChainGateway } from "../chain/gateway";
 import { loadChainConfig } from "../chain/config";
-import { recomputeAndVerifySettled } from "../chain/outbox";
+import { LedgerNotAttestableError, recomputeAndVerifySettled } from "../chain/outbox";
 import { fetchDemoTokenBalances } from "../chain/demo-token";
 
 export const chainRouter = Router();
+
+/** The settled, attestable ledger row — or a 409 already sent, and null. */
+async function attestableOr409(ledgerEntryId: string, res: Response) {
+  try {
+    return await recomputeAndVerifySettled(ledgerEntryId);
+  } catch (err) {
+    if (err instanceof LedgerNotAttestableError) {
+      res.status(409).json({ error: err.message });
+      return null;
+    }
+    throw err;
+  }
+}
 
 function jsonAttestation<T extends { slot: bigint | null }>(row: T) {
   return { ...row, slot: row.slot?.toString() ?? null };
@@ -159,7 +172,9 @@ chainRouter.post(
       return res.status(400).json({ error: "Invalid coordinatorPubkey." });
     }
 
-    const { entry, hash, payload } = await recomputeAndVerifySettled(req.params.id);
+    const settled = await attestableOr409(req.params.id, res);
+    if (!settled) return;
+    const { entry, hash, payload } = settled;
     const prepared = await gateway.prepareSubmitTransaction({
       ledgerEntryId: entry.id,
       coordinatorPubkey: body.data.coordinatorPubkey,
@@ -216,7 +231,9 @@ chainRouter.post(
       return res.status(400).json({ error: "Fake/mock signatures are rejected." });
     }
 
-    const { entry, hash, payload } = await recomputeAndVerifySettled(req.params.id);
+    const settled = await attestableOr409(req.params.id, res);
+    if (!settled) return;
+    const { entry, hash, payload } = settled;
     const expectedPda = pendingPdaFromLedgerId(entry.id).toBase58();
     try {
       const verified = await gateway.verifyPendingSubmission({
@@ -280,7 +297,9 @@ chainRouter.post(
       return res.status(400).json({ error: "Fake/mock signatures are rejected." });
     }
 
-    const { entry, hash, payload } = await recomputeAndVerifySettled(req.params.id);
+    const settled = await attestableOr409(req.params.id, res);
+    if (!settled) return;
+    const { entry, hash, payload } = settled;
     const expectedFinal = finalPdaFromLedgerId(entry.id).toBase58();
     try {
       const verified = await gateway.verifyFinalize({
@@ -325,7 +344,9 @@ chainRouter.post(
     if (!gateway.isEnabled()) {
       return res.status(503).json({ error: "Solana trust layer is disabled." });
     }
-    const { entry, hash, payload } = await recomputeAndVerifySettled(req.params.id);
+    const settled = await attestableOr409(req.params.id, res);
+    if (!settled) return;
+    const { entry, hash, payload } = settled;
     try {
       const result = await gateway.reconcileLedger({
         ledgerEntryId: entry.id,

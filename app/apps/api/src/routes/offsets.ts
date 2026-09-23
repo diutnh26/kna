@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
+import { voidLedgerEntries } from "../lib/ledger";
 
 export const offsetsRouter = Router();
 
@@ -295,10 +296,10 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
       },
     });
 
-    // One ledger row per offset, replaced rather than added to when the
-    // guest changes their mind. A contribution of work is not money, so it
-    // gets no row at all — the ledger records what moved.
-    await tx.ledgerEntry.deleteMany({ where: { offsetId: saved.id } });
+    // One live ledger row per offset: the previous one is voided rather than
+    // added to when the guest changes their mind. A contribution of work is
+    // not money, so it gets no row at all — the ledger records what moved.
+    await voidLedgerEntries(tx, { offsetId: saved.id }, "offset changed", req.user!.id);
     if (amountVnd > 0) {
       await tx.ledgerEntry.create({
         data: {
@@ -395,7 +396,10 @@ offsetsRouter.delete("/:bookingId", requireAuth, async (req: AuthedRequest, res)
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.ledgerEntry.deleteMany({ where: { offsetId: booking.offset!.id } });
+    // The contribution row goes; its ledger rows stay, voided and detached.
+    await voidLedgerEntries(tx, { offsetId: booking.offset!.id }, "offset removed", req.user!.id, {
+      offsetId: null,
+    });
     await tx.offsetContribution.delete({ where: { id: booking.offset!.id } });
   });
 

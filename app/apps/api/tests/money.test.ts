@@ -94,13 +94,15 @@ describe("booking money path", () => {
     expect(after.body.totals.bookingEarnedVnd).toBe(earnedBefore + 450_000);
   });
 
-  it("removes the ledger entry when a booking is declined, because no money moved", async () => {
+  it("voids the ledger entry when a booking is declined, because no money moved", async () => {
     const created = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
       .send({ listingId, guests: 1, nights: 1, checkIn: soon() });
 
-    const before = await prisma.ledgerEntry.count();
+    const live = () => prisma.ledgerEntry.count({ where: { voidedAt: null } });
+    const before = await live();
+    const total = await prisma.ledgerEntry.count();
 
     const declined = await request(app)
       .post(`/bookings/${created.body.id}/decision`)
@@ -108,7 +110,9 @@ describe("booking money path", () => {
       .send({ decision: "decline" });
     expect(declined.body.status).toBe("CANCELLED");
 
-    expect(await prisma.ledgerEntry.count()).toBe(before - 1);
+    // One fewer live row, and none gone: the ledger is append-only.
+    expect(await live()).toBe(before - 1);
+    expect(await prisma.ledgerEntry.count()).toBe(total);
   });
 
   it("refuses coordination to a guest and to an anonymous caller", async () => {

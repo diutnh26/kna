@@ -7,6 +7,7 @@ import { requireAuth, requireCoordinator, type AuthedRequest } from "../middlewa
 import { getPaymentGateway } from "../payments/gateway";
 import { coordinatorIds, notify, notifyAll } from "../lib/notify";
 import { enqueueLedgerSettledOutbox } from "../chain/outbox";
+import { voidLedgerEntries } from "../lib/ledger";
 
 export const bookingsRouter = Router();
 
@@ -235,7 +236,7 @@ bookingsRouter.post(
           booking.guests,
           listing?.unit ?? "per night"
         );
-        await tx.ledgerEntry.deleteMany({ where: { bookingId: booking.id } });
+        await voidLedgerEntries(tx, { bookingId: booking.id }, "booking declined", req.user!.id);
       } else {
         const ledgerEntry = booking.ledgerEntries[0];
         if (ledgerEntry) {

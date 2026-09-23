@@ -87,7 +87,7 @@ describe("offsets", () => {
   });
 
   it("writes one ledger row, with nothing retained", async () => {
-    const rows = await prisma.ledgerEntry.findMany({ where: { offsetId: { not: null } } });
+    const rows = await prisma.ledgerEntry.findMany({ where: { offsetId: { not: null }, voidedAt: null } });
     expect(rows).toHaveLength(1);
     expect(rows[0].totalVnd).toBe(660_000);
     // An offset is not a sale: no commission, no Fund share.
@@ -133,7 +133,7 @@ describe("offsets", () => {
 
     // Still one offset and one ledger row for this booking.
     expect(await prisma.offsetContribution.count({ where: { bookingId: bookingA } })).toBe(1);
-    const rows = await prisma.ledgerEntry.findMany({ where: { offset: { bookingId: bookingA } } });
+    const rows = await prisma.ledgerEntry.findMany({ where: { voidedAt: null, offset: { bookingId: bookingA } } });
     expect(rows).toHaveLength(1);
     expect(rows[0].totalVnd).toBe(570_000);
   });
@@ -176,7 +176,12 @@ describe("offsets", () => {
     }
   });
 
-  it("removes an offset and its ledger row together", async () => {
+  it("removes an offset and voids its ledger row together", async () => {
+    const offsetB = await prisma.offsetContribution.findUniqueOrThrow({ where: { bookingId: bookingB } });
+    const rowB = await prisma.ledgerEntry.findFirstOrThrow({
+      where: { offsetId: offsetB.id, voidedAt: null },
+    });
+
     await request(app)
       .delete(`/offsets/${bookingB}`)
       .set("Authorization", `Bearer ${guestToken}`)
@@ -184,8 +189,14 @@ describe("offsets", () => {
 
     expect(await prisma.offsetContribution.count({ where: { bookingId: bookingB } })).toBe(0);
     expect(await prisma.ledgerEntry.count({ where: { offset: { bookingId: bookingB } } })).toBe(0);
-    const rows = await prisma.ledgerEntry.findMany({ where: { offset: { bookingId: bookingA } } });
+    const rows = await prisma.ledgerEntry.findMany({ where: { voidedAt: null, offset: { bookingId: bookingA } } });
     expect(rows).toHaveLength(1); // bookingA's offset ledger row
+
+    // The removed offset's row is kept for the record: voided, detached.
+    const kept = await prisma.ledgerEntry.findUniqueOrThrow({ where: { id: rowB.id } });
+    expect(kept.voidReason).toBe("offset removed");
+    expect(kept.offsetId).toBeNull();
+    expect(kept.totalVnd).toBe(rowB.totalVnd);
   });
 
   it("shows the offset on its booking in the account timeline", async () => {
@@ -276,7 +287,7 @@ describe("offsets", () => {
       expect(res.body.amountVnd).toBe(0);
       expect(res.body.eligible).toBe(true);
       // Work is not money, so it writes no ledger row.
-      const rows = await prisma.ledgerEntry.findMany({ where: { offsetId: res.body.id } });
+      const rows = await prisma.ledgerEntry.findMany({ where: { offsetId: res.body.id, voidedAt: null } });
       expect(rows).toHaveLength(0);
     });
 
@@ -417,7 +428,7 @@ describe("offsets", () => {
         origin: "europe",
       });
       expect(res.status).toBe(201);
-      const row = await prisma.ledgerEntry.findFirstOrThrow({ where: { offsetId: res.body.id } });
+      const row = await prisma.ledgerEntry.findFirstOrThrow({ where: { offsetId: res.body.id, voidedAt: null } });
       expect(row.toLabel).toMatch(/towards running the session/i);
 
       const domestic = await attach({
@@ -429,7 +440,7 @@ describe("offsets", () => {
       });
       expect(domestic.status).toBe(201);
       const plain = await prisma.ledgerEntry.findFirstOrThrow({
-        where: { offsetId: domestic.body.id },
+        where: { offsetId: domestic.body.id, voidedAt: null },
       });
       expect(plain.toLabel).toBe("Yok Đôn buffer replanting");
     });

@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { loadChainConfig } from "./config";
 import { getChainGateway } from "./gateway";
-import { recomputeAndVerifySettled } from "./outbox";
+import { LedgerNotAttestableError, recomputeAndVerifySettled } from "./outbox";
 
 const MAX_ATTEMPTS = 8;
 
@@ -132,7 +132,8 @@ export async function processOutboxRow(rowId: string) {
     ]);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown worker error";
-    const attempts = row.attempts;
+    // Retrying cannot make a row attestable, so it goes straight to DEAD.
+    const attempts = err instanceof LedgerNotAttestableError ? MAX_ATTEMPTS : row.attempts;
     await prisma.chainOutbox.update({
       where: { id: row.id },
       data: {

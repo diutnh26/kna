@@ -19,6 +19,7 @@ import type { Prisma } from "@prisma/client";
  * row, so there is no second copy of the truth to drift.
  */
 export const SETTLED_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
+  voidedAt: null,
   OR: [
     { booking: { status: { in: ["CONFIRMED", "COMPLETED"] } } },
     { order: { status: { in: ["PAID", "FULFILLED"] } } },
@@ -31,9 +32,32 @@ export const SETTLED_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
 
 /** The counterpart: promised, but not yet money. Reported, never summed in. */
 export const PENDING_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
+  voidedAt: null,
   OR: [
     { booking: { status: "PENDING" } },
     { order: { status: "PENDING" } },
     { offset: { booking: { status: "PENDING" } } },
   ],
 };
+
+/**
+ * The ledger is the record Proof of Impact rests on, so it is append-only:
+ * a row that no longer stands is marked void with who and why, never
+ * deleted. Both views above skip voided rows, so a void reads exactly as a
+ * delete did — except that the history survives.
+ *
+ * `detach` clears the parent link for the one case where the parent itself
+ * is removed (a withdrawn offset); the row keeps its labels and amounts.
+ */
+export async function voidLedgerEntries(
+  tx: Prisma.TransactionClient,
+  where: Prisma.LedgerEntryWhereInput,
+  reason: string,
+  voidedById: string | null,
+  detach: Partial<Record<"bookingId" | "orderId" | "offsetId", null>> = {}
+) {
+  return tx.ledgerEntry.updateMany({
+    where: { AND: [where, { voidedAt: null }] },
+    data: { voidedAt: new Date(), voidReason: reason, voidedById, ...detach },
+  });
+}

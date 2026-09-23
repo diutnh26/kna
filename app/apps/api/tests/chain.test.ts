@@ -218,4 +218,56 @@ describe("chain verifier routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.demoToken.balances).toBeNull();
   });
+
+  // The program's validate_split accepts only the booking split (7% / 3%).
+  // A settled marketplace order (5% / 0%) must never reach the chain, where
+  // it would fail with SplitMismatch.
+  describe("attestation scope", () => {
+    let orderLedgerId: string;
+
+    beforeAll(async () => {
+      const buyer = await makeUser("buyer@chain.kna", "GUEST");
+      const order = await prisma.order.create({
+        data: { buyerId: buyer.id, status: "PAID", totalVnd: 400_000, marketplaceFeeVnd: 20_000 },
+      });
+      orderLedgerId = (
+        await prisma.ledgerEntry.create({
+          data: {
+            orderId: order.id,
+            fromLabel: "Buyer",
+            toLabel: "Ho Gia Demo",
+            totalVnd: 400_000,
+            platformFeeVnd: 20_000,
+            communityFundVnd: 0,
+          },
+        })
+      ).id;
+    });
+
+    it("POST prepare refuses a marketplace ledger entry with 409", async () => {
+      const res = await request(app)
+        .post(`/chain/ledger/${orderLedgerId}/prepare`)
+        .set("Authorization", `Bearer ${coordinatorToken}`)
+        .send({ coordinatorPubkey: "3yY8ey4qCgN6kRLdbobDKU78siQJqWgP8Hum1sUcia42" });
+      expect(res.status).toBe(409);
+      expect(res.body.error).toMatch(/only booking/i);
+    });
+
+    it("does not queue a marketplace ledger entry for attestation", async () => {
+      const { enqueueLedgerSettledOutbox } = await import("../src/chain/outbox");
+      await prisma.$transaction((tx) => enqueueLedgerSettledOutbox(tx, orderLedgerId));
+      expect(
+        await prisma.chainOutbox.count({ where: { idempotencyKey: `ledger:${orderLedgerId}:settled` } })
+      ).toBe(0);
+      expect(await prisma.ledgerAttestation.count({ where: { ledgerEntryId: orderLedgerId } })).toBe(0);
+    });
+
+    it("still queues a settled booking ledger entry", async () => {
+      const { enqueueLedgerSettledOutbox } = await import("../src/chain/outbox");
+      await prisma.$transaction((tx) => enqueueLedgerSettledOutbox(tx, ledgerId));
+      expect(
+        await prisma.chainOutbox.count({ where: { idempotencyKey: `ledger:${ledgerId}:settled` } })
+      ).toBe(1);
+    });
+  });
 });

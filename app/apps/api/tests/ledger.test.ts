@@ -112,6 +112,15 @@ describe("public ledger", () => {
       .expect(200);
 
     expect(await ledger()).toHaveLength(1); // still just the confirmed one
+
+    // Append-only: the row the guest was shown survives, voided, with who
+    // declined it and why.
+    const row = await prisma.ledgerEntry.findFirstOrThrow({ where: { bookingId: booking.body.id } });
+    expect(row.voidedAt).not.toBeNull();
+    expect(row.voidReason).toBe("booking declined");
+    const coordinator = await prisma.user.findUniqueOrThrow({ where: { email: "coord@ledger.kna" } });
+    expect(row.voidedById).toBe(coordinator.id);
+    expect((await stats()).ledgerEntriesAwaiting).toBe(0);
   });
 
   it("holds marketplace orders to the same rule", async () => {
@@ -136,7 +145,7 @@ describe("public ledger", () => {
     expect(rows[0].communityFundVnd).toBe(0);
   });
 
-  it("returns stock and drops the ledger row when an order is cancelled", async () => {
+  it("returns stock and voids the ledger row when an order is cancelled", async () => {
     const before = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
 
     const order = await request(app)
@@ -156,6 +165,10 @@ describe("public ledger", () => {
     const after = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
     expect(after.stock).toBe(before.stock);
     expect(await ledger()).toHaveLength(2);
+
+    const row = await prisma.ledgerEntry.findFirstOrThrow({ where: { orderId: order.body.id } });
+    expect(row.voidedAt).not.toBeNull();
+    expect(row.voidReason).toBe("order cancelled");
   });
 
   it("refuses order settlement to a guest and to an anonymous caller", async () => {
