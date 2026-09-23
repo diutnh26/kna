@@ -4,6 +4,7 @@ import { loadChainConfig } from "./config";
 import { getChainGateway } from "./gateway";
 import { LedgerNotAttestableError, recomputeAndVerifySettled } from "./outbox";
 import { registerAccountOnChain } from "./accounts-onchain";
+import { NotReadyError, cancelBookingOnChain, recordBookingOnChain } from "./bookings-onchain";
 
 const MAX_ATTEMPTS = 8;
 
@@ -46,36 +47,65 @@ export async function claimOutboxBatch(limit = 5) {
 
 type OutboxRow = NonNullable<Awaited<ReturnType<typeof prisma.chainOutbox.findUnique>>>;
 
-/** register_account for a new (or backfilled) account. */
-async function processAccountRegister(row: OutboxRow) {
-  const { userId } = row.payload as { userId: string };
+/**
+ * Chain work that is not a ledger attestation: one handler per event type,
+ * plus where to show its last error. A NotReadyError (waiting on another
+ * event, e.g. an account registration) retries far longer before DEAD.
+ */
+const handlers: Record<
+  string,
+  { run: (payload: Record<string, string>) => Promise<unknown>; onError: (payload: Record<string, string>, message: string) => Promise<unknown> }
+> = {
+  ACCOUNT_REGISTER: {
+    run: ({ userId }) => registerAccountOnChain(userId),
+    onError: ({ userId }, message) =>
+      prisma.wallet.updateMany({ where: { userId }, data: { registerError: message } }),
+  },
+  BOOKING_RECORD: {
+    run: ({ bookingId }) => recordBookingOnChain(bookingId),
+    onError: ({ bookingId }, message) =>
+      prisma.booking.updateMany({ where: { id: bookingId }, data: { onchainError: message } }),
+  },
+  BOOKING_CANCEL: {
+    run: ({ bookingId }) => cancelBookingOnChain(bookingId),
+    onError: ({ bookingId }, message) =>
+      prisma.booking.updateMany({ where: { id: bookingId }, data: { onchainError: message } }),
+  },
+};
+
+const MAX_NOT_READY_ATTEMPTS = 60;
+
+async function processChainEvent(row: OutboxRow) {
+  const handler = handlers[row.eventType];
+  const payload = row.payload as Record<string, string>;
   try {
     if (!getChainGateway().isEnabled()) {
       throw new Error("Solana disabled — leaving outbox for later");
     }
-    await registerAccountOnChain(userId);
+    await handler.run(payload);
     await prisma.chainOutbox.update({
       where: { id: row.id },
       data: { status: "DONE", leaseUntil: null, lastError: null },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown worker error";
+    const limit = err instanceof NotReadyError ? MAX_NOT_READY_ATTEMPTS : MAX_ATTEMPTS;
     await prisma.chainOutbox.update({
       where: { id: row.id },
       data: {
-        status: row.attempts >= MAX_ATTEMPTS ? "DEAD" : "RETRYABLE",
+        status: row.attempts >= limit ? "DEAD" : "RETRYABLE",
         lastError: message,
         leaseUntil: null,
       },
     });
-    await prisma.wallet.updateMany({ where: { userId }, data: { registerError: message } });
+    await handler.onError(payload, message);
   }
 }
 
 export async function processOutboxRow(rowId: string) {
   const row = await prisma.chainOutbox.findUnique({ where: { id: rowId } });
   if (!row) return;
-  if (row.eventType === "ACCOUNT_REGISTER") return processAccountRegister(row);
+  if (row.eventType in handlers) return processChainEvent(row);
 
   try {
     if (!getChainGateway().isEnabled()) {

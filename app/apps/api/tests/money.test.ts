@@ -11,7 +11,6 @@ import { PASSWORD, app, makeListing, makeProvider, makeUser, resetDb, soon } fro
  */
 describe("booking money path", () => {
   let guestToken: string;
-  let coordinatorToken: string;
   let hostToken: string;
   let listingId: string;
 
@@ -25,7 +24,6 @@ describe("booking money path", () => {
     const login = async (email: string) =>
       (await request(app).post("/auth/login").send({ email, password: PASSWORD })).body.token;
     guestToken = await login("guest@money.kna");
-    coordinatorToken = await login("coord@money.kna");
     hostToken = await login("host@money.kna");
   });
 
@@ -71,30 +69,30 @@ describe("booking money path", () => {
     expect(res.body.providerPayoutVnd).toBe(450_000);
   });
 
-  it("starts a booking PENDING and keeps it out of the host's earnings", async () => {
+  it("confirms a booking instantly, and counts it for the host only once it is paid", async () => {
     const created = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
       .send({ listingId, guests: 1, nights: 1, checkIn: soon() });
-    expect(created.body.status).toBe("PENDING");
+    expect(created.status).toBe(201);
+    // No approval step: the provider opened these dates already.
+    expect(created.body.status).toBe("CONFIRMED");
+    expect(created.body.decidedVia).toBe("INSTANT");
 
-    const before = await request(app)
-      .get("/providers/me")
-      .set("Authorization", `Bearer ${hostToken}`);
-    const earnedBefore = before.body.totals.bookingEarnedVnd;
+    const earned = async () =>
+      (await request(app).get("/providers/me").set("Authorization", `Bearer ${hostToken}`)).body
+        .totals.bookingEarnedVnd;
+    const before = await earned();
 
-    await request(app)
-      .post(`/bookings/${created.body.id}/decision`)
-      .set("Authorization", `Bearer ${coordinatorToken}`)
-      .send({ decision: "confirm" });
+    // Booked is not paid: nothing has moved yet.
+    expect(await earned()).toBe(before);
 
-    const after = await request(app)
-      .get("/providers/me")
-      .set("Authorization", `Bearer ${hostToken}`);
-    expect(after.body.totals.bookingEarnedVnd).toBe(earnedBefore + 450_000);
+    // Paid at check-out (pay_booking) — the moment it counts.
+    await prisma.booking.update({ where: { id: created.body.id }, data: { status: "COMPLETED" } });
+    expect(await earned()).toBe(before + 450_000);
   });
 
-  it("voids the ledger entry when a booking is declined, because no money moved", async () => {
+  it("lets the guest cancel before check-in, voiding the ledger entry", async () => {
     const created = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
@@ -104,23 +102,32 @@ describe("booking money path", () => {
     const before = await live();
     const total = await prisma.ledgerEntry.count();
 
-    const declined = await request(app)
-      .post(`/bookings/${created.body.id}/decision`)
-      .set("Authorization", `Bearer ${coordinatorToken}`)
-      .send({ decision: "decline" });
-    expect(declined.body.status).toBe("CANCELLED");
+    const cancelled = await request(app)
+      .post(`/bookings/${created.body.id}/cancel`)
+      .set("Authorization", `Bearer ${guestToken}`);
+    expect(cancelled.status).toBe(200);
+    expect(cancelled.body.status).toBe("CANCELLED");
 
     // One fewer live row, and none gone: the ledger is append-only.
     expect(await live()).toBe(before - 1);
     expect(await prisma.ledgerEntry.count()).toBe(total);
   });
 
-  it("refuses coordination to a guest and to an anonymous caller", async () => {
-    expect((await request(app).get("/bookings/pending")).status).toBe(401);
-    const asGuest = await request(app)
-      .get("/bookings/pending")
-      .set("Authorization", `Bearer ${guestToken}`);
-    expect(asGuest.status).toBe(403);
+  it("refuses to cancel for an anonymous caller or another guest", async () => {
+    const created = await request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ listingId, guests: 1, nights: 1, checkIn: soon() });
+    expect((await request(app).post(`/bookings/${created.body.id}/cancel`)).status).toBe(401);
+
+    await makeUser("other@money.kna", "GUEST");
+    const other = (
+      await request(app).post("/auth/login").send({ email: "other@money.kna", password: PASSWORD })
+    ).body.token;
+    const res = await request(app)
+      .post(`/bookings/${created.body.id}/cancel`)
+      .set("Authorization", `Bearer ${other}`);
+    expect(res.status).toBe(404);
   });
 
   it("keeps every ledger row internally consistent", async () => {
@@ -181,23 +188,82 @@ describe("booking money path", () => {
     }
   });
 
-  it("puts the soonest arrival at the top of the coordinator queue", async () => {
-    const far = soon(90);
-    const near = soon(2);
-    for (const checkIn of [far, near]) {
-      await request(app)
-        .post("/bookings")
-        .set("Authorization", `Bearer ${guestToken}`)
-        .send({ listingId, guests: 1, nights: 1, checkIn });
-    }
+  // ── Rooms and the calendar ─────────────────────────────────────────
+  // The provider opens days at the listing's room count; a booking holds
+  // its rooms on every night, all or nothing.
 
-    const queue = await request(app)
-      .get("/bookings/pending")
-      .set("Authorization", `Bearer ${coordinatorToken}`);
+  async function singleRoomListing() {
+    const host = await prisma.provider.findFirstOrThrow({ where: { user: { email: "host@money.kna" } } });
+    const listing = await makeListing(host.id, 300_000);
+    await prisma.listing.update({ where: { id: listing.id }, data: { inventory: 1 } });
+    await prisma.availabilitySlot.updateMany({ where: { listingId: listing.id }, data: { capacity: 1 } });
+    return listing.id;
+  }
 
-    const dates = queue.body.map((b: { checkIn: string }) => b.checkIn.slice(0, 10));
-    expect(dates).toEqual([...dates].sort());
-    expect(dates[0]).toBe(near);
+  const book = (id: string, checkIn: string, nights = 1, token = guestToken) =>
+    request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ listingId: id, guests: 1, nights, checkIn });
+
+  it("locks booked nights: the last room cannot be sold twice for overlapping dates", async () => {
+    const id = await singleRoomListing();
+    expect((await book(id, soon(10), 3)).status).toBe(201); // nights 10, 11, 12
+
+    const overlap = await book(id, soon(12), 2); // 12 is taken
+    expect(overlap.status).toBe(409);
+    expect(overlap.body.error).toMatch(/fully booked/i);
+    expect(overlap.body.date).toBe(soon(12));
+    // All or nothing: night 13 was not left half-claimed by the failed booking.
+    const night13 = await prisma.availabilitySlot.findFirstOrThrow({
+      where: { listingId: id, date: new Date(`${soon(13)}T00:00:00Z`) },
+    });
+    expect(night13.booked).toBe(0);
+
+    expect((await book(id, soon(13), 2)).status).toBe(201); // check-out day 13 is free again
+  });
+
+  it("gives the dates back when a booking is cancelled", async () => {
+    const id = await singleRoomListing();
+    const first = await book(id, soon(20));
+    expect((await book(id, soon(20))).status).toBe(409);
+    await request(app).post(`/bookings/${first.body.id}/cancel`).set("Authorization", `Bearer ${guestToken}`);
+    expect((await book(id, soon(20))).status).toBe(201);
+  });
+
+  it("refuses dates the provider has not opened", async () => {
+    const id = await singleRoomListing();
+    const res = await book(id, soon(500));
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatch(/not open/i);
+  });
+
+  it("books as many rooms as the group needs, and prices per room", async () => {
+    // Two guests per room: five guests need three rooms.
+    const res = await request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ listingId, guests: 5, nights: 2, checkIn: soon(30) });
+    expect(res.status).toBe(201);
+    expect(res.body.rooms).toBe(3);
+    expect(res.body.totalVnd).toBe(500_000 * 2 * 3);
+
+    const tooFew = await request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ listingId, guests: 5, rooms: 2, nights: 1, checkIn: soon(30) });
+    expect(tooFew.status).toBe(400);
+  });
+
+  it("sells the last room once when eight guests try at the same moment", async () => {
+    const id = await singleRoomListing();
+    const results = await Promise.all(Array.from({ length: 8 }, () => book(id, soon(40), 2)));
+    expect(results.filter((r) => r.status === 201)).toHaveLength(1);
+    expect(results.filter((r) => r.status === 409)).toHaveLength(7);
+    const slots = await prisma.availabilitySlot.findMany({
+      where: { listingId: id, date: { in: [new Date(`${soon(40)}T00:00:00Z`), new Date(`${soon(41)}T00:00:00Z`)] } },
+    });
+    expect(slots.map((s) => s.booked)).toEqual([1, 1]);
   });
 
 });

@@ -13,7 +13,10 @@
 export const ROLES = ["GUEST", "PROVIDER", "COORDINATOR", "COMMITTEE", "ADMIN"] as const;
 export const PROVIDER_TYPES = ["HOMESTAY", "GUIDE", "ARTISAN"] as const;
 export const LISTING_CATEGORIES = ["STAY", "GUIDED_WALK", "CRAFT_SESSION", "CEREMONY"] as const;
-export const BOOKING_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"] as const;
+// CONFIRMED: booked, dates locked (instant). COMPLETED: paid at check-out.
+// UNPAID: past check-out and its grace period without payment. PENDING only
+// on bookings made before instant confirmation.
+export const BOOKING_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "UNPAID"] as const;
 export const ORDER_STATUSES = ["PENDING", "PAID", "FULFILLED", "CANCELLED"] as const;
 export const MODERATION_STATUSES = ["DRAFT", "IN_REVIEW", "PUBLISHED", "REJECTED"] as const;
 

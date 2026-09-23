@@ -96,7 +96,7 @@ describe("offsets", () => {
     expect(rows[0].toLabel).toMatch(/Yok Đôn/);
   });
 
-  it("keeps it off the public ledger until the booking is confirmed", async () => {
+  it("keeps it off the public ledger until the stay is paid", async () => {
     // Use a throwaway booking so bookingA stays editable for the rest of the suite.
     const confirmBooking = (
       await request(app)
@@ -109,16 +109,8 @@ describe("offsets", () => {
     const before = await request(app).get("/community/ledger");
     expect(before.body.filter((r: { offsetId: string | null }) => r.offsetId)).toHaveLength(0);
 
-    const pending = await request(app)
-      .get("/bookings/pending")
-      .set("Authorization", `Bearer ${coordinatorToken}`);
-    const target = pending.body.find((b: { id: string }) => b.id === confirmBooking);
-
-    await request(app)
-      .post(`/bookings/${target.id}/decision`)
-      .set("Authorization", `Bearer ${coordinatorToken}`)
-      .send({ decision: "confirm" })
-      .expect(200);
+    // Paid with the stay, at check-out (pay_booking).
+    await prisma.booking.update({ where: { id: confirmBooking }, data: { status: "COMPLETED" } });
 
     const after = await request(app).get("/community/ledger");
     const offsetRows = after.body.filter((r: { offsetId: string | null }) => r.offsetId);

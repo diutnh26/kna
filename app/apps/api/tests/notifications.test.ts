@@ -70,31 +70,19 @@ describe("notifications", () => {
     expect(await inbox(guestToken)).toEqual({ items: [], unread: 0 });
   });
 
-  it("tells the household and the coordinator when a booking arrives", async () => {
+  it("tells the household, and confirms to the guest at once, when a booking is made", async () => {
     await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
       .send({ listingId, guests: 2, nights: 1, checkIn: soon() })
       .expect(201);
 
-    // The household whose dates were asked for.
+    // The household whose dates were booked.
     expect(await typesFor(hostToken)).toContain("BOOKING_RECEIVED");
-    // Whoever has to decide.
-    expect(await typesFor(coordinatorToken)).toContain("BOOKING_AWAITING_DECISION");
-    // The guest is told nothing yet — they made it happen.
+    // Nothing waits on a coordinator any more: the dates were already open.
+    expect(await typesFor(coordinatorToken)).not.toContain("BOOKING_AWAITING_DECISION");
+    // The guest is told it is confirmed, not that it was received.
     expect(await typesFor(guestToken)).not.toContain("BOOKING_RECEIVED");
-  });
-
-  it("tells the guest when the decision is made", async () => {
-    const pending = await request(app)
-      .get("/bookings/pending")
-      .set("Authorization", `Bearer ${coordinatorToken}`);
-
-    await request(app)
-      .post(`/bookings/${pending.body[0].id}/decision`)
-      .set("Authorization", `Bearer ${coordinatorToken}`)
-      .send({ decision: "confirm" })
-      .expect(200);
 
     const items = (await inbox(guestToken)).items;
     const confirmed = items.find((n: { type: string }) => n.type === "BOOKING_CONFIRMED");
@@ -102,6 +90,19 @@ describe("notifications", () => {
     // Carries what it needs to be rendered in either language.
     expect(confirmed.params.listing).toBeTruthy();
     expect(confirmed.href).toBe("#account");
+  });
+
+  it("tells the guest when their booking is cancelled", async () => {
+    const booking = await request(app)
+      .post("/bookings")
+      .set("Authorization", `Bearer ${guestToken}`)
+      .send({ listingId, guests: 1, nights: 1, checkIn: soon(20) })
+      .expect(201);
+    await request(app)
+      .post(`/bookings/${booking.body.id}/cancel`)
+      .set("Authorization", `Bearer ${coordinatorToken}`)
+      .expect(200);
+    expect(await typesFor(guestToken)).toContain("BOOKING_DECLINED");
   });
 
   it("stores a key and its values, not a finished sentence", async () => {

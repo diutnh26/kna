@@ -76,7 +76,7 @@ describe("account", () => {
     expect(JSON.stringify(body)).not.toMatch(/passwordHash|\$2[aby]\$/);
   });
 
-  it("counts a pending booking without counting its money", async () => {
+  it("counts a booked stay without counting its money", async () => {
     await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
@@ -92,16 +92,9 @@ describe("account", () => {
     expect(totals.toCommunityFundVnd).toBe(0);
   });
 
-  it("counts the money once a coordinator confirms", async () => {
-    const pending = await request(app)
-      .get("/bookings/pending")
-      .set("Authorization", `Bearer ${coordinatorToken}`);
-
-    await request(app)
-      .post(`/bookings/${pending.body[0].id}/decision`)
-      .set("Authorization", `Bearer ${coordinatorToken}`)
-      .send({ decision: "confirm" })
-      .expect(200);
+  it("counts the money once the stay is paid at check-out", async () => {
+    // Paid through pay_booking; until then the booking is only held.
+    await prisma.booking.updateMany({ where: { status: "CONFIRMED" }, data: { status: "COMPLETED" } });
 
     const { totals } = await account();
     expect(totals.spentVnd).toBe(500_000);
@@ -117,7 +110,7 @@ describe("account", () => {
     expect(body.staffMoney).toBeNull();
   });
 
-  it("shows the provider what their confirmed bookings earned", async () => {
+  it("shows the provider what their paid bookings earned", async () => {
     const hostToken = (
       await request(app).post("/auth/login").send({ email: "host@account.kna", password: PASSWORD })
     ).body.token as string;
@@ -248,7 +241,7 @@ describe("account", () => {
     const timeline = async () =>
       (await request(app).get("/account/activity").set("Authorization", `Bearer ${guestToken}`)).body;
     const confirmed = (await timeline()).find(
-      (r: { kind: string; status: string }) => r.kind === "booking" && r.status === "CONFIRMED"
+      (r: { kind: string; status: string }) => r.kind === "booking" && r.status === "COMPLETED"
     );
     expect(confirmed.platformFeeVnd).toBe(35_000);
     expect(confirmed.proof).toMatchObject({ state: null, explorerUrl: null });

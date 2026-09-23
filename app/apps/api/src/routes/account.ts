@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import { OPEN_BOOKING_STATUSES, PAID_BOOKING_STATUSES } from "../lib/ledger";
 import {
   establishSession,
   requireAuth,
@@ -49,7 +50,7 @@ function proofOf(entry: { id: string; attestation: AttestationProof } | undefine
  */
 
 /** Money is only counted once it has actually moved — as on the ledger. */
-const SETTLED_BOOKING = ["CONFIRMED", "COMPLETED"];
+const SETTLED_BOOKING = PAID_BOOKING_STATUSES;
 const SETTLED_ORDER = ["PAID", "FULFILLED"];
 
 async function describeAccount(userId: string) {
@@ -115,7 +116,7 @@ async function describeAccount(userId: string) {
       fundVnd: confirmed.reduce((n, b) => n + b.communityFundVnd, 0),
       platformVnd: confirmed.reduce((n, b) => n + b.platformFeeVnd, 0),
       bookings: confirmed.length,
-      pending: providerBookings.filter((b) => b.status === "PENDING").length,
+      pending: providerBookings.filter((b) => OPEN_BOOKING_STATUSES.includes(b.status)).length,
     };
   }
 
@@ -170,7 +171,7 @@ async function describeAccount(userId: string) {
     staffMoney,
     totals: {
       bookings: bookings.length,
-      bookingsAwaiting: bookings.filter((b) => b.status === "PENDING").length,
+      bookingsAwaiting: bookings.filter((b) => OPEN_BOOKING_STATUSES.includes(b.status)).length,
       orders: orders.length,
       ordersAwaiting: orders.filter((o) => o.status === "PENDING").length,
       contributions,

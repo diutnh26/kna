@@ -154,11 +154,18 @@ model Listing {
   imageUrl     String?
   published    Boolean  @default(false)
   createdAt    DateTime @default(now())
+  // What one day's slot holds: rooms for a per-night stay, seats for a
+  // per-person experience. The provider opens dates at this capacity.
+  inventory        Int @default(1)
+  maxGuestsPerRoom Int @default(2)
 
   slots    AvailabilitySlot[]
   bookings Booking[]
 }
 
+/// One open day of a listing, opened by its provider. `capacity` and
+/// `booked` count rooms (stays) or seats (experiences). A CHECK constraint
+/// holds 0 <= booked <= capacity, so no code path can overbook.
 model AvailabilitySlot {
   id        String   @id @default(cuid())
   listingId String
@@ -209,6 +216,12 @@ model Booking {
   // Demo SPL token disbursement (devnet) — JSON array of tx signatures
   demoTxSigs      String?
   demoDisburseAt  DateTime?
+  // Rooms held (stays) or seats (experiences), and the day payment opens.
+  rooms           Int       @default(1)
+  checkOut        DateTime?
+  // create_booking on devnet
+  onchainTx       String?
+  onchainError    String?
   // Who moved it out of PENDING, when, and by which path: COORDINATOR (the
   // decision route), PAYMENT_VERIFY (a coordinator syncing the bank) or
   // PAYMENT_WEBHOOK (no user). A money decision always leaves a trace.

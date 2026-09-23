@@ -217,14 +217,14 @@ describe("archive moderation gate", () => {
 
       // The token works while the role holds.
       expect(
-        (await request(app).get("/bookings/pending").set("Authorization", `Bearer ${token}`)).status
+        (await request(app).get("/orders/pending").set("Authorization", `Bearer ${token}`)).status
       ).toBe(200);
 
       await prisma.user.update({ where: { email }, data: { role: "GUEST" } });
 
       // Same token, same seven-day expiry — but the role is re-read.
       expect(
-        (await request(app).get("/bookings/pending").set("Authorization", `Bearer ${token}`)).status
+        (await request(app).get("/orders/pending").set("Authorization", `Bearer ${token}`)).status
       ).toBe(403);
     });
 

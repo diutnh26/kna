@@ -58,7 +58,7 @@ describe("public ledger", () => {
     expect(await ledger()).toEqual([]);
   });
 
-  it("does NOT publish a booking that is still awaiting confirmation", async () => {
+  it("does NOT publish a booking that has not been paid yet", async () => {
     const booking = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
@@ -75,23 +75,15 @@ describe("public ledger", () => {
     expect(s.ledgerEntriesAwaiting).toBe(1);
   });
 
-  it("publishes it once a coordinator confirms", async () => {
-    const pending = await request(app)
-      .get("/bookings/pending")
-      .set("Authorization", `Bearer ${coordinatorToken}`);
-    const id = pending.body[0].id;
+  it("publishes it once the guest has paid at check-out", async () => {
+    const booking = await prisma.booking.findFirstOrThrow({ where: { status: "CONFIRMED" } });
+    // Confirmed on the spot: no coordinator decided it.
+    expect(booking.decidedVia).toBe("INSTANT");
+    expect(booking.decidedById).toBeNull();
+    expect(booking.decidedAt).not.toBeNull();
 
-    await request(app)
-      .post(`/bookings/${id}/decision`)
-      .set("Authorization", `Bearer ${coordinatorToken}`)
-      .send({ decision: "confirm" })
-      .expect(200);
-
-    const decided = await prisma.booking.findUniqueOrThrow({ where: { id } });
-    const coordinator = await prisma.user.findUniqueOrThrow({ where: { email: "coord@ledger.kna" } });
-    expect(decided.decidedById).toBe(coordinator.id);
-    expect(decided.decidedVia).toBe("COORDINATOR");
-    expect(decided.decidedAt).not.toBeNull();
+    // Paid at check-out (pay_booking): now it is money.
+    await prisma.booking.update({ where: { id: booking.id }, data: { status: "COMPLETED" } });
 
     // 500,000/night × 1 night. The 7/3 split of the booking fee schedule.
     const rows = await ledger();
@@ -105,27 +97,26 @@ describe("public ledger", () => {
     expect(s.ledgerEntriesAwaiting).toBe(0);
   });
 
-  it("never publishes a declined booking", async () => {
+  it("never publishes a cancelled booking", async () => {
     const booking = await request(app)
       .post("/bookings")
       .set("Authorization", `Bearer ${guestToken}`)
       .send({ listingId, guests: 1, nights: 1, checkIn: soon() });
 
     await request(app)
-      .post(`/bookings/${booking.body.id}/decision`)
-      .set("Authorization", `Bearer ${coordinatorToken}`)
-      .send({ decision: "decline" })
+      .post(`/bookings/${booking.body.id}/cancel`)
+      .set("Authorization", `Bearer ${guestToken}`)
       .expect(200);
 
-    expect(await ledger()).toHaveLength(1); // still just the confirmed one
+    expect(await ledger()).toHaveLength(1); // still just the paid one
 
     // Append-only: the row the guest was shown survives, voided, with who
-    // declined it and why.
+    // cancelled it and why.
     const row = await prisma.ledgerEntry.findFirstOrThrow({ where: { bookingId: booking.body.id } });
     expect(row.voidedAt).not.toBeNull();
-    expect(row.voidReason).toBe("booking declined");
-    const coordinator = await prisma.user.findUniqueOrThrow({ where: { email: "coord@ledger.kna" } });
-    expect(row.voidedById).toBe(coordinator.id);
+    expect(row.voidReason).toBe("booking cancelled");
+    const guest = await prisma.user.findUniqueOrThrow({ where: { email: "guest@ledger.kna" } });
+    expect(row.voidedById).toBe(guest.id);
     expect((await stats()).ledgerEntriesAwaiting).toBe(0);
   });
 

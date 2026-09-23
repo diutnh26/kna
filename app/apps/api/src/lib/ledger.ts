@@ -18,15 +18,23 @@ import type { Prisma } from "@prisma/client";
  * Settled-ness is derived from the parent rather than denormalised onto the
  * row, so there is no second copy of the truth to drift.
  */
+/**
+ * A booking's money moves at check-out (pay_booking), not when it is booked:
+ * bookings are confirmed instantly, so CONFIRMED only means the dates are
+ * held. PAID is when it counts; OPEN is everything still owed.
+ */
+export const PAID_BOOKING_STATUSES = ["COMPLETED"];
+export const OPEN_BOOKING_STATUSES = ["PENDING", "CONFIRMED", "UNPAID"];
+
 export const SETTLED_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
   voidedAt: null,
   OR: [
-    { booking: { status: { in: ["CONFIRMED", "COMPLETED"] } } },
+    { booking: { status: { in: PAID_BOOKING_STATUSES } } },
     { order: { status: { in: ["PAID", "FULFILLED"] } } },
     // An offset carries no status of its own: it is paid with the stay, so
     // it is settled exactly when its booking is. One rule, read through
     // the parent, rather than a second flag that could disagree with it.
-    { offset: { booking: { status: { in: ["CONFIRMED", "COMPLETED"] } } } },
+    { offset: { booking: { status: { in: PAID_BOOKING_STATUSES } } } },
   ],
 };
 
@@ -34,9 +42,9 @@ export const SETTLED_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
 export const PENDING_LEDGER_WHERE: Prisma.LedgerEntryWhereInput = {
   voidedAt: null,
   OR: [
-    { booking: { status: "PENDING" } },
+    { booking: { status: { in: OPEN_BOOKING_STATUSES } } },
     { order: { status: "PENDING" } },
-    { offset: { booking: { status: "PENDING" } } },
+    { offset: { booking: { status: { in: OPEN_BOOKING_STATUSES } } } },
   ],
 };
 

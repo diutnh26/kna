@@ -201,8 +201,28 @@ export async function populate(prisma: PrismaClient) {
         imageUrl: "/images/listings/coffee-cherry-to-cup.jpg",
         published: true,
       },
-    ].map((data) => prisma.listing.create({ data }))
+    ].map((data) =>
+      prisma.listing.create({
+        // Two rooms per homestay, ten seats per experience.
+        data: { ...data, inventory: data.unit === "per night" ? 2 : 10 },
+      })
+    )
   );
+
+  // The providers have verified their calendars: the next 120 days are
+  // open, so guests can book straight away.
+  const today = new Date();
+  const firstDay = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  await prisma.availabilitySlot.createMany({
+    data: listings.flatMap((listing) =>
+      Array.from({ length: 120 }, (_, i) => ({
+        listingId: listing.id,
+        date: new Date(firstDay + i * 86_400_000),
+        capacity: listing.inventory,
+        booked: 0,
+      }))
+    ),
+  });
   const longhouseStay = listings[0];
 
   // ── Products ─────────────────────────────────────────────────────────

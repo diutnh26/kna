@@ -92,7 +92,8 @@ describe("chain verifier routes", () => {
         guests: 2,
         nights: 1,
         checkIn: new Date("2026-10-01"),
-        status: "CONFIRMED",
+        // Paid at check-out: only paid bookings are attested.
+        status: "COMPLETED",
         totalVnd: 1_000_000,
         platformFeeVnd: 70_000,
         communityFundVnd: 30_000,
@@ -300,7 +301,7 @@ describe("chain verifier routes", () => {
           guests: 1,
           nights: 1,
           checkIn: new Date("2026-10-02"),
-          status: "CONFIRMED",
+          status: "COMPLETED",
           totalVnd: 1_000_000,
           platformFeeVnd: 70_000,
           communityFundVnd: 30_000,

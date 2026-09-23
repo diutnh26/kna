@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
-import { voidLedgerEntries } from "../lib/ledger";
+import { voidLedgerEntries, OPEN_BOOKING_STATUSES, PAID_BOOKING_STATUSES } from "../lib/ledger";
 
 export const offsetsRouter = Router();
 
@@ -234,7 +234,7 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
   if (booking.status === "CANCELLED") {
     return res.status(409).json({ error: "That booking was cancelled." });
   }
-  if (booking.status === "CONFIRMED" || booking.status === "COMPLETED") {
+  if (PAID_BOOKING_STATUSES.includes(booking.status)) {
     return res.status(409).json({
       error: "That stay is confirmed. Offsets are locked after confirmation.",
     });
@@ -323,7 +323,7 @@ offsetsRouter.post("/", requireAuth, async (req: AuthedRequest, res) => {
     current,
     next,
     eligible,
-    settled: booking.status === "CONFIRMED" || booking.status === "COMPLETED",
+    settled: PAID_BOOKING_STATUSES.includes(booking.status),
   });
 });
 
@@ -386,7 +386,7 @@ offsetsRouter.delete("/:bookingId", requireAuth, async (req: AuthedRequest, res)
   if (!booking || booking.guestId !== req.user!.id) {
     return res.status(404).json({ error: "That booking is not on your account." });
   }
-  if (booking.status === "CONFIRMED" || booking.status === "COMPLETED") {
+  if (PAID_BOOKING_STATUSES.includes(booking.status)) {
     return res.status(409).json({
       error: "That stay is confirmed. Offsets cannot be removed after confirmation.",
     });
