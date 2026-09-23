@@ -2,8 +2,8 @@
 
 Every guard in `app/programs/kna-trust-layer/src/lib.rs`, the test that proves
 it, and what the operator sees today. Tests live in
-`app/packages/chain-client/program-tests/trust-layer.test.ts` (LiteSVM against
-the built `.so`) unless marked *Rust unit*.
+`app/packages/chain-client/program-tests/` — `trust-layer.test.ts` and
+`settlement.test.ts`, LiteSVM against the built `.so` — unless marked *Rust unit*.
 
 Run them: `.\scripts\program-tests.ps1` on Windows, or
 `anchor build && npm run test:program` (from `app/`) on Linux/macOS. CI runs
@@ -23,7 +23,11 @@ Anchor numbers custom errors from 6000; Phantom shows them as
 | 6004 | 0x1774 | `SplitMismatch` | `validate_split` in `submit_attestation`: parts do not sum to the total, or platform / community share is not floor(total × bps / 10 000) | parts not summing; marketplace split 5% / 0%; 3,750 ₫ rounded (263 / 113) rejected while floored (262 / 112) passes; *Rust unit* `rejects_bad_split`, `rejects_parts_not_summing_to_total`, `rejects_overflow_sum` |
 | 6005 | 0x1775 | `InvalidState` | `finalize_attestation` on a non-PENDING attestation; `cancel_pending` on a non-PENDING attestation; `acknowledge_receipt` with a mismatched ledger hash | finalize after cancel; cancel after finalize |
 | 6006 | 0x1776 | `AlreadyExists` | Never raised. Replays are stopped by Anchor `init` instead (below). | — |
-| 6007 | 0x1777 | `Overflow` | `validate_split` bps multiplication. Unreachable in practice: u64 × u16 always fits in u128. | *Rust unit* `booking_split_1m_vnd`, `floor_split_small_total`, `zero_total_ok` cover the arithmetic |
+| 6007 | 0x1777 | `Overflow` | `validate_split` bps multiplication (unreachable: u64 × u16 fits in u128); `settle_split` VND → token-unit conversion and treasury totals | *Rust unit* `booking_split_1m_vnd`, `floor_split_small_total`, `zero_total_ok` cover the split arithmetic |
+| 6008 | 0x1778 | `InvalidTokenAccount` | `initialize_treasury`: escrow not owned by the treasury PDA. `settle_split`: an escrow other than the treasury's, a Community Fund account not owned by the committee vault, a platform account not owned by the platform wallet, or an account that is not an initialized SPL token account | escrow owned by someone else; fund destination redirected to the provider; platform destination redirected; another escrow |
+| 6009 | 0x1779 | `InvalidMint` | `settle_split`: a destination holding a different token, or a mint other than the treasury's | provider account of another mint |
+
+`settle_split` also raises `Paused`, `Unauthorized` (settler without the coordinator role) and `RoleRevoked`; `initialize_treasury` raises `Unauthorized` for anyone but the coordinator authority. All proven in `settlement.test.ts`.
 
 ## Anchor and runtime guards
 
@@ -34,6 +38,10 @@ Anchor numbers custom errors from 6000; Phantom shows them as
 | `init` on the final PDA `["final", hash(ledgerId)]` | Double settlement: finalizing twice, by the same or another signer | member finalizes, then the vault's finalize fails (`already in use`) and the first finalization stands |
 | Role PDA must exist (`AccountNotInitialized`, 3012) | A wallet with no grant submitting | submit by a wallet with no grant |
 | Optional `committee_role` + vault check | Vault path works without a role grant; nobody else can use it | finalize by the vault with no role account; outsider on the same path gets `Unauthorized` |
+| Final PDA must exist (`AccountNotInitialized`) | Paying out an attestation the committee has not finalized, or one that was withdrawn | settle while only pending; settle after cancel |
+| `init` on the settlement PDA `["settlement", hash(ledgerId)]` | Double payout | second settle fails (`already in use`) and balances are unchanged |
+| Token program rejects the transfer | Paying out more than escrow holds | underfunded escrow: whole transaction fails, no record, no partial transfer |
+| Amounts read from the final PDA | Paying anything other than the notarized split | settle pays exactly 900,000 / 30,000 / 70,000 VND (× 1,000 units) for a 1,000,000 VND booking |
 
 ## What the operator sees
 
@@ -51,10 +59,12 @@ devnet measurement:
 
 | Instruction | Max CU |
 |---|---|
+| `settle_split` (3 token CPIs) | 29,578 |
 | `submit_attestation` | 20,663 |
 | `finalize_attestation` (committee member) | 20,512 |
 | `grant_role` | 18,922 |
 | `finalize_attestation` (vault) | 13,911 |
+| `initialize_treasury` | 10,932 |
 | `initialize_config` | 9,133 |
 | `cancel_pending` | 8,542 |
 | `revoke_role` | 5,785 |

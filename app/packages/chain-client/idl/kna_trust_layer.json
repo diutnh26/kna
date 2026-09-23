@@ -138,6 +138,42 @@
         { "name": "archive_proof", "writable": true }
       ],
       "args": []
+    },
+    {
+      "name": "initialize_treasury",
+      "discriminator": [124, 186, 211, 195, 85, 165, 129, 166],
+      "accounts": [
+        { "name": "authority", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "treasury", "writable": true },
+        { "name": "mint" },
+        { "name": "vault" },
+        { "name": "system_program" }
+      ],
+      "args": [
+        { "name": "platform_wallet", "type": "pubkey" },
+        { "name": "units_per_vnd", "type": "u64" }
+      ]
+    },
+    {
+      "name": "settle_split",
+      "discriminator": [3, 170, 152, 217, 94, 9, 9, 213],
+      "accounts": [
+        { "name": "settler", "writable": true, "signer": true },
+        { "name": "config" },
+        { "name": "settler_role" },
+        { "name": "treasury", "writable": true },
+        { "name": "final_attestation" },
+        { "name": "settlement_record", "writable": true },
+        { "name": "vault", "writable": true },
+        { "name": "mint" },
+        { "name": "provider_token", "writable": true },
+        { "name": "community_token", "writable": true },
+        { "name": "platform_token", "writable": true },
+        { "name": "token_program" },
+        { "name": "system_program" }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -146,7 +182,9 @@
     { "name": "PendingAttestation", "discriminator": [94, 7, 185, 147, 23, 85, 211, 159] },
     { "name": "FinalAttestation", "discriminator": [204, 58, 26, 243, 72, 12, 252, 142] },
     { "name": "GuestReceipt", "discriminator": [166, 38, 66, 81, 251, 214, 110, 213] },
-    { "name": "ArchiveProof", "discriminator": [178, 137, 163, 94, 105, 76, 224, 241] }
+    { "name": "ArchiveProof", "discriminator": [178, 137, 163, 94, 105, 76, 224, 241] },
+    { "name": "Treasury", "discriminator": [238, 239, 123, 238, 89, 1, 168, 253] },
+    { "name": "SettlementRecord", "discriminator": [172, 159, 67, 74, 96, 85, 37, 205] }
   ],
   "events": [
     { "name": "ConfigInitialized" },
@@ -159,7 +197,9 @@
     { "name": "AttestationCancelled" },
     { "name": "ReceiptAcknowledged" },
     { "name": "ArchiveProofPublished" },
-    { "name": "ArchiveProofRevoked" }
+    { "name": "ArchiveProofRevoked" },
+    { "name": "TreasuryInitialized" },
+    { "name": "SplitSettled" }
   ],
   "errors": [
     { "code": 6000, "name": "Unauthorized", "msg": "Unauthorized" },
@@ -169,7 +209,9 @@
     { "code": 6004, "name": "SplitMismatch", "msg": "Fee split does not match invariant" },
     { "code": 6005, "name": "InvalidState", "msg": "Invalid state transition" },
     { "code": 6006, "name": "AlreadyExists", "msg": "Attestation already exists" },
-    { "code": 6007, "name": "Overflow", "msg": "Arithmetic overflow" }
+    { "code": 6007, "name": "Overflow", "msg": "Arithmetic overflow" },
+    { "code": 6008, "name": "InvalidTokenAccount", "msg": "Token account is not the expected one" },
+    { "code": 6009, "name": "InvalidMint", "msg": "Mint is not the treasury mint" }
   ],
   "types": [],
   "deployed": {

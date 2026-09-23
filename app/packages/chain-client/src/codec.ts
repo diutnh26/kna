@@ -17,6 +17,8 @@ export const IX = {
   acknowledgeReceipt: "acknowledge_receipt",
   publishArchiveProof: "publish_archive_proof",
   revokeArchiveProof: "revoke_archive_proof",
+  initializeTreasury: "initialize_treasury",
+  settleSplit: "settle_split",
 } as const;
 
 export function encodeU64(n: number | bigint): Buffer {

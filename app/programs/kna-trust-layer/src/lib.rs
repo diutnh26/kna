@@ -15,6 +15,18 @@ pub const ATTESTATION_PENDING: u8 = 0;
 pub const ATTESTATION_FINALIZED: u8 = 1;
 pub const ATTESTATION_CANCELLED: u8 = 2;
 
+/// SPL Token program. Token CPIs are encoded by hand (TransferChecked) rather
+/// than through anchor-spl, which would pull a large dependency tree into a
+/// build pinned to rustc 1.84.
+/// TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA (checked in the unit tests).
+pub const TOKEN_PROGRAM_ID: Pubkey = Pubkey::new_from_array([
+    6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206, 235, 121, 172, 28, 180, 133,
+    237, 95, 91, 55, 145, 58, 140, 245, 133, 126, 255, 0, 169,
+]);
+const TOKEN_ACCOUNT_LEN: usize = 165;
+const MINT_LEN: usize = 82;
+const TOKEN_IX_TRANSFER_CHECKED: u8 = 12;
+
 #[program]
 pub mod kna_trust_layer {
     use super::*;
@@ -256,6 +268,130 @@ pub mod kna_trust_layer {
         Ok(())
     }
 
+    /// One-time setup of the settlement escrow: the dKNA mint, the escrow
+    /// token account (owned by the treasury PDA), the platform's wallet and
+    /// how many token base units stand for one VND.
+    pub fn initialize_treasury(
+        ctx: Context<InitializeTreasury>,
+        platform_wallet: Pubkey,
+        units_per_vnd: u64,
+    ) -> Result<()> {
+        require_keys_eq!(
+            ctx.accounts.authority.key(),
+            ctx.accounts.config.coordinator_authority,
+            KnaError::Unauthorized
+        );
+        require!(units_per_vnd > 0, KnaError::InvalidMint);
+        let decimals = read_mint_decimals(&ctx.accounts.mint)?;
+        let (vault_mint, vault_owner) = read_token_account(&ctx.accounts.vault)?;
+        require_keys_eq!(vault_mint, ctx.accounts.mint.key(), KnaError::InvalidMint);
+        require_keys_eq!(
+            vault_owner,
+            ctx.accounts.treasury.key(),
+            KnaError::InvalidTokenAccount
+        );
+
+        let treasury = &mut ctx.accounts.treasury;
+        treasury.mint = ctx.accounts.mint.key();
+        treasury.vault = ctx.accounts.vault.key();
+        treasury.platform_wallet = platform_wallet;
+        treasury.units_per_vnd = units_per_vnd;
+        treasury.decimals = decimals;
+        treasury.settled_count = 0;
+        treasury.settled_total_vnd = 0;
+        treasury.bump = ctx.bumps.treasury;
+        emit!(TreasuryInitialized {
+            mint: treasury.mint,
+            vault: treasury.vault,
+            platform_wallet,
+            units_per_vnd,
+        });
+        Ok(())
+    }
+
+    /// Pays out a finalized attestation from escrow: three CPI transfers into
+    /// SPL Token for exactly the amounts the committee finalized — provider,
+    /// Community Fund (the committee vault) and platform. A SettlementRecord
+    /// PDA per ledger entry makes a second settlement impossible.
+    pub fn settle_split(ctx: Context<SettleSplit>) -> Result<()> {
+        require!(!ctx.accounts.config.paused, KnaError::Paused);
+        let role = &ctx.accounts.settler_role;
+        require!(!role.revoked, KnaError::RoleRevoked);
+        require!(role.role == ROLE_COORDINATOR, KnaError::Unauthorized);
+        require_keys_eq!(role.wallet, ctx.accounts.settler.key(), KnaError::Unauthorized);
+
+        let treasury = &ctx.accounts.treasury;
+        let (provider_mint, _) = read_token_account(&ctx.accounts.provider_token)?;
+        let (community_mint, community_owner) = read_token_account(&ctx.accounts.community_token)?;
+        let (platform_mint, platform_owner) = read_token_account(&ctx.accounts.platform_token)?;
+        require_keys_eq!(provider_mint, treasury.mint, KnaError::InvalidMint);
+        require_keys_eq!(community_mint, treasury.mint, KnaError::InvalidMint);
+        require_keys_eq!(platform_mint, treasury.mint, KnaError::InvalidMint);
+        require_keys_eq!(
+            community_owner,
+            ctx.accounts.config.committee_vault,
+            KnaError::InvalidTokenAccount
+        );
+        require_keys_eq!(platform_owner, treasury.platform_wallet, KnaError::InvalidTokenAccount);
+
+        let fin = &ctx.accounts.final_attestation;
+        let units = treasury.units_per_vnd;
+        let to_units = |vnd: u64| vnd.checked_mul(units).ok_or(error!(KnaError::Overflow));
+        let transfers = [
+            (&ctx.accounts.provider_token, to_units(fin.provider_vnd)?),
+            (&ctx.accounts.community_token, to_units(fin.community_vnd)?),
+            (&ctx.accounts.platform_token, to_units(fin.platform_vnd)?),
+        ];
+
+        let bump = [treasury.bump];
+        let seeds: &[&[u8]] = &[b"treasury", &bump];
+        for (destination, amount) in transfers {
+            if amount == 0 {
+                continue;
+            }
+            transfer_checked(
+                &ctx.accounts.token_program,
+                &ctx.accounts.vault,
+                &ctx.accounts.mint,
+                destination,
+                &ctx.accounts.treasury.to_account_info(),
+                amount,
+                treasury.decimals,
+                seeds,
+            )?;
+        }
+
+        let settled_at = Clock::get()?.unix_timestamp;
+        let record = &mut ctx.accounts.settlement_record;
+        record.ledger_id_hash = fin.ledger_id_hash;
+        record.provider_token = ctx.accounts.provider_token.key();
+        record.provider_vnd = fin.provider_vnd;
+        record.community_vnd = fin.community_vnd;
+        record.platform_vnd = fin.platform_vnd;
+        record.units_per_vnd = units;
+        record.settled_at = settled_at;
+        record.settled_by = ctx.accounts.settler.key();
+        record.bump = ctx.bumps.settlement_record;
+
+        let treasury = &mut ctx.accounts.treasury;
+        treasury.settled_count = treasury.settled_count.checked_add(1).ok_or(KnaError::Overflow)?;
+        treasury.settled_total_vnd = treasury
+            .settled_total_vnd
+            .checked_add(fin.total_vnd)
+            .ok_or(KnaError::Overflow)?;
+
+        emit!(SplitSettled {
+            ledger_id_hash: fin.ledger_id_hash,
+            provider_token: record.provider_token,
+            provider_vnd: fin.provider_vnd,
+            community_vnd: fin.community_vnd,
+            platform_vnd: fin.platform_vnd,
+            settled_by: record.settled_by,
+            settled_at,
+        });
+        Ok(())
+    }
+
     pub fn revoke_archive_proof(ctx: Context<RevokeArchiveProof>) -> Result<()> {
         assert_committee_or_vault(
             &ctx.accounts.config,
@@ -316,6 +452,61 @@ fn validate_split(
         .ok_or(KnaError::Overflow)? as u64;
     require!(platform == expected_platform, KnaError::SplitMismatch);
     require!(community == expected_community, KnaError::SplitMismatch);
+    Ok(())
+}
+
+/// (mint, owner) of an initialized SPL token account owned by the Token program.
+fn read_token_account(account: &AccountInfo) -> Result<(Pubkey, Pubkey)> {
+    require_keys_eq!(*account.owner, TOKEN_PROGRAM_ID, KnaError::InvalidTokenAccount);
+    let data = account.try_borrow_data()?;
+    require!(data.len() == TOKEN_ACCOUNT_LEN, KnaError::InvalidTokenAccount);
+    // state: 0 uninitialized, 1 initialized, 2 frozen
+    require!(data[108] == 1, KnaError::InvalidTokenAccount);
+    let mint = Pubkey::try_from(&data[0..32]).map_err(|_| error!(KnaError::InvalidTokenAccount))?;
+    let owner = Pubkey::try_from(&data[32..64]).map_err(|_| error!(KnaError::InvalidTokenAccount))?;
+    Ok((mint, owner))
+}
+
+/// Decimals of an initialized SPL mint owned by the Token program.
+fn read_mint_decimals(account: &AccountInfo) -> Result<u8> {
+    require_keys_eq!(*account.owner, TOKEN_PROGRAM_ID, KnaError::InvalidMint);
+    let data = account.try_borrow_data()?;
+    require!(data.len() == MINT_LEN && data[45] == 1, KnaError::InvalidMint);
+    Ok(data[44])
+}
+
+/// CPI: SPL Token TransferChecked, signed by the treasury PDA.
+#[allow(clippy::too_many_arguments)]
+fn transfer_checked<'info>(
+    token_program: &AccountInfo<'info>,
+    from: &AccountInfo<'info>,
+    mint: &AccountInfo<'info>,
+    to: &AccountInfo<'info>,
+    authority: &AccountInfo<'info>,
+    amount: u64,
+    decimals: u8,
+    signer_seeds: &[&[u8]],
+) -> Result<()> {
+    use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+    let mut data = Vec::with_capacity(10);
+    data.push(TOKEN_IX_TRANSFER_CHECKED);
+    data.extend_from_slice(&amount.to_le_bytes());
+    data.push(decimals);
+    let ix = Instruction {
+        program_id: TOKEN_PROGRAM_ID,
+        accounts: vec![
+            AccountMeta::new(from.key(), false),
+            AccountMeta::new_readonly(mint.key(), false),
+            AccountMeta::new(to.key(), false),
+            AccountMeta::new_readonly(authority.key(), true),
+        ],
+        data,
+    };
+    anchor_lang::solana_program::program::invoke_signed(
+        &ix,
+        &[from.clone(), mint.clone(), to.clone(), authority.clone(), token_program.clone()],
+        &[signer_seeds],
+    )?;
     Ok(())
 }
 
@@ -481,6 +672,99 @@ pub struct RevokeArchiveProof<'info> {
     pub committee_role: Option<Account<'info, RoleGrant>>,
 }
 
+#[derive(Accounts)]
+pub struct InitializeTreasury<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
+    #[account(
+        init,
+        payer = authority,
+        space = 8 + Treasury::INIT_SPACE,
+        seeds = [b"treasury"],
+        bump
+    )]
+    pub treasury: Account<'info, Treasury>,
+    /// CHECK: validated as an initialized SPL mint in the handler.
+    pub mint: UncheckedAccount<'info>,
+    /// CHECK: validated as a token account of `mint` owned by the treasury PDA.
+    pub vault: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct SettleSplit<'info> {
+    #[account(mut)]
+    pub settler: Signer<'info>,
+    #[account(seeds = [b"config"], bump = config.bump)]
+    pub config: Account<'info, Config>,
+    #[account(seeds = [b"role", settler.key().as_ref()], bump = settler_role.bump)]
+    pub settler_role: Account<'info, RoleGrant>,
+    #[account(mut, seeds = [b"treasury"], bump = treasury.bump)]
+    pub treasury: Account<'info, Treasury>,
+    #[account(
+        seeds = [b"final", final_attestation.ledger_id_hash.as_ref()],
+        bump = final_attestation.bump
+    )]
+    pub final_attestation: Account<'info, FinalAttestation>,
+    #[account(
+        init,
+        payer = settler,
+        space = 8 + SettlementRecord::INIT_SPACE,
+        seeds = [b"settlement", final_attestation.ledger_id_hash.as_ref()],
+        bump
+    )]
+    pub settlement_record: Account<'info, SettlementRecord>,
+    /// CHECK: must be the treasury's escrow token account.
+    #[account(mut, address = treasury.vault @ KnaError::InvalidTokenAccount)]
+    pub vault: UncheckedAccount<'info>,
+    /// CHECK: must be the treasury's mint.
+    #[account(address = treasury.mint @ KnaError::InvalidMint)]
+    pub mint: UncheckedAccount<'info>,
+    /// CHECK: token account of `mint`; the provider is identified off-chain,
+    /// so the coordinator role that signs this vouches for it.
+    #[account(mut)]
+    pub provider_token: UncheckedAccount<'info>,
+    /// CHECK: token account of `mint` owned by config.committee_vault.
+    #[account(mut)]
+    pub community_token: UncheckedAccount<'info>,
+    /// CHECK: token account of `mint` owned by treasury.platform_wallet.
+    #[account(mut)]
+    pub platform_token: UncheckedAccount<'info>,
+    /// CHECK: the SPL Token program.
+    #[account(address = TOKEN_PROGRAM_ID)]
+    pub token_program: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct Treasury {
+    pub mint: Pubkey,
+    pub vault: Pubkey,
+    pub platform_wallet: Pubkey,
+    pub units_per_vnd: u64,
+    pub decimals: u8,
+    pub settled_count: u64,
+    pub settled_total_vnd: u64,
+    pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct SettlementRecord {
+    pub ledger_id_hash: [u8; 32],
+    pub provider_token: Pubkey,
+    pub provider_vnd: u64,
+    pub community_vnd: u64,
+    pub platform_vnd: u64,
+    pub units_per_vnd: u64,
+    pub settled_at: i64,
+    pub settled_by: Pubkey,
+    pub bump: u8,
+}
+
 #[account]
 #[derive(InitSpace)]
 pub struct Config {
@@ -629,6 +913,25 @@ pub struct ArchiveProofRevoked {
     pub revoked_by: Pubkey,
 }
 
+#[event]
+pub struct TreasuryInitialized {
+    pub mint: Pubkey,
+    pub vault: Pubkey,
+    pub platform_wallet: Pubkey,
+    pub units_per_vnd: u64,
+}
+
+#[event]
+pub struct SplitSettled {
+    pub ledger_id_hash: [u8; 32],
+    pub provider_token: Pubkey,
+    pub provider_vnd: u64,
+    pub community_vnd: u64,
+    pub platform_vnd: u64,
+    pub settled_by: Pubkey,
+    pub settled_at: i64,
+}
+
 #[error_code]
 pub enum KnaError {
     #[msg("Unauthorized")]
@@ -647,6 +950,12 @@ pub enum KnaError {
     AlreadyExists,
     #[msg("Arithmetic overflow")]
     Overflow,
+    // Appended: Anchor numbers errors by position, and 6000–6007 are
+    // already relied on by clients and docs/ERROR-MATRIX.md.
+    #[msg("Token account is not the expected one")]
+    InvalidTokenAccount,
+    #[msg("Mint is not the treasury mint")]
+    InvalidMint,
 }
 
 #[cfg(test)]
@@ -682,6 +991,15 @@ mod tests {
     #[test]
     fn rejects_parts_not_summing_to_total() {
         assert!(validate_split(1_000_000, 70_000, 30_000, 899_999, 700, 300).is_err());
+    }
+
+    #[test]
+    fn token_program_id_is_spl_token() {
+        use std::str::FromStr;
+        assert_eq!(
+            TOKEN_PROGRAM_ID,
+            Pubkey::from_str("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA").unwrap()
+        );
     }
 
     #[test]
