@@ -84,5 +84,33 @@ export async function backfillWallets(batch = 200) {
     select: { userId: true },
   });
   for (const w of unregistered) await enqueueAccountRegistration(prisma, w.userId);
+  await reviveStalledChainWork();
   return created;
+}
+
+/**
+ * Chain work that gave up (DEAD) because of the platform's setup — a key
+ * not yet configured, the program not yet upgraded — gets another chance
+ * on every start. Render restarts the service whenever its environment
+ * changes, so adding the missing key is what retries it. Only work that is
+ * still owed is revived: unregistered wallets, unrecorded open bookings.
+ */
+export async function reviveStalledChainWork() {
+  const [wallets, bookings] = await Promise.all([
+    prisma.wallet.findMany({ where: { registeredTx: null }, select: { userId: true } }),
+    prisma.booking.findMany({
+      where: { onchainTx: null, status: { in: ["CONFIRMED", "UNPAID"] } },
+      select: { id: true },
+    }),
+  ]);
+  const keys = [
+    ...wallets.map((w) => `account:${w.userId}:register`),
+    ...bookings.map((b) => `booking:${b.id}:record`),
+  ];
+  if (keys.length === 0) return 0;
+  const revived = await prisma.chainOutbox.updateMany({
+    where: { idempotencyKey: { in: keys }, status: "DEAD" },
+    data: { status: "PENDING", attempts: 0, leaseUntil: null, lastError: null },
+  });
+  return revived.count;
 }

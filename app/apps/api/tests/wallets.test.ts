@@ -97,6 +97,26 @@ describe("platform-held wallets", () => {
     expect(await backfillWallets()).toBe(0);
   });
 
+  it("revives registrations that gave up, on the next start", async () => {
+    const { backfillWallets, provisionAndRegister } = await import("../src/chain/wallets");
+    const user = await makeUser("dead@wallet.kna");
+    await provisionAndRegister(user.id);
+    const key = `account:${user.id}:register`;
+    await prisma.chainOutbox.update({
+      where: { idempotencyKey: key },
+      data: { status: "DEAD", attempts: 9, lastError: "KNA_REGISTRAR_KEYPAIR_B58 is not configured" },
+    });
+    await backfillWallets();
+    const row = await prisma.chainOutbox.findUniqueOrThrow({ where: { idempotencyKey: key } });
+    expect(row).toMatchObject({ status: "PENDING", attempts: 0, lastError: null });
+
+    // A registered wallet's dead row stays dead: nothing is owed.
+    await prisma.wallet.update({ where: { userId: user.id }, data: { registeredTx: "sig" } });
+    await prisma.chainOutbox.update({ where: { idempotencyKey: key }, data: { status: "DEAD" } });
+    await backfillWallets();
+    expect((await prisma.chainOutbox.findUniqueOrThrow({ where: { idempotencyKey: key } })).status).toBe("DEAD");
+  });
+
   it("the worker registers the account on-chain, and retries a failure", async () => {
     const { processOutboxRow } = await import("../src/chain/worker");
     const user = await makeUser("worker@wallet.kna");
