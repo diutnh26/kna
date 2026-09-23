@@ -87,6 +87,12 @@ describe("public ledger", () => {
       .send({ decision: "confirm" })
       .expect(200);
 
+    const decided = await prisma.booking.findUniqueOrThrow({ where: { id } });
+    const coordinator = await prisma.user.findUniqueOrThrow({ where: { email: "coord@ledger.kna" } });
+    expect(decided.decidedById).toBe(coordinator.id);
+    expect(decided.decidedVia).toBe("COORDINATOR");
+    expect(decided.decidedAt).not.toBeNull();
+
     // 500,000/night × 1 night. The 7/3 split of the booking fee schedule.
     const rows = await ledger();
     expect(rows).toHaveLength(1);

@@ -30,7 +30,14 @@ async function findByPaymentRef(paymentRef: string): Promise<PaidTarget | null> 
   return null;
 }
 
-async function markBookingPaid(bookingId: string, expectedAmountVnd?: number) {
+/** Who marked a payment: a coordinator syncing the bank, or the bank's webhook. */
+type PaidBy = { userId: string | null; via: "PAYMENT_VERIFY" | "PAYMENT_WEBHOOK" };
+
+function decisionFields(paidBy: PaidBy) {
+  return { decidedById: paidBy.userId, decidedAt: new Date(), decidedVia: paidBy.via };
+}
+
+async function markBookingPaid(bookingId: string, paidBy: PaidBy, expectedAmountVnd?: number) {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     include: {
@@ -58,6 +65,9 @@ async function markBookingPaid(bookingId: string, expectedAmountVnd?: number) {
       paymentStatus: "PAID",
       paymentPaidAt: new Date(),
       status: booking.status === "PENDING" ? "CONFIRMED" : booking.status,
+      // Only a PENDING booking is decided here; one a coordinator already
+      // decided keeps that decision's trace.
+      ...(booking.status === "PENDING" ? decisionFields(paidBy) : {}),
     },
   });
 
@@ -118,7 +128,7 @@ async function markBookingPaid(bookingId: string, expectedAmountVnd?: number) {
   return updated;
 }
 
-async function markOrderPaid(orderId: string, expectedAmountVnd?: number) {
+async function markOrderPaid(orderId: string, paidBy: PaidBy, expectedAmountVnd?: number) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { items: { include: { product: true } }, ledgerEntries: true },
@@ -142,6 +152,7 @@ async function markOrderPaid(orderId: string, expectedAmountVnd?: number) {
       paymentStatus: "PAID",
       paymentPaidAt: new Date(),
       status: "PAID",
+      ...(order.status === "PENDING" ? decisionFields(paidBy) : {}),
     },
   });
   if (claimed.count !== 1) {
@@ -162,16 +173,16 @@ async function markOrderPaid(orderId: string, expectedAmountVnd?: number) {
   return updated;
 }
 
-async function applyPaid(paymentRef: string, expectedAmountVnd?: number) {
+async function applyPaid(paymentRef: string, paidBy: PaidBy, expectedAmountVnd?: number) {
   const target = await findByPaymentRef(paymentRef);
   if (!target) {
     return { ok: false as const, error: "No booking/order for that payment reference." };
   }
   if (target.kind === "booking") {
-    const booking = await markBookingPaid(target.id, expectedAmountVnd);
+    const booking = await markBookingPaid(target.id, paidBy, expectedAmountVnd);
     return { ok: true as const, kind: "booking" as const, booking };
   }
-  const order = await markOrderPaid(target.id, expectedAmountVnd);
+  const order = await markOrderPaid(target.id, paidBy, expectedAmountVnd);
   return { ok: true as const, kind: "order" as const, order };
 }
 
@@ -198,7 +209,11 @@ paymentsRouter.post("/webhook", async (req, res) => {
     }
 
     const paymentRef = verified.paymentRef ?? verified.reference;
-    const result = await applyPaid(paymentRef, verified.amountVnd);
+    const result = await applyPaid(
+      paymentRef,
+      { userId: null, via: "PAYMENT_WEBHOOK" },
+      verified.amountVnd
+    );
     if (!result.ok) {
       return res.status(404).json({ error: result.error });
     }
@@ -251,7 +266,11 @@ paymentsRouter.post(
         return res.json({ ok: false, status: synced.status, synced });
       }
 
-      const result = await applyPaid(synced.reference || ref, synced.amount);
+      const result = await applyPaid(
+        synced.reference || ref,
+        { userId: req.user!.id, via: "PAYMENT_VERIFY" },
+        synced.amount
+      );
       if (!result.ok) {
         return res.status(404).json({ error: result.error });
       }

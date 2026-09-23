@@ -221,7 +221,12 @@ bookingsRouter.post(
     const updated = await prisma.$transaction(async (tx) => {
       const claimed = await tx.booking.updateMany({
         where: { id: booking.id, status: "PENDING" },
-        data: { status: parsed.data.decision === "confirm" ? "CONFIRMED" : "CANCELLED" },
+        data: {
+          status: parsed.data.decision === "confirm" ? "CONFIRMED" : "CANCELLED",
+          decidedById: req.user!.id,
+          decidedAt: new Date(),
+          decidedVia: "COORDINATOR",
+        },
       });
       if (claimed.count !== 1) {
         return null;

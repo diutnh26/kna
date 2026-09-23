@@ -208,6 +208,12 @@ model Booking {
   // Demo SPL token disbursement (devnet) — JSON array of tx signatures
   demoTxSigs      String?
   demoDisburseAt  DateTime?
+  // Who moved it out of PENDING, when, and by which path: COORDINATOR (the
+  // decision route), PAYMENT_VERIFY (a coordinator syncing the bank) or
+  // PAYMENT_WEBHOOK (no user). A money decision always leaves a trace.
+  decidedById     String?
+  decidedAt       DateTime?
+  decidedVia      String?
   createdAt         DateTime @default(now())
 
   ledgerEntries LedgerEntry[]
@@ -285,6 +291,12 @@ model Order {
   paymentRef      String?
   paymentStatus   String    @default("AWAITING_PAYMENT")
   paymentPaidAt   DateTime?
+  // Who moved it out of PENDING, when, and by which path: COORDINATOR (the
+  // decision route), PAYMENT_VERIFY (a coordinator syncing the bank) or
+  // PAYMENT_WEBHOOK (no user). A money decision always leaves a trace.
+  decidedById     String?
+  decidedAt       DateTime?
+  decidedVia      String?
   createdAt         DateTime @default(now())
 
   items         OrderItem[]

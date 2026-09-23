@@ -22,6 +22,14 @@ import { fetchDemoTokenBalances } from "../chain/demo-token";
 
 export const chainRouter = Router();
 
+/**
+ * Every step a person takes on an attestation leaves a row: who, what, which
+ * ledger entry, and the signature or the reason it was refused.
+ */
+function audit(actorUserId: string, action: string, ledgerEntryId: string, detail: string) {
+  return prisma.chainAuditLog.create({ data: { actorUserId, action, ledgerEntryId, detail } });
+}
+
 /** The settled, attestable ledger row — or a 409 already sent, and null. */
 async function attestableOr409(ledgerEntryId: string, res: Response) {
   try {
@@ -204,6 +212,7 @@ chainRouter.post(
         payloadVersion: 1,
       },
     });
+    await audit(req.user!.id, "PREPARE_ATTESTATION", entry.id, body.data.coordinatorPubkey);
 
     res.json(prepared);
   }
@@ -264,9 +273,11 @@ chainRouter.post(
         where: { idempotencyKey: `ledger:${req.params.id}:settled` },
         data: { status: "AWAITING_COMMITTEE", lastError: null },
       });
+      await audit(req.user!.id, "SUBMIT_ATTESTATION", entry.id, verified.pendingTxSig);
       res.json(jsonAttestation(updated));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Submit verification failed";
+      await audit(req.user!.id, "SUBMIT_REJECTED", entry.id, message);
       await prisma.ledgerAttestation.updateMany({
         where: { ledgerEntryId: req.params.id },
         data: { lastError: message, state: "RETRYABLE" },
@@ -327,9 +338,11 @@ chainRouter.post(
         where: { idempotencyKey: `ledger:${req.params.id}:settled` },
         data: { status: "FINALIZED", lastError: null },
       });
+      await audit(req.user!.id, "FINALIZE_ATTESTATION", entry.id, verified.finalizeTxSig);
       res.json(jsonAttestation(updated));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Finalize verification failed";
+      await audit(req.user!.id, "FINALIZE_REJECTED", entry.id, message);
       return res.status(400).json({ error: message });
     }
   }

@@ -168,6 +168,13 @@ describe("chain verifier routes", () => {
     const row = await prisma.ledgerAttestation.findUnique({ where: { ledgerEntryId: ledgerId } });
     expect(row?.finalPda).toBe(expectedPda);
     expect(row?.finalizeTxSig).toBe(REAL_SIG);
+
+    const audit = await prisma.chainAuditLog.findFirstOrThrow({
+      where: { ledgerEntryId: ledgerId, action: "FINALIZE_ATTESTATION" },
+    });
+    const member = await prisma.user.findUniqueOrThrow({ where: { email: "host@chain.kna" } });
+    expect(audit.actorUserId).toBe(member.id);
+    expect(audit.detail).toBe(REAL_SIG);
   });
 
   it("POST finalize rejects derived final PDA mismatch and does not keep a bad PDA", async () => {

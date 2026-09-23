@@ -202,6 +202,10 @@ describe("POST /payments/webhook integration", () => {
     expect(row.paymentStatus).toBe("PAID");
     expect(row.status).toBe("CONFIRMED");
     expect(JSON.parse(row.demoTxSigs!)).toEqual(["sig1", "sig2", "sig3"]);
+    // Decided by the bank's webhook: a trace, with no person behind it.
+    expect(row.decidedVia).toBe("PAYMENT_WEBHOOK");
+    expect(row.decidedById).toBeNull();
+    expect(row.decidedAt).not.toBeNull();
   });
 
   it("disburses only once when the same paymentRef is posted twice", async () => {

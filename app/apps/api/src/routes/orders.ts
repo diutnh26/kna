@@ -216,7 +216,12 @@ ordersRouter.post(
     const updated = await prisma.$transaction(async (tx) => {
       const claimed = await tx.order.updateMany({
         where: { id: order.id, status: "PENDING" },
-        data: { status: parsed.data.decision === "settle" ? "PAID" : "CANCELLED" },
+        data: {
+          status: parsed.data.decision === "settle" ? "PAID" : "CANCELLED",
+          decidedById: req.user!.id,
+          decidedAt: new Date(),
+          decidedVia: "COORDINATOR",
+        },
       });
       if (claimed.count !== 1) {
         return null;
