@@ -136,7 +136,7 @@ export default function WalletCard() {
 
       <p className="text-xs text-bone/55 leading-relaxed">{t('walletCard.explainer')}</p>
 
-      <div className="grid md:grid-cols-2 gap-5">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
         <form onSubmit={topUp} className="space-y-2">
           <label className="block text-xs uppercase tracking-wider text-bone/60" htmlFor="topup-amount">
             {t('walletCard.topUpLabel')}
@@ -177,28 +177,28 @@ export default function WalletCard() {
           </button>
           <p className="text-xs text-bone/45">{t('walletCard.faucetHint')}</p>
         </div>
-      </div>
 
-      <div className="space-y-2 border-t border-bone/10 pt-4">
-        <div className="text-xs uppercase tracking-wider text-bone/60">{t('walletCard.payerLabel')}</div>
-        <p className="text-xs text-bone/70">
-          {payingIsPhantom
-            ? t('walletCard.payingFrom', { wallet: short(account.linked.pubkey), kind: 'Phantom' })
-            : t('walletCard.payingFrom', { wallet: short(account.address), kind: t('walletCard.fixedWallet') })}
-        </p>
-        {account.linked ? (
-          payingIsPhantom ? (
-            <button type="button" onClick={payWithFixed} disabled={busy === 'payer'} className="border border-bone/25 px-3 py-1.5 text-xs disabled:opacity-50">
-              {t('walletCard.useFixed')}
-            </button>
+        <div className="space-y-2 md:col-span-2 xl:col-span-1 border-t border-bone/10 pt-4 xl:border-t-0 xl:pt-0">
+          <div className="text-xs uppercase tracking-wider text-bone/60">{t('walletCard.payerLabel')}</div>
+          <p className="text-xs text-bone/70">
+            {payingIsPhantom
+              ? t('walletCard.payingFrom', { wallet: short(account.linked.pubkey), kind: 'Phantom' })
+              : t('walletCard.payingFrom', { wallet: short(account.address), kind: t('walletCard.fixedWallet') })}
+          </p>
+          {account.linked ? (
+            payingIsPhantom ? (
+              <button type="button" onClick={payWithFixed} disabled={busy === 'payer'} className="border border-bone/25 px-3 py-1.5 text-xs disabled:opacity-50">
+                {t('walletCard.useFixed')}
+              </button>
+            ) : (
+              <button type="button" onClick={payWithPhantom} disabled={busy === 'payer'} className="border border-amber/40 px-3 py-1.5 text-xs disabled:opacity-50">
+                {t('walletCard.usePhantom', { wallet: short(account.linked.pubkey) })}
+              </button>
+            )
           ) : (
-            <button type="button" onClick={payWithPhantom} disabled={busy === 'payer'} className="border border-amber/40 px-3 py-1.5 text-xs disabled:opacity-50">
-              {t('walletCard.usePhantom', { wallet: short(account.linked.pubkey) })}
-            </button>
-          )
-        ) : (
-          <GuestReceiptPanel />
-        )}
+            <GuestReceiptPanel />
+          )}
+        </div>
       </div>
 
       {topUps.length > 0 && (
