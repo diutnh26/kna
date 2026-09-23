@@ -58,7 +58,22 @@ describe("assertProductionConfig", () => {
     process.env.JWT_SECRET = "a".repeat(48);
     process.env.DATABASE_URL = "sqlserver://real";
     process.env.CORS_ORIGIN = "https://kna.example";
+    process.env.WALLET_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString("base64");
     const assert = await load();
     expect(() => assert()).not.toThrow();
+  });
+
+  it("refuses production without a real wallet encryption key", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.JWT_SECRET = "a".repeat(48);
+    process.env.DATABASE_URL = "sqlserver://real";
+    process.env.CORS_ORIGIN = "https://kna.example";
+    delete process.env.WALLET_ENCRYPTION_KEY;
+    let assert = await load();
+    expect(() => assert()).toThrow(/WALLET_ENCRYPTION_KEY is unset/);
+
+    process.env.WALLET_ENCRYPTION_KEY = Buffer.alloc(16, 7).toString("base64");
+    assert = await load();
+    expect(() => assert()).toThrow(/32 random bytes/);
   });
 });

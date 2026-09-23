@@ -38,7 +38,7 @@ export type DemoTokenBalances = {
   community: DemoTokenBalance | null;
 };
 
-async function readAtaBalance(
+export async function readAtaBalance(
   connection: Connection,
   mint: PublicKey,
   owner: string

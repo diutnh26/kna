@@ -1,0 +1,76 @@
+import { Keypair, Transaction } from "@solana/web3.js";
+import bs58 from "bs58";
+import {
+  ACCOUNT_FLAG_GUEST,
+  ACCOUNT_FLAG_PROVIDER,
+  buildRegisterAccountIx,
+  fetchAccountRecord,
+} from "@kna/chain-client";
+import { prisma } from "../lib/prisma";
+import { getChainGateway } from "./gateway";
+import { loadWalletKeypair } from "./wallets";
+
+/**
+ * The platform registrar: a coordinator-role key that registers accounts,
+ * records bookings and pays network fees, so users never need devnet SOL.
+ */
+export function loadRegistrar(): Keypair {
+  const raw = process.env.KNA_REGISTRAR_KEYPAIR_B58?.trim();
+  if (!raw) throw new Error("KNA_REGISTRAR_KEYPAIR_B58 is not configured");
+  return Keypair.fromSecretKey(bs58.decode(raw));
+}
+
+export async function accountFlags(userId: string) {
+  const provider = await prisma.provider.findUnique({ where: { userId }, select: { id: true } });
+  return ACCOUNT_FLAG_GUEST | (provider ? ACCOUNT_FLAG_PROVIDER : 0);
+}
+
+/**
+ * register_account for one user, signed by the registrar and by the user's
+ * own fixed wallet. Idempotent: an account already on-chain with this
+ * wallet is simply recorded as registered.
+ */
+export async function registerAccountOnChain(userId: string) {
+  const wallet = await prisma.wallet.findUnique({ where: { userId } });
+  if (!wallet) throw new Error("No wallet to register");
+  if (wallet.registeredTx) return wallet;
+
+  const connection = getChainGateway().connection();
+  const onChain = await fetchAccountRecord(connection, userId);
+  if (onChain) {
+    if (onChain.wallet !== wallet.pubkey) {
+      throw new Error("This account is already bound on-chain to a different wallet");
+    }
+    return prisma.wallet.update({
+      where: { userId },
+      data: { registeredTx: "already-registered", registeredAt: new Date(), registerError: null },
+    });
+  }
+
+  const registrar = loadRegistrar();
+  const walletKeypair = await loadWalletKeypair(userId);
+  const flags = await accountFlags(userId);
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({ feePayer: registrar.publicKey, blockhash, lastValidBlockHeight }).add(
+    buildRegisterAccountIx({
+      registrar: registrar.publicKey,
+      wallet: walletKeypair.publicKey,
+      userId,
+      flags,
+    })
+  );
+  const sig = await connection.sendTransaction(tx, [registrar, walletKeypair], {
+    preflightCommitment: "confirmed",
+  });
+  await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
+
+  // Believe the chain: read the record back before saying it is registered.
+  const record = await fetchAccountRecord(connection, userId);
+  if (!record || record.wallet !== wallet.pubkey || record.flags !== flags) {
+    throw new Error("Account record on-chain does not match after register_account");
+  }
+  return prisma.wallet.update({
+    where: { userId },
+    data: { registeredTx: sig, registeredAt: new Date(), registerError: null },
+  });
+}

@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import { OAuth2Client } from "google-auth-library";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import { provisionAndRegister } from "../chain/wallets";
 import { hashOpaque, newOpaqueToken, sendVerificationEmail } from "../lib/mail";
 import {
   ACCESS_COOKIE,
@@ -140,6 +141,9 @@ authRouter.post("/signup", registerLimiter, async (req, res) => {
     },
   });
 
+  // Every account gets its fixed wallet at sign-up.
+  await provisionAndRegister(user.id);
+
   const rawVerify = await issueVerifyToken(user.id);
   try {
     await sendVerificationEmail(email, rawVerify);
@@ -241,6 +245,7 @@ authRouter.post("/google", googleLimiter, async (req, res) => {
       passwordHash: null,
     },
   });
+  await provisionAndRegister(user.id);
   return respondWithSession(res, user, 201);
 });
 

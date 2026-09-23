@@ -7,6 +7,10 @@ import { PublicKey } from "@solana/web3.js";
 import { prisma } from "../lib/prisma";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
 import { loadChainConfig } from "../chain/config";
+import { explorerAccountUrl, explorerTxUrl } from "@kna/chain-client";
+import { Connection } from "@solana/web3.js";
+import { provisionAndRegister } from "../chain/wallets";
+import { loadMint, readAtaBalance } from "../chain/demo-token";
 
 export const walletRouter = Router();
 
@@ -139,6 +143,46 @@ walletRouter.post("/link", requireAuth, async (req: AuthedRequest, res) => {
     linkedAt: updated.linkedAt,
     domain: config.walletLinkDomain,
     verified: true,
+  });
+});
+
+/**
+ * The account's wallets as the Account screen shows them: the fixed wallet
+ * (its address never changes), whether it is registered on-chain, the
+ * linked Phantom if any, which of the two pays bookings, and that wallet's
+ * dKNA balance. Never the secret key.
+ */
+walletRouter.get("/account", requireAuth, async (req: AuthedRequest, res) => {
+  const userId = req.user!.id;
+  const wallet =
+    (await prisma.wallet.findUnique({ where: { userId } })) ?? (await provisionAndRegister(userId));
+  const link = await prisma.walletLink.findUnique({ where: { userId } });
+  const linked = link && !link.pubkey.startsWith("pending:") ? link : null;
+  const paymentWallet = linked?.isDefault ? linked.pubkey : wallet.pubkey;
+  const config = loadChainConfig();
+
+  let balance = null;
+  const mint = loadMint();
+  if (mint) {
+    try {
+      balance = await readAtaBalance(new Connection(config.rpcUrl, "confirmed"), mint, paymentWallet);
+    } catch {
+      balance = null; // RPC trouble must not break the Account screen
+    }
+  }
+
+  const registeredTx =
+    wallet.registeredTx && wallet.registeredTx !== "already-registered" ? wallet.registeredTx : null;
+  res.json({
+    address: wallet.pubkey,
+    explorer: explorerAccountUrl(config.cluster, wallet.pubkey),
+    registered: Boolean(wallet.registeredTx),
+    registeredAt: wallet.registeredAt,
+    registeredTxExplorer: registeredTx ? explorerTxUrl(config.cluster, registeredTx) : null,
+    registerError: wallet.registeredTx ? null : wallet.registerError,
+    linked: linked ? { pubkey: linked.pubkey, isDefault: linked.isDefault } : null,
+    paymentWallet,
+    balance,
   });
 });
 

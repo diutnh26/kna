@@ -64,6 +64,7 @@ model User {
   moderatedEntries   ArchiveEntry[] @relation("ArchiveModerator")
   notifications      Notification[]
   walletLink         WalletLink?
+  wallet             Wallet?
   refreshTokens      RefreshToken[]
 }
 
@@ -412,6 +413,24 @@ model ArchiveEntry {
 
 // ── Solana trust layer (Track 2) ──────────────────────────
 
+/// The account's fixed wallet: created by the platform at sign-up, its key
+/// held encrypted (lib/walletCrypto.ts), registered on-chain once with
+/// register_account. One per user, never replaced.
+model Wallet {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  pubkey          String    @unique
+  encryptedSecret String
+  createdAt       DateTime  @default(now())
+  // register_account on devnet
+  registeredTx    String?
+  registeredAt    DateTime?
+  registerError   String?
+}
+
+/// A wallet the user brings (Phantom). When `isDefault`, it pays their
+/// bookings instead of the fixed wallet (set_payment_wallet on-chain).
 model WalletLink {
   id              String   @id @default(cuid())
   userId          String   @unique
@@ -421,6 +440,8 @@ model WalletLink {
   challengeExpiry DateTime?
   linkVersion     Int      @default(1)
   linkedAt        DateTime @default(now())
+  isDefault       Boolean  @default(false)
+  paymentWalletTx String?
 }
 
 model ChainOutbox {

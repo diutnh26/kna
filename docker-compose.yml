@@ -47,6 +47,8 @@ services:
       DATABASE_URL: postgresql://kna:kna@postgres:5432/kna_dev
       DIRECT_DATABASE_URL: postgresql://kna:kna@postgres:5432/kna_dev
       JWT_SECRET: docker-local-not-a-secret-at-least-32-chars
+      # Local only: encrypts the platform-held wallet keys of this Docker stack.
+      WALLET_ENCRYPTION_KEY: NXtUrC5pfIk36StvtKwR91uhV6UifzmUVKNj9QP8YwI=
       CORS_ORIGIN: http://localhost:8080
       PUBLIC_BASE_URL: http://localhost:8080
       ACCESS_TOKEN_TTL: 15m

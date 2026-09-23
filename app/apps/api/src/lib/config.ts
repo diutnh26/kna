@@ -26,6 +26,13 @@ export function assertProductionConfig() {
     problems.push("DATABASE_URL is unset.");
   }
 
+  const walletKey = process.env.WALLET_ENCRYPTION_KEY?.trim();
+  if (!walletKey) {
+    problems.push("WALLET_ENCRYPTION_KEY is unset — it encrypts the platform-held wallet keys.");
+  } else if (Buffer.from(walletKey, "base64").length !== 32) {
+    problems.push("WALLET_ENCRYPTION_KEY must be 32 random bytes, base64-encoded.");
+  }
+
   if (!process.env.CORS_ORIGIN) {
     problems.push("CORS_ORIGIN is unset — it must name the deployed frontend, not default to localhost.");
   }

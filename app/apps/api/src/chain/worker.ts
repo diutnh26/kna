@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import { loadChainConfig } from "./config";
 import { getChainGateway } from "./gateway";
 import { LedgerNotAttestableError, recomputeAndVerifySettled } from "./outbox";
+import { registerAccountOnChain } from "./accounts-onchain";
 
 const MAX_ATTEMPTS = 8;
 
@@ -43,9 +44,38 @@ export async function claimOutboxBatch(limit = 5) {
   return claimed;
 }
 
+type OutboxRow = NonNullable<Awaited<ReturnType<typeof prisma.chainOutbox.findUnique>>>;
+
+/** register_account for a new (or backfilled) account. */
+async function processAccountRegister(row: OutboxRow) {
+  const { userId } = row.payload as { userId: string };
+  try {
+    if (!getChainGateway().isEnabled()) {
+      throw new Error("Solana disabled — leaving outbox for later");
+    }
+    await registerAccountOnChain(userId);
+    await prisma.chainOutbox.update({
+      where: { id: row.id },
+      data: { status: "DONE", leaseUntil: null, lastError: null },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown worker error";
+    await prisma.chainOutbox.update({
+      where: { id: row.id },
+      data: {
+        status: row.attempts >= MAX_ATTEMPTS ? "DEAD" : "RETRYABLE",
+        lastError: message,
+        leaseUntil: null,
+      },
+    });
+    await prisma.wallet.updateMany({ where: { userId }, data: { registerError: message } });
+  }
+}
+
 export async function processOutboxRow(rowId: string) {
   const row = await prisma.chainOutbox.findUnique({ where: { id: rowId } });
   if (!row) return;
+  if (row.eventType === "ACCOUNT_REGISTER") return processAccountRegister(row);
 
   try {
     if (!getChainGateway().isEnabled()) {
