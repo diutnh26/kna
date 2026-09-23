@@ -830,6 +830,21 @@
       "ARCHIVE_REJECTED": "{{title}} không được đăng. {{note}}"
     }
   },
+  "receipt": {
+    "title": "Biên nhận tác động",
+    "toProvider": "Cho {{provider}}",
+    "toFund": "Quỹ cộng đồng",
+    "toPlatform": "Nền tảng KNĂ",
+    "status": {
+      "awaiting": "Đang chờ thanh toán và xác nhận. Chưa có khoản tiền nào được chuyển.",
+      "confirmed": "Đã thanh toán và xác nhận. Khoản phân chia này đã có trên sổ cái công khai.",
+      "cancelled": "Đã huỷ. Không có khoản tiền nào được chuyển."
+    },
+    "proofAfterConfirm": "Bằng chứng được ghi lên Solana sau khi xác nhận.",
+    "proofAwaitingCommittee": "Bằng chứng đã gửi lên Solana, đang chờ hội đồng cộng đồng.",
+    "proofFinalized": "Bằng chứng đã được hội đồng cộng đồng hoàn tất trên Solana.",
+    "proofWithdrawn": "Bằng chứng trên chuỗi đã được điều phối viên rút lại."
+  },
   "wallet": {
     "connect": "Kết nối ví",
     "connecting": "Đang kết nối…",

@@ -19,6 +19,7 @@ import { useAuth } from '../context/useAuth';
 import { GuestReceiptPanel } from '../wallet/AttestationPanel';
 import DemoWalletPanel from './DemoWalletPanel';
 import DemoTxHistory from './DemoTxHistory';
+import ImpactReceipt from './ImpactReceipt';
 
 const vnd = (n) => n.toLocaleString('vi-VN') + ' ₫';
 const dmy = (iso) =>
@@ -617,6 +618,29 @@ export default function Account() {
                           <p className="mt-2 text-[10px] text-[#F5EDDD]/40">
                             {t('travel.demoTokensSkipped')}
                           </p>
+                        ) : null}
+
+                        {row.kind === 'booking' && row.proof !== undefined ? (
+                          <div className="mt-3 max-w-md">
+                            <ImpactReceipt
+                              totalVnd={row.totalVnd}
+                              providerVnd={row.toProviderVnd}
+                              communityFundVnd={row.toCommunityFundVnd}
+                              platformFeeVnd={row.platformFeeVnd}
+                              provider={row.from}
+                              status={
+                                row.status === 'CANCELLED'
+                                  ? 'cancelled'
+                                  : row.status === 'CONFIRMED' ||
+                                      row.status === 'COMPLETED' ||
+                                      row.paymentStatus === 'PAID'
+                                    ? 'confirmed'
+                                    : 'awaiting'
+                              }
+                              proof={row.proof}
+                              compact
+                            />
+                          </div>
                         ) : null}
 
                         {row.kind === 'contribution' && (

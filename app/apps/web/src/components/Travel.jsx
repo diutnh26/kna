@@ -17,6 +17,7 @@ import { useAuth } from '../context/useAuth';
 import { useDebounced } from '../lib/useDebounced';
 import ApiErrorNotice from './ApiErrorNotice';
 import DemoWalletPanel from './DemoWalletPanel';
+import ImpactReceipt from './ImpactReceipt';
 
 const CATEGORIES = ['All', 'Stay', 'Guided walk', 'Craft session', 'Ceremony'];
 const BUON = ['All buôn', 'Buôn Akô Dhông', 'Buôn Đôn', 'Buôn Trấp'];
@@ -196,6 +197,11 @@ export default function Travel() {
           status: 'done',
           error: null,
           bookingId: created.id,
+          // The split as the server computed it, for the impact receipt.
+          totalVnd: created.totalVnd,
+          providerPayoutVnd: created.providerPayoutVnd,
+          communityFundVnd: created.communityFundVnd,
+          platformFeeVnd: created.platformFeeVnd,
           paymentRef: created.paymentRef ?? created.payment?.paymentRef,
           payment: created.payment,
           demoTxSigs: (() => {
@@ -450,6 +456,17 @@ export default function Travel() {
                             )}
                           </div>
 
+                          {booking?.status === 'done' && booking.totalVnd != null && (
+                            <ImpactReceipt
+                              totalVnd={booking.totalVnd}
+                              providerVnd={booking.providerPayoutVnd}
+                              communityFundVnd={booking.communityFundVnd}
+                              platformFeeVnd={booking.platformFeeVnd}
+                              provider={l.provider.displayName}
+                              status={booking.paymentStatus === 'PAID' ? 'confirmed' : 'awaiting'}
+                              compact
+                            />
+                          )}
                           {booking?.status === 'done' && booking.payment && (
                             <div className="space-y-3 text-xs text-bone/70">
                               {booking.payment.qrUrl ? (

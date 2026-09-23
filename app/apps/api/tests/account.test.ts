@@ -244,6 +244,32 @@ describe("account", () => {
     expect(booking.toProviderVnd).toBe(450_000);
   });
 
+  it("carries each booking's proof state for the impact receipt, linking only real signatures", async () => {
+    const timeline = async () =>
+      (await request(app).get("/account/activity").set("Authorization", `Bearer ${guestToken}`)).body;
+    const confirmed = (await timeline()).find(
+      (r: { kind: string; status: string }) => r.kind === "booking" && r.status === "CONFIRMED"
+    );
+    expect(confirmed.platformFeeVnd).toBe(35_000);
+    expect(confirmed.proof).toMatchObject({ state: null, explorerUrl: null });
+
+    const ledgerEntryId = confirmed.proof.ledgerEntryId;
+    await prisma.ledgerAttestation.create({
+      data: { ledgerEntryId, payloadHash: "h", state: "AWAITING_COMMITTEE", pendingTxSig: `mock_${"A".repeat(80)}` },
+    });
+    let row = (await timeline()).find((r: { id: string }) => r.id === confirmed.id);
+    expect(row.proof.state).toBe("AWAITING_COMMITTEE");
+    expect(row.proof.explorerUrl).toBeNull(); // a mock signature is never linked
+
+    await prisma.ledgerAttestation.update({
+      where: { ledgerEntryId },
+      data: { state: "FINALIZED", finalizeTxSig: "4".repeat(88) },
+    });
+    row = (await timeline()).find((r: { id: string }) => r.id === confirmed.id);
+    expect(row.proof.state).toBe("FINALIZED");
+    expect(row.proof.explorerUrl).toContain("4".repeat(88));
+  });
+
   it("shows only this person's activity", async () => {
     await makeUser("other@account.kna", "GUEST");
     const otherToken = (

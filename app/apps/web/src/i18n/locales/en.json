@@ -830,6 +830,21 @@
       "ARCHIVE_REJECTED": "{{title}} was not published. {{note}}"
     }
   },
+  "receipt": {
+    "title": "Impact receipt",
+    "toProvider": "To {{provider}}",
+    "toFund": "Community Fund",
+    "toPlatform": "KNĂ platform",
+    "status": {
+      "awaiting": "Awaiting payment and confirmation. Nothing has moved yet.",
+      "confirmed": "Paid and confirmed. This split is on the public ledger.",
+      "cancelled": "Cancelled. No money moved."
+    },
+    "proofAfterConfirm": "Its proof is recorded on Solana after confirmation.",
+    "proofAwaitingCommittee": "Proof submitted on Solana, awaiting the community committee.",
+    "proofFinalized": "Proof finalized on Solana by the community committee.",
+    "proofWithdrawn": "Its on-chain proof was withdrawn by a coordinator."
+  },
   "wallet": {
     "connect": "Connect wallet",
     "connecting": "Connecting…",

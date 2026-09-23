@@ -9,8 +9,33 @@ import {
   revokeSessions,
   type AuthedRequest,
 } from "../middleware/auth";
+import { explorerTxUrl, isLikelyFakeSignature } from "@kna/chain-client";
+import { loadChainConfig } from "../chain/config";
 
 export const accountRouter = Router();
+
+type AttestationProof = {
+  state: string;
+  pendingTxSig: string | null;
+  finalizeTxSig: string | null;
+} | null;
+
+/**
+ * The proof half of a booking's impact receipt: which ledger row carries it,
+ * how far its attestation has got, and an Explorer link only for a real,
+ * verified signature (finalize first, else the pending submit).
+ */
+function proofOf(entry: { id: string; attestation: AttestationProof } | undefined) {
+  if (!entry) return null;
+  const sig = [entry.attestation?.finalizeTxSig, entry.attestation?.pendingTxSig].find(
+    (s): s is string => Boolean(s) && !isLikelyFakeSignature(s!)
+  );
+  return {
+    ledgerEntryId: entry.id,
+    state: entry.attestation?.state ?? null,
+    explorerUrl: sig ? explorerTxUrl(loadChainConfig().cluster, sig) : null,
+  };
+}
 
 /**
  * A person's own account: who they are, and what they have done here.
@@ -313,6 +338,13 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
         },
         guest: { select: { fullName: true, email: true } },
         offset: true,
+        ledgerEntries: {
+          where: { voidedAt: null },
+          select: {
+            id: true,
+            attestation: { select: { state: true, pendingTxSig: true, finalizeTxSig: true } },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
       take: isStaff ? 60 : 40,
@@ -374,6 +406,8 @@ accountRouter.get("/activity", requireAuth, async (req: AuthedRequest, res) => {
       totalVnd: b.totalVnd,
       toProviderVnd: b.providerPayoutVnd,
       toCommunityFundVnd: b.communityFundVnd,
+      platformFeeVnd: b.platformFeeVnd,
+      proof: proofOf(b.ledgerEntries[0]),
       paymentRef: b.paymentRef,
       paymentStatus: b.paymentStatus,
       demoTxSigs: (() => {
