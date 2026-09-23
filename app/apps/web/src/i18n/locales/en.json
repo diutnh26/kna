@@ -893,6 +893,10 @@
     "recordFinalize": "Record finalize sig",
     "pasteFinalizeSig": "Paste the finalized Solana transaction signature",
     "pasteMultisigPdaOptional": "Optional: paste the Squads multisig PDA to verify this vault matches it",
+    "pasteFromClipboard": "Paste",
+    "invalidSignature": "That is not a Solana transaction signature (86–88 base58 characters).",
+    "invalidAddress": "That is not a Solana address (32–44 base58 characters).",
+    "formCancel": "Cancel",
     "squadsPasteback": "After Squads executes the vault transaction, paste the executed transaction signature back into KNĂ so the API can verify the final PDA and update the public ledger.",
     "publicLedger": "Public ledger",
     "verifyOnChain": "Verify on-chain"

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import { useWallet } from './WalletProvider';
+import { isSolanaAddress, isSolanaSignature } from './solanaFormat';
 
 // Once a pending PDA exists on-chain, submitting again can only fail
 // (the program's `init` refuses it), so the button goes away.
@@ -281,6 +282,53 @@ export function GuestReceiptPanel() {
   );
 }
 
+
+/**
+ * One inline field for a value pasted in from Squads or Phantom, checked as
+ * base58 of the right length before it is sent. Replaces window.prompt,
+ * which could not show a format error, broke in some demo browsers, and could
+ * not be driven by tests.
+ */
+function PasteField({ label, value, onChange, valid, invalidText, optional = false }) {
+  const { t } = useTranslation();
+  const trimmed = value.trim();
+  const showError = trimmed.length > 0 && !valid(trimmed);
+  const canPaste = typeof navigator !== 'undefined' && navigator.clipboard?.readText;
+  return (
+    <label className="block space-y-1">
+      <span className="text-bone/70">{label}</span>
+      <span className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required={!optional}
+          spellCheck={false}
+          autoComplete="off"
+          aria-invalid={showError}
+          className="flex-1 min-w-0 bg-transparent border border-bone/20 px-2 py-1 font-mono text-[10px]"
+        />
+        {canPaste ? (
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                onChange((await navigator.clipboard.readText()).trim());
+              } catch {
+                /* clipboard permission denied: typing still works */
+              }
+            }}
+            className="border border-bone/20 px-2 py-1 uppercase tracking-wider"
+          >
+            {t('wallet.pasteFromClipboard')}
+          </button>
+        ) : null}
+      </span>
+      {showError ? <span className="block text-kteh">{invalidText}</span> : null}
+    </label>
+  );
+}
+
 export function CommitteeFinalizePanel() {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
@@ -289,6 +337,9 @@ export function CommitteeFinalizePanel() {
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState('');
   const [note, setNote] = useState('');
+  // Which row has which form open: { id, kind: 'squads' | 'finalize' }.
+  const [form, setForm] = useState(null);
+  const [value, setValue] = useState('');
 
   async function refresh() {
     if (!isAuthenticated) return;
@@ -299,12 +350,22 @@ export function CommitteeFinalizePanel() {
     refresh().catch(() => setRows([]));
   }, [isAuthenticated]);
 
-  async function loadSquadsProposal(ledgerEntryId) {
+  function openForm(id, kind) {
+    setForm({ id, kind });
+    setValue('');
+    setError('');
+  }
+
+  function closeForm() {
+    setForm(null);
+    setValue('');
+  }
+
+  async function loadSquadsProposal(ledgerEntryId, multisigPda) {
     setBusyId(ledgerEntryId);
     setError('');
     try {
       if (!connected) await connect();
-      const multisigPda = window.prompt(t('wallet.pasteMultisigPdaOptional'))?.trim() || undefined;
       const ix = await api.chainSquadsProposal(ledgerEntryId, { multisigPda });
       setNote(
         [
@@ -318,6 +379,7 @@ export function CommitteeFinalizePanel() {
           .filter(Boolean)
           .join('\n')
       );
+      closeForm();
       return ix;
     } catch (err) {
       setError(err.message ?? t('wallet.attestError'));
@@ -331,11 +393,24 @@ export function CommitteeFinalizePanel() {
     setError('');
     try {
       await api.chainFinalize(ledgerEntryId, { finalizeTxSig });
+      closeForm();
       await refresh();
     } catch (err) {
       setError(err.message ?? t('wallet.attestError'));
     } finally {
       setBusyId(null);
+    }
+  }
+
+  function submitForm(event) {
+    event.preventDefault();
+    const trimmed = value.trim();
+    if (form.kind === 'squads') {
+      if (trimmed && !isSolanaAddress(trimmed)) return;
+      loadSquadsProposal(form.id, trimmed || undefined);
+    } else {
+      if (!isSolanaSignature(trimmed)) return;
+      recordFinalize(form.id, trimmed);
     }
   }
 
@@ -349,35 +424,79 @@ export function CommitteeFinalizePanel() {
         <p className="text-bone/40">{t('wallet.noAwaiting')}</p>
       ) : (
         <ul className="space-y-2">
-          {rows.map((row) => (
-            <li key={row.ledgerEntryId} className="border border-bone/10 p-2 space-y-2">
-              <div className="font-mono">{row.ledgerEntryId.slice(-10)}</div>
-              <div>
-                {row.toLabel} · {row.totalVnd?.toLocaleString?.('vi-VN')} ₫
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={busyId === row.ledgerEntryId}
-                  onClick={() => loadSquadsProposal(row.ledgerEntryId)}
-                  className="border px-2 py-1 uppercase tracking-wider"
-                >
-                  {t('wallet.exportSquadsProposal')}
-                </button>
-                <button
-                  type="button"
-                  disabled={busyId === row.ledgerEntryId}
-                  onClick={() => {
-                    const sig = window.prompt(t('wallet.pasteFinalizeSig'));
-                    if (sig) recordFinalize(row.ledgerEntryId, sig.trim());
-                  }}
-                  className="border border-sage/50 px-2 py-1 uppercase tracking-wider"
-                >
-                  {t('wallet.recordFinalize')}
-                </button>
-              </div>
-            </li>
-          ))}
+          {rows.map((row) => {
+            const open = form?.id === row.ledgerEntryId ? form.kind : null;
+            const busy = busyId === row.ledgerEntryId;
+            const trimmed = value.trim();
+            const ready =
+              open === 'squads' ? !trimmed || isSolanaAddress(trimmed) : isSolanaSignature(trimmed);
+            return (
+              <li key={row.ledgerEntryId} className="border border-bone/10 p-2 space-y-2">
+                <div className="font-mono">{row.ledgerEntryId.slice(-10)}</div>
+                <div>
+                  {row.toLabel} · {row.totalVnd?.toLocaleString?.('vi-VN')} ₫
+                </div>
+                {open ? (
+                  <form onSubmit={submitForm} className="space-y-2">
+                    {open === 'squads' ? (
+                      <PasteField
+                        label={t('wallet.pasteMultisigPdaOptional')}
+                        value={value}
+                        onChange={setValue}
+                        valid={isSolanaAddress}
+                        invalidText={t('wallet.invalidAddress')}
+                        optional
+                      />
+                    ) : (
+                      <PasteField
+                        label={t('wallet.pasteFinalizeSig')}
+                        value={value}
+                        onChange={setValue}
+                        valid={isSolanaSignature}
+                        invalidText={t('wallet.invalidSignature')}
+                      />
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={busy || !ready}
+                        className="border border-sage/50 px-2 py-1 uppercase tracking-wider disabled:opacity-50"
+                      >
+                        {open === 'squads' ? t('wallet.exportSquadsProposal') : t('wallet.recordFinalize')}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={closeForm}
+                        className="px-2 py-1 uppercase tracking-wider text-bone/60"
+                      >
+                        {t('wallet.formCancel')}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => openForm(row.ledgerEntryId, 'squads')}
+                      className="border px-2 py-1 uppercase tracking-wider"
+                    >
+                      {t('wallet.exportSquadsProposal')}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => openForm(row.ledgerEntryId, 'finalize')}
+                      className="border border-sage/50 px-2 py-1 uppercase tracking-wider"
+                    >
+                      {t('wallet.recordFinalize')}
+                    </button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
       <p className="text-bone/45">

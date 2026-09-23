@@ -893,6 +893,10 @@
     "recordFinalize": "Ghi finalize sig",
     "pasteFinalizeSig": "Dán chữ ký giao dịch finalize trên Solana",
     "pasteMultisigPdaOptional": "Tuỳ chọn: dán Squads multisig PDA để kiểm tra vault này khớp multisig thật",
+    "pasteFromClipboard": "Dán",
+    "invalidSignature": "Đây không phải chữ ký giao dịch Solana (86–88 ký tự base58).",
+    "invalidAddress": "Đây không phải địa chỉ Solana (32–44 ký tự base58).",
+    "formCancel": "Huỷ",
     "squadsPasteback": "Sau khi Squads execute vault transaction, dán lại chữ ký giao dịch vào KNĂ để API xác minh final PDA và cập nhật sổ công khai.",
     "publicLedger": "Sổ công khai",
     "verifyOnChain": "Xác minh on-chain"
