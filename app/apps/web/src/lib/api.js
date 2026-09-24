@@ -84,6 +84,31 @@ async function request(path, { method = 'GET', body, token: _token, _skipRefresh
   return data;
 }
 
+/**
+ * Upload a photograph (JPEG, PNG or WebP, at most 3 MB). The body is the
+ * file itself, so this bypasses request()'s JSON encoding; it keeps the
+ * same one-refresh-then-retry behaviour.
+ */
+async function uploadImage(file, retried = false) {
+  const res = await fetch(`${API_URL}/images`, {
+    method: 'POST',
+    headers: { 'Content-Type': file.type },
+    credentials: 'include',
+    body: file,
+  });
+  if (res.status === 401 && !retried) {
+    try {
+      await refreshSession();
+      return uploadImage(file, true);
+    } catch {
+      // fall through to the 401 below
+    }
+  }
+  const data = res.headers.get('content-type')?.includes('application/json') ? await res.json() : null;
+  if (!res.ok) throw new ApiError(data?.error || `Upload failed (${res.status})`, res.status);
+  return data;
+}
+
 function query(params = {}) {
   const clean = Object.fromEntries(
     Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
@@ -118,6 +143,15 @@ export const api = {
   providerDashboard: () => request('/providers/me'),
   setAvailability: (listingId, body) =>
     request(`/providers/me/listings/${listingId}/availability`, { method: 'PUT', body }),
+  // The provider's own catalogue and profile.
+  updateProviderProfile: (body) => request('/providers/me', { method: 'PATCH', body }),
+  createMyListing: (body) => request('/providers/me/listings', { method: 'POST', body }),
+  updateMyListing: (id, body) => request(`/providers/me/listings/${id}`, { method: 'PATCH', body }),
+  deleteMyListing: (id) => request(`/providers/me/listings/${id}`, { method: 'DELETE' }),
+  createMyProduct: (body) => request('/providers/me/products', { method: 'POST', body }),
+  updateMyProduct: (id, body) => request(`/providers/me/products/${id}`, { method: 'PATCH', body }),
+  deleteMyProduct: (id) => request(`/providers/me/products/${id}`, { method: 'DELETE' }),
+  uploadImage: (file) => uploadImage(file),
 
   // A person's own account: who they are, and everything they have done
   // here as one timeline rather than three lists.
@@ -150,6 +184,24 @@ export const api = {
   reviewedEntries: () => request('/archive/reviewed'),
   reviewEntry: (id, payload) =>
     request(`/archive/${id}/review`, { method: 'POST', body: payload }),
+  phraseQueue: () => request('/archive/phrases/queue'),
+  reviewPhrase: (id, payload) =>
+    request(`/archive/phrases/${id}/review`, { method: 'POST', body: payload }),
+
+  // The admin console (ADMIN only). Every change sends a JSON body, which
+  // the API requires.
+  adminMeta: () => request('/admin/meta'),
+  adminSystem: () => request('/admin/system'),
+  adminList: (resource, params) => request(`/admin/${resource}${query(params)}`),
+  adminGet: (resource, id) => request(`/admin/${resource}/${encodeURIComponent(id)}`),
+  adminHistory: (resource, id) => request(`/admin/${resource}/${encodeURIComponent(id)}/history`),
+  adminCreate: (resource, body) => request(`/admin/${resource}`, { method: 'POST', body }),
+  adminUpdate: (resource, id, body) =>
+    request(`/admin/${resource}/${encodeURIComponent(id)}`, { method: 'PATCH', body }),
+  adminRemove: (resource, id, reason) =>
+    request(`/admin/${resource}/${encodeURIComponent(id)}`, { method: 'DELETE', body: { reason } }),
+  adminAction: (resource, id, action, body = {}) =>
+    request(`/admin/${resource}/${encodeURIComponent(id)}/actions/${action}`, { method: 'POST', body }),
 
   ledger: (limit) => request(`/community/ledger${query({ limit })}`),
   fund: () => request('/community/fund'),

@@ -16,6 +16,8 @@ import { notificationsRouter } from "./routes/notifications";
 import { chainRouter } from "./routes/chain";
 import { walletRouter } from "./routes/wallet";
 import { traceRouter } from "./routes/trace";
+import { adminRouter } from "./routes/admin";
+import { imagesRouter } from "./routes/images";
 import { paymentsRouter } from "./routes/payments";
 
 /**
@@ -57,6 +59,8 @@ export function createApp() {
   app.use("/chain", chainRouter);
   app.use("/wallet", walletRouter);
   app.use("/trace", traceRouter);
+  app.use("/images", imagesRouter);
+  app.use("/admin", adminRouter);
   app.use("/payments", paymentsRouter);
 
   app.use((req, res) => {

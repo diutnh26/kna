@@ -34,9 +34,21 @@ export default function Navbar({ active = '', theme = 'dark' }) {
   if (user?.provider || user?.role === 'COORDINATOR' || user?.role === 'ADMIN' || user?.isCommitteeMember) {
     LINKS.push({ key: 'dashboard', label: t('nav.dashboard'), href: '#dashboard' });
   }
-  if (user?.isCommitteeMember || user?.role === 'ADMIN') {
+  // Review is the Committee's: publishing is their decision, and an admin
+  // without a seat does not review.
+  if (user?.isCommitteeMember) {
     LINKS.push({ key: 'review', label: t('nav.review'), href: '#review' });
   }
+  if (user?.role === 'ADMIN') {
+    LINKS.push({ key: 'admin', label: t('nav.admin'), href: '#admin' });
+  }
+
+  // Staff accounts carry extra links (Dashboard, Review, Admin) and a wallet
+  // button. With all of them the desktop row no longer fits at lg widths,
+  // so it switches to the menu until xl and tightens its spacing.
+  const crowded = LINKS.length > 7;
+  const desktopRow = crowded ? 'hidden xl:flex' : 'hidden lg:flex';
+  const menuOnly = crowded ? 'xl:hidden' : 'lg:hidden';
 
   function toggleLanguage() {
     i18n.changeLanguage(i18n.resolvedLanguage === 'vi' ? 'en' : 'vi');
@@ -62,15 +74,17 @@ export default function Navbar({ active = '', theme = 'dark' }) {
         {/* Wordmark */}
         <a href="#home" className="flex items-center gap-4 shrink-0">
           <span className="font-display text-2xl font-semibold tracking-tight">KNĂ</span>
-          <span className={`hidden md:block h-4 w-px ${divider}`} />
-          <span className={`hidden md:block text-[10px] ${faint} tracking-[0.2em] uppercase`}>
+          <span className={`${crowded ? 'hidden 2xl:block' : 'hidden md:block'} h-4 w-px ${divider}`} />
+          <span
+            className={`${crowded ? 'hidden 2xl:block' : 'hidden md:block'} text-[10px] ${faint} tracking-[0.2em] uppercase whitespace-nowrap`}
+          >
             {t('nav.wordmarkSub')}
           </span>
         </a>
 
         {/* Desktop links */}
-        <div className="ml-auto hidden lg:flex items-center gap-8">
-          <div className={`flex items-center gap-8 text-sm ${muted}`}>
+        <div className={`ml-auto pl-6 ${desktopRow} items-center ${crowded ? 'gap-6' : 'gap-8'}`}>
+          <div className={`flex items-center ${crowded ? 'gap-5' : 'gap-8'} text-sm whitespace-nowrap ${muted}`}>
             {LINKS.map((link) => {
               const isActive = link.key === active;
               return (
@@ -93,7 +107,7 @@ export default function Navbar({ active = '', theme = 'dark' }) {
           <div className="flex items-center gap-5 text-sm">
             <button
               onClick={toggleLanguage}
-              className={`${faint} text-xs tracking-wider hover:${text}`}
+              className={`${faint} text-xs tracking-wider whitespace-nowrap hover:${text}`}
               aria-label="Switch language"
             >
               {t('nav.langToggle')}
@@ -106,7 +120,7 @@ export default function Navbar({ active = '', theme = 'dark' }) {
                 {/* The greeting is a greeting; the icon is the door. Making
                     the whole phrase a link meant the only route to an
                     account was a piece of text that did not look like one. */}
-                <span className={`${muted} text-xs`}>
+                <span className={`${muted} text-xs whitespace-nowrap`}>
                   {t('auth.greeting', { name: user.fullName.split(' ')[0] })}
                 </span>
                 <CartButton theme={theme} />
@@ -147,7 +161,7 @@ export default function Navbar({ active = '', theme = 'dark' }) {
         {/* Mobile toggle */}
         <button
           onClick={() => setOpen(!open)}
-          className="ml-auto lg:hidden p-2"
+          className={`ml-auto ${menuOnly} p-2`}
           aria-label={open ? 'Close menu' : 'Open menu'}
         >
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -156,7 +170,7 @@ export default function Navbar({ active = '', theme = 'dark' }) {
 
       {/* Mobile drawer */}
       {open && (
-        <div className={`lg:hidden border-t ${rule} px-8 py-6`}>
+        <div className={`${menuOnly} border-t ${rule} px-8 py-6`}>
           <div className="flex flex-col gap-5">
             {LINKS.map((link) => (
               <a

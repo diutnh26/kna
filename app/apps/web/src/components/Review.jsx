@@ -24,21 +24,25 @@ export default function Review() {
   const { user, token, isAuthenticated, openAuthModal } = useAuth();
   const [queue, setQueue] = useState([]);
   const [reviewed, setReviewed] = useState([]);
+  const [phrases, setPhrases] = useState([]);
   const [notes, setNotes] = useState({});
   const [busyId, setBusyId] = useState(null);
   const [errors, setErrors] = useState({});
   const [loadState, setLoadState] = useState('loading'); // 'loading' | 'ready' | 'error'
 
-  const mayReview = Boolean(user?.isCommitteeMember || user?.role === 'ADMIN');
+  // A seat, and only a seat: publishing is the Committee's decision, and
+  // the admin role does not stand in for one (the API enforces the same).
+  const mayReview = Boolean(user?.isCommitteeMember);
 
   const fetchAll = useCallback(
-    () => Promise.all([api.reviewQueue(token), api.reviewedEntries(token)]),
+    () => Promise.all([api.reviewQueue(token), api.reviewedEntries(token), api.phraseQueue()]),
     [token]
   );
 
-  const apply = useCallback(([queueData, reviewedData]) => {
+  const apply = useCallback(([queueData, reviewedData, phraseData]) => {
     setQueue(queueData);
     setReviewed(reviewedData);
+    setPhrases(phraseData);
     setLoadState('ready');
   }, []);
 
@@ -68,6 +72,22 @@ export default function Review() {
       const message =
         err instanceof ApiError ? err.message : t('review.decisionError');
       setErrors((e) => ({ ...e, [entry.id]: message }));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function decidePhrase(phrase, decision) {
+    const key = `phrase-${phrase.id}`;
+    setErrors((e) => ({ ...e, [key]: null }));
+    setBusyId(key);
+    try {
+      await api.reviewPhrase(phrase.id, { decision, note: notes[key] ?? '' });
+      setNotes((n) => ({ ...n, [key]: '' }));
+      apply(await fetchAll());
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : t('review.decisionError');
+      setErrors((e) => ({ ...e, [key]: message }));
     } finally {
       setBusyId(null);
     }
@@ -230,6 +250,58 @@ export default function Review() {
                 </article>
               ))}
             </div>
+
+            {/* ── PHRASES ─────────────────────────────── */}
+            {phrases.length > 0 && (
+              <div className="mt-16">
+                <h2 className="font-display text-3xl font-medium mb-2">
+                  {t('review.phrasesWaiting')}
+                  <span className="text-copper ml-3 text-2xl">{phrases.length}</span>
+                </h2>
+                <p className="text-sm text-bone/50 mb-8">{t('review.phrasesBody')}</p>
+                <div className="space-y-4">
+                  {phrases.map((phrase) => {
+                    const key = `phrase-${phrase.id}`;
+                    return (
+                      <article key={phrase.id} className="border border-bone/15 p-6">
+                        <div className="font-display text-2xl mb-1">{phrase.ede}</div>
+                        <div className="text-sm text-bone/70 mb-2">{phrase.en}</div>
+                        {phrase.note && <p className="text-xs text-bone/50 mb-4">{phrase.note}</p>}
+                        <label htmlFor={`note-${key}`} className="block text-xs uppercase tracking-wider text-bone/50 mb-2">
+                          {t('review.reasonLabel')}
+                        </label>
+                        <textarea
+                          id={`note-${key}`}
+                          rows={2}
+                          value={notes[key] ?? ''}
+                          onChange={(e) => setNotes((n) => ({ ...n, [key]: e.target.value }))}
+                          className="w-full bg-transparent border border-bone/25 px-3 py-2.5 text-sm focus:outline-none focus:border-bone/60 transition mb-4"
+                        />
+                        {errors[key] && <p className="text-sm text-amber mb-4">{errors[key]}</p>}
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            onClick={() => decidePhrase(phrase, 'publish')}
+                            disabled={busyId === key}
+                            className="inline-flex items-center gap-2 bg-[#3F6146] hover:bg-[#35543B] disabled:opacity-50 px-5 py-3 text-sm transition"
+                          >
+                            <Check className="w-4 h-4" />
+                            {t('review.publish')}
+                          </button>
+                          <button
+                            onClick={() => decidePhrase(phrase, 'reject')}
+                            disabled={busyId === key}
+                            className="inline-flex items-center gap-2 border border-kteh text-kteh hover:bg-kteh hover:text-bone disabled:opacity-50 px-5 py-3 text-sm transition"
+                          >
+                            <X className="w-4 h-4" />
+                            {t('review.refuse')}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* ── DECIDED ─────────────────────────────── */}

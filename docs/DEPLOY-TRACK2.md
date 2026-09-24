@@ -42,6 +42,7 @@ It is idempotent. It runs `initialize_payment_config` (dKNA, 1 VND = 1,000 base 
 2. In Render: **New → Blueprint**, pick `diutnh26/kna`, branch `track2/full-package`. Render reads `render.yaml` at the repo root and proposes `kna-t2-api` and `kna-t2-web`.
 3. Fill every `sync: false` variable in the dashboard: the database strings, a fresh `JWT_SECRET`, the dKNA keys, and the VietQR, SMTP and Google values.
 4. Deploy. The API build runs `prisma migrate deploy` against the new database.
+5. Make the first admin. Sign up on the web app, then run `npx tsx src/scripts/make-admin.ts you@example.com` from `app/apps/api`, with `DATABASE_URL` set to Neon's direct connection string. Later admins are made in the console. See [ADMIN.md](ADMIN.md).
 
 Live hosts: `https://kna-t2-api-or0d.onrender.com` and `https://kna-t2-web-or0d.onrender.com` (Render added the `-or0d` suffix). If they ever change, update `CORS_ORIGIN`, `PUBLIC_BASE_URL`, `WALLET_LINK_DOMAIN` and `VITE_API_URL` to match.
 

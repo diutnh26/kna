@@ -11,6 +11,7 @@ import Review from './components/Review';
 import Dashboard from './components/Dashboard';
 import Account from './components/Account';
 import Trace from './components/Trace';
+import AdminConsole from './components/admin/AdminConsole';
 import AuthModal from './components/AuthModal';
 import DemoDataBanner from './components/DemoDataBanner';
 import DemoBanner from './components/DemoBanner';
@@ -32,6 +33,7 @@ import CartDrawer from './components/CartDrawer';
  *   /#review        → Committee review queue (gated in the screen itself)
  *   /#dashboard     → Provider earnings + coordinator booking queue
  *   /#account       → The signed-in person's details and activity
+ *   /#admin         → Admin console (ADMIN only; gated in the screen and the API)
  *
  * Swap for react-router-dom when screens need nested
  * routes or URL parameters.
@@ -54,6 +56,7 @@ const ROUTES = {
   '#dashboard': Dashboard,
   '#account': Account,
   '#trace': Trace,
+  '#admin': AdminConsole,
 };
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';

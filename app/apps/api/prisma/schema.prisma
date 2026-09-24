@@ -53,6 +53,9 @@ model User {
   // withdrawing a seat or a coordinator role take effect now rather than
   // whenever the old token happens to expire.
   tokenVersion Int      @default(0)
+  // Set by an admin: the account cannot sign in or use a session, and its
+  // records stay. Cleared to re-enable it.
+  disabledAt   DateTime?
   createdAt    DateTime @default(now())
 
   provider      Provider?
@@ -557,4 +560,40 @@ model Phrase {
   sortOrder        Int      @default(0)
   moderationStatus String   @default("IN_REVIEW")
   createdAt        DateTime @default(now())
+  moderatedById    String?
+  moderatedAt      DateTime?
+  moderationNote   String?
+}
+
+// ── Admin ─────────────────────────────────────────────────
+
+/// Every change made from the admin console: who made it, to which record,
+/// what changed (before/after), and the reason when one was required.
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String
+  resource    String
+  recordId    String?
+  action      String
+  changes     Json?
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  @@index([resource, recordId])
+  @@index([actorUserId])
+  @@index([createdAt])
+}
+
+/// A photograph uploaded by a provider or an admin (JPEG, PNG or WebP, at
+/// most 3 MB), served at GET /images/:id. Kept in Postgres: the hosts have
+/// no persistent disk, and the catalogue is small.
+model UploadedImage {
+  id          String   @id @default(cuid())
+  ownerUserId String
+  contentType String
+  size        Int
+  data        Bytes
+  createdAt   DateTime @default(now())
+
+  @@index([ownerUserId])
 }

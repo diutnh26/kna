@@ -4,16 +4,15 @@ import { prisma } from "../lib/prisma";
 import { splitBooking } from "../lib/fees";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
 import { notify } from "../lib/notify";
-import { voidLedgerEntries } from "../lib/ledger";
 import {
   AvailabilityError,
   addDays,
   claimDays,
   dateOnly,
   daysHeld,
-  releaseDays,
 } from "../lib/availability";
-import { enqueueBookingCancel, enqueueBookingRecord } from "../chain/bookings-onchain-queue";
+import { enqueueBookingRecord } from "../chain/bookings-onchain-queue";
+import { DecisionError, cancelBooking } from "../lib/decisions";
 import {
   PAYABLE_STATUSES,
   completePayment,
@@ -240,49 +239,16 @@ bookingsRouter.post("/:id/pay/confirm", requireAuth, async (req: AuthedRequest, 
  * back on the calendar and the ledger row is voided (never deleted).
  */
 bookingsRouter.post("/:id/cancel", requireAuth, async (req: AuthedRequest, res) => {
-  const booking = await prisma.booking.findUnique({
-    where: { id: req.params.id },
-    include: { listing: { select: { title: true, unit: true } } },
-  });
+  const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
   const isStaff = req.user!.role === "COORDINATOR" || req.user!.role === "ADMIN";
   if (!booking || (booking.guestId !== req.user!.id && !isStaff)) {
     return res.status(404).json({ error: "That booking is not on your account." });
   }
-  if (booking.checkIn <= todayUtc()) {
-    return res.status(409).json({ error: "A stay can only be cancelled before check-in." });
+  try {
+    const via = isStaff && booking.guestId !== req.user!.id ? "COORDINATOR" : "GUEST";
+    res.json(await cancelBooking(booking.id, req.user!.id, via));
+  } catch (err) {
+    if (err instanceof DecisionError) return res.status(err.status).json({ error: err.message });
+    throw err;
   }
-
-  const cancelled = await prisma.$transaction(async (tx) => {
-    const claimed = await tx.booking.updateMany({
-      where: { id: booking.id, status: { in: ["PENDING", "CONFIRMED"] } },
-      data: {
-        status: "CANCELLED",
-        decidedById: req.user!.id,
-        decidedAt: new Date(),
-        decidedVia: isStaff && booking.guestId !== req.user!.id ? "COORDINATOR" : "GUEST",
-      },
-    });
-    if (claimed.count !== 1) return null;
-    await releaseDays(
-      tx,
-      booking.listingId,
-      booking.checkIn,
-      daysHeld(booking.listing.unit, booking.nights),
-      booking.rooms
-    );
-    await voidLedgerEntries(tx, { bookingId: booking.id }, "booking cancelled", req.user!.id);
-    await notify(tx, {
-      userId: booking.guestId,
-      type: "BOOKING_DECLINED",
-      params: { listing: booking.listing.title, date: booking.checkIn.toISOString().slice(0, 10) },
-      href: "#account",
-    });
-    return tx.booking.findUnique({ where: { id: booking.id } });
-  });
-
-  if (!cancelled) {
-    return res.status(409).json({ error: "That booking can no longer be cancelled." });
-  }
-  if (booking.onchainTx) await enqueueBookingCancel(prisma, booking.id);
-  res.json(cancelled);
 });

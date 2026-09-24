@@ -7,6 +7,8 @@ export const PASSWORD = "test-password1";
 
 /** Wipes every table, in foreign-key-safe order. */
 export async function resetDb() {
+  await prisma.adminAuditLog.deleteMany();
+  await prisma.uploadedImage.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.ledgerAttestation.deleteMany();
   await prisma.chainOutbox.deleteMany();

@@ -4,6 +4,22 @@ import { prisma } from "../lib/prisma";
 import { OPEN_BOOKING_STATUSES, PAID_BOOKING_STATUSES } from "../lib/ledger";
 import { requireAuth, type AuthedRequest } from "../middleware/auth";
 import { splitOrder } from "../lib/fees";
+import {
+  CatalogError,
+  availabilitySchema,
+  createListing,
+  createProduct,
+  imageUrlSchema,
+  listingCreateSchema,
+  listingUpdateSchema,
+  productCreateSchema,
+  productUpdateSchema,
+  removeListing,
+  removeProduct,
+  setAvailability,
+  updateListing,
+  updateProduct,
+} from "../lib/catalog";
 
 export const providersRouter = Router();
 
@@ -72,6 +88,8 @@ providersRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
       type: provider.type,
       buon: provider.buon,
       verified: provider.verified,
+      bio: provider.bio,
+      imageUrl: provider.imageUrl,
     },
     listings: provider.listings,
     products: provider.products,
@@ -120,12 +138,6 @@ providersRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
   });
 });
 
-const availabilitySchema = z.object({
-  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  open: z.boolean(),
-});
-
 /**
  * The provider verifies their own calendar: open a range of days at the
  * listing's full inventory, or close it. Closing never takes away rooms that
@@ -143,29 +155,119 @@ providersRouter.put("/me/listings/:id/availability", requireAuth, async (req: Au
   if (!listing) {
     return res.status(404).json({ error: "That listing is not yours." });
   }
-  const start = new Date(`${parsed.data.from}T00:00:00Z`);
-  const end = new Date(`${parsed.data.to}T00:00:00Z`);
-  const days = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
-  if (days < 1 || days > 366) {
-    return res.status(400).json({ error: "The range must run forward and span at most a year." });
+  try {
+    const days = await prisma.$transaction((tx) => setAvailability(tx, listing, parsed.data));
+    res.json({ ok: true, days });
+  } catch (err) {
+    if (err instanceof CatalogError) return res.status(err.status).json({ error: err.message });
+    throw err;
   }
+});
 
-  await prisma.$transaction(async (tx) => {
-    for (let i = 0; i < days; i++) {
-      const date = new Date(start.getTime() + i * 86_400_000);
-      if (parsed.data.open) {
-        await tx.$executeRaw`
-          INSERT INTO "AvailabilitySlot" ("id", "listingId", "date", "capacity", "booked")
-          VALUES (${`slot_${listing.id}_${date.getTime()}`}, ${listing.id}, ${date}, ${listing.inventory}, 0)
-          ON CONFLICT ("listingId", "date")
-          DO UPDATE SET "capacity" = GREATEST(${listing.inventory}, "AvailabilitySlot"."booked")`;
-      } else {
-        await tx.availabilitySlot.deleteMany({ where: { listingId: listing.id, date, booked: 0 } });
-        await tx.$executeRaw`
-          UPDATE "AvailabilitySlot" SET "capacity" = "booked"
-          WHERE "listingId" = ${listing.id} AND "date" = ${date}`;
-      }
-    }
-  });
-  res.json({ ok: true, days });
+// ── The provider's own catalogue ─────────────────────────────────────
+// A provider creates, edits and removes their own listings and products,
+// photographs included. Publishing needs a provider KNĂ has verified: an
+// unverified household can prepare everything, and it goes live once they
+// are verified. Removing something that has bookings or orders unpublishes
+// it instead (lib/catalog.ts).
+
+async function myProvider(req: AuthedRequest) {
+  return prisma.provider.findUnique({ where: { userId: req.user!.id } });
+}
+
+function catalogError(res: import("express").Response, err: unknown) {
+  if (err instanceof CatalogError) return res.status(err.status).json({ error: err.message });
+  throw err;
+}
+
+const NOT_VERIFIED = "Your household must be verified by KNĂ before anything can be published.";
+
+const profileSchema = z.object({
+  displayName: z.string().trim().min(1).max(120).optional(),
+  bio: z.string().trim().max(2000).nullable().optional(),
+  imageUrl: imageUrlSchema.nullable().optional(),
+});
+
+providersRouter.patch("/me", requireAuth, async (req: AuthedRequest, res) => {
+  const provider = await myProvider(req);
+  if (!provider) return res.status(404).json({ error: "This account is not a registered provider." });
+  const parsed = profileSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input." });
+  }
+  res.json(await prisma.provider.update({ where: { id: provider.id }, data: parsed.data }));
+});
+
+providersRouter.post("/me/listings", requireAuth, async (req: AuthedRequest, res) => {
+  const provider = await myProvider(req);
+  if (!provider) return res.status(404).json({ error: "This account is not a registered provider." });
+  const parsed = listingCreateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input." });
+  }
+  if (parsed.data.published && !provider.verified) return res.status(403).json({ error: NOT_VERIFIED });
+  const listing = await prisma.$transaction((tx) => createListing(tx, provider.id, parsed.data));
+  res.status(201).json(listing);
+});
+
+providersRouter.patch("/me/listings/:id", requireAuth, async (req: AuthedRequest, res) => {
+  const provider = await myProvider(req);
+  const listing = provider
+    ? await prisma.listing.findFirst({ where: { id: req.params.id, providerId: provider.id } })
+    : null;
+  if (!provider || !listing) return res.status(404).json({ error: "That listing is not yours." });
+  const parsed = listingUpdateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input." });
+  }
+  if (parsed.data.published && !provider.verified) return res.status(403).json({ error: NOT_VERIFIED });
+  try {
+    res.json(await prisma.$transaction((tx) => updateListing(tx, listing, parsed.data)));
+  } catch (err) {
+    catalogError(res, err);
+  }
+});
+
+providersRouter.delete("/me/listings/:id", requireAuth, async (req: AuthedRequest, res) => {
+  const provider = await myProvider(req);
+  const listing = provider
+    ? await prisma.listing.findFirst({ where: { id: req.params.id, providerId: provider.id } })
+    : null;
+  if (!provider || !listing) return res.status(404).json({ error: "That listing is not yours." });
+  res.json(await prisma.$transaction((tx) => removeListing(tx, listing)));
+});
+
+providersRouter.post("/me/products", requireAuth, async (req: AuthedRequest, res) => {
+  const provider = await myProvider(req);
+  if (!provider) return res.status(404).json({ error: "This account is not a registered provider." });
+  const parsed = productCreateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input." });
+  }
+  if (parsed.data.published && !provider.verified) return res.status(403).json({ error: NOT_VERIFIED });
+  const product = await prisma.$transaction((tx) => createProduct(tx, provider.id, parsed.data));
+  res.status(201).json(product);
+});
+
+providersRouter.patch("/me/products/:id", requireAuth, async (req: AuthedRequest, res) => {
+  const provider = await myProvider(req);
+  const product = provider
+    ? await prisma.product.findFirst({ where: { id: req.params.id, providerId: provider.id } })
+    : null;
+  if (!provider || !product) return res.status(404).json({ error: "That product is not yours." });
+  const parsed = productUpdateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input." });
+  }
+  if (parsed.data.published && !provider.verified) return res.status(403).json({ error: NOT_VERIFIED });
+  res.json(await prisma.$transaction((tx) => updateProduct(tx, product, parsed.data)));
+});
+
+providersRouter.delete("/me/products/:id", requireAuth, async (req: AuthedRequest, res) => {
+  const provider = await myProvider(req);
+  const product = provider
+    ? await prisma.product.findFirst({ where: { id: req.params.id, providerId: provider.id } })
+    : null;
+  if (!provider || !product) return res.status(404).json({ error: "That product is not yours." });
+  res.json(await prisma.$transaction((tx) => removeProduct(tx, product)));
 });

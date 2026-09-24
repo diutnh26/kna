@@ -35,7 +35,9 @@ export type NotificationType =
   // to whoever has to act
   | "BOOKING_AWAITING_DECISION"
   | "ORDER_AWAITING_SETTLEMENT"
-  | "ARCHIVE_AWAITING_REVIEW";
+  | "ARCHIVE_AWAITING_REVIEW"
+  // a message from a KNĂ admin
+  | "ADMIN_NOTICE";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -92,11 +94,11 @@ export async function coordinatorIds(): Promise<string[]> {
   return [...new Set([...byRole.map((u) => u.id), ...bySeat.map((m) => m.userId)])];
 }
 
-/** Everyone who may review an archive submission. */
+/**
+ * Everyone who may review an archive entry or a phrase: the Committee.
+ * Admins are not reviewers — publishing is the Committee's decision.
+ */
 export async function reviewerIds(): Promise<string[]> {
-  const [admins, seats] = await Promise.all([
-    prisma.user.findMany({ where: { role: "ADMIN" }, select: { id: true } }),
-    prisma.committeeMember.findMany({ select: { userId: true } }),
-  ]);
-  return [...new Set([...admins.map((u) => u.id), ...seats.map((m) => m.userId)])];
+  const seats = await prisma.committeeMember.findMany({ select: { userId: true } });
+  return [...new Set(seats.map((m) => m.userId))];
 }

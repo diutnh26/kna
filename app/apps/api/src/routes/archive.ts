@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 import { notify, notifyAll, reviewerIds } from "../lib/notify";
 import {
   requireAuth,
-  requireCommittee,
+  requireCommitteeSeat,
   requireContributor,
   type AuthedRequest,
 } from "../middleware/auth";
@@ -152,7 +152,7 @@ archiveRouter.get("/mine", requireAuth, async (req: AuthedRequest, res) => {
 archiveRouter.get(
   "/queue",
   requireAuth,
-  requireCommittee,
+  requireCommitteeSeat,
   async (_req: AuthedRequest, res) => {
     const entries = await prisma.archiveEntry.findMany({
       where: { moderationStatus: "IN_REVIEW" },
@@ -167,7 +167,7 @@ archiveRouter.get(
 archiveRouter.get(
   "/reviewed",
   requireAuth,
-  requireCommittee,
+  requireCommitteeSeat,
   async (_req: AuthedRequest, res) => {
     const entries = await prisma.archiveEntry.findMany({
       where: { moderationStatus: { in: ["PUBLISHED", "REJECTED"] } },
@@ -189,7 +189,7 @@ const reviewSchema = z.object({
 archiveRouter.post(
   "/:id/review",
   requireAuth,
-  requireCommittee,
+  requireCommitteeSeat,
   async (req: AuthedRequest, res) => {
     const parsed = reviewSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -231,5 +231,55 @@ archiveRouter.post(
     }
 
     res.json(updated);
+  }
+);
+
+// ── Phrasebook review ────────────────────────────────────────────────
+// Phrases publish the same way archive entries do: the Committee decides.
+// New and edited phrases arrive IN_REVIEW (from the admin console) and wait
+// here for a seat-holder.
+
+archiveRouter.get(
+  "/phrases/queue",
+  requireAuth,
+  requireCommitteeSeat,
+  async (_req: AuthedRequest, res) => {
+    const phrases = await prisma.phrase.findMany({
+      where: { moderationStatus: "IN_REVIEW" },
+      orderBy: { createdAt: "asc" },
+    });
+    res.json(phrases);
+  }
+);
+
+archiveRouter.post(
+  "/phrases/:id/review",
+  requireAuth,
+  requireCommitteeSeat,
+  async (req: AuthedRequest, res) => {
+    const parsed = reviewSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "A decision of 'publish' or 'reject' is required." });
+    }
+    const { decision, note } = parsed.data;
+    if (decision === "reject" && !note?.trim()) {
+      return res.status(400).json({ error: "A reason is required when refusing a phrase." });
+    }
+    const claimed = await prisma.phrase.updateMany({
+      where: { id: req.params.id, moderationStatus: "IN_REVIEW" },
+      data: {
+        moderationStatus: decision === "publish" ? "PUBLISHED" : "REJECTED",
+        moderatedById: req.user!.id,
+        moderatedAt: new Date(),
+        moderationNote: note?.trim() || null,
+      },
+    });
+    if (claimed.count !== 1) {
+      const exists = await prisma.phrase.findUnique({ where: { id: req.params.id } });
+      return exists
+        ? res.status(409).json({ error: "That phrase has already been reviewed." })
+        : res.status(404).json({ error: "That phrase no longer exists." });
+    }
+    res.json(await prisma.phrase.findUnique({ where: { id: req.params.id } }));
   }
 );

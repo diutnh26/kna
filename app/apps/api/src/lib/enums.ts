@@ -13,6 +13,8 @@
 export const ROLES = ["GUEST", "PROVIDER", "COORDINATOR", "COMMITTEE", "ADMIN"] as const;
 export const PROVIDER_TYPES = ["HOMESTAY", "GUIDE", "ARTISAN"] as const;
 export const LISTING_CATEGORIES = ["STAY", "GUIDED_WALK", "CRAFT_SESSION", "CEREMONY"] as const;
+// The marketplace filter row; CK_Product_category holds the same list.
+export const PRODUCT_CATEGORIES = ["Textile", "Basketry", "Woodwork", "Coffee", "Jewellery"] as const;
 // CONFIRMED: booked, dates locked (instant). COMPLETED: paid at check-out.
 // UNPAID: past check-out and its grace period without payment. PENDING only
 // on bookings made before instant confirmation.

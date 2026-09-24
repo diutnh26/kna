@@ -3,9 +3,8 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { splitOrder } from "../lib/fees";
 import { requireAuth, requireCoordinator, type AuthedRequest } from "../middleware/auth";
-import { coordinatorIds, notify, notifyAll } from "../lib/notify";
-import { enqueueLedgerSettledOutbox } from "../chain/outbox";
-import { voidLedgerEntries } from "../lib/ledger";
+import { coordinatorIds, notifyAll } from "../lib/notify";
+import { DecisionError, decideOrder } from "../lib/decisions";
 import { getPaymentGateway } from "../payments/gateway";
 
 export const ordersRouter = Router();
@@ -206,56 +205,11 @@ ordersRouter.post(
       return res.status(400).json({ error: "A decision of 'settle' or 'cancel' is required." });
     }
 
-    const order = await prisma.order.findUnique({
-      where: { id: req.params.id },
-      include: { items: true },
-    });
-    if (!order) {
-      return res.status(404).json({ error: "That order no longer exists." });
+    try {
+      res.json(await decideOrder(req.params.id, parsed.data.decision, req.user!.id, "COORDINATOR"));
+    } catch (err) {
+      if (err instanceof DecisionError) return res.status(err.status).json({ error: err.message });
+      throw err;
     }
-    const updated = await prisma.$transaction(async (tx) => {
-      const claimed = await tx.order.updateMany({
-        where: { id: order.id, status: "PENDING" },
-        data: {
-          status: parsed.data.decision === "settle" ? "PAID" : "CANCELLED",
-          decidedById: req.user!.id,
-          decidedAt: new Date(),
-          decidedVia: "COORDINATOR",
-        },
-      });
-      if (claimed.count !== 1) {
-        return null;
-      }
-
-      if (parsed.data.decision === "cancel") {
-        for (const item of order.items) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { stock: { increment: item.quantity } },
-          });
-        }
-        await voidLedgerEntries(tx, { orderId: order.id }, "order cancelled", req.user!.id);
-      } else {
-        const ledger = await tx.ledgerEntry.findFirst({ where: { orderId: order.id } });
-        if (ledger) {
-          await enqueueLedgerSettledOutbox(tx, ledger.id);
-        }
-      }
-
-      await notify(tx, {
-        userId: order.buyerId,
-        type: parsed.data.decision === "settle" ? "ORDER_SETTLED" : "ORDER_CANCELLED",
-        params: { count: order.items.reduce((n, i) => n + i.quantity, 0) },
-        href: "#account",
-      });
-
-      return tx.order.findUnique({ where: { id: order.id } });
-    });
-
-    if (!updated) {
-      return res.status(409).json({ error: "That order has already been decided." });
-    }
-
-    res.json(updated);
   }
 );

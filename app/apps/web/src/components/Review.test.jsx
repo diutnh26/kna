@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Review from './Review';
@@ -23,6 +23,35 @@ const pending = (over = {}) => ({
  * refusal cannot be filed without a reason.
  */
 describe('Review', () => {
+  beforeEach(() => {
+    vi.spyOn(api, 'phraseQueue').mockResolvedValue([]);
+  });
+
+  it('refuses an admin who holds no seat: publishing is the Committee decision', async () => {
+    signIn({ role: 'ADMIN', isCommitteeMember: false });
+    const queue = vi.spyOn(api, 'reviewQueue');
+    renderScreen(<Review />);
+    expect(await screen.findByText(/This queue belongs to the Committee/)).toBeInTheDocument();
+    expect(queue).not.toHaveBeenCalled();
+  });
+
+  it('reviews phrases as well as archive entries', async () => {
+    const user = userEvent.setup();
+    signIn({ isCommitteeMember: true, committeeRole: 'Chair · elder' });
+    vi.spyOn(api, 'reviewQueue').mockResolvedValue([]);
+    vi.spyOn(api, 'reviewedEntries').mockResolvedValue([]);
+    api.phraseQueue
+      .mockResolvedValueOnce([{ id: 'p1', ede: 'Kơ jăk', en: 'Thank you', note: 'Everyday.' }])
+      .mockResolvedValueOnce([]);
+    const review = vi.spyOn(api, 'reviewPhrase').mockResolvedValue({ id: 'p1', moderationStatus: 'PUBLISHED' });
+
+    renderScreen(<Review />);
+    expect(await screen.findByText('Kơ jăk')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Publish/ }));
+    await waitFor(() => expect(review).toHaveBeenCalledWith('p1', { decision: 'publish', note: '' }));
+    await waitFor(() => expect(screen.queryByText('Kơ jăk')).not.toBeInTheDocument());
+  });
+
   it('asks an anonymous visitor to sign in, and does not fetch the queue', async () => {
     const queue = vi.spyOn(api, 'reviewQueue');
     renderScreen(<Review />);

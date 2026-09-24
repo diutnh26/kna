@@ -6,8 +6,10 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { provisionAndRegister } from "../chain/wallets";
 import { hashOpaque, newOpaqueToken, sendVerificationEmail } from "../lib/mail";
+import { passwordPolicy } from "../lib/password";
 import {
   ACCESS_COOKIE,
+  DISABLED_MESSAGE,
   REFRESH_COOKIE,
   clearAuthCookies,
   establishSession,
@@ -22,11 +24,6 @@ import {
 
 export const authRouter = Router();
 
-const passwordPolicy = z
-  .string()
-  .min(8, "Password must be at least 8 characters.")
-  .regex(/[A-Za-z]/, "Password must include a letter.")
-  .regex(/\d/, "Password must include a digit.");
 
 const credentialLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -103,9 +100,12 @@ async function issueVerifyToken(userId: string) {
 
 async function respondWithSession(
   res: import("express").Response,
-  user: { id: string; role: string; tokenVersion: number },
+  user: { id: string; role: string; tokenVersion: number; disabledAt?: Date | null },
   status = 200
 ) {
+  if (user.disabledAt) {
+    return res.status(403).json({ error: DISABLED_MESSAGE });
+  }
   const token = await establishSession(res, user);
   return res.status(status).json({ token, user: await describeUser(user.id) });
 }
@@ -258,10 +258,10 @@ authRouter.post("/refresh", credentialLimiter, async (req, res) => {
 
   const row = await prisma.refreshToken.findUnique({
     where: { tokenHash: hashToken(raw) },
-    include: { user: { select: { id: true, role: true, tokenVersion: true } } },
+    include: { user: { select: { id: true, role: true, tokenVersion: true, disabledAt: true } } },
   });
 
-  if (!row || row.revokedAt || row.expiresAt < new Date()) {
+  if (!row || row.revokedAt || row.expiresAt < new Date() || row.user.disabledAt) {
     clearAuthCookies(res);
     return res.status(401).json({ error: "Session expired — sign in again." });
   }

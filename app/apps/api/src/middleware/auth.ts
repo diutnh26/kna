@@ -24,6 +24,7 @@ const COOKIE_SECURE =
   process.env.NODE_ENV === "production";
 
 export const ACCESS_COOKIE = "access_token";
+export const DISABLED_MESSAGE = "This account has been disabled. Contact KNĂ if you think this is a mistake.";
 export const REFRESH_COOKIE = "refresh_token";
 
 export function signToken(payload: { id: string; role: string; tokenVersion: number }) {
@@ -131,11 +132,14 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
   try {
     const user = await prisma.user.findUnique({
       where: { id: claim.id },
-      select: { id: true, role: true, tokenVersion: true },
+      select: { id: true, role: true, tokenVersion: true, disabledAt: true },
     });
 
     if (!user) {
       return res.status(401).json({ error: "That account no longer exists." });
+    }
+    if (user.disabledAt) {
+      return res.status(403).json({ error: DISABLED_MESSAGE });
     }
     if ((claim.tokenVersion ?? 0) !== user.tokenVersion) {
       return res.status(401).json({ error: "Session ended — sign in again." });
@@ -173,6 +177,42 @@ export function requireRole(...roles: string[]) {
     }
     next();
   };
+}
+
+/**
+ * The admin console. ADMIN only — coordinators and Committee members keep
+ * their own screens and do not get it.
+ */
+export function requireAdmin(req: AuthedRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Sign in required." });
+  }
+  if (req.user.role !== "ADMIN") {
+    return res.status(403).json({ error: "Only KNĂ admins can use the admin console." });
+  }
+  next();
+}
+
+/**
+ * Publishing to the archive and the phrasebook is the Committee's decision,
+ * and only theirs: a seat is required, and the ADMIN role does not stand in
+ * for one. An admin who also holds a seat reviews as a Committee member.
+ */
+export async function requireCommitteeSeat(req: AuthedRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Sign in required." });
+  }
+  try {
+    const seat = await prisma.committeeMember.findUnique({ where: { userId: req.user.id } });
+    if (!seat) {
+      return res
+        .status(403)
+        .json({ error: "Only Community Governance Committee members can review submissions." });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 /**

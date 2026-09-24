@@ -7,6 +7,7 @@ import { useAuth } from '../context/useAuth';
 import ApiErrorNotice from './ApiErrorNotice';
 import { OperatorWalletBar } from '../wallet/WalletConnect';
 import ProviderCalendar from './ProviderCalendar';
+import ProviderCatalog from './ProviderCatalog';
 import DemoWalletPanel from './DemoWalletPanel';
 import DemoTxHistory from './DemoTxHistory';
 
@@ -39,6 +40,7 @@ export default function Dashboard() {
   const { user, token, isAuthenticated, openAuthModal } = useAuth();
   const [data, setData] = useState(null);
   const [loadState, setLoadState] = useState('loading');
+  const [reload, setReload] = useState(0);
 
   const mayCoordinate = Boolean(
     user && (user.role === 'ADMIN' || user.role === 'COORDINATOR' || user.isCommitteeMember)
@@ -64,7 +66,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, fetchDashboard]);
+  }, [isAuthenticated, fetchDashboard, reload]);
 
   const totals = data?.totals;
 
@@ -143,8 +145,16 @@ export default function Dashboard() {
       {/* ── PROVIDER EARNINGS ─────────────────────── */}
       {data && (
         <>
-          <section className="px-8 lg:px-12 xl:px-16 py-12 max-w-6xl space-y-5">
-            <ProviderCalendar listings={data.listings} />
+          <section className="px-8 lg:px-12 xl:px-16 py-12">
+            <ProviderCatalog
+              provider={data.provider}
+              listings={data.listings}
+              products={data.products}
+              onChanged={() => setReload((n) => n + 1)}
+            />
+          </section>
+          <section className="px-8 lg:px-12 xl:px-16 pb-12 max-w-6xl space-y-5">
+            <ProviderCalendar key={data.listings.map((l) => l.id).join()} listings={data.listings} />
           </section>
           <section className="px-8 lg:px-12 xl:px-16 pb-12 max-w-6xl space-y-5">
             <DemoWalletPanel />
